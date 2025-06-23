@@ -39,6 +39,7 @@ class PhotoModel extends Photo {
     };
   }
 
+  @override
   PhotoModel copyWith({
     String? id,
     String? storeId,

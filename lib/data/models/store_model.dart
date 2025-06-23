@@ -56,6 +56,7 @@ class StoreModel extends Store {
     };
   }
 
+  @override
   StoreModel copyWith({
     String? id,
     String? name,
