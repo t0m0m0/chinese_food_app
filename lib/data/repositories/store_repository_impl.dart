@@ -1,12 +1,16 @@
 import '../../domain/entities/store.dart';
+import '../../domain/entities/photo.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../datasources/store_local_datasource.dart';
 import '../models/store_model.dart';
+import '../models/photo_model.dart';
+import '../../core/database/database_helper.dart';
 
 class StoreRepositoryImpl implements StoreRepository {
   final StoreLocalDatasource _localDatasource;
+  final DatabaseHelper _databaseHelper;
 
-  StoreRepositoryImpl(this._localDatasource);
+  StoreRepositoryImpl(this._localDatasource, this._databaseHelper);
 
   @override
   Future<List<Store>> getAllStores() async {
@@ -47,5 +51,74 @@ class StoreRepositoryImpl implements StoreRepository {
   Future<List<Store>> searchStores(String query) async {
     final storeModels = await _localDatasource.searchStores(query);
     return storeModels.cast<Store>();
+  }
+
+  // ページネーション対応メソッド
+  Future<List<Store>> getStoresPaginated({
+    int page = 0,
+    int pageSize = 20,
+  }) async {
+    final storeModels = await _localDatasource.getStoresPaginated(
+      page: page,
+      pageSize: pageSize,
+    );
+    return storeModels.cast<Store>();
+  }
+
+  // トランザクション対応メソッド
+  Future<void> insertStoreWithPhotos(
+    Store store,
+    List<Photo> photos,
+  ) async {
+    try {
+      final db = await _databaseHelper.database;
+      await db.transaction((txn) async {
+        // Store insertion
+        await txn.insert(
+          'stores',
+          StoreModel.fromEntity(store).toMap(),
+        );
+
+        // Photos insertion
+        for (final photo in photos) {
+          await txn.insert(
+            'photos',
+            PhotoModel.fromEntity(photo).toMap(),
+          );
+        }
+      });
+    } catch (e) {
+      throw Exception('Failed to insert store with photos: ${e.toString()}');
+    }
+  }
+
+  Future<void> deleteStoreWithRelatedData(String storeId) async {
+    try {
+      final db = await _databaseHelper.database;
+      await db.transaction((txn) async {
+        // Delete related photos first
+        await txn.delete(
+          'photos',
+          where: 'store_id = ?',
+          whereArgs: [storeId],
+        );
+
+        // Delete related visit records
+        await txn.delete(
+          'visit_records',
+          where: 'store_id = ?',
+          whereArgs: [storeId],
+        );
+
+        // Finally delete the store
+        await txn.delete(
+          'stores',
+          where: 'id = ?',
+          whereArgs: [storeId],
+        );
+      });
+    } catch (e) {
+      throw Exception('Failed to delete store with related data: ${e.toString()}');
+    }
   }
 }

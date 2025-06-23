@@ -75,7 +75,31 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // 将来のバージョンアップ時に使用
+    for (int version = oldVersion + 1; version <= newVersion; version++) {
+      switch (version) {
+        case 2:
+          await _upgradeToVersion2(db);
+          break;
+        case 3:
+          await _upgradeToVersion3(db);
+          break;
+        default:
+          throw UnsupportedError('Unsupported database version: $version');
+      }
+    }
+  }
+
+  Future<void> _upgradeToVersion2(Database db) async {
+    // 例: storesテーブルにratingカラムを追加
+    await db.execute('ALTER TABLE stores ADD COLUMN rating REAL DEFAULT 0.0');
+    
+    // 新しいインデックスを追加
+    await db.execute('CREATE INDEX idx_stores_rating ON stores (rating)');
+  }
+
+  Future<void> _upgradeToVersion3(Database db) async {
+    // 例: 将来の拡張用
+    // await db.execute('ALTER TABLE stores ADD COLUMN phone TEXT');
   }
 
   Future<void> close() async {
