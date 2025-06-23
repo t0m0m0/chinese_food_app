@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'presentation/pages/swipe/swipe_page.dart';
-import 'presentation/pages/search/search_page.dart';
-import 'presentation/pages/my_menu/my_menu_page.dart';
+
 import 'core/constants/app_constants.dart';
+import 'presentation/pages/my_menu/my_menu_page.dart';
+import 'presentation/pages/search/search_page.dart';
+import 'presentation/pages/swipe/swipe_page.dart';
 
 void main() {
   runApp(const MyApp());

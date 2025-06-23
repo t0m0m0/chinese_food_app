@@ -1,5 +1,6 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+
 import '../constants/app_constants.dart';
 
 class DatabaseHelper {
@@ -70,7 +71,8 @@ class DatabaseHelper {
 
     // インデックス作成
     await db.execute('CREATE INDEX idx_stores_status ON stores (status)');
-    await db.execute('CREATE INDEX idx_visit_records_store_id ON visit_records (store_id)');
+    await db.execute(
+        'CREATE INDEX idx_visit_records_store_id ON visit_records (store_id)');
     await db.execute('CREATE INDEX idx_photos_store_id ON photos (store_id)');
   }
 
@@ -91,7 +93,8 @@ class DatabaseHelper {
 
   Future<void> _upgradeToVersion2(Database db) async {
     // 例: storesテーブルにratingカラムを追加
-    await db.execute('ALTER TABLE stores ADD COLUMN rating REAL DEFAULT 0.0');
+    await db
+        .execute('ALTER TABLE stores ADD COLUMN rating REAL DEFAULT 0.0');
 
     // 新しいインデックスを追加
     await db.execute('CREATE INDEX idx_stores_rating ON stores (rating)');

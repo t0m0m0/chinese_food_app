@@ -16,7 +16,8 @@ class VisitRecordRepositoryImpl implements VisitRecordRepository {
 
   @override
   Future<List<VisitRecord>> getVisitRecordsByStoreId(String storeId) async {
-    final visitRecordModels = await _localDatasource.getVisitRecordsByStoreId(storeId);
+    final visitRecordModels =
+        await _localDatasource.getVisitRecordsByStoreId(storeId);
     return visitRecordModels.cast<VisitRecord>();
   }
 
