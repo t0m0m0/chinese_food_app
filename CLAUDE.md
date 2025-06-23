@@ -184,10 +184,12 @@ Windows版Flutter (`/mnt/c/dev/flutter`) はWSL2でCRLF問題が発生するた�
    git checkout -b docs/文書更新内容
    ```
 
-2. **開発・実装**
-   - 適切な単位で機能を実装
-   - コードの品質とアーキテクチャを維持
+2. **開発・実装（TDD必須）**
+   - **Red**: 失敗するテストから開始
+   - **Green**: テストが通る最小限の実装
+   - **Refactor**: コード品質向上とリファクタリング
    - Clean Architecture原則に従う
+   - 適切な単位で機能を実装
 
 3. **コミット・プッシュ**
    ```bash
@@ -214,8 +216,10 @@ Windows版Flutter (`/mnt/c/dev/flutter`) はWSL2でCRLF問題が発生するた�
 5. **セルフレビュー実施**
    - **コードレビュー**: GitHub PR画面で詳細レビュー
    - **品質チェック**: エラーハンドリング、パフォーマンス、アーキテクチャ
+   - **QAレビュー**: QA担当者目線での厳格な品質検証
    - **改善提案**: 具体的なコードサンプル付きコメント
    - **総合評価**: Good Points / Issues Found / Recommendations
+   - **レビューコメント**: GitHub PRへの詳細な指摘事項記録
 
 6. **レビュー指摘対応**
    - 指摘事項を同一ブランチで修正
@@ -233,6 +237,8 @@ Windows版Flutter (`/mnt/c/dev/flutter`) はWSL2でCRLF問題が発生するた�
 ### 品質基準
 
 #### 必須要件
+- **TDD（テスト駆動開発）**: Red → Green → Refactor サイクル厳守
+- **テストカバレッジ**: 新機能は80%以上のカバレッジ必須
 - **コードフォーマット**: コミット前に必ず`dart format .`実行
 - **エラーハンドリング**: try-catch とDatabaseException対応
 - **アーキテクチャ準拠**: Clean Architecture + Repository Pattern
@@ -276,6 +282,229 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **レビュー必須**: セルフレビューまたはペアレビュー実施
 - **品質優先**: 動作するだけでなく、保守しやすいコード
 - **段階的実装**: 大きな機能は複数PRに分割
+
+## レビュープロセス
+
+### QAレビューガイドライン
+
+PRレビューでは以下の観点から厳格にチェックします：
+
+#### 🚨 **ブロッカー問題（必須修正）**
+- **データ整合性**: NULL制約、CHECK制約、外部キー制約
+- **セキュリティ**: 例外処理、入力検証、SQLインジェクション対策
+- **エラーハンドリング**: try-catch、適切な例外処理
+- **テストカバレッジ**: エッジケース、異常系テスト
+
+#### ⚠️ **重要問題（推奨修正）**
+- **パフォーマンス**: インデックス、クエリ最適化
+- **バリデーション**: 入力値検証、ビジネスルール検証
+- **コード品質**: 可読性、保守性、設計パターン
+
+#### 🔧 **軽微問題（改善提案）**
+- **ドキュメント**: JavaDoc、コメント
+- **命名規則**: 変数名、メソッド名の適切性
+- **コード重複**: DRY原則の適用
+
+### レビューコメント記録
+
+```bash
+# QAレビュー結果をPRにコメント
+gh pr comment PR番号 --body "レビュー結果詳細"
+
+# 指摘事項の分類
+# ❌ ブロッカー問題: REJECT（変更要求）
+# ⚠️ 重要問題: CHANGES REQUESTED  
+# 🔧 軽微問題: APPROVED WITH SUGGESTIONS
+```
+
+### レビュー後の対応フロー
+
+1. **指摘事項対応**: 同一ブランチで修正実装
+2. **追加テスト**: 不足していたテストケース追加
+3. **修正コミット**: 指摘事項ごとに適切なコミットメッセージ
+4. **再レビュー依頼**: `gh pr comment --body "修正完了。再レビューお願いします"`
+
+## TDD（テスト駆動開発）ガイドライン
+
+### TDDサイクル
+
+1. **Red（レッド）フェーズ**
+   ```bash
+   # 失敗するテストを作成
+   flutter test test/path/to/test.dart  # 失敗することを確認
+   ```
+   - 機能要件を満たすテストを先に作成
+   - テストが失敗することを確認
+   - 必要最小限のテストから開始
+
+2. **Green（グリーン）フェーズ**
+   ```bash
+   # テストが通る最小限の実装
+   flutter test test/path/to/test.dart  # 成功することを確認
+   ```
+   - テストが通る最小限のコードを実装
+   - 可読性や設計は後回し
+   - まずは動作することを優先
+
+3. **Refactor（リファクタ）フェーズ**
+   ```bash
+   dart format .                        # フォーマット実行
+   flutter test                         # 全テスト実行
+   flutter analyze                      # 静的解析実行
+   ```
+   - コード品質向上
+   - 設計パターンの適用
+   - パフォーマンス最適化
+   - テストが通ることを確認しながら改善
+
+### テスト種別と配置
+
+```
+test/
+├── unit/              # 単体テスト
+│   ├── models/        # モデルクラステスト
+│   ├── repositories/  # Repository層テスト
+│   └── datasources/   # DataSource層テスト
+├── widget/            # ウィジェットテスト
+│   └── pages/         # ページ単位テスト
+├── integration/       # 統合テスト
+│   └── database/      # DB統合テスト
+└── e2e/              # E2Eテスト
+    └── user_flows/    # ユーザーフローテスト
+```
+
+### テスト命名規約
+
+- **ファイル名**: `機能名_test.dart`
+- **テスト名**: `should_期待する動作_when_条件`
+- **グループ名**: 機能や責務ごとにグルーピング
+
+### 例：TDDによるRepository実装
+
+```dart
+// 1. Red: テスト作成
+test('should_return_stores_when_valid_status_provided', () async {
+  // given
+  const status = 'want_to_go';
+  
+  // when
+  final result = await repository.getStoresByStatus(status);
+  
+  // then
+  expect(result, isA<List<Store>>());
+  expect(result.every((store) => store.status == status), isTrue);
+});
+
+// 2. Green: 最小実装
+Future<List<Store>> getStoresByStatus(String status) async {
+  return []; // 最小実装
+}
+
+// 3. Refactor: 実際の実装とコード改善
+Future<List<Store>> getStoresByStatus(String status) async {
+  try {
+    return await _localDatasource.getStoresByStatus(status);
+  } on DatabaseException catch (e) {
+    throw Exception('Failed to fetch stores: ${e.toString()}');
+  }
+}
+```
+
+## Issue実装ワークフロー
+
+### Issue実装の基本フロー
+
+GitHub Issueに基づく実装は以下の手順で進めます：
+
+1. **Issue選定と準備**
+   ```bash
+   # 実装するissueを確認
+   gh issue view 10
+   
+   # 依存関係を確認（技術タスクから開始推奨）
+   # データベース → Repository → UI の順序
+   ```
+
+2. **ブランチ作成とTDD開始**
+   ```bash
+   # issue内容に基づいたブランチ名
+   git checkout -b feature/database-schema-migration
+   
+   # Red: 失敗するテストを先に作成
+   flutter test test/path/to/new_test.dart  # 失敗確認
+   ```
+
+3. **TDDサイクル実行**
+   ```bash
+   # Green: 最小実装でテスト通す
+   flutter test test/path/to/new_test.dart  # 成功確認
+   
+   # Refactor: コード品質向上
+   dart format .
+   flutter analyze
+   flutter test
+   ```
+
+4. **実装完了確認**
+   ```bash
+   # Issue内の受け入れ基準をチェック
+   # - [ ] 基本機能 ✅
+   # - [ ] UI/UX ✅  
+   # - [ ] 技術要件 ✅
+   # - [ ] 定義完了 ✅
+   ```
+
+5. **コミット・プッシュ・PR**
+   ```bash
+   git add .
+   git commit -m "issue #10: データベーススキーマとマイグレーション実装"
+   git push origin feature/database-schema-migration
+   gh pr create --title "issue #10: データベーススキーマとマイグレーション実装"
+   ```
+
+### Issue実装の優先順序
+
+技術的依存関係に基づいた実装順序：
+
+1. **Foundation Layer**
+   - issue #10: データベーススキーマ（**最優先**）
+   - issue #11: テスト実装
+   - issue #12: セキュリティ強化
+
+2. **Business Logic Layer**
+   - Repository/DataSource層の実装
+   - Model/Entity層の完成
+
+3. **Presentation Layer**
+   - issue #5: スワイプ機能
+   - issue #6: 検索機能  
+   - issue #7: マイメニュー
+   - issue #8: 訪問記録
+   - issue #9: 店舗詳細
+
+### Issue状況の追跡
+
+```bash
+# 進行中のissue確認
+gh issue list --state open --assignee @me
+
+# 完了したissue確認  
+gh issue list --state closed
+
+# issue #10の進捗確認
+gh issue view 10
+```
+
+### Issue完了時のチェックリスト
+
+- [ ] 受け入れ基準全て満たす
+- [ ] TDDサイクル完了（Red→Green→Refactor）
+- [ ] テストカバレッジ80%以上
+- [ ] `flutter analyze`エラーゼロ
+- [ ] `dart format .`実行済み
+- [ ] PR作成・レビュー完了
+- [ ] CI/CDパイプライン成功
+- [ ] issueクローズ
 
 ## CI/CD システム
 
