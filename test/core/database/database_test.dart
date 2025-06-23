@@ -1,10 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:chinese_food_app/core/database/database_helper.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   late DatabaseHelper databaseHelper;
   late Database database;
+  final uuid = const Uuid();
 
   // Use SQLite FFI for testing
   setUpAll(() {
@@ -168,9 +170,9 @@ void main() {
 
   group('Database CRUD Operations Tests', () {
     test('should insert and retrieve store data', () async {
-      // Red: This test should fail initially
-      const storeData = {
-        'id': 'test-store-1',
+      final storeId = uuid.v4();
+      final storeData = {
+        'id': storeId,
         'name': '中華料理 テスト',
         'address': '東京都渋谷区テスト1-1-1',
         'lat': 35.6762,
@@ -185,7 +187,7 @@ void main() {
       final List<Map<String, dynamic>> result = await database.query(
         'stores',
         where: 'id = ?',
-        whereArgs: ['test-store-1'],
+        whereArgs: [storeId],
       );
 
       expect(result.length, 1);
@@ -194,9 +196,11 @@ void main() {
     });
 
     test('should maintain referential integrity with foreign keys', () async {
-      // Red: This test should fail initially
-      const storeData = {
-        'id': 'test-store-2',
+      final storeId = uuid.v4();
+      final visitId = uuid.v4();
+
+      final storeData = {
+        'id': storeId,
         'name': '中華料理 外部キーテスト',
         'address': '東京都新宿区テスト2-2-2',
         'lat': 35.6762,
@@ -208,9 +212,9 @@ void main() {
 
       await database.insert('stores', storeData);
 
-      const visitData = {
-        'id': 'test-visit-1',
-        'store_id': 'test-store-2',
+      final visitData = {
+        'id': visitId,
+        'store_id': storeId,
         'visited_at': '2025-06-23T12:00:00.000Z',
         'menu': 'ラーメン',
         'memo': '美味しかった',
@@ -225,7 +229,7 @@ void main() {
         FROM stores s 
         JOIN visit_records v ON s.id = v.store_id 
         WHERE s.id = ?
-      ''', ['test-store-2']);
+      ''', [storeId]);
 
       expect(result.length, 1);
       expect(result.first['name'], '中華料理 外部キーテスト');
@@ -250,10 +254,12 @@ void main() {
     });
 
     test('should support transaction operations', () async {
+      final storeId = uuid.v4();
+
       // Test transaction functionality
       final result = await databaseHelper.transaction<int>((txn) async {
         await txn.insert('stores', {
-          'id': 'txn-test-1',
+          'id': storeId,
           'name': 'トランザクションテスト店',
           'address': 'テスト住所',
           'lat': 35.6762,
@@ -273,11 +279,174 @@ void main() {
       final stores = await database.query(
         'stores',
         where: 'id = ?',
-        whereArgs: ['txn-test-1'],
+        whereArgs: [storeId],
       );
 
       expect(stores.length, 1);
       expect(stores.first['name'], 'トランザクションテスト店');
+    });
+  });
+
+  group('Database Validation Tests', () {
+    test('should reject invalid status values', () async {
+      final storeId = uuid.v4();
+
+      expect(() async {
+        await database.insert('stores', {
+          'id': storeId,
+          'name': 'テスト店',
+          'address': 'テスト住所',
+          'lat': 35.6762,
+          'lng': 139.6503,
+          'status': 'invalid_status', // 無効な値
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }, throwsA(isA<DatabaseException>()));
+    });
+
+    test('should reject empty name values', () async {
+      final storeId = uuid.v4();
+
+      expect(() async {
+        await database.insert('stores', {
+          'id': storeId,
+          'name': '', // 空文字
+          'address': 'テスト住所',
+          'lat': 35.6762,
+          'lng': 139.6503,
+          'status': 'want_to_go',
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }, throwsA(isA<DatabaseException>()));
+    });
+
+    test('should reject invalid latitude values', () async {
+      final storeId = uuid.v4();
+
+      expect(() async {
+        await database.insert('stores', {
+          'id': storeId,
+          'name': 'テスト店',
+          'address': 'テスト住所',
+          'lat': 91.0, // 無効な緯度
+          'lng': 139.6503,
+          'status': 'want_to_go',
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }, throwsA(isA<DatabaseException>()));
+    });
+
+    test('should reject invalid longitude values', () async {
+      final storeId = uuid.v4();
+
+      expect(() async {
+        await database.insert('stores', {
+          'id': storeId,
+          'name': 'テスト店',
+          'address': 'テスト住所',
+          'lat': 35.6762,
+          'lng': 181.0, // 無効な経度
+          'status': 'want_to_go',
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }, throwsA(isA<DatabaseException>()));
+    });
+  });
+
+  group('Database Cascade Tests', () {
+    test('should cascade delete when store is removed', () async {
+      final storeId = uuid.v4();
+      final visitId = uuid.v4();
+      final photoId = uuid.v4();
+
+      // Insert store
+      await database.insert('stores', {
+        'id': storeId,
+        'name': 'カスケードテスト店',
+        'address': 'テスト住所',
+        'lat': 35.6762,
+        'lng': 139.6503,
+        'status': 'visited',
+        'memo': 'カスケードテスト',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      // Insert visit record
+      await database.insert('visit_records', {
+        'id': visitId,
+        'store_id': storeId,
+        'visited_at': '2025-06-23T12:00:00.000Z',
+        'menu': 'テストメニュー',
+        'memo': 'カスケードテスト',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      // Insert photo
+      await database.insert('photos', {
+        'id': photoId,
+        'store_id': storeId,
+        'visit_id': visitId,
+        'file_path': '/test/path/photo.jpg',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      // Verify data exists
+      expect(
+        (await database.query('stores', where: 'id = ?', whereArgs: [storeId]))
+            .length,
+        1,
+      );
+      expect(
+        (await database.query('visit_records',
+                where: 'store_id = ?', whereArgs: [storeId]))
+            .length,
+        1,
+      );
+      expect(
+        (await database
+                .query('photos', where: 'store_id = ?', whereArgs: [storeId]))
+            .length,
+        1,
+      );
+
+      // Delete store (should cascade)
+      await database.delete('stores', where: 'id = ?', whereArgs: [storeId]);
+
+      // Verify cascade deletion
+      expect(
+        (await database.query('stores', where: 'id = ?', whereArgs: [storeId]))
+            .length,
+        0,
+      );
+      expect(
+        (await database.query('visit_records',
+                where: 'store_id = ?', whereArgs: [storeId]))
+            .length,
+        0,
+      );
+      expect(
+        (await database
+                .query('photos', where: 'store_id = ?', whereArgs: [storeId]))
+            .length,
+        0,
+      );
+    });
+
+    test('should handle foreign key constraint violation', () async {
+      final nonExistentStoreId = uuid.v4();
+      final visitId = uuid.v4();
+
+      // Try to insert visit record with non-existent store_id
+      expect(() async {
+        await database.insert('visit_records', {
+          'id': visitId,
+          'store_id': nonExistentStoreId, // 存在しないstore_id
+          'visited_at': '2025-06-23T12:00:00.000Z',
+          'menu': 'テストメニュー',
+          'memo': 'テスト',
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }, throwsA(isA<DatabaseException>()));
     });
   });
 }

@@ -37,12 +37,12 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE stores (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        address TEXT NOT NULL,
-        lat REAL NOT NULL,
-        lng REAL NOT NULL,
-        status TEXT,
-        memo TEXT,
+        name TEXT NOT NULL CHECK(length(name) > 0),
+        address TEXT NOT NULL CHECK(length(address) > 0),
+        lat REAL NOT NULL CHECK(lat BETWEEN -90 AND 90),
+        lng REAL NOT NULL CHECK(lng BETWEEN -180 AND 180),
+        status TEXT NOT NULL CHECK(status IN ('want_to_go', 'visited', 'bad')),
+        memo TEXT DEFAULT '',
         created_at TEXT NOT NULL
       )
     ''');
@@ -53,10 +53,10 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL,
         visited_at TEXT NOT NULL,
-        menu TEXT NOT NULL,
-        memo TEXT NOT NULL,
+        menu TEXT NOT NULL CHECK(length(menu) > 0),
+        memo TEXT DEFAULT '',
         created_at TEXT NOT NULL,
-        FOREIGN KEY (store_id) REFERENCES stores (id)
+        FOREIGN KEY (store_id) REFERENCES stores (id) ON DELETE CASCADE
       )
     ''');
 
@@ -66,10 +66,10 @@ class DatabaseHelper {
         id TEXT PRIMARY KEY,
         store_id TEXT NOT NULL,
         visit_id TEXT,
-        file_path TEXT NOT NULL,
+        file_path TEXT NOT NULL CHECK(length(file_path) > 0),
         created_at TEXT NOT NULL,
-        FOREIGN KEY (store_id) REFERENCES stores (id),
-        FOREIGN KEY (visit_id) REFERENCES visit_records (id)
+        FOREIGN KEY (store_id) REFERENCES stores (id) ON DELETE CASCADE,
+        FOREIGN KEY (visit_id) REFERENCES visit_records (id) ON DELETE SET NULL
       )
     ''');
 
@@ -113,9 +113,21 @@ class DatabaseHelper {
   }
 
   /// バッチ処理用のトランザクション実行
+  ///
+  /// [action]: トランザクション内で実行する処理
+  ///
+  /// Returns: アクションの実行結果
+  ///
+  /// Throws: [Exception] トランザクション実行に失敗した場合
   Future<T> transaction<T>(Future<T> Function(Transaction txn) action) async {
-    final db = await database;
-    return await db.transaction(action);
+    try {
+      final db = await database;
+      return await db.transaction(action);
+    } on DatabaseException catch (e) {
+      throw Exception('Transaction failed: ${e.toString()}');
+    } catch (e) {
+      throw Exception('Unexpected error during transaction: ${e.toString()}');
+    }
   }
 
   /// パフォーマンス統計取得
@@ -136,10 +148,22 @@ class DatabaseHelper {
   }
 
   /// データベースの整合性チェック
+  ///
+  /// Returns:
+  ///   - true: データベースに問題なし
+  ///   - false: データベースに破損または問題あり
   Future<bool> checkIntegrity() async {
-    final db = await database;
-    final result = await db.rawQuery('PRAGMA integrity_check');
-    return result.first['integrity_check'] == 'ok';
+    try {
+      final db = await database;
+      final result = await db.rawQuery('PRAGMA integrity_check');
+      return result.isNotEmpty && result.first['integrity_check'] == 'ok';
+    } on DatabaseException {
+      // データベースエラーの場合は整合性に問題があると判断
+      return false;
+    } catch (_) {
+      // その他の予期しないエラーも整合性問題として扱う
+      return false;
+    }
   }
 
   Future<void> close() async {
