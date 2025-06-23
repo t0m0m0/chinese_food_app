@@ -181,10 +181,14 @@ flutter build windows/macos/linux  # Desktop
 
 3. **コミット・プッシュ**
    ```bash
+   # 必須: コミット前のフォーマット実行
+   dart format .
+   
    git add .
    git commit -m "適切なコミットメッセージ"
    git push origin ブランチ名
    ```
+   - **必須手順**: コミット前に必ず`dart format .`を実行
    - **コミットメッセージ規則**: 日本語で簡潔に機能説明
    - **適切な単位**: 1つの機能や修正につき1コミット
    - **Claude Code署名**: 自動付与される`🤖 Generated with Claude Code`を含める
@@ -219,6 +223,7 @@ flutter build windows/macos/linux  # Desktop
 ### 品質基準
 
 #### 必須要件
+- **コードフォーマット**: コミット前に必ず`dart format .`実行
 - **エラーハンドリング**: try-catch とDatabaseException対応
 - **アーキテクチャ準拠**: Clean Architecture + Repository Pattern
 - **型安全性**: null safety完全対応
