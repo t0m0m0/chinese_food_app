@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication Language
+- **User Communication**: Always respond to the user in Japanese (日本語)
+- **Internal Thinking**: Use English for internal reasoning and analysis
+- This language setting should be maintained throughout all interactions with this codebase
+
 ## Project Overview
 # 町中華探索アプリ「マチアプ」仕様書（MVP）
 

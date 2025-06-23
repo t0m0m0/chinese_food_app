@@ -54,7 +54,7 @@ jobs:
         - **Web**: GitHub Pagesで公開予定
         
         ### 🛠️ 技術情報
-        - Flutter SDK: 3.8.1+
+        - Flutter SDK: 3.24.0+
         - Dart SDK: included with Flutter
         - Clean Architecture準拠
         - SQLiteローカルデータベース
@@ -97,7 +97,7 @@ jobs:
     - name: Flutter環境をセットアップ
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.8.1'
+        flutter-version: '3.24.0'
         channel: 'stable'
         cache: true
         
@@ -139,7 +139,7 @@ jobs:
     - name: Flutter環境をセットアップ
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.8.1'
+        flutter-version: '3.24.0'
         channel: 'stable'
         cache: true
         
@@ -181,7 +181,7 @@ jobs:
     - name: Flutter環境をセットアップ
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.8.1'
+        flutter-version: '3.24.0'
         channel: 'stable'
         cache: true
         
