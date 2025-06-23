@@ -18,23 +18,38 @@ void main() {
     // BottomNavigationBarが表示されることを確認
     expect(find.byType(BottomNavigationBar), findsOneWidget);
 
-    // 3つのタブが存在することを確認
-    expect(find.text('スワイプ'), findsOneWidget);
-    expect(find.text('検索'), findsOneWidget);
-    expect(find.text('マイメニュー'), findsOneWidget);
+    // 3つのタブが存在することを確認（BottomNavigationBar内で検索）
+    expect(find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.text('スワイプ')
+    ), findsOneWidget);
+    expect(find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.text('検索')
+    ), findsOneWidget);
+    expect(find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.text('マイメニュー')
+    ), findsOneWidget);
 
     // デフォルトでスワイプページが表示されることを確認
     expect(find.text('スワイプ画面 - 実装予定'), findsOneWidget);
 
     // 検索タブをタップして画面遷移をテスト
-    await tester.tap(find.text('検索'));
+    await tester.tap(find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.text('検索')
+    ));
     await tester.pump();
 
     // 検索ページが表示されることを確認
     expect(find.text('検索画面 - 実装予定'), findsOneWidget);
 
     // マイメニュータブをタップして画面遷移をテスト
-    await tester.tap(find.text('マイメニュー'));
+    await tester.tap(find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.text('マイメニュー')
+    ));
     await tester.pump();
 
     // マイメニューページが表示されることを確認
