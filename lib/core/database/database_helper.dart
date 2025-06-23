@@ -25,6 +25,10 @@ class DatabaseHelper {
       version: AppConstants.databaseVersion,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
+      onOpen: (db) async {
+        // 外部キー制約を有効化
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
     );
   }
 
@@ -71,8 +75,12 @@ class DatabaseHelper {
 
     // インデックス作成
     await db.execute('CREATE INDEX idx_stores_status ON stores (status)');
+    await db
+        .execute('CREATE INDEX idx_stores_created_at ON stores (created_at)');
     await db.execute(
         'CREATE INDEX idx_visit_records_store_id ON visit_records (store_id)');
+    await db.execute(
+        'CREATE INDEX idx_visit_records_visited_at ON visit_records (visited_at)');
     await db.execute('CREATE INDEX idx_photos_store_id ON photos (store_id)');
   }
 
