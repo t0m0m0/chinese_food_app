@@ -35,27 +35,27 @@ dependencies:
   cupertino_icons: ^1.0.8
   
   # データベース関連
-  sqflite: ^2.3.0
+  sqflite: ^2.4.1
   path: ^1.8.3
   
   # HTTP通信・API関連
   http: ^1.1.0
   
   # 地図・位置情報関連
-  google_maps_flutter: ^2.5.0
-  geolocator: ^10.1.0
+  google_maps_flutter: ^2.9.0
+  geolocator: ^13.0.1
   geocoding: ^2.1.1
   
   # UI・UX関連
-  flutter_card_swiper: ^6.2.0
-  cached_network_image: ^3.3.0
-  image_picker: ^1.0.4
+  flutter_card_swiper: ^7.0.2
+  cached_network_image: ^3.4.1
+  image_picker: ^1.1.2
   
   # 状態管理
   provider: ^6.1.1
   
   # ユーティリティ
-  uuid: ^4.2.1
+  uuid: ^4.5.1
   intl: ^0.19.0
 
 dev_dependencies:
