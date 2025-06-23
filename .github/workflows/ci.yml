@@ -33,8 +33,7 @@ jobs:
       run: flutter analyze
       
     - name: コードフォーマットをチェック
-      run: |
-        dart format --set-exit-if-changed . || echo "⚠️ コードフォーマットの問題を検出しましたが、継続します"
+      run: dart format --set-exit-if-changed .
       
     - name: Pubspec依存関係をチェック
       run: flutter pub deps
