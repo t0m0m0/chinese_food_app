@@ -153,3 +153,106 @@ flutter build windows/macos/linux  # Desktop
 ## Environment
 - Flutter SDK 3.8.1+
 - Private package (not published to pub.dev)
+
+## Development Workflow
+
+このプロジェクトでは品質管理とレビューベースの開発フローを採用しています。
+
+### 基本フロー
+
+1. **ブランチ作成**
+   ```bash
+   git checkout -b feature/機能名
+   # または
+   git checkout -b fix/修正内容
+   # または  
+   git checkout -b docs/文書更新内容
+   ```
+
+2. **開発・実装**
+   - 適切な単位で機能を実装
+   - コードの品質とアーキテクチャを維持
+   - Clean Architecture原則に従う
+
+3. **コミット・プッシュ**
+   ```bash
+   git add .
+   git commit -m "適切なコミットメッセージ"
+   git push origin ブランチ名
+   ```
+   - **コミットメッセージ規則**: 日本語で簡潔に機能説明
+   - **適切な単位**: 1つの機能や修正につき1コミット
+   - **Claude Code署名**: 自動付与される`🤖 Generated with Claude Code`を含める
+
+4. **プルリクエスト作成**
+   ```bash
+   gh pr create --title "機能名" --body "説明"
+   ```
+   - 実装内容の詳細説明
+   - Test planの記載
+   - 必要に応じてスクリーンショット
+
+5. **セルフレビュー実施**
+   - **コードレビュー**: GitHub PR画面で詳細レビュー
+   - **品質チェック**: エラーハンドリング、パフォーマンス、アーキテクチャ
+   - **改善提案**: 具体的なコードサンプル付きコメント
+   - **総合評価**: Good Points / Issues Found / Recommendations
+
+6. **レビュー指摘対応**
+   - 指摘事項を同一ブランチで修正
+   - 適切なコミットメッセージで変更内容を説明
+   - 修正完了後にプッシュ
+
+7. **最終確認・マージ**
+   ```bash
+   gh pr merge PR番号 --merge
+   ```
+   - すべての指摘事項対応完了を確認
+   - 最終品質チェック実施
+   - masterブランチにマージ実行
+
+### 品質基準
+
+#### 必須要件
+- **エラーハンドリング**: try-catch とDatabaseException対応
+- **アーキテクチャ準拠**: Clean Architecture + Repository Pattern
+- **型安全性**: null safety完全対応
+- **命名規則**: Dart標準命名規則遵守
+
+#### 推奨要件  
+- **ページネーション**: 大量データ対応
+- **トランザクション**: 複数テーブル操作での整合性保証
+- **マイグレーション**: 将来のスキーマ変更対応
+- **ドキュメント**: コードコメントと説明
+
+### ブランチ命名規則
+
+| プレフィックス | 用途 | 例 |
+|----------------|------|-----|
+| `feature/` | 新機能開発 | `feature/swipe-ui`, `feature/search-api` |
+| `fix/` | バグ修正 | `fix/database-improvements`, `fix/null-safety` |
+| `docs/` | 文書更新 | `docs/update-readme`, `docs/api-spec` |
+| `refactor/` | リファクタリング | `refactor/clean-architecture` |
+| `test/` | テスト追加 | `test/unit-tests`, `test/integration` |
+
+### コミットメッセージ例
+
+```
+町中華探索アプリのスワイプUI実装
+
+- flutter_card_swiperによるマッチングアプリ風UI
+- 右スワイプ「行きたい」、左スワイプ「興味なし」対応  
+- Store repositoryとの連携でローカルDB保存
+- Material Design 3準拠のカードデザイン
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+### 注意事項
+
+- **masterブランチ直接コミット禁止**: 必ずブランチ経由
+- **レビュー必須**: セルフレビューまたはペアレビュー実施
+- **品質優先**: 動作するだけでなく、保守しやすいコード
+- **段階的実装**: 大きな機能は複数PRに分割
