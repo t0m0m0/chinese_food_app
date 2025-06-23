@@ -232,4 +232,52 @@ void main() {
       expect(result.first['menu'], 'ラーメン');
     });
   });
+
+  group('Database Performance Tests', () {
+    test('should provide database statistics', () async {
+      final stats = await databaseHelper.getDatabaseStats();
+
+      expect(stats, isA<Map<String, dynamic>>());
+      expect(stats['version'], 1);
+      expect(stats['tables'], greaterThan(0));
+      expect(stats['foreign_keys_enabled'], isTrue);
+    });
+
+    test('should check database integrity', () async {
+      final isIntegrityOk = await databaseHelper.checkIntegrity();
+
+      expect(isIntegrityOk, isTrue);
+    });
+
+    test('should support transaction operations', () async {
+      // Test transaction functionality
+      final result = await databaseHelper.transaction<int>((txn) async {
+        await txn.insert('stores', {
+          'id': 'txn-test-1',
+          'name': 'トランザクションテスト店',
+          'address': 'テスト住所',
+          'lat': 35.6762,
+          'lng': 139.6503,
+          'status': 'want_to_go',
+          'memo': 'トランザクションテスト',
+          'created_at': '2025-06-23T16:00:00.000Z',
+        });
+
+        // Return something to verify transaction completed
+        return 42;
+      });
+
+      expect(result, 42);
+
+      // Verify data was inserted
+      final stores = await database.query(
+        'stores',
+        where: 'id = ?',
+        whereArgs: ['txn-test-1'],
+      );
+
+      expect(stores.length, 1);
+      expect(stores.first['name'], 'トランザクションテスト店');
+    });
+  });
 }

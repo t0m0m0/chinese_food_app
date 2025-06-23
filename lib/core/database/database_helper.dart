@@ -112,9 +112,41 @@ class DatabaseHelper {
     // await db.execute('ALTER TABLE stores ADD COLUMN phone TEXT');
   }
 
-  Future<void> close() async {
+  /// バッチ処理用のトランザクション実行
+  Future<T> transaction<T>(Future<T> Function(Transaction txn) action) async {
     final db = await database;
-    await db.close();
-    _database = null;
+    return await db.transaction(action);
+  }
+
+  /// パフォーマンス統計取得
+  Future<Map<String, dynamic>> getDatabaseStats() async {
+    final db = await database;
+    final tables = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type='table'",
+    );
+
+    final stats = <String, dynamic>{
+      'version': await db.getVersion(),
+      'tables': tables.length,
+      'foreign_keys_enabled':
+          (await db.rawQuery('PRAGMA foreign_keys')).first['foreign_keys'] == 1,
+    };
+
+    return stats;
+  }
+
+  /// データベースの整合性チェック
+  Future<bool> checkIntegrity() async {
+    final db = await database;
+    final result = await db.rawQuery('PRAGMA integrity_check');
+    return result.first['integrity_check'] == 'ok';
+  }
+
+  Future<void> close() async {
+    if (_database != null) {
+      final db = await database;
+      await db.close();
+      _database = null;
+    }
   }
 }
