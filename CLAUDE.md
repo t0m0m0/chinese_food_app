@@ -148,6 +148,16 @@ flutter build web           # Web
 flutter build windows/macos/linux  # Desktop
 ```
 
+### WSL2環境での注意点
+WSL2環境では、Windows版FlutterではなくLinux版Flutterを使用してください：
+```bash
+# Linux版Flutter（WSL2推奨）
+export PATH="$HOME/flutter/bin:$PATH"
+dart format .                 # 正常動作
+```
+
+Windows版Flutter (`/mnt/c/dev/flutter`) はWSL2でCRLF問題が発生するため非推奨です。
+
 ## Architecture
 - **Entry Point**: `lib/main.dart` - Material Design app with StatefulWidget counter example
 - **Testing**: Standard Flutter widget testing in `test/`

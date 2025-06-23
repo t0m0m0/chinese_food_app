@@ -93,8 +93,7 @@ class DatabaseHelper {
 
   Future<void> _upgradeToVersion2(Database db) async {
     // 例: storesテーブルにratingカラムを追加
-    await db
-        .execute('ALTER TABLE stores ADD COLUMN rating REAL DEFAULT 0.0');
+    await db.execute('ALTER TABLE stores ADD COLUMN rating REAL DEFAULT 0.0');
 
     // 新しいインデックスを追加
     await db.execute('CREATE INDEX idx_stores_rating ON stores (rating)');

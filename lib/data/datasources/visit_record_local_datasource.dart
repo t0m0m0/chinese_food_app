@@ -20,7 +20,8 @@ class VisitRecordLocalDatasource {
     });
   }
 
-  Future<List<VisitRecordModel>> getVisitRecordsByStoreId(String storeId) async {
+  Future<List<VisitRecordModel>> getVisitRecordsByStoreId(
+      String storeId) async {
     final db = await _databaseHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
       'visit_records',

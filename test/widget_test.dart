@@ -21,13 +21,11 @@ void main() {
     // 3つのタブが存在することを確認（BottomNavigationBar内で検索）
     expect(
         find.descendant(
-            of: find.byType(BottomNavigationBar),
-            matching: find.text('スワイプ')),
+            of: find.byType(BottomNavigationBar), matching: find.text('スワイプ')),
         findsOneWidget);
     expect(
         find.descendant(
-            of: find.byType(BottomNavigationBar),
-            matching: find.text('検索')),
+            of: find.byType(BottomNavigationBar), matching: find.text('検索')),
         findsOneWidget);
     expect(
         find.descendant(

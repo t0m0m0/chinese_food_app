@@ -88,8 +88,7 @@ class StoreRepositoryImpl implements StoreRepository {
         }
       });
     } catch (e) {
-      throw Exception(
-          'Failed to insert store with photos: ${e.toString()}');
+      throw Exception('Failed to insert store with photos: ${e.toString()}');
     }
   }
 
