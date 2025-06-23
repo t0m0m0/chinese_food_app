@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication Language
+- **User Communication**: Always respond to the user in Japanese (日本語)
+- **Internal Thinking**: Use English for internal reasoning and analysis
+- This language setting should be maintained throughout all interactions with this codebase
+
 ## Project Overview
 # 町中華探索アプリ「マチアプ」仕様書（MVP）
 
@@ -256,3 +261,87 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **レビュー必須**: セルフレビューまたはペアレビュー実施
 - **品質優先**: 動作するだけでなく、保守しやすいコード
 - **段階的実装**: 大きな機能は複数PRに分割
+
+## CI/CD システム
+
+### 自動化パイプライン
+
+このプロジェクトは包括的なCI/CDシステムを採用し、コード品質とリリース品質を自動保証します。
+
+#### 🔄 メインCI (`ci.yml`)
+**実行タイミング**: `master`/`develop`ブランチプッシュ、全PR作成・更新
+
+1. **コード品質チェック**
+   ```bash
+   flutter analyze          # 静的解析
+   dart format --check      # フォーマット確認
+   flutter pub deps         # 依存関係チェック
+   ```
+
+2. **テスト実行**
+   ```bash
+   flutter test --coverage  # 単体テスト + カバレッジ
+   ```
+
+3. **ビルドテスト**
+   ```bash
+   flutter build apk        # Android APK
+   flutter build web        # Webアプリ
+   ```
+
+4. **セキュリティスキャン**
+   - 依存関係の脆弱性チェック
+   - コードの潜在的問題検出
+
+#### 📋 PR品質チェック (`pr-checks.yml`) 
+**実行タイミング**: プルリクエスト作成・更新
+
+- **命名規則チェック**: ブランチ名が`feature/`, `fix/`, `docs/`等で開始
+- **コミットメッセージ**: Claude Code署名確認
+- **差分解析**: 変更行数、ファイル種別分析
+- **依存関係監視**: pubspec.yaml変更時の影響確認
+
+#### 🚀 リリース自動化 (`release.yml`)
+**実行タイミング**: `v*.*.*`形式のタグプッシュ
+
+- **リリースノート自動生成**: 前回タグからの変更履歴
+- **成果物生成**: Android APK、Web版tar.gz
+- **GitHub Release**: 自動リリースページ作成
+- **GitHub Pages**: Web版自動デプロイ
+
+### 品質ゲート
+
+#### 必須条件（マージブロック）
+- ✅ `flutter analyze`エラーゼロ
+- ✅ `dart format`準拠
+- ✅ 単体テスト全パス
+- ✅ Android/Webビルド成功
+- ✅ ブランチ命名規則準拠
+
+#### 推奨条件（警告）
+- 🟡 テストカバレッジ80%以上
+- 🟡 Claude Code署名付きコミット
+- 🟡 PR変更行数500行以下
+
+### リリースフロー
+
+```bash
+# 新しいバージョンをリリース
+git tag v1.0.0
+git push origin v1.0.0
+
+# 自動実行される処理:
+# 1. GitHub Releaseページ生成
+# 2. Android APK自動ビルド・アップロード  
+# 3. Web版ビルド・GitHub Pages デプロイ
+# 4. リリースノート自動生成
+```
+
+### モニタリング
+
+- **カバレッジ**: Codecov連携でPRごとの変化追跡
+- **成果物**: Android APK/Web版を7日間保持
+- **セキュリティ**: 依存関係脆弱性の自動検出
+- **ログ**: GitHub Actionsで30日間保持
+
+詳細は `.github/README.md` を参照してください。

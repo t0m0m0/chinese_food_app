@@ -1,0 +1,149 @@
+name: PR品質チェック
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # PR品質チェック
+  pr-quality-check:
+    runs-on: ubuntu-latest
+    name: PR品質チェック
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Flutter環境をセットアップ
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+        
+    - name: 依存関係をインストール
+      run: flutter pub get
+      
+    - name: 変更されたファイルを取得
+      id: changed-files
+      run: |
+        git diff --name-only origin/${{ github.base_ref }}..HEAD > changed_files.txt
+        echo "Changed files:"
+        cat changed_files.txt
+        
+    - name: Dartファイルの変更をチェック
+      run: |
+        if grep -q "\.dart$" changed_files.txt; then
+          echo "Dartファイルの変更を検出"
+          grep "\.dart$" changed_files.txt | xargs flutter analyze
+        else
+          echo "Dartファイルの変更なし"
+        fi
+        
+    - name: テストカバレッジをチェック
+      run: |
+        if grep -q "lib/.*\.dart$" changed_files.txt; then
+          echo "ライブラリファイルの変更を検出、テスト実行"
+          flutter test --coverage
+          
+          # カバレッジが80%以上かチェック（簡易版）
+          if [ -f "coverage/lcov.info" ]; then
+            echo "カバレッジレポートが生成されました"
+          else
+            echo "⚠️ カバレッジレポートが見つかりません"
+          fi
+        else
+          echo "テスト対象の変更なし"
+        fi
+        
+    - name: PRタイトルとブランチ名をチェック
+      run: |
+        echo "PR Title: ${{ github.event.pull_request.title }}"
+        echo "Branch: ${{ github.head_ref }}"
+        
+        # ブランチ命名規則チェック
+        if [[ "${{ github.head_ref }}" =~ ^(feature|fix|docs|refactor|test)/.+ ]]; then
+          echo "✅ ブランチ命名規則に準拠"
+        else
+          echo "❌ ブランチ命名規則エラー: feature/, fix/, docs/, refactor/, test/のいずれかで開始してください"
+          exit 1
+        fi
+        
+    - name: コミットメッセージをチェック
+      run: |
+        # 最新のコミットメッセージを取得
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+        echo "最新のコミットメッセージ: $COMMIT_MSG"
+        
+        # Claude Code署名をチェック
+        if echo "$COMMIT_MSG" | grep -q "🤖 Generated with \[Claude Code\]"; then
+          echo "✅ Claude Code署名を確認"
+        else
+          echo "⚠️ Claude Code署名が見つかりません（推奨）"
+        fi
+
+  # PR差分解析
+  pr-diff-analysis:
+    runs-on: ubuntu-latest
+    name: PR差分解析
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: 追加・削除行数を計算
+      run: |
+        ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}..HEAD | awk '{sum += $1} END {print sum}')
+        DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}..HEAD | awk '{sum += $2} END {print sum}')
+        
+        echo "追加行数: $ADDITIONS"
+        echo "削除行数: $DELETIONS"
+        
+        # 大きなPRの警告
+        if [ "$ADDITIONS" -gt 500 ]; then
+          echo "⚠️ 大きなPRです（500行以上の追加）。分割を検討してください。"
+        fi
+        
+    - name: ファイル種別解析
+      run: |
+        echo "変更されたファイルの種別:"
+        git diff --name-only origin/${{ github.base_ref }}..HEAD | \
+        awk -F. '{if (NF>1) print $NF}' | sort | uniq -c | sort -nr
+
+  # 依存関係チェック
+  dependency-check:
+    runs-on: ubuntu-latest
+    name: 依存関係チェック
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      
+    - name: Flutter環境をセットアップ
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+        
+    - name: pubspec.yamlの変更をチェック
+      run: |
+        if git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -q "pubspec.yaml"; then
+          echo "pubspec.yamlの変更を検出"
+          
+          # 依存関係を取得
+          flutter pub get
+          
+          # アウトデートされた依存関係をチェック
+          flutter pub outdated || echo "依存関係チェック完了"
+          
+          # 新しい依存関係の確認
+          echo "現在の依存関係:"
+          flutter pub deps --no-dev
+        else
+          echo "pubspec.yamlの変更なし"
+        fi

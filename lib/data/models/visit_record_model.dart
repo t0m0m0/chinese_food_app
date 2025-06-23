@@ -43,6 +43,7 @@ class VisitRecordModel extends VisitRecord {
     };
   }
 
+  @override
   VisitRecordModel copyWith({
     String? id,
     String? storeId,

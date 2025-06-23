@@ -1,0 +1,199 @@
+name: リリース自動化
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # v1.0.0形式のタグでトリガー
+
+jobs:
+  # リリース準備
+  prepare-release:
+    runs-on: ubuntu-latest
+    name: リリース準備
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      
+    - name: タグ情報を取得
+      id: tag_info
+      run: |
+        echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        echo "RELEASE_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        
+    - name: リリースノートを生成
+      id: release_notes
+      run: |
+        # 前回のタグから現在までの変更を取得
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+        if [ -n "$PREVIOUS_TAG" ]; then
+          echo "前回のタグ: $PREVIOUS_TAG"
+          CHANGES=$(git log --pretty=format:"- %s" $PREVIOUS_TAG..HEAD)
+        else
+          echo "初回リリース"
+          CHANGES=$(git log --pretty=format:"- %s")
+        fi
+        
+        # リリースノートを作成
+        cat > release_notes.md << EOF
+        ## 🎉 町中華アプリ ${{ steps.tag_info.outputs.TAG_NAME }} リリース
+        
+        ### 📱 対応プラットフォーム
+        - Android (APK)
+        - Web (PWA対応)
+        - iOS (要開発者アカウント)
+        
+        ### 🔄 変更内容
+        $CHANGES
+        
+        ### 📦 ダウンロード
+        - **Android**: \`app-release.apk\` をダウンロード
+        - **Web**: GitHub Pagesで公開予定
+        
+        ### 🛠️ 技術情報
+        - Flutter SDK: 3.24.0+
+        - Dart SDK: included with Flutter
+        - Clean Architecture準拠
+        - SQLiteローカルデータベース
+        
+        ### 🤖 自動生成
+        このリリースはGitHub Actionsにより自動生成されました。
+        EOF
+        
+        echo "リリースノート:"
+        cat release_notes.md
+        
+    - name: GitHubリリースを作成
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag_info.outputs.TAG_NAME }}
+        release_name: 町中華アプリ ${{ steps.tag_info.outputs.RELEASE_NAME }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+
+  # Android リリースビルド
+  build-android-release:
+    runs-on: ubuntu-latest
+    name: Android リリースビルド
+    needs: prepare-release
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      
+    - name: Java環境をセットアップ
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Flutter環境をセットアップ
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+        
+    - name: 依存関係をインストール
+      run: flutter pub get
+      
+    - name: Android リリースAPKをビルド
+      run: |
+        # リリースビルドの準備
+        flutter clean
+        flutter pub get
+        
+        # APKビルド（署名なし）
+        flutter build apk --release
+        
+        # ファイル名を変更
+        cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/machiapp-${{ github.ref_name }}.apk
+        
+    - name: リリースAPKをアップロード
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.prepare-release.outputs.upload_url }}
+        asset_path: build/app/outputs/flutter-apk/machiapp-${{ github.ref_name }}.apk
+        asset_name: machiapp-${{ github.ref_name }}.apk
+        asset_content_type: application/vnd.android.package-archive
+
+  # Web リリースビルド
+  build-web-release:
+    runs-on: ubuntu-latest
+    name: Web リリースビルド
+    needs: prepare-release
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      
+    - name: Flutter環境をセットアップ
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+        
+    - name: 依存関係をインストール
+      run: flutter pub get
+      
+    - name: Web リリースビルド
+      run: |
+        flutter clean
+        flutter pub get
+        flutter build web --release
+        
+        # Web用アーカイブを作成
+        cd build/web
+        tar -czf ../../machiapp-web-${{ github.ref_name }}.tar.gz .
+        cd ../..
+        
+    - name: Web ビルドをアップロード
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.prepare-release.outputs.upload_url }}
+        asset_path: machiapp-web-${{ github.ref_name }}.tar.gz
+        asset_name: machiapp-web-${{ github.ref_name }}.tar.gz
+        asset_content_type: application/gzip
+
+  # GitHub Pages デプロイ（Web版）
+  deploy-github-pages:
+    runs-on: ubuntu-latest
+    name: GitHub Pages デプロイ
+    needs: build-web-release
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      
+    - name: Flutter環境をセットアップ
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+        cache: true
+        
+    - name: 依存関係をインストール
+      run: flutter pub get
+      
+    - name: Web プロダクションビルド
+      run: flutter build web --release --base-href "/chinese_food_app/"
+      
+    - name: GitHub Pages にデプロイ
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: build/web
+        cname: # カスタムドメインがある場合はここに設定

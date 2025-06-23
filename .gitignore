@@ -44,4 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-CLAUDE.md
+# Coverage reports
+coverage/
+
+# CI/CD artifacts
+*.apk
+*.ipa
+*.tar.gz
