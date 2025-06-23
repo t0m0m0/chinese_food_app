@@ -4,7 +4,8 @@ class AppConstants {
   static const String appVersion = '1.0.0';
   
   // API関連
-  static const String hotpepperApiUrl = 'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/';
+  static const String hotpepperApiUrl =
+      'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/';
   
   // データベース
   static const String databaseName = 'machiapp.db';

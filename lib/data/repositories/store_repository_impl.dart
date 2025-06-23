@@ -1,10 +1,10 @@
-import '../../domain/entities/store.dart';
+import '../../core/database/database_helper.dart';
 import '../../domain/entities/photo.dart';
+import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../datasources/store_local_datasource.dart';
-import '../models/store_model.dart';
 import '../models/photo_model.dart';
-import '../../core/database/database_helper.dart';
+import '../models/store_model.dart';
 
 class StoreRepositoryImpl implements StoreRepository {
   final StoreLocalDatasource _localDatasource;
@@ -88,7 +88,8 @@ class StoreRepositoryImpl implements StoreRepository {
         }
       });
     } catch (e) {
-      throw Exception('Failed to insert store with photos: ${e.toString()}');
+      throw Exception(
+          'Failed to insert store with photos: ${e.toString()}');
     }
   }
 
@@ -118,7 +119,8 @@ class StoreRepositoryImpl implements StoreRepository {
         );
       });
     } catch (e) {
-      throw Exception('Failed to delete store with related data: ${e.toString()}');
+      throw Exception(
+          'Failed to delete store with related data: ${e.toString()}');
     }
   }
 }

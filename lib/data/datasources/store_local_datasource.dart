@@ -1,7 +1,8 @@
 import 'package:sqflite/sqflite.dart';
+
 import '../../core/database/database_helper.dart';
-import '../models/store_model.dart';
 import '../../domain/entities/store.dart';
+import '../models/store_model.dart';
 
 class StoreLocalDatasource {
   final DatabaseHelper _databaseHelper;
@@ -20,7 +21,8 @@ class StoreLocalDatasource {
         return StoreModel.fromMap(maps[i]);
       });
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to fetch stores: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to fetch stores: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }
@@ -42,7 +44,8 @@ class StoreLocalDatasource {
 
       return maps.map((map) => StoreModel.fromMap(map)).toList();
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to fetch paginated stores: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to fetch paginated stores: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }
@@ -62,7 +65,8 @@ class StoreLocalDatasource {
         return StoreModel.fromMap(maps[i]);
       });
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to fetch stores by status: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to fetch stores by status: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }
@@ -82,7 +86,8 @@ class StoreLocalDatasource {
       }
       return null;
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to fetch store by id: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to fetch store by id: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }
@@ -97,7 +102,8 @@ class StoreLocalDatasource {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to insert store: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to insert store: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }
@@ -113,7 +119,8 @@ class StoreLocalDatasource {
         whereArgs: [store.id],
       );
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to update store: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to update store: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }
@@ -128,7 +135,8 @@ class StoreLocalDatasource {
         whereArgs: [id],
       );
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to delete store: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to delete store: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }
@@ -148,7 +156,8 @@ class StoreLocalDatasource {
         return StoreModel.fromMap(maps[i]);
       });
     } on DatabaseException catch (e) {
-      throw Exception('Database error - Failed to search stores: ${e.toString()}');
+      throw Exception(
+          'Database error - Failed to search stores: ${e.toString()}');
     } catch (e) {
       throw Exception('Unexpected error: ${e.toString()}');
     }

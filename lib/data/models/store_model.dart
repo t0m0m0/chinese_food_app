@@ -19,12 +19,12 @@ class StoreModel extends Store {
       address: map['address'] as String,
       lat: (map['lat'] as num).toDouble(),
       lng: (map['lng'] as num).toDouble(),
-      status: map['status'] != null 
-        ? StoreStatus.values.firstWhere(
-            (e) => e.value == map['status'],
-            orElse: () => StoreStatus.wantToGo,
-          )
-        : null,
+      status: map['status'] != null
+          ? StoreStatus.values.firstWhere(
+              (e) => e.value == map['status'],
+              orElse: () => StoreStatus.wantToGo,
+            )
+          : null,
       memo: map['memo'] as String?,
       createdAt: DateTime.parse(map['created_at'] as String),
     );
