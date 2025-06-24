@@ -8,10 +8,13 @@ plugins {
 // Flutter Gradle Plugin configuration access
 val flutterVersionCode = project.properties["flutter.versionCode"] ?: "1"
 val flutterVersionName = project.properties["flutter.versionName"] ?: "1.0.0"
+val flutterCompileSdkVersion = project.properties["flutter.compileSdkVersion"]?.toString()?.toInt() ?: 34
+val flutterMinSdkVersion = project.properties["flutter.minSdkVersion"]?.toString()?.toInt() ?: 21
+val flutterTargetSdkVersion = project.properties["flutter.targetSdkVersion"]?.toString()?.toInt() ?: 34
 
 android {
     namespace = "com.example.chinese_food_app"
-    compileSdk = 34
+    compileSdk = flutterCompileSdkVersion
     
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -24,8 +27,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.chinese_food_app"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = flutterMinSdkVersion
+        targetSdk = flutterTargetSdkVersion
         versionCode = flutterVersionCode.toString().toInt()
         versionName = flutterVersionName.toString()
     }
