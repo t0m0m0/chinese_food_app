@@ -1,174 +1,101 @@
-# 町中華探索アプリ「マチアプ」
+# Chinese Food App
 
-町中華を探索・記録するためのモバイルアプリケーション。マッチングアプリ風のUIで店舗をスワイプし、「行きたい」「興味なし」などのステータスを設定できます。
+A Flutter mobile application for discovering and managing Chinese restaurants.
 
-## 📱 アプリ概要
+## 📱 About
 
-### 目的
-- 気になる町中華を探し、行きたい店をストックする
-- 実際に訪れた町中華を記録として残す
-- スワイプや検索など、直感的なUIで町中華探索を楽しめる体験を提供する
+This is a mobile app that helps users discover and keep track of Chinese restaurants. Built with Flutter using Clean Architecture principles and Test-Driven Development (TDD).
 
-### 想定ユーザー
-- 町中華が好きな一般ユーザー
-- 一人で地道に店を開拓するのが好きな人
-- ラーメン、餃子、定食などのB級グルメファン
+## 🏗️ Architecture
 
-## 🎯 機能一覧（MVP）
+- **Clean Architecture** with Repository Pattern
+- **Test-Driven Development** (TDD)
+- **SQLite** for local data storage
+- **Material Design 3** UI
 
-### 1. スワイプ画面（マッチングアプリ風UI）
-- 1枚ずつ店舗カードを表示（写真、店名、住所）
-- 右スワイプ → 「行きたい」
-- 左スワイプ → 「興味なし（bad）」
-- スワイプ結果はローカルDB（SQLite）に保存
+## 🚀 Getting Started
 
-### 2. 店舗検索
-- ホットペッパーAPIを利用した店舗検索
-- 現在地 or 地名での検索対応
-- 結果をリストとGoogle Map上に表示
-- 店舗をタップすると詳細画面へ遷移
-
-### 3. マイメニュー（一覧管理画面）
-- 「行きたい」「行った」店の一覧を表示
-- タブまたはフィルターで切り替え可能
-- 店舗ごとの訪問記録を追加・編集できる
-
-## 🏗️ アーキテクチャ
-
-### Clean Architecture + Repository Pattern
-```
-lib/
-├── core/           # 共通機能・データベース
-├── domain/         # エンティティ・リポジトリインターface
-├── data/           # データソース・リポジトリ実装
-└── presentation/   # UI・ページ
-```
-
-### データモデル
-- **Store**: 店舗情報（ID、店名、住所、緯度経度、ステータス）
-- **VisitRecord**: 訪問記録（店舗ID、訪問日時、メニュー、感想）
-- **Photo**: 写真（店舗ID、訪問記録ID、ファイルパス）
-
-## 🚀 開発環境
-
-### 前提条件
+### Prerequisites
 - Flutter SDK 3.24.0+
 - Dart SDK 3.4.0+
 
-### セットアップ
+### Setup
 ```bash
-# 依存関係のインストール
+# Install dependencies
 flutter pub get
 
-# アプリケーション実行
+# Run the app
 flutter run
 
-# テスト実行
+# Run tests
 flutter test
 
-# 静的解析
+# Code analysis
 flutter analyze
 
-# コードフォーマット
+# Format code
 dart format .
 ```
 
-### WSL2環境での注意点
-WSL2環境では、Linux版Flutterを使用してください：
+### WSL2 Environment
+For WSL2 users, use Linux version of Flutter:
 ```bash
-# Linux版Flutter（WSL2推奨）
 export PATH="$HOME/flutter/bin:$PATH"
 ```
 
-## 🧪 テスト
+## 🧪 Testing
 
-### TDD（テスト駆動開発）
-このプロジェクトはTDDアプローチを採用しています：
-- **Red**: 失敗するテストを作成
-- **Green**: テストが通る最小限の実装
-- **Refactor**: コード品質向上
+This project follows TDD methodology:
+- **Red**: Write failing tests first
+- **Green**: Implement minimal code to pass tests
+- **Refactor**: Improve code quality
 
-### テスト構成
-```
-test/
-├── core/           # Database・Entity・Repository層テスト
-├── widget/         # ウィジェットテスト
-└── integration/    # 統合テスト
-```
-
-### テスト実行
 ```bash
-# 全テスト実行
+# Run all tests
 flutter test
 
-# カバレッジ付きテスト実行
+# Run tests with coverage
 flutter test --coverage
 
-# 特定テスト実行
-flutter test test/core/entities/
+# Run specific tests
+flutter test test/core/
 ```
 
-## 🔧 使用技術
+## 🔧 Tech Stack
 
-### フレームワーク・言語
-- **Flutter** 3.24.0 - クロスプラットフォームUI
-- **Dart** 3.4.0 - プログラミング言語
+### Framework
+- **Flutter** 3.24.0 - Cross-platform UI framework
+- **Dart** 3.4.0 - Programming language
 
-### データベース・ストレージ
-- **SQLite** (sqflite) - ローカルデータベース
-- **ローカルストレージ** - 写真・設定保存
+### Database
+- **SQLite** (sqflite) - Local database
 
-### 外部API（予定）
-- **ホットペッパーグルメAPI** - 店舗情報取得
-- **Google Maps SDK** - 地図表示・位置情報
+### Development Tools
+- **Mockito** - Mocking framework for testing
+- **build_runner** - Code generation
+- **flutter_lints** - Static analysis
 
-### 開発・テストツール
-- **Mockito** - モッキングフレームワーク
-- **build_runner** - コード生成
-- **flutter_lints** - 静的解析
+## 📱 Platform Support
 
-## 📱 対応プラットフォーム
+- ✅ Android
+- ✅ iOS
+- ✅ Web
+- ✅ Desktop (Windows/macOS/Linux)
 
-- ✅ **Android**
-- ✅ **iOS** 
-- ✅ **Web**
-- ✅ **Windows/macOS/Linux** (デスクトップ)
+## 🧹 Code Quality
 
-## 🎨 デザイン
+- 58/58 tests passing
+- Zero static analysis issues
+- Automated CI/CD pipeline
+- Code formatting enforced
 
-- **Material Design 3** 準拠
-- **レスポンシブデザイン** 対応
-- **オレンジ系カラーテーマ** （町中華のイメージ）
+## 📚 Development
 
-## 📚 開発ドキュメント
+For detailed development guidelines, see [CLAUDE.md](./CLAUDE.md).
 
-詳細な開発ガイドラインは [CLAUDE.md](./CLAUDE.md) を参照してください。
+## 📄 License
 
-## 🚧 開発状況
-
-### ✅ 完了済み
-- [x] プロジェクト初期設定
-- [x] Clean Architecture構造構築
-- [x] データベーススキーマ設計・実装
-- [x] Entity・Repository層実装
-- [x] TDD基盤とテスト実装（58テスト）
-- [x] CI/CDパイプライン構築
-
-### 🔄 進行中
-- [ ] スワイプUI実装
-- [ ] 店舗検索機能実装
-- [ ] マイメニュー画面実装
-
-### 📋 予定
-- [ ] ホットペッパーAPI連携
-- [ ] Google Maps統合
-- [ ] 写真機能実装
-- [ ] 訪問記録機能
-- [ ] 状態管理実装
-
-## 📄 ライセンス
-
-このプロジェクトはプライベート開発用です（`publish_to: 'none'`）。
+Private development project.
 
 ---
 
