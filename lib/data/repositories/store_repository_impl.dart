@@ -2,6 +2,7 @@ import '../../core/database/database_helper.dart';
 import '../../domain/entities/photo.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
+import '../datasources/hotpepper_api_datasource.dart';
 import '../datasources/store_local_datasource.dart';
 import '../models/photo_model.dart';
 import '../models/store_model.dart';
@@ -9,8 +10,13 @@ import '../models/store_model.dart';
 class StoreRepositoryImpl implements StoreRepository {
   final StoreLocalDatasource _localDatasource;
   final DatabaseHelper _databaseHelper;
+  final HotpepperApiDatasource _apiDatasource;
 
-  StoreRepositoryImpl(this._localDatasource, this._databaseHelper);
+  StoreRepositoryImpl(
+    this._localDatasource,
+    this._databaseHelper,
+    this._apiDatasource,
+  );
 
   @override
   Future<List<Store>> getAllStores() async {
@@ -51,6 +57,40 @@ class StoreRepositoryImpl implements StoreRepository {
   Future<List<Store>> searchStores(String query) async {
     final storeModels = await _localDatasource.searchStores(query);
     return storeModels.cast<Store>();
+  }
+
+  @override
+  Future<List<Store>> searchStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    final response = await _apiDatasource.searchStores(
+      lat: lat,
+      lng: lng,
+      address: address,
+      keyword: keyword,
+      range: range,
+      count: count,
+      start: start,
+    );
+
+    return response.shops.map((hotpepperStore) {
+      return Store(
+        id: hotpepperStore.id,
+        name: hotpepperStore.name,
+        address: hotpepperStore.address,
+        lat: hotpepperStore.lat ?? 0.0,
+        lng: hotpepperStore.lng ?? 0.0,
+        status: null,
+        memo: hotpepperStore.catch_,
+        createdAt: DateTime.now(),
+      );
+    }).toList();
   }
 
   // ページネーション対応メソッド

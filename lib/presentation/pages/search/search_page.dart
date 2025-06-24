@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../../data/datasources/hotpepper_api_datasource.dart';
+import '../../../data/repositories/store_repository_impl.dart';
+import '../../../data/datasources/store_local_datasource.dart';
+import '../../../core/database/database_helper.dart';
+import '../../../domain/usecases/search_stores_usecase.dart';
+import '../../../domain/entities/store.dart';
+import '../../../services/location_service.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -9,114 +15,171 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  bool _isLocationSearch = true; // true: 現在地検索, false: 住所検索
+  final _searchController = TextEditingController();
+  final _locationService = LocationService();
+  
+  List<Store> _searchResults = [];
   bool _isLoading = false;
-  final TextEditingController _addressController = TextEditingController();
+  String? _errorMessage;
+  bool _useCurrentLocation = true;
+
+  late final SearchStoresUsecase _searchUsecase;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeServices();
+  }
+
+  void _initializeServices() {
+    final apiDatasource = MockHotpepperApiDatasource();
+    final localDatasource = StoreLocalDatasource(DatabaseHelper());
+    final repository = StoreRepositoryImpl(
+      localDatasource,
+      DatabaseHelper(),
+      apiDatasource,
+    );
+    _searchUsecase = SearchStoresUsecase(repository);
+  }
 
   @override
   void dispose() {
-    _addressController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _performSearch() async {
+    if (!_useCurrentLocation && _searchController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('住所を入力してください')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _searchResults.clear();
+    });
+
+    try {
+      SearchStoresParams params;
+
+      if (_useCurrentLocation) {
+        final locationResult = await _locationService.getCurrentPosition();
+        if (!locationResult.isSuccess) {
+          setState(() {
+            _errorMessage = locationResult.error;
+            _isLoading = false;
+          });
+          return;
+        }
+
+        params = SearchStoresParams(
+          lat: locationResult.lat,
+          lng: locationResult.lng,
+          keyword: '中華',
+        );
+      } else {
+        params = SearchStoresParams(
+          address: _searchController.text.trim(),
+          keyword: '中華',
+        );
+      }
+
+      final result = await _searchUsecase.execute(params);
+
+      setState(() {
+        _isLoading = false;
+        if (result.isSuccess) {
+          _searchResults = result.stores ?? [];
+        } else {
+          _errorMessage = result.error;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('検索'),
-        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Column(
         children: [
-          // 検索タイプ切り替え
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SegmentedButton<bool>(
-                    segments: const [
-                      ButtonSegment<bool>(
-                        value: true,
-                        label: Text('現在地で検索'),
-                        icon: Icon(Icons.my_location),
-                      ),
-                      ButtonSegment<bool>(
-                        value: false,
-                        label: Text('住所で検索'),
-                        icon: Icon(Icons.location_on),
-                      ),
-                    ],
-                    selected: {_isLocationSearch},
-                    onSelectionChanged: (Set<bool> newSelection) {
-                      setState(() {
-                        _isLocationSearch = newSelection.first;
-                      });
-                    },
-                  ),
+          _buildSearchForm(),
+          const Divider(),
+          Expanded(child: _buildSearchResults()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchForm() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: RadioListTile<bool>(
+                  title: const Text('現在地で検索'),
+                  value: true,
+                  groupValue: _useCurrentLocation,
+                  onChanged: (value) {
+                    setState(() {
+                      _useCurrentLocation = value ?? true;
+                    });
+                  },
                 ),
-              ],
-            ),
-          ),
-          
-          // 検索フォーム
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                if (!_isLocationSearch)
-                  TextField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(
-                      labelText: '住所を入力',
-                      hintText: '例: 東京都渋谷区',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _performSearch,
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('検索'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 検索結果エリア
-          Expanded(
-            child: DefaultTabController(
-              length: 2,
-              child: Column(
-                children: [
-                  const TabBar(
-                    tabs: [
-                      Tab(text: '検索結果', icon: Icon(Icons.list)),
-                      Tab(text: 'マップ', icon: Icon(Icons.map)),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        // 検索結果リスト
-                        _buildSearchResults(),
-                        // Google Maps
-                        _buildMapView(),
-                      ],
-                    ),
-                  ),
-                ],
               ),
+              Expanded(
+                child: RadioListTile<bool>(
+                  title: const Text('住所で検索'),
+                  value: false,
+                  groupValue: _useCurrentLocation,
+                  onChanged: (value) {
+                    setState(() {
+                      _useCurrentLocation = value ?? true;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (!_useCurrentLocation)
+            TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: '住所を入力',
+                hintText: '例: 東京都新宿区',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.location_on),
+              ),
+            ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _isLoading ? null : _performSearch,
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.search),
+              label: Text(_isLoading ? '検索中...' : '中華料理店を検索'),
             ),
           ),
         ],
@@ -125,56 +188,106 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildSearchResults() {
-    // TODO: 実際の検索結果データを表示
-    return const Center(
-      child: Text(
-        '検索結果',
-        style: TextStyle(fontSize: 18),
-      ),
-    );
-  }
-
-  Widget _buildMapView() {
-    // TODO: Google Maps APIキーの設定が必要
-    return const GoogleMap(
-      initialCameraPosition: CameraPosition(
-        target: LatLng(35.6762, 139.6503), // 東京駅
-        zoom: 11.0,
-      ),
-    );
-  }
-
-  void _performSearch() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // TODO: 実際の検索処理を実装
-      await Future.delayed(const Duration(seconds: 1)); // 模擬的な遅延
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('検索が完了しました'),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('検索エラー: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (_isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('検索中...'),
+          ],
+        ),
+      );
     }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'エラーが発生しました',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(_errorMessage!),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _performSearch,
+              child: const Text('再試行'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_searchResults.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('検索ボタンを押して中華料理店を探しましょう'),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final store = _searchResults[index];
+        return _buildStoreCard(store);
+      },
+    );
+  }
+
+  Widget _buildStoreCard(Store store) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListTile(
+        leading: const CircleAvatar(
+          child: Icon(Icons.restaurant),
+        ),
+        title: Text(
+          store.name,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(store.address),
+            if (store.memo?.isNotEmpty == true) ...[
+              const SizedBox(height: 4),
+              Text(
+                store.memo!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.favorite_border),
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${store.name}を「行きたい」に追加しました')),
+            );
+          },
+        ),
+        onTap: () {
+          // TODO: 店舗詳細画面への遷移
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${store.name}の詳細画面は実装予定です')),
+          );
+        },
+      ),
+    );
   }
 }

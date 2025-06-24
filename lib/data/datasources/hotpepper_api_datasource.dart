@@ -1,123 +1,141 @@
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../core/constants/app_constants.dart';
 import '../models/hotpepper_store_model.dart';
 
-/// ホットペッパーAPI通信のDataSource
-class HotpepperApiDatasource {
-  final http.Client _client;
-  static const String _baseUrl = 'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/';
-  
-  // 注意: 実際のAPIキーは環境変数から取得すべき
-  // TODO: 環境変数またはSecure StorageからAPIキーを取得
-  static const String _apiKey = 'YOUR_API_KEY_HERE';
+abstract class HotpepperApiDatasource {
+  Future<HotpepperSearchResponse> searchStores({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  });
+}
 
-  HotpepperApiDatasource({http.Client? client}) : _client = client ?? http.Client();
+class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
+  final http.Client client;
+  final String? apiKey;
 
-  /// 位置情報で店舗を検索
-  /// 
-  /// [lat] 緯度
-  /// [lng] 経度
-  /// [range] 検索範囲（1:300m, 2:500m, 3:1000m, 4:2000m, 5:3000m）
-  /// [count] 取得件数（デフォルト20件、最大100件）
-  /// [start] 検索開始位置（デフォルト1）
-  Future<HotpepperSearchResponse> searchByLocation({
-    required double lat,
-    required double lng,
-    int range = 3, // デフォルト1km
+  HotpepperApiDatasourceImpl({
+    required this.client,
+    this.apiKey,
+  });
+
+  @override
+  Future<HotpepperSearchResponse> searchStores({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
     int count = 20,
     int start = 1,
   }) async {
-    try {
-      final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-        'key': _apiKey,
-        'lat': lat.toString(),
-        'lng': lng.toString(),
-        'range': range.toString(),
-        'count': count.toString(),
-        'start': start.toString(),
-        'format': 'json',
-        'keyword': '中華', // 町中華を検索するキーワード
-      });
+    if (apiKey == null || apiKey!.isEmpty) {
+      throw Exception('HotPepper API key is not configured');
+    }
 
-      final response = await _client.get(uri);
+    final queryParams = <String, String>{
+      'key': apiKey!,
+      'format': 'json',
+      'count': count.toString(),
+      'start': start.toString(),
+      'range': range.toString(),
+    };
+
+    if (lat != null && lng != null) {
+      queryParams['lat'] = lat.toString();
+      queryParams['lng'] = lng.toString();
+    }
+
+    if (address != null && address.isNotEmpty) {
+      queryParams['address'] = address;
+    }
+
+    if (keyword != null && keyword.isNotEmpty) {
+      queryParams['keyword'] = keyword;
+    } else {
+      queryParams['keyword'] = '中華';
+    }
+
+    final uri = Uri.parse(AppConstants.hotpepperApiUrl).replace(
+      queryParameters: queryParams,
+    );
+
+    try {
+      final response = await client.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'MachiApp/1.0.0',
+        },
+      );
 
       if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body) as Map<String, dynamic>;
-        return HotpepperSearchResponse.fromJson(jsonData);
+        return HotpepperSearchResponse.fromJsonString(response.body);
+      } else if (response.statusCode == 401) {
+        throw Exception('Invalid API key');
+      } else if (response.statusCode == 429) {
+        throw Exception('API rate limit exceeded');
       } else {
-        throw Exception('API request failed with status: ${response.statusCode}');
+        throw Exception('API request failed: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Failed to search stores by location: $e');
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('Network error: $e');
     }
   }
+}
 
-  /// 住所で店舗を検索
-  /// 
-  /// [address] 住所文字列
-  /// [count] 取得件数（デフォルト20件、最大100件）
-  /// [start] 検索開始位置（デフォルト1）
-  Future<HotpepperSearchResponse> searchByAddress({
-    required String address,
+class MockHotpepperApiDatasource implements HotpepperApiDatasource {
+  @override
+  Future<HotpepperSearchResponse> searchStores({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
     int count = 20,
     int start = 1,
   }) async {
-    try {
-      final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-        'key': _apiKey,
-        'address': address,
-        'count': count.toString(),
-        'start': start.toString(),
-        'format': 'json',
-        'keyword': '中華', // 町中華を検索するキーワード
-      });
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      final response = await _client.get(uri);
+    final mockStores = [
+      HotpepperStoreModel(
+        id: 'mock_001',
+        name: '町中華 龍華楼',
+        address: '東京都新宿区西新宿1-1-1',
+        lat: 35.6917,
+        lng: 139.7006,
+        genre: '中華料理',
+        budget: '～1000円',
+        access: 'JR新宿駅徒歩5分',
+        catch_: '昔ながらの町中華！',
+        photo: null,
+      ),
+      HotpepperStoreModel(
+        id: 'mock_002',
+        name: '中華料理 福来',
+        address: '東京都新宿区西新宿2-2-2',
+        lat: 35.6895,
+        lng: 139.6917,
+        genre: '中華料理',
+        budget: '1001～1500円',
+        access: 'JR新宿駅徒歩7分',
+        catch_: '本格的な中華を気軽に！',
+        photo: null,
+      ),
+    ];
 
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body) as Map<String, dynamic>;
-        return HotpepperSearchResponse.fromJson(jsonData);
-      } else {
-        throw Exception('API request failed with status: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Failed to search stores by address: $e');
-    }
-  }
-
-  /// 店舗IDで詳細情報を取得
-  /// 
-  /// [id] 店舗ID
-  Future<HotpepperStoreModel?> getStoreDetail(String id) async {
-    try {
-      final uri = Uri.parse(_baseUrl).replace(queryParameters: {
-        'key': _apiKey,
-        'id': id,
-        'format': 'json',
-      });
-
-      final response = await _client.get(uri);
-
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body) as Map<String, dynamic>;
-        final searchResponse = HotpepperSearchResponse.fromJson(jsonData);
-        
-        return searchResponse.results.isNotEmpty 
-            ? searchResponse.results.first 
-            : null;
-      } else {
-        throw Exception('API request failed with status: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Failed to get store detail: $e');
-    }
-  }
-
-  /// APIキーが設定されているかチェック
-  bool get hasValidApiKey => _apiKey != 'YOUR_API_KEY_HERE' && _apiKey.isNotEmpty;
-
-  /// リソース解放
-  void dispose() {
-    _client.close();
+    return HotpepperSearchResponse(
+      shops: mockStores,
+      resultsAvailable: mockStores.length,
+      resultsReturned: mockStores.length,
+      resultsStart: start,
+    );
   }
 }

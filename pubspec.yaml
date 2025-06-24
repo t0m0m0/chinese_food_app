@@ -38,7 +38,6 @@ dependencies:
   sqflite: ^2.4.1
   path: ^1.8.3
   
-  # 将来実装予定の依存関係（実装時に有効化）
   # HTTP通信・API関連
   http: ^1.1.0
   
