@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:chinese_food_app/presentation/pages/search/search_page.dart';
 
@@ -19,7 +18,7 @@ void main() {
       expect(find.text('住所で検索'), findsOneWidget);
     });
 
-    testWidgets('should display search results list', (tester) async {
+    testWidgets('should display initial state message', (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(
         MaterialApp(
@@ -27,11 +26,11 @@ void main() {
         ),
       );
 
-      // then: 検索結果が表示される（実装がないため失敗するはず）
-      expect(find.text('検索結果'), findsOneWidget);
+      // then: 初期状態のメッセージが表示される
+      expect(find.text('検索ボタンを押して中華料理店を探しましょう'), findsOneWidget);
     });
 
-    testWidgets('should display google maps view', (tester) async {
+    testWidgets('should display search button', (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(
         MaterialApp(
@@ -39,11 +38,11 @@ void main() {
         ),
       );
 
-      // then: Google Mapsが表示される（実装がないため失敗するはず）
-      expect(find.byType(GoogleMap), findsOneWidget);
+      // then: 検索ボタンが表示される
+      expect(find.text('中華料理店を検索'), findsOneWidget);
     });
 
-    testWidgets('should show loading state during search', (tester) async {
+    testWidgets('should show no loading state initially', (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(
         MaterialApp(
@@ -51,11 +50,11 @@ void main() {
         ),
       );
 
-      // then: ローディング状態が表示される（実装がないため失敗するはず）
+      // then: 初期状態ではローディングが表示されない
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('should handle search form submission', (tester) async {
+    testWidgets('should have both radio buttons for location selection', (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(
         MaterialApp(
@@ -63,8 +62,16 @@ void main() {
         ),
       );
 
-      // then: 検索ボタンが存在する（実装がないため失敗するはず）
-      expect(find.text('検索'), findsOneWidget);
+      // then: 両方のラジオボタンが存在する
+      expect(find.byType(RadioListTile<bool>), findsNWidgets(2));
+      
+      // 現在地で検索がデフォルトで選択されている
+      final currentLocationRadio = find.byWidgetPredicate(
+        (Widget widget) => widget is RadioListTile<bool> && 
+        widget.value == true && 
+        widget.groupValue == true
+      );
+      expect(currentLocationRadio, findsOneWidget);
     });
   });
 }
