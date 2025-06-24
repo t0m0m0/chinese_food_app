@@ -33,8 +33,9 @@ void main() {
             matching: find.text('マイメニュー')),
         findsOneWidget);
 
-    // デフォルトでスワイプページが表示されることを確認
-    expect(find.text('スワイプ画面 - 実装予定'), findsOneWidget);
+    // デフォルトでスワイプページが表示されることを確認（実装済み）
+    expect(find.text('← 興味なし'), findsOneWidget);
+    expect(find.text('→ 行きたい'), findsOneWidget);
 
     // 検索タブをタップして画面遷移をテスト
     await tester.tap(find.descendant(
