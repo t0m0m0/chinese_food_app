@@ -41,8 +41,8 @@ dependencies:
   # HTTP通信・API関連
   http: ^1.1.0
   
-  # 地図・位置情報関連
-  google_maps_flutter: ^2.9.0
+  # 地図・位置情報関連（CI修正のため一時的にgoogle_mapsのみコメントアウト）
+  # google_maps_flutter: ^2.9.0
   geolocator: ^13.0.1
   geocoding: ^2.1.1
   
