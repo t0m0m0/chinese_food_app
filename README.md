@@ -1,16 +1,175 @@
-# chinese_food_app
+# 町中華探索アプリ「マチアプ」
 
-A new Flutter project.
+町中華を探索・記録するためのモバイルアプリケーション。マッチングアプリ風のUIで店舗をスワイプし、「行きたい」「興味なし」などのステータスを設定できます。
 
-## Getting Started
+## 📱 アプリ概要
 
-This project is a starting point for a Flutter application.
+### 目的
+- 気になる町中華を探し、行きたい店をストックする
+- 実際に訪れた町中華を記録として残す
+- スワイプや検索など、直感的なUIで町中華探索を楽しめる体験を提供する
 
-A few resources to get you started if this is your first Flutter project:
+### 想定ユーザー
+- 町中華が好きな一般ユーザー
+- 一人で地道に店を開拓するのが好きな人
+- ラーメン、餃子、定食などのB級グルメファン
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🎯 機能一覧（MVP）
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 1. スワイプ画面（マッチングアプリ風UI）
+- 1枚ずつ店舗カードを表示（写真、店名、住所）
+- 右スワイプ → 「行きたい」
+- 左スワイプ → 「興味なし（bad）」
+- スワイプ結果はローカルDB（SQLite）に保存
+
+### 2. 店舗検索
+- ホットペッパーAPIを利用した店舗検索
+- 現在地 or 地名での検索対応
+- 結果をリストとGoogle Map上に表示
+- 店舗をタップすると詳細画面へ遷移
+
+### 3. マイメニュー（一覧管理画面）
+- 「行きたい」「行った」店の一覧を表示
+- タブまたはフィルターで切り替え可能
+- 店舗ごとの訪問記録を追加・編集できる
+
+## 🏗️ アーキテクチャ
+
+### Clean Architecture + Repository Pattern
+```
+lib/
+├── core/           # 共通機能・データベース
+├── domain/         # エンティティ・リポジトリインターface
+├── data/           # データソース・リポジトリ実装
+└── presentation/   # UI・ページ
+```
+
+### データモデル
+- **Store**: 店舗情報（ID、店名、住所、緯度経度、ステータス）
+- **VisitRecord**: 訪問記録（店舗ID、訪問日時、メニュー、感想）
+- **Photo**: 写真（店舗ID、訪問記録ID、ファイルパス）
+
+## 🚀 開発環境
+
+### 前提条件
+- Flutter SDK 3.24.0+
+- Dart SDK 3.4.0+
+
+### セットアップ
+```bash
+# 依存関係のインストール
+flutter pub get
+
+# アプリケーション実行
+flutter run
+
+# テスト実行
+flutter test
+
+# 静的解析
+flutter analyze
+
+# コードフォーマット
+dart format .
+```
+
+### WSL2環境での注意点
+WSL2環境では、Linux版Flutterを使用してください：
+```bash
+# Linux版Flutter（WSL2推奨）
+export PATH="$HOME/flutter/bin:$PATH"
+```
+
+## 🧪 テスト
+
+### TDD（テスト駆動開発）
+このプロジェクトはTDDアプローチを採用しています：
+- **Red**: 失敗するテストを作成
+- **Green**: テストが通る最小限の実装
+- **Refactor**: コード品質向上
+
+### テスト構成
+```
+test/
+├── core/           # Database・Entity・Repository層テスト
+├── widget/         # ウィジェットテスト
+└── integration/    # 統合テスト
+```
+
+### テスト実行
+```bash
+# 全テスト実行
+flutter test
+
+# カバレッジ付きテスト実行
+flutter test --coverage
+
+# 特定テスト実行
+flutter test test/core/entities/
+```
+
+## 🔧 使用技術
+
+### フレームワーク・言語
+- **Flutter** 3.24.0 - クロスプラットフォームUI
+- **Dart** 3.4.0 - プログラミング言語
+
+### データベース・ストレージ
+- **SQLite** (sqflite) - ローカルデータベース
+- **ローカルストレージ** - 写真・設定保存
+
+### 外部API（予定）
+- **ホットペッパーグルメAPI** - 店舗情報取得
+- **Google Maps SDK** - 地図表示・位置情報
+
+### 開発・テストツール
+- **Mockito** - モッキングフレームワーク
+- **build_runner** - コード生成
+- **flutter_lints** - 静的解析
+
+## 📱 対応プラットフォーム
+
+- ✅ **Android**
+- ✅ **iOS** 
+- ✅ **Web**
+- ✅ **Windows/macOS/Linux** (デスクトップ)
+
+## 🎨 デザイン
+
+- **Material Design 3** 準拠
+- **レスポンシブデザイン** 対応
+- **オレンジ系カラーテーマ** （町中華のイメージ）
+
+## 📚 開発ドキュメント
+
+詳細な開発ガイドラインは [CLAUDE.md](./CLAUDE.md) を参照してください。
+
+## 🚧 開発状況
+
+### ✅ 完了済み
+- [x] プロジェクト初期設定
+- [x] Clean Architecture構造構築
+- [x] データベーススキーマ設計・実装
+- [x] Entity・Repository層実装
+- [x] TDD基盤とテスト実装（58テスト）
+- [x] CI/CDパイプライン構築
+
+### 🔄 進行中
+- [ ] スワイプUI実装
+- [ ] 店舗検索機能実装
+- [ ] マイメニュー画面実装
+
+### 📋 予定
+- [ ] ホットペッパーAPI連携
+- [ ] Google Maps統合
+- [ ] 写真機能実装
+- [ ] 訪問記録機能
+- [ ] 状態管理実装
+
+## 📄 ライセンス
+
+このプロジェクトはプライベート開発用です（`publish_to: 'none'`）。
+
+---
+
+🤖 **Generated with [Claude Code](https://claude.ai/code)**
