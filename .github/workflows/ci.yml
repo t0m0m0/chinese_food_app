@@ -100,7 +100,7 @@ jobs:
       run: flutter build apk --debug
       
     - name: ビルド成果物をアップロード
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: android-apk-debug
         path: build/app/outputs/flutter-apk/app-debug.apk
@@ -130,7 +130,7 @@ jobs:
       run: flutter build web
       
     - name: ビルド成果物をアップロード
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: web-build
         path: build/web/
