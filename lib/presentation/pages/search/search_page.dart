@@ -161,7 +161,7 @@ class _SearchPageState extends State<SearchPage> {
                   groupValue: _useCurrentLocation,
                   onChanged: (value) {
                     setState(() {
-                      _useCurrentLocation = value ?? true;
+                      _useCurrentLocation = !(value ?? false);
                     });
                   },
                 ),
