@@ -42,8 +42,9 @@ void main() {
         of: find.byType(BottomNavigationBar), matching: find.text('検索')));
     await tester.pump();
 
-    // 検索ページが表示されることを確認
-    expect(find.text('検索画面 - 実装予定'), findsOneWidget);
+    // 検索ページが表示されることを確認（実装済みUI）
+    expect(find.text('現在地で検索'), findsOneWidget);
+    expect(find.text('中華料理店を検索'), findsOneWidget);
 
     // マイメニュータブをタップして画面遷移をテスト
     await tester.tap(find.descendant(

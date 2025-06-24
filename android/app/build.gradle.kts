@@ -5,29 +5,32 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Flutter Gradle Plugin configuration access
+val flutterVersionCode = project.properties["flutter.versionCode"] ?: "1"
+val flutterVersionName = project.properties["flutter.versionName"] ?: "1.0.0"
+val flutterCompileSdkVersion = project.properties["flutter.compileSdkVersion"]?.toString()?.toInt() ?: 34
+val flutterMinSdkVersion = project.properties["flutter.minSdkVersion"]?.toString()?.toInt() ?: 21
+val flutterTargetSdkVersion = project.properties["flutter.targetSdkVersion"]?.toString()?.toInt() ?: 34
+
 android {
     namespace = "com.example.chinese_food_app"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
-
+    compileSdk = flutterCompileSdkVersion
+    
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.chinese_food_app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = flutterMinSdkVersion
+        targetSdk = flutterTargetSdkVersion
+        versionCode = flutterVersionCode.toString().toInt()
+        versionName = flutterVersionName.toString()
     }
 
     buildTypes {

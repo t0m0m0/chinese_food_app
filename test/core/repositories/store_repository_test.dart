@@ -5,11 +5,14 @@ import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/data/repositories/store_repository_impl.dart';
 import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
+import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart'
+    show HotpepperApiDatasource;
 import 'package:chinese_food_app/data/models/store_model.dart';
+import 'package:chinese_food_app/data/models/hotpepper_store_model.dart';
 import 'package:chinese_food_app/core/database/database_helper.dart';
 
 // Mockクラスを生成するためのアノテーション
-@GenerateMocks([StoreLocalDatasource, DatabaseHelper])
+@GenerateMocks([StoreLocalDatasource, DatabaseHelper, HotpepperApiDatasource])
 import 'store_repository_test.mocks.dart';
 
 void main() {
@@ -17,11 +20,17 @@ void main() {
     late StoreRepository repository;
     late MockStoreLocalDatasource mockLocalDataSource;
     late MockDatabaseHelper mockDatabaseHelper;
+    late MockHotpepperApiDatasource mockApiDataSource;
 
     setUp(() {
       mockLocalDataSource = MockStoreLocalDatasource();
       mockDatabaseHelper = MockDatabaseHelper();
-      repository = StoreRepositoryImpl(mockLocalDataSource, mockDatabaseHelper);
+      mockApiDataSource = MockHotpepperApiDatasource();
+      repository = StoreRepositoryImpl(
+        mockLocalDataSource,
+        mockDatabaseHelper,
+        mockApiDataSource,
+      );
     });
 
     group('getAllStores', () {
@@ -301,6 +310,79 @@ void main() {
         // Assert
         expect(result, isEmpty);
         verify(mockLocalDataSource.searchStores('存在しない')).called(1);
+      });
+    });
+
+    group('searchStoresFromApi', () {
+      test('should return stores from API with valid coordinates', () async {
+        // Arrange
+        final mockApiResponse = HotpepperSearchResponse(
+          shops: [
+            HotpepperStoreModel(
+              id: 'api-store-1',
+              name: 'API中華料理店',
+              address: '東京都渋谷区API1-1-1',
+              lat: 35.6762,
+              lng: 139.6503,
+              catch_: 'API経由の店舗',
+            ),
+            HotpepperStoreModel(
+              id: 'api-store-2',
+              name: 'API中華料理店2',
+              address: '東京都新宿区API2-2-2',
+              lat: 0.0, // 無効な座標 - フィルタリングされるべき
+              lng: 0.0,
+              catch_: 'フィルタされる店舗',
+            ),
+          ],
+          resultsAvailable: 2,
+          resultsReturned: 2,
+          resultsStart: 1,
+        );
+
+        when(mockApiDataSource.searchStores(
+          lat: 35.6762,
+          lng: 139.6503,
+          keyword: '中華',
+        )).thenAnswer((_) async => mockApiResponse);
+
+        // Act
+        final result = await repository.searchStoresFromApi(
+          lat: 35.6762,
+          lng: 139.6503,
+          keyword: '中華',
+        );
+
+        // Assert
+        expect(result.length, 1); // 有効な座標の店舗のみ
+        expect(result.first.id, 'api-store-1');
+        expect(result.first.name, 'API中華料理店');
+        expect(result.first.lat, 35.6762);
+        expect(result.first.lng, 139.6503);
+        verify(mockApiDataSource.searchStores(
+          lat: 35.6762,
+          lng: 139.6503,
+          keyword: '中華',
+        )).called(1);
+      });
+
+      test('should propagate exception from API datasource', () async {
+        // Arrange
+        when(mockApiDataSource.searchStores(
+          lat: anyNamed('lat'),
+          lng: anyNamed('lng'),
+          keyword: anyNamed('keyword'),
+        )).thenThrow(Exception('API error'));
+
+        // Act & Assert
+        expect(
+          () => repository.searchStoresFromApi(
+            lat: 35.6762,
+            lng: 139.6503,
+            keyword: '中華',
+          ),
+          throwsA(isA<Exception>()),
+        );
       });
     });
   });

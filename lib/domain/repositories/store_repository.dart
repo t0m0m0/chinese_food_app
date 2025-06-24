@@ -8,4 +8,14 @@ abstract class StoreRepository {
   Future<void> updateStore(Store store);
   Future<void> deleteStore(String id);
   Future<List<Store>> searchStores(String query);
+
+  Future<List<Store>> searchStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  });
 }
