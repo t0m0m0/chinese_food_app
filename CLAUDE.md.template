@@ -1,0 +1,82 @@
+# CLAUDE.md Template
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Communication Language
+- **User Communication**: Specify preferred language (English/Japanese/etc.)
+- **Internal Thinking**: Use English for internal reasoning and analysis
+- This language setting should be maintained throughout all interactions with this codebase
+
+## Project Overview
+# Flutter Mobile Application
+
+## Architecture
+- **Clean Architecture** with Repository Pattern
+- **Test-Driven Development** (TDD)
+- **SQLite** for local data storage
+- **Material Design 3** UI
+
+## Development Commands
+
+### Setup & Dependencies
+```bash
+flutter pub get
+```
+
+### Running
+```bash
+flutter run                    # Run on connected device/emulator
+flutter run -d chrome         # Run on web
+flutter run -d windows/macos/linux  # Run on desktop
+```
+
+### Code Quality
+```bash
+flutter analyze               # Static analysis
+flutter test                  # Run all tests
+dart format .                 # Code formatting
+```
+
+### Building
+```bash
+flutter build apk           # Android APK
+flutter build appbundle     # Android App Bundle  
+flutter build ios           # iOS
+flutter build web           # Web
+flutter build windows/macos/linux  # Desktop
+```
+
+## Development Workflow
+
+### Basic Flow
+1. **Branch Creation**: `git checkout -b feature/feature-name`
+2. **Development**: Follow TDD methodology (Red→Green→Refactor)
+3. **Commit**: `git commit -m "description"`
+4. **Push**: `git push origin branch-name`
+5. **Pull Request**: Create PR for code review
+6. **Review & Merge**: Code review and merge to main branch
+
+### Quality Standards
+- **TDD Required**: Red → Green → Refactor cycle
+- **Test Coverage**: 80%+ coverage for new features
+- **Code Formatting**: Run `dart format .` before commit
+- **Static Analysis**: `flutter analyze` must pass
+- **Architecture**: Follow Clean Architecture principles
+
+### Branch Naming
+| Prefix | Purpose | Example |
+|--------|---------|---------|
+| `feature/` | New features | `feature/user-authentication` |
+| `fix/` | Bug fixes | `fix/login-validation` |
+| `docs/` | Documentation | `docs/api-documentation` |
+| `refactor/` | Code refactoring | `refactor/database-layer` |
+| `test/` | Test additions | `test/unit-tests` |
+
+## Environment
+- Flutter SDK 3.24.0+
+- Dart SDK 3.4.0+
+- Platform support: Android, iOS, Web, Desktop
+
+---
+
+**Note**: Copy this template to `CLAUDE.md` and customize with project-specific information. Add `CLAUDE.md` to `.gitignore` if it contains sensitive information.

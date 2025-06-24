@@ -54,3 +54,6 @@ coverage/
 *.apk
 *.ipa
 *.tar.gz
+
+# Project-specific documentation (contains sensitive information)
+CLAUDE.md
