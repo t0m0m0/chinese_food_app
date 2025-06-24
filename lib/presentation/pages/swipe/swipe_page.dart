@@ -21,6 +21,7 @@ class _SwipePageState extends State<SwipePage> {
 
   void _loadSampleStores() {
     // サンプルデータ（将来的にはrepositoryから取得）
+    final now = DateTime.now();
     stores = [
       Store(
         id: '1',
@@ -28,7 +29,7 @@ class _SwipePageState extends State<SwipePage> {
         address: '東京都渋谷区1-1-1',
         lat: 35.6621,
         lng: 139.7038,
-        createdAt: DateTime.now(),
+        createdAt: now,
       ),
       Store(
         id: '2',
@@ -36,7 +37,7 @@ class _SwipePageState extends State<SwipePage> {
         address: '東京都新宿区2-2-2',
         lat: 35.6938,
         lng: 139.7036,
-        createdAt: DateTime.now(),
+        createdAt: now,
       ),
       Store(
         id: '3',
@@ -44,7 +45,7 @@ class _SwipePageState extends State<SwipePage> {
         address: '東京都世田谷区3-3-3',
         lat: 35.6462,
         lng: 139.6503,
-        createdAt: DateTime.now(),
+        createdAt: now,
       ),
     ];
   }
@@ -93,6 +94,13 @@ class _SwipePageState extends State<SwipePage> {
     }
   }
 
+  /// 店舗情報を表示するカードウィジェットを構築
+  ///
+  /// Material Design 3準拠のデザインで、店舗名、住所、
+  /// アイコンを美しいカードレイアウトで表示します。
+  ///
+  /// [store] 表示する店舗データ
+  /// 戻り値: Material Design 3準拠のCardウィジェット
   Widget _buildStoreCard(Store store) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
