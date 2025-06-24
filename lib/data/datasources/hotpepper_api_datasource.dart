@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import '../../core/constants/app_constants.dart';
+import '../../core/config/app_config.dart';
 import '../models/hotpepper_store_model.dart';
 
 abstract class HotpepperApiDatasource {
@@ -16,11 +17,9 @@ abstract class HotpepperApiDatasource {
 
 class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
   final http.Client client;
-  final String? apiKey;
 
   HotpepperApiDatasourceImpl({
     required this.client,
-    this.apiKey,
   });
 
   @override
@@ -33,8 +32,9 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
     int count = 20,
     int start = 1,
   }) async {
-    if (apiKey == null || apiKey!.isEmpty) {
-      throw Exception('HotPepper API key is not configured');
+    final apiKey = AppConfig.hotpepperApiKey;
+    if (!AppConfig.hasHotpepperApiKey) {
+      throw Exception('HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.');
     }
 
     final queryParams = <String, String>{

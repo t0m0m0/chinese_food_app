@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../../../data/datasources/hotpepper_api_datasource.dart';
 import '../../../data/repositories/store_repository_impl.dart';
 import '../../../data/datasources/store_local_datasource.dart';
 import '../../../core/database/database_helper.dart';
+import '../../../core/config/app_config.dart';
 import '../../../domain/usecases/search_stores_usecase.dart';
 import '../../../domain/entities/store.dart';
 import '../../../services/location_service.dart';
@@ -32,7 +34,17 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _initializeServices() {
-    final apiDatasource = MockHotpepperApiDatasource();
+    // 本番環境ではAPIキーが設定されている場合のみ実API使用
+    final HotpepperApiDatasource apiDatasource;
+    if (AppConfig.hasHotpepperApiKey && AppConfig.isProduction) {
+      apiDatasource = HotpepperApiDatasourceImpl(
+        client: http.Client(),
+      );
+    } else {
+      // 開発環境またはAPIキー未設定時はモック使用
+      apiDatasource = MockHotpepperApiDatasource();
+    }
+    
     final localDatasource = StoreLocalDatasource(DatabaseHelper());
     final repository = StoreRepositoryImpl(
       localDatasource,
