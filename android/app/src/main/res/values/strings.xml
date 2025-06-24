@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Google Maps API Key -->
+    <!-- CI環境用のダミーキー。本番環境では実際のAPIキーで上書きする -->
+    <string name="google_maps_api_key">AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT</string>
+</resources>

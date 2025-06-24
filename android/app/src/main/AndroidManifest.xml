@@ -32,9 +32,10 @@
             </intent-filter>
         </activity>
         <!-- Google Maps APIキー設定 -->
+        <!-- CI環境ではダミーキーを使用、本番では実際のAPIキーを設定 -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${GOOGLE_MAPS_API_KEY}" />
+            android:value="@string/google_maps_api_key" />
         
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

@@ -31,6 +31,10 @@ android {
         targetSdk = flutterTargetSdkVersion
         versionCode = flutterVersionCode.toString().toInt()
         versionName = flutterVersionName.toString()
+        
+        // Google Maps APIキーを環境変数から取得、なければダミーキーを使用
+        val googleMapsApiKey = System.getenv("GOOGLE_MAPS_API_KEY") ?: "AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT"
+        resValue("string", "google_maps_api_key", googleMapsApiKey)
     }
 
     buildTypes {
