@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 位置情報取得のための権限 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- インターネット接続のための権限（API通信用） -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
     <application
         android:label="chinese_food_app"
         android:name="${applicationName}"
