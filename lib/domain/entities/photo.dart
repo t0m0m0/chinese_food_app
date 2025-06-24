@@ -39,7 +39,7 @@ class Photo {
     if (filePath.isEmpty) {
       throw ArgumentError('File path cannot be empty');
     }
-    
+
     // ファイルパスの基本的なバリデーション
     if (!filePath.startsWith('/') && !filePath.contains(':')) {
       throw ArgumentError('File path must be an absolute path: $filePath');
