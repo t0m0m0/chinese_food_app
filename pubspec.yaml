@@ -40,12 +40,12 @@ dependencies:
   
   # 将来実装予定の依存関係（実装時に有効化）
   # HTTP通信・API関連
-  # http: ^1.1.0
+  http: ^1.1.0
   
   # 地図・位置情報関連
-  # google_maps_flutter: ^2.9.0
-  # geolocator: ^13.0.1
-  # geocoding: ^2.1.1
+  google_maps_flutter: ^2.9.0
+  geolocator: ^13.0.1
+  geocoding: ^2.1.1
   
   # UI・UX関連
   flutter_card_swiper: ^7.0.2
