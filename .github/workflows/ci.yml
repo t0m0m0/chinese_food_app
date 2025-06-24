@@ -58,6 +58,9 @@ jobs:
     - name: 依存関係をインストール
       run: flutter pub get
       
+    - name: コード生成（テスト用）
+      run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
+      
     - name: 単体テストを実行
       run: flutter test --coverage
       
