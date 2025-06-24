@@ -47,8 +47,8 @@ app.*.map.json
 # Coverage reports
 coverage/
 
-# Mock generated files
-**/*.mocks.dart
+# Mock generated files (コミットして一貫性保持)
+# **/*.mocks.dart
 
 # CI/CD artifacts
 *.apk
