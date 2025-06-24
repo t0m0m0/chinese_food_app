@@ -2,6 +2,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class LocationService {
+  static const LocationSettings _locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 100,
+  );
+
   Future<LocationServiceResult> getCurrentPosition() async {
     try {
       final permission = await _checkLocationPermission();
@@ -12,7 +17,7 @@ class LocationService {
       }
 
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: _locationSettings,
       );
 
       return LocationServiceResult.success(
