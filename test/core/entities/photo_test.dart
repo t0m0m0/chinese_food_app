@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/entities/photo.dart';
+import 'package:chinese_food_app/domain/entities/photo.dart';
 
 void main() {
   group('Photo Entity Tests', () {

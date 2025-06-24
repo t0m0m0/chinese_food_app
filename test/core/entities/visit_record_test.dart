@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/entities/visit_record.dart';
+import 'package:chinese_food_app/domain/entities/visit_record.dart';
 
 void main() {
   group('VisitRecord Entity Tests', () {

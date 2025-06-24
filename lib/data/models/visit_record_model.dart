@@ -1,12 +1,12 @@
 import '../../domain/entities/visit_record.dart';
 
 class VisitRecordModel extends VisitRecord {
-  const VisitRecordModel({
+  VisitRecordModel({
     required super.id,
     required super.storeId,
     required super.visitedAt,
     required super.menu,
-    required super.memo,
+    super.memo,
     required super.createdAt,
   });
 

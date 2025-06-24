@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/store.dart';
 
 void main() {
   group('Store Entity Tests', () {

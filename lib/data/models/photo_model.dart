@@ -1,7 +1,7 @@
 import '../../domain/entities/photo.dart';
 
 class PhotoModel extends Photo {
-  const PhotoModel({
+  PhotoModel({
     required super.id,
     required super.storeId,
     super.visitId,

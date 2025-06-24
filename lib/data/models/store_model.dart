@@ -1,7 +1,7 @@
 import '../../domain/entities/store.dart';
 
 class StoreModel extends Store {
-  const StoreModel({
+  StoreModel({
     required super.id,
     required super.name,
     required super.address,
