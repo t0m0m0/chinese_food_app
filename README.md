@@ -91,7 +91,7 @@ flutter test test/core/
 
 ## 📚 Development
 
-For detailed development guidelines, see [CLAUDE.md](./CLAUDE.md).
+For detailed development guidelines, see [CLAUDE.md.template](./CLAUDE.md.template) (customize as needed).
 
 ## 📄 License
 
