@@ -8,7 +8,7 @@ abstract class StoreRepository {
   Future<void> updateStore(Store store);
   Future<void> deleteStore(String id);
   Future<List<Store>> searchStores(String query);
-  
+
   Future<List<Store>> searchStoresFromApi({
     double? lat,
     double? lng,

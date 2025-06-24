@@ -5,7 +5,8 @@ import 'package:chinese_food_app/presentation/pages/search/search_page.dart';
 
 void main() {
   group('SearchPage', () {
-    testWidgets('should display search form with location toggle', (tester) async {
+    testWidgets('should display search form with location toggle',
+        (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(
         MaterialApp(
@@ -54,7 +55,8 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('should have both radio buttons for location selection', (tester) async {
+    testWidgets('should have both radio buttons for location selection',
+        (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(
         MaterialApp(
@@ -64,13 +66,12 @@ void main() {
 
       // then: 両方のラジオボタンが存在する
       expect(find.byType(RadioListTile<bool>), findsNWidgets(2));
-      
+
       // 現在地で検索がデフォルトで選択されている
-      final currentLocationRadio = find.byWidgetPredicate(
-        (Widget widget) => widget is RadioListTile<bool> && 
-        widget.value == true && 
-        widget.groupValue == true
-      );
+      final currentLocationRadio = find.byWidgetPredicate((Widget widget) =>
+          widget is RadioListTile<bool> &&
+          widget.value == true &&
+          widget.groupValue == true);
       expect(currentLocationRadio, findsOneWidget);
     });
   });

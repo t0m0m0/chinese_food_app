@@ -34,7 +34,8 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
   }) async {
     final apiKey = AppConfig.hotpepperApiKey;
     if (!AppConfig.hasHotpepperApiKey) {
-      throw Exception('HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.');
+      throw Exception(
+          'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.');
     }
 
     final queryParams = <String, String>{

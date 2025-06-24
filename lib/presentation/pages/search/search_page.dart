@@ -19,7 +19,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final _searchController = TextEditingController();
   final _locationService = LocationService();
-  
+
   List<Store> _searchResults = [];
   bool _isLoading = false;
   String? _errorMessage;
@@ -45,7 +45,7 @@ class _SearchPageState extends State<SearchPage> {
       // 開発環境またはAPIキー未設定時はモック使用
       apiDatasource = MockHotpepperApiDatasource();
     }
-    
+
     final localDatasource = StoreLocalDatasource(DatabaseHelper());
     final repository = StoreRepositoryImpl(
       localDatasource,

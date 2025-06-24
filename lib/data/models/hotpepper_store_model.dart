@@ -102,10 +102,11 @@ class HotpepperSearchResponse {
   factory HotpepperSearchResponse.fromJson(Map<String, dynamic> json) {
     final results = json['results'] as Map<String, dynamic>;
     final shopList = results['shop'] as List<dynamic>? ?? [];
-    
+
     return HotpepperSearchResponse(
       shops: shopList
-          .map((shop) => HotpepperStoreModel.fromJson(shop as Map<String, dynamic>))
+          .map((shop) =>
+              HotpepperStoreModel.fromJson(shop as Map<String, dynamic>))
           .toList(),
       resultsAvailable: results['results_available'] as int? ?? 0,
       resultsReturned: results['results_returned'] as int? ?? 0,
@@ -119,7 +120,8 @@ class HotpepperSearchResponse {
   }
 
   bool get hasResults => shops.isNotEmpty;
-  bool get hasMoreResults => resultsAvailable > resultsStart + resultsReturned - 1;
+  bool get hasMoreResults =>
+      resultsAvailable > resultsStart + resultsReturned - 1;
 
   @override
   String toString() {

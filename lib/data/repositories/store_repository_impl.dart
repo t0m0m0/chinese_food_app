@@ -82,8 +82,8 @@ class StoreRepositoryImpl implements StoreRepository {
     // 有効な座標データを持つ店舗のみをフィルタリング
     // null値や(0.0, 0.0)座標（大西洋上）の店舗を除外
     return response.shops
-        .where((hotpepperStore) => 
-            hotpepperStore.lat != null && 
+        .where((hotpepperStore) =>
+            hotpepperStore.lat != null &&
             hotpepperStore.lng != null &&
             hotpepperStore.lat != 0.0 &&
             hotpepperStore.lng != 0.0)
