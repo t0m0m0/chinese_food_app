@@ -79,13 +79,21 @@ class StoreRepositoryImpl implements StoreRepository {
       start: start,
     );
 
-    return response.shops.map((hotpepperStore) {
+    // 有効な座標データを持つ店舗のみをフィルタリング
+    // null値や(0.0, 0.0)座標（大西洋上）の店舗を除外
+    return response.shops
+        .where((hotpepperStore) => 
+            hotpepperStore.lat != null && 
+            hotpepperStore.lng != null &&
+            hotpepperStore.lat != 0.0 &&
+            hotpepperStore.lng != 0.0)
+        .map((hotpepperStore) {
       return Store(
         id: hotpepperStore.id,
         name: hotpepperStore.name,
         address: hotpepperStore.address,
-        lat: hotpepperStore.lat ?? 0.0,
-        lng: hotpepperStore.lng ?? 0.0,
+        lat: hotpepperStore.lat!,
+        lng: hotpepperStore.lng!,
         status: null,
         memo: hotpepperStore.catch_,
         createdAt: DateTime.now(),

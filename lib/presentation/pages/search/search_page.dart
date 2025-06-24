@@ -24,6 +24,7 @@ class _SearchPageState extends State<SearchPage> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _useCurrentLocation = true;
+  bool _hasSearched = false; // 検索が実行されたかどうかのフラグ
 
   late final SearchStoresUsecase _searchUsecase;
 
@@ -72,6 +73,7 @@ class _SearchPageState extends State<SearchPage> {
       _isLoading = true;
       _errorMessage = null;
       _searchResults.clear();
+      _hasSearched = true;
     });
 
     try {
@@ -105,6 +107,10 @@ class _SearchPageState extends State<SearchPage> {
         _isLoading = false;
         if (result.isSuccess) {
           _searchResults = result.stores ?? [];
+          // 座標フィルタリングで結果が空になった場合の追加情報
+          if (_searchResults.isEmpty) {
+            _errorMessage = '検索範囲内に有効な座標を持つ店舗が見つかりませんでした。';
+          }
         } else {
           _errorMessage = result.error;
         }
@@ -237,13 +243,24 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     if (_searchResults.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.search, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text('検索ボタンを押して中華料理店を探しましょう'),
+            const SizedBox(height: 16),
+            Text(
+              _hasSearched ? '検索結果が見つかりません' : '検索ボタンを押して中華料理店を探しましょう',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            if (_hasSearched) ...[
+              const SizedBox(height: 8),
+              const Text(
+                '別の住所で検索するか、\n検索範囲を広げてみてください',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
           ],
         ),
       );
