@@ -11,10 +11,10 @@ class LocationService {
     try {
       // 一時的にダミーデータを返す（CI環境での互換性問題のため）
       return LocationServiceResult.success(
-        lat: 35.6762,  // 東京駅
+        lat: 35.6762, // 東京駅
         lng: 139.6503,
       );
-      
+
       // final permission = await _checkLocationPermission();
       // if (!permission.isGranted) {
       //   return LocationServiceResult.failure(
@@ -206,4 +206,3 @@ class GeocodeResult {
     }
   }
 }
-
