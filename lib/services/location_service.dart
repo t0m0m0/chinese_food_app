@@ -207,23 +207,3 @@ class GeocodeResult {
   }
 }
 
-class _PermissionResult {
-  final String? errorMessage;
-  final bool isGranted;
-
-  const _PermissionResult._({
-    this.errorMessage,
-    required this.isGranted,
-  });
-
-  factory _PermissionResult.success() {
-    return const _PermissionResult._(isGranted: true);
-  }
-
-  factory _PermissionResult.failure(String errorMessage) {
-    return _PermissionResult._(
-      errorMessage: errorMessage,
-      isGranted: false,
-    );
-  }
-}
