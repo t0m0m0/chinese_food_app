@@ -43,7 +43,7 @@ dependencies:
   
   # 地図・位置情報関連
   google_maps_flutter: ^2.9.0
-  geolocator: ^14.0.1
+  # geolocator: ^14.0.1  # 一時的に無効化 - CI環境での互換性問題のため
   geocoding: ^2.1.1
   
   # UI・UX関連

@@ -63,3 +63,13 @@ CLAUDE.md
 .env.local
 .env.production
 .env.staging
+
+# Downloaded dependencies (external libraries and tools)
+# Java Development Kit
+jdk-*/
+openjdk-*.tar.gz
+# Android SDK Command Line Tools
+commandlinetools-*.zip
+# Archive files
+*.tar.gz
+*.zip
