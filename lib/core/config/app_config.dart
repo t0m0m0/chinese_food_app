@@ -7,7 +7,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AppConfig {
   // テスト用のAPIキー保存
   static String? _testHotpepperApiKey;
-  static String? _testGoogleMapsApiKey;
 
   // セキュアストレージのインスタンス
   static const _storage = FlutterSecureStorage(
@@ -121,6 +120,5 @@ class AppConfig {
   /// テスト用APIキーをクリア
   static void clearTestApiKey() {
     _testHotpepperApiKey = null;
-    _testGoogleMapsApiKey = null;
   }
 }

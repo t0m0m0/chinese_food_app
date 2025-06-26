@@ -4,7 +4,6 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
-import 'package:chinese_food_app/data/models/hotpepper_store_model.dart';
 import 'package:chinese_food_app/core/config/app_config.dart';
 
 import 'hotpepper_api_datasource_test.mocks.dart';
