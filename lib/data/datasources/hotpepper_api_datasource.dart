@@ -3,7 +3,26 @@ import '../../core/constants/app_constants.dart';
 import '../../core/config/app_config.dart';
 import '../models/hotpepper_store_model.dart';
 
+/// HotPepper API データソース抽象クラス
+///
+/// HotPepper API制限:
+/// - 1日3,000リクエスト
+/// - 1秒間5リクエスト
+/// - HTTPSでのアクセス必須
+/// - APIキー必須
 abstract class HotpepperApiDatasource {
+  /// 店舗検索を実行
+  ///
+  /// [lat] 緯度 (-90.0 〜 90.0)
+  /// [lng] 経度 (-180.0 〜 180.0)
+  /// [address] 住所での検索
+  /// [keyword] キーワード検索 (デフォルト: "中華")
+  /// [range] 検索範囲 (1:300m, 2:500m, 3:1000m, 4:2000m, 5:3000m)
+  /// [count] 取得件数 (1-100)
+  /// [start] 検索開始位置 (1以上)
+  ///
+  /// 戻り値: [HotpepperSearchResponse] 検索結果
+  /// 例外: APIキーエラー、レート制限エラー、パラメータエラー等
   Future<HotpepperSearchResponse> searchStores({
     double? lat,
     double? lng,
@@ -32,8 +51,33 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
     int count = 20,
     int start = 1,
   }) async {
-    final apiKey = AppConfig.hotpepperApiKey;
-    if (!AppConfig.hasHotpepperApiKey) {
+    // パラメータ検証
+    if (lat != null && (lat < -90.0 || lat > 90.0)) {
+      throw ArgumentError('緯度は-90.0から90.0の範囲で指定してください');
+    }
+    if (lng != null && (lng < -180.0 || lng > 180.0)) {
+      throw ArgumentError('経度は-180.0から180.0の範囲で指定してください');
+    }
+    if (range < 1 || range > 5) {
+      throw ArgumentError('検索範囲は1から5の間で指定してください');
+    }
+    if (count < 1 || count > 100) {
+      throw ArgumentError('取得件数は1から100の間で指定してください');
+    }
+    if (start < 1) {
+      throw ArgumentError('検索開始位置は1以上で指定してください');
+    }
+
+    // APIキー取得（本番環境では非同期版を使用）
+    final apiKey = AppConfig.isProduction
+        ? await AppConfig.hotpepperApiKey
+        : AppConfig.hotpepperApiKeySync;
+
+    final hasApiKey = AppConfig.isProduction
+        ? await AppConfig.hasHotpepperApiKeyAsync
+        : AppConfig.hasHotpepperApiKey;
+
+    if (!hasApiKey) {
       throw Exception(
           'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.');
     }
@@ -77,11 +121,20 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
       if (response.statusCode == 200) {
         return HotpepperSearchResponse.fromJsonString(response.body);
       } else if (response.statusCode == 401) {
-        throw Exception('Invalid API key');
+        throw Exception(
+            'Invalid API key - Please check your HotPepper API key configuration');
       } else if (response.statusCode == 429) {
-        throw Exception('API rate limit exceeded');
+        throw Exception(
+            'API rate limit exceeded - HotPepper API allows max 5 requests/second and 3000 requests/day');
+      } else if (response.statusCode == 400) {
+        throw Exception(
+            'Invalid request parameters - Please check search criteria');
+      } else if (response.statusCode >= 500) {
+        throw Exception(
+            'HotPepper API server error (${response.statusCode}) - Please try again later');
       } else {
-        throw Exception('API request failed: ${response.statusCode}');
+        throw Exception(
+            'API request failed with status ${response.statusCode}');
       }
     } catch (e) {
       if (e is Exception) {

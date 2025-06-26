@@ -1,63 +1,20 @@
-import '../../core/database/database_helper.dart';
-import '../../domain/entities/photo.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../datasources/hotpepper_api_datasource.dart';
 import '../datasources/store_local_datasource.dart';
-import '../models/photo_model.dart';
-import '../models/store_model.dart';
 
+/// Store Repository の実装クラス
+///
+/// ローカルデータベースとAPI通信を管理し、
+/// Clean Architecture のRepository パターンを実装する
 class StoreRepositoryImpl implements StoreRepository {
-  final StoreLocalDatasource _localDatasource;
-  final DatabaseHelper _databaseHelper;
-  final HotpepperApiDatasource _apiDatasource;
+  final HotpepperApiDatasource apiDatasource;
+  final StoreLocalDatasource localDatasource;
 
-  StoreRepositoryImpl(
-    this._localDatasource,
-    this._databaseHelper,
-    this._apiDatasource,
-  );
-
-  @override
-  Future<List<Store>> getAllStores() async {
-    final storeModels = await _localDatasource.getAllStores();
-    return storeModels.cast<Store>();
-  }
-
-  @override
-  Future<List<Store>> getStoresByStatus(StoreStatus status) async {
-    final storeModels = await _localDatasource.getStoresByStatus(status);
-    return storeModels.cast<Store>();
-  }
-
-  @override
-  Future<Store?> getStoreById(String id) async {
-    final storeModel = await _localDatasource.getStoreById(id);
-    return storeModel;
-  }
-
-  @override
-  Future<void> insertStore(Store store) async {
-    final storeModel = StoreModel.fromEntity(store);
-    await _localDatasource.insertStore(storeModel);
-  }
-
-  @override
-  Future<void> updateStore(Store store) async {
-    final storeModel = StoreModel.fromEntity(store);
-    await _localDatasource.updateStore(storeModel);
-  }
-
-  @override
-  Future<void> deleteStore(String id) async {
-    await _localDatasource.deleteStore(id);
-  }
-
-  @override
-  Future<List<Store>> searchStores(String query) async {
-    final storeModels = await _localDatasource.searchStores(query);
-    return storeModels.cast<Store>();
-  }
+  StoreRepositoryImpl({
+    required this.apiDatasource,
+    required this.localDatasource,
+  });
 
   @override
   Future<List<Store>> searchStoresFromApi({
@@ -69,105 +26,105 @@ class StoreRepositoryImpl implements StoreRepository {
     int count = 20,
     int start = 1,
   }) async {
-    final response = await _apiDatasource.searchStores(
-      lat: lat,
-      lng: lng,
-      address: address,
-      keyword: keyword,
-      range: range,
-      count: count,
-      start: start,
-    );
-
-    // 有効な座標データを持つ店舗のみをフィルタリング
-    // null値や(0.0, 0.0)座標（大西洋上）の店舗を除外
-    return response.shops
-        .where((hotpepperStore) =>
-            hotpepperStore.lat != null &&
-            hotpepperStore.lng != null &&
-            hotpepperStore.lat != 0.0 &&
-            hotpepperStore.lng != 0.0)
-        .map((hotpepperStore) {
-      return Store(
-        id: hotpepperStore.id,
-        name: hotpepperStore.name,
-        address: hotpepperStore.address,
-        lat: hotpepperStore.lat!,
-        lng: hotpepperStore.lng!,
-        status: null,
-        memo: hotpepperStore.catch_,
-        createdAt: DateTime.now(),
-      );
-    }).toList();
-  }
-
-  // ページネーション対応メソッド
-  Future<List<Store>> getStoresPaginated({
-    int page = 0,
-    int pageSize = 20,
-  }) async {
-    final storeModels = await _localDatasource.getStoresPaginated(
-      page: page,
-      pageSize: pageSize,
-    );
-    return storeModels.cast<Store>();
-  }
-
-  // トランザクション対応メソッド
-  Future<void> insertStoreWithPhotos(
-    Store store,
-    List<Photo> photos,
-  ) async {
     try {
-      final db = await _databaseHelper.database;
-      await db.transaction((txn) async {
-        // Store insertion
-        await txn.insert(
-          'stores',
-          StoreModel.fromEntity(store).toMap(),
-        );
+      final response = await apiDatasource.searchStores(
+        lat: lat,
+        lng: lng,
+        address: address,
+        keyword: keyword,
+        range: range,
+        count: count,
+        start: start,
+      );
 
-        // Photos insertion
-        for (final photo in photos) {
-          await txn.insert(
-            'photos',
-            PhotoModel.fromEntity(photo).toMap(),
-          );
-        }
-      });
+      // API結果をDomainエンティティに変換
+      return response.shops.map((hotpepperStore) {
+        return Store(
+          id: hotpepperStore.id,
+          name: hotpepperStore.name,
+          address: hotpepperStore.address,
+          lat: hotpepperStore.lat ?? 0.0,
+          lng: hotpepperStore.lng ?? 0.0,
+          status: StoreStatus.wantToGo, // API検索結果はデフォルトで「行きたい」
+          memo: hotpepperStore.catch_,
+          createdAt: DateTime.now(),
+        );
+      }).toList();
     } catch (e) {
-      throw Exception('Failed to insert store with photos: ${e.toString()}');
+      rethrow; // Usecaseレイヤーでハンドリング
     }
   }
 
-  Future<void> deleteStoreWithRelatedData(String storeId) async {
+  @override
+  Future<void> insertStore(Store store) async {
     try {
-      final db = await _databaseHelper.database;
-      await db.transaction((txn) async {
-        // Delete related photos first
-        await txn.delete(
-          'photos',
-          where: 'store_id = ?',
-          whereArgs: [storeId],
-        );
-
-        // Delete related visit records
-        await txn.delete(
-          'visit_records',
-          where: 'store_id = ?',
-          whereArgs: [storeId],
-        );
-
-        // Finally delete the store
-        await txn.delete(
-          'stores',
-          where: 'id = ?',
-          whereArgs: [storeId],
-        );
-      });
+      await localDatasource.insertStore(store);
     } catch (e) {
-      throw Exception(
-          'Failed to delete store with related data: ${e.toString()}');
+      throw Exception('店舗の保存に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<Store>> searchStores(String query) async {
+    try {
+      return await localDatasource.searchStores(query);
+    } catch (e) {
+      throw Exception('店舗検索に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> updateStore(Store store) async {
+    try {
+      await localDatasource.updateStore(store);
+    } catch (e) {
+      throw Exception('店舗の更新に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> deleteStore(String storeId) async {
+    try {
+      await localDatasource.deleteStore(storeId);
+    } catch (e) {
+      throw Exception('店舗の削除に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<Store?> getStoreById(String storeId) async {
+    try {
+      return await localDatasource.getStoreById(storeId);
+    } catch (e) {
+      throw Exception('店舗の取得に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<Store>> getStoresByStatus(StoreStatus status) async {
+    try {
+      return await localDatasource.getStoresByStatus(status);
+    } catch (e) {
+      throw Exception('店舗一覧の取得に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<Store>> getAllStores() async {
+    try {
+      return await localDatasource.getAllStores();
+    } catch (e) {
+      throw Exception('全店舗の取得に失敗しました: ${e.toString()}');
+    }
+  }
+
+  /// 店舗が存在するかチェック
+  Future<bool> isStoreExists(String storeId) async {
+    try {
+      final store = await localDatasource.getStoreById(storeId);
+      return store != null;
+    } catch (e) {
+      return false;
     }
   }
 }

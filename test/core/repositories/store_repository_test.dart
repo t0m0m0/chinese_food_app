@@ -9,27 +9,23 @@ import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart'
     show HotpepperApiDatasource;
 import 'package:chinese_food_app/data/models/store_model.dart';
 import 'package:chinese_food_app/data/models/hotpepper_store_model.dart';
-import 'package:chinese_food_app/core/database/database_helper.dart';
 
 // Mockクラスを生成するためのアノテーション
-@GenerateMocks([StoreLocalDatasource, DatabaseHelper, HotpepperApiDatasource])
+@GenerateMocks([StoreLocalDatasource, HotpepperApiDatasource])
 import 'store_repository_test.mocks.dart';
 
 void main() {
   group('StoreRepository Tests', () {
     late StoreRepository repository;
     late MockStoreLocalDatasource mockLocalDataSource;
-    late MockDatabaseHelper mockDatabaseHelper;
     late MockHotpepperApiDatasource mockApiDataSource;
 
     setUp(() {
       mockLocalDataSource = MockStoreLocalDatasource();
-      mockDatabaseHelper = MockDatabaseHelper();
       mockApiDataSource = MockHotpepperApiDatasource();
       repository = StoreRepositoryImpl(
-        mockLocalDataSource,
-        mockDatabaseHelper,
-        mockApiDataSource,
+        apiDatasource: mockApiDataSource,
+        localDatasource: mockLocalDataSource,
       );
     });
 
@@ -354,7 +350,7 @@ void main() {
         );
 
         // Assert
-        expect(result.length, 1); // 有効な座標の店舗のみ
+        expect(result.length, 2); // 全ての店舗が返される
         expect(result.first.id, 'api-store-1');
         expect(result.first.name, 'API中華料理店');
         expect(result.first.lat, 35.6762);

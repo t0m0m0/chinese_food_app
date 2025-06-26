@@ -3,19 +3,15 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
-import 'package:chinese_food_app/core/database/database_helper.dart' as _i8;
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart'
-    as _i10;
+    as _i6;
 import 'package:chinese_food_app/data/datasources/store_local_datasource.dart'
-    as _i5;
-import 'package:chinese_food_app/data/models/hotpepper_store_model.dart' as _i4;
-import 'package:chinese_food_app/data/models/store_model.dart' as _i6;
-import 'package:chinese_food_app/domain/entities/store.dart' as _i7;
+    as _i3;
+import 'package:chinese_food_app/data/models/hotpepper_store_model.dart' as _i2;
+import 'package:chinese_food_app/domain/entities/store.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i9;
-import 'package:sqflite/sqflite.dart' as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -30,29 +26,9 @@ import 'package:sqflite/sqflite.dart' as _i2;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakeDatabase_0 extends _i1.SmartFake implements _i2.Database {
-  _FakeDatabase_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
-class _FakeFuture_1<T1> extends _i1.SmartFake implements _i3.Future<T1> {
-  _FakeFuture_1(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
-class _FakeHotpepperSearchResponse_2 extends _i1.SmartFake
-    implements _i4.HotpepperSearchResponse {
-  _FakeHotpepperSearchResponse_2(
+class _FakeHotpepperSearchResponse_0 extends _i1.SmartFake
+    implements _i2.HotpepperSearchResponse {
+  _FakeHotpepperSearchResponse_0(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -65,182 +41,91 @@ class _FakeHotpepperSearchResponse_2 extends _i1.SmartFake
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockStoreLocalDatasource extends _i1.Mock
-    implements _i5.StoreLocalDatasource {
+    implements _i3.StoreLocalDatasource {
   MockStoreLocalDatasource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<List<_i6.StoreModel>> getAllStores() => (super.noSuchMethod(
+  _i4.Future<void> insertStore(_i5.Store? store) => (super.noSuchMethod(
+        Invocation.method(
+          #insertStore,
+          [store],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> updateStore(_i5.Store? store) => (super.noSuchMethod(
+        Invocation.method(
+          #updateStore,
+          [store],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> deleteStore(String? storeId) => (super.noSuchMethod(
+        Invocation.method(
+          #deleteStore,
+          [storeId],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<_i5.Store?> getStoreById(String? storeId) => (super.noSuchMethod(
+        Invocation.method(
+          #getStoreById,
+          [storeId],
+        ),
+        returnValue: _i4.Future<_i5.Store?>.value(),
+      ) as _i4.Future<_i5.Store?>);
+
+  @override
+  _i4.Future<List<_i5.Store>> getAllStores() => (super.noSuchMethod(
         Invocation.method(
           #getAllStores,
           [],
         ),
-        returnValue: _i3.Future<List<_i6.StoreModel>>.value(<_i6.StoreModel>[]),
-      ) as _i3.Future<List<_i6.StoreModel>>);
+        returnValue: _i4.Future<List<_i5.Store>>.value(<_i5.Store>[]),
+      ) as _i4.Future<List<_i5.Store>>);
 
   @override
-  _i3.Future<List<_i6.StoreModel>> getStoresPaginated({
-    int? page = 0,
-    int? pageSize = 20,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #getStoresPaginated,
-          [],
-          {
-            #page: page,
-            #pageSize: pageSize,
-          },
-        ),
-        returnValue: _i3.Future<List<_i6.StoreModel>>.value(<_i6.StoreModel>[]),
-      ) as _i3.Future<List<_i6.StoreModel>>);
-
-  @override
-  _i3.Future<List<_i6.StoreModel>> getStoresByStatus(_i7.StoreStatus? status) =>
+  _i4.Future<List<_i5.Store>> getStoresByStatus(_i5.StoreStatus? status) =>
       (super.noSuchMethod(
         Invocation.method(
           #getStoresByStatus,
           [status],
         ),
-        returnValue: _i3.Future<List<_i6.StoreModel>>.value(<_i6.StoreModel>[]),
-      ) as _i3.Future<List<_i6.StoreModel>>);
+        returnValue: _i4.Future<List<_i5.Store>>.value(<_i5.Store>[]),
+      ) as _i4.Future<List<_i5.Store>>);
 
   @override
-  _i3.Future<_i6.StoreModel?> getStoreById(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #getStoreById,
-          [id],
-        ),
-        returnValue: _i3.Future<_i6.StoreModel?>.value(),
-      ) as _i3.Future<_i6.StoreModel?>);
-
-  @override
-  _i3.Future<void> insertStore(_i6.StoreModel? store) => (super.noSuchMethod(
-        Invocation.method(
-          #insertStore,
-          [store],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-
-  @override
-  _i3.Future<void> updateStore(_i6.StoreModel? store) => (super.noSuchMethod(
-        Invocation.method(
-          #updateStore,
-          [store],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-
-  @override
-  _i3.Future<void> deleteStore(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #deleteStore,
-          [id],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-
-  @override
-  _i3.Future<List<_i6.StoreModel>> searchStores(String? query) =>
+  _i4.Future<List<_i5.Store>> searchStores(String? query) =>
       (super.noSuchMethod(
         Invocation.method(
           #searchStores,
           [query],
         ),
-        returnValue: _i3.Future<List<_i6.StoreModel>>.value(<_i6.StoreModel>[]),
-      ) as _i3.Future<List<_i6.StoreModel>>);
-}
-
-/// A class which mocks [DatabaseHelper].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockDatabaseHelper extends _i1.Mock implements _i8.DatabaseHelper {
-  MockDatabaseHelper() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i3.Future<_i2.Database> get database => (super.noSuchMethod(
-        Invocation.getter(#database),
-        returnValue: _i3.Future<_i2.Database>.value(_FakeDatabase_0(
-          this,
-          Invocation.getter(#database),
-        )),
-      ) as _i3.Future<_i2.Database>);
-
-  @override
-  _i3.Future<T> transaction<T>(
-          _i3.Future<T> Function(_i2.Transaction)? action) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #transaction,
-          [action],
-        ),
-        returnValue: _i9.ifNotNull(
-              _i9.dummyValueOrNull<T>(
-                this,
-                Invocation.method(
-                  #transaction,
-                  [action],
-                ),
-              ),
-              (T v) => _i3.Future<T>.value(v),
-            ) ??
-            _FakeFuture_1<T>(
-              this,
-              Invocation.method(
-                #transaction,
-                [action],
-              ),
-            ),
-      ) as _i3.Future<T>);
-
-  @override
-  _i3.Future<Map<String, dynamic>> getDatabaseStats() => (super.noSuchMethod(
-        Invocation.method(
-          #getDatabaseStats,
-          [],
-        ),
-        returnValue:
-            _i3.Future<Map<String, dynamic>>.value(<String, dynamic>{}),
-      ) as _i3.Future<Map<String, dynamic>>);
-
-  @override
-  _i3.Future<bool> checkIntegrity() => (super.noSuchMethod(
-        Invocation.method(
-          #checkIntegrity,
-          [],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
-
-  @override
-  _i3.Future<void> close() => (super.noSuchMethod(
-        Invocation.method(
-          #close,
-          [],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<List<_i5.Store>>.value(<_i5.Store>[]),
+      ) as _i4.Future<List<_i5.Store>>);
 }
 
 /// A class which mocks [HotpepperApiDatasource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockHotpepperApiDatasource extends _i1.Mock
-    implements _i10.HotpepperApiDatasource {
+    implements _i6.HotpepperApiDatasource {
   MockHotpepperApiDatasource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<_i4.HotpepperSearchResponse> searchStores({
+  _i4.Future<_i2.HotpepperSearchResponse> searchStores({
     double? lat,
     double? lng,
     String? address,
@@ -263,8 +148,8 @@ class MockHotpepperApiDatasource extends _i1.Mock
             #start: start,
           },
         ),
-        returnValue: _i3.Future<_i4.HotpepperSearchResponse>.value(
-            _FakeHotpepperSearchResponse_2(
+        returnValue: _i4.Future<_i2.HotpepperSearchResponse>.value(
+            _FakeHotpepperSearchResponse_0(
           this,
           Invocation.method(
             #searchStores,
@@ -280,5 +165,5 @@ class MockHotpepperApiDatasource extends _i1.Mock
             },
           ),
         )),
-      ) as _i3.Future<_i4.HotpepperSearchResponse>);
+      ) as _i4.Future<_i2.HotpepperSearchResponse>);
 }

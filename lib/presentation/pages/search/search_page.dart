@@ -46,11 +46,11 @@ class _SearchPageState extends State<SearchPage> {
       apiDatasource = MockHotpepperApiDatasource();
     }
 
-    final localDatasource = StoreLocalDatasource(DatabaseHelper());
+    final localDatasource =
+        StoreLocalDatasourceImpl(dbHelper: DatabaseHelper());
     final repository = StoreRepositoryImpl(
-      localDatasource,
-      DatabaseHelper(),
-      apiDatasource,
+      apiDatasource: apiDatasource,
+      localDatasource: localDatasource,
     );
     _searchUsecase = SearchStoresUsecase(repository);
   }
