@@ -51,7 +51,9 @@ void main() {
         of: find.byType(BottomNavigationBar), matching: find.text('マイメニュー')));
     await tester.pump();
 
-    // マイメニューページが表示されることを確認
-    expect(find.text('マイメニュー画面 - 実装予定'), findsOneWidget);
+    // マイメニューページが表示されることを確認（実装済み）
+    expect(find.text('行きたい'), findsOneWidget);
+    expect(find.text('行った'), findsOneWidget);
+    expect(find.text('興味なし'), findsOneWidget);
   });
 }
