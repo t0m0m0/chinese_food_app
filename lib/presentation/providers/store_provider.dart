@@ -53,6 +53,11 @@ class StoreProvider extends ChangeNotifier {
     return List.unmodifiable(_cachedBadStores!);
   }
 
+  /// スワイプ用の新しい店舗（ステータス未設定）リスト
+  List<Store> get newStores {
+    return _stores.where((store) => store.status == null).toList();
+  }
+
   /// リポジトリから全ての店舗データを取得
   ///
   /// 初回起動時にはサンプルデータを自動初期化する
@@ -125,6 +130,56 @@ class StoreProvider extends ChangeNotifier {
   /// エラーをクリア
   void clearError() {
     _clearError();
+  }
+
+  /// HotPepper APIから新しい店舗データを検索して追加
+  Future<void> loadNewStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword = '中華',
+    int count = 10,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final apiStores = await repository.searchStoresFromApi(
+        lat: lat,
+        lng: lng,
+        address: address,
+        keyword: keyword,
+        count: count,
+      );
+      
+      print('DEBUG: API returned ${apiStores.length} stores');
+      for (var store in apiStores) {
+        print('DEBUG: API Store: ${store.name}');
+      }
+
+      // APIから取得した店舗をローカルリストに追加（重複チェック付き）
+      for (final apiStore in apiStores) {
+        // 既存の店舗と重複しているかチェック
+        final isDuplicate = _stores.any(
+          (store) => store.name == apiStore.name && store.address == apiStore.address,
+        );
+
+        if (!isDuplicate) {
+          // 新しい店舗として追加（ステータスはnull）
+          final newStore = apiStore.copyWith(status: null);
+          _stores.add(newStore);
+          print('DEBUG: Added new store: ${newStore.name}');
+        } else {
+          print('DEBUG: Skipped duplicate store: ${apiStore.name}');
+        }
+      }
+
+      notifyListeners();
+    } catch (e) {
+      _setError('新しい店舗の取得に失敗しました');
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override

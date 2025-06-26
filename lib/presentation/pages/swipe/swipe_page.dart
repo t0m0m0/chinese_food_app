@@ -27,7 +27,17 @@ class _SwipePageState extends State<SwipePage> {
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
   void _loadStoresFromProvider() {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+    
+    // 既存の店舗データを読み込み
     storeProvider.loadStores().then((_) {
+      // APIから新しい店舗データも取得
+      return storeProvider.loadNewStoresFromApi(
+        // テスト環境では現在地を使用（実際の実装では位置情報サービスを使用）
+        lat: 35.6917,
+        lng: 139.7006,
+        count: 10,
+      );
+    }).then((_) {
       if (mounted) {
         _updateAvailableStores();
       }
@@ -41,6 +51,19 @@ class _SwipePageState extends State<SwipePage> {
       _availableStores =
           storeProvider.stores.where((store) => store.status == null).toList();
     });
+  }
+
+  /// プルトゥリフレッシュで新しい店舗データを取得
+  Future<void> _refreshStores() async {
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+    await storeProvider.loadNewStoresFromApi(
+      lat: 35.6917,
+      lng: 139.7006,
+      count: 10,
+    );
+    if (mounted) {
+      _updateAvailableStores();
+    }
   }
 
   bool _onSwipe(
@@ -251,7 +274,7 @@ class _SwipePageState extends State<SwipePage> {
                       children: [
                         CircularProgressIndicator(),
                         SizedBox(height: 16),
-                        Text('店舗データを読み込み中...'),
+                        Text('新しい店舗を読み込み中...'),
                       ],
                     ),
                   );
@@ -320,16 +343,19 @@ class _SwipePageState extends State<SwipePage> {
                           ],
                         ),
                       )
-                    : Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: CardSwiper(
-                          controller: controller,
-                          cardsCount: _availableStores.length,
-                          onSwipe: _onSwipe,
-                          cardBuilder: (context, index, percentThresholdX,
+                    : RefreshIndicator(
+                        onRefresh: _refreshStores,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: CardSwiper(
+                            controller: controller,
+                            cardsCount: _availableStores.length,
+                            onSwipe: _onSwipe,
+                            cardBuilder: (context, index, percentThresholdX,
                               percentThresholdY) {
                             return _buildStoreCard(_availableStores[index]);
                           },
+                          ),
                         ),
                       );
               },
