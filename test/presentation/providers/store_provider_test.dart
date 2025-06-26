@@ -9,11 +9,11 @@ class FakeStoreRepository implements StoreRepository {
   bool _shouldThrowOnUpdate = false;
   bool _shouldThrowOnInsert = false;
   bool _shouldThrowOnGetAll = false;
-  
+
   void setShouldThrowOnUpdate(bool value) => _shouldThrowOnUpdate = value;
   void setShouldThrowOnInsert(bool value) => _shouldThrowOnInsert = value;
   void setShouldThrowOnGetAll(bool value) => _shouldThrowOnGetAll = value;
-  
+
   @override
   Future<List<Store>> getAllStores() async {
     if (_shouldThrowOnGetAll) throw Exception('Database error');
@@ -56,7 +56,7 @@ class FakeStoreRepository implements StoreRepository {
   Future<List<Store>> searchStores(String query) async {
     return _stores.where((s) => s.name.contains(query)).toList();
   }
-  
+
   @override
   Future<List<Store>> searchStoresFromApi({
     double? lat,
@@ -70,7 +70,7 @@ class FakeStoreRepository implements StoreRepository {
     // テスト用の実装
     return [];
   }
-  
+
   void setStores(List<Store> stores) {
     _stores = List.from(stores);
   }
