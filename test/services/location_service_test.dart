@@ -24,7 +24,8 @@ void main() {
     group('Address to Coordinates (geocoding)', () {
       test('should handle geocoding operations', () async {
         // Act - テスト環境では実際のAPIコールの成功/失敗は環境依存
-        final result = await locationService.getCoordinatesFromAddress('東京都千代田区');
+        final result =
+            await locationService.getCoordinatesFromAddress('東京都千代田区');
 
         // Assert - 結果の形式が正しいことを確認
         expect(result.isSuccess, isA<bool>());
@@ -51,7 +52,8 @@ void main() {
 
       test('should handle invalid address', () async {
         // Act - 明らかに存在しない住所
-        final result = await locationService.getCoordinatesFromAddress('InvalidAddress123XYZ456');
+        final result = await locationService
+            .getCoordinatesFromAddress('InvalidAddress123XYZ456');
 
         // Assert - 失敗するはず
         expect(result.isSuccess, false);
@@ -62,7 +64,8 @@ void main() {
     group('Coordinates to Address (reverse geocoding)', () {
       test('should handle reverse geocoding operations', () async {
         // Act - 東京駅の座標（テスト環境では結果は環境依存）
-        final result = await locationService.getAddressFromCoordinates(35.6762, 139.6503);
+        final result =
+            await locationService.getAddressFromCoordinates(35.6762, 139.6503);
 
         // Assert - 結果の形式が正しいことを確認
         expect(result.isSuccess, isA<bool>());
@@ -78,7 +81,8 @@ void main() {
 
       test('should handle extreme coordinates', () async {
         // Act - 極端な座標値
-        final result = await locationService.getAddressFromCoordinates(999.0, 999.0);
+        final result =
+            await locationService.getAddressFromCoordinates(999.0, 999.0);
 
         // Assert - 失敗するはず
         expect(result.isSuccess, false);
@@ -113,14 +117,15 @@ void main() {
 
     test('should have correct toString representation', () {
       // Act
-      final successResult = LocationServiceResult.success(lat: 35.6762, lng: 139.6503);
+      final successResult =
+          LocationServiceResult.success(lat: 35.6762, lng: 139.6503);
       final failureResult = LocationServiceResult.failure('Error message');
 
       // Assert
       expect(successResult.toString(), contains('success'));
       expect(successResult.toString(), contains('35.6762'));
       expect(successResult.toString(), contains('139.6503'));
-      
+
       expect(failureResult.toString(), contains('failure'));
       expect(failureResult.toString(), contains('Error message'));
     });
@@ -176,7 +181,7 @@ void main() {
       // Assert
       expect(successResult.toString(), contains('success'));
       expect(successResult.toString(), contains('東京都千代田区'));
-      
+
       expect(failureResult.toString(), contains('failure'));
       expect(failureResult.toString(), contains('Error message'));
     });

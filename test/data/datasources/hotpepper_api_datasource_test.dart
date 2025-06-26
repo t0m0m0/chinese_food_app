@@ -17,7 +17,7 @@ void main() {
   setUp(() {
     mockClient = MockClient();
     datasource = HotpepperApiDatasourceImpl(client: mockClient);
-    
+
     // APIキーをテスト用に設定
     AppConfig.setTestApiKey('test_api_key');
   });
@@ -42,7 +42,9 @@ void main() {
               'budget': {'name': '～1000円'},
               'access': 'JR渋谷駅徒歩5分',
               'catch': '本格中華をお手軽に！',
-              'photo': {'pc': {'l': 'https://example.com/photo.jpg'}},
+              'photo': {
+                'pc': {'l': 'https://example.com/photo.jpg'}
+              },
             }
           ],
           'results_available': 1,

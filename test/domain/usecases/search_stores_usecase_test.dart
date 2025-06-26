@@ -39,7 +39,8 @@ void main() {
       ),
     ];
 
-    test('should return success result when stores are found by location', () async {
+    test('should return success result when stores are found by location',
+        () async {
       // Red: This test should fail - we need to implement the functionality
       final params = SearchStoresParams(
         lat: 35.6762,
@@ -66,7 +67,8 @@ void main() {
       expect(result.hasStores, true);
     });
 
-    test('should return success result when stores are found by address', () async {
+    test('should return success result when stores are found by address',
+        () async {
       final params = SearchStoresParams(
         address: '東京都渋谷区',
         keyword: '中華',
@@ -91,7 +93,8 @@ void main() {
       expect(result.error, isNull);
     });
 
-    test('should return success result with empty list when no stores found', () async {
+    test('should return success result with empty list when no stores found',
+        () async {
       final params = SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
@@ -117,7 +120,8 @@ void main() {
       expect(result.hasStores, false);
     });
 
-    test('should return failure result when repository throws exception', () async {
+    test('should return failure result when repository throws exception',
+        () async {
       final params = SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
@@ -184,7 +188,7 @@ void main() {
       expect(result.isSuccess, false);
       expect(result.error, '検索条件が不正です。位置情報または住所を指定してください。');
       expect(result.stores, isNull);
-      
+
       // Repository should not be called
       verifyNever(mockRepository.searchStoresFromApi(
         lat: anyNamed('lat'),
@@ -204,7 +208,7 @@ void main() {
         lat: 35.6762,
         lng: 139.6503,
       );
-      
+
       final paramsWithoutLocation = SearchStoresParams(
         address: '東京都渋谷区',
       );
@@ -217,7 +221,7 @@ void main() {
       final paramsWithAddress = SearchStoresParams(
         address: '東京都渋谷区',
       );
-      
+
       final paramsWithEmptyAddress = SearchStoresParams(
         address: '',
       );
@@ -237,7 +241,7 @@ void main() {
         lat: 35.6762,
         lng: 139.6503,
       );
-      
+
       final validAddressParams = SearchStoresParams(
         address: '東京都渋谷区',
       );
