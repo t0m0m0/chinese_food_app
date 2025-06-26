@@ -62,27 +62,31 @@ class StoreProvider extends ChangeNotifier {
 
   /// 店舗のステータスを更新
   ///
+  /// データベースへの永続化を先に実行し、成功後にローカル状態を更新することで
+  /// データの整合性を保証する
+  ///
   /// [storeId] 更新対象の店舗ID
   /// [newStatus] 新しいステータス
   Future<void> updateStoreStatus(String storeId, StoreStatus newStatus) async {
-    try {
-      // ローカル状態を更新
-      final storeIndex = _stores.indexWhere((store) => store.id == storeId);
-      if (storeIndex == -1) {
-        throw Exception('店舗が見つかりません: $storeId');
-      }
+    final storeIndex = _stores.indexWhere((store) => store.id == storeId);
+    if (storeIndex == -1) {
+      throw Exception('店舗が見つかりません: $storeId');
+    }
 
-      final updatedStore = _stores[storeIndex].copyWith(status: newStatus);
+    final originalStore = _stores[storeIndex];
+    final updatedStore = originalStore.copyWith(status: newStatus);
+
+    try {
+      // データベースへの永続化を先に実行
+      await repository.updateStore(updatedStore);
+
+      // 成功後にローカル状態を更新
       _stores[storeIndex] = updatedStore;
       notifyListeners();
-
-      // データベースに永続化
-      await repository.updateStore(updatedStore);
       _clearError();
     } catch (e) {
       _setError('店舗ステータスの更新に失敗しました: ${e.toString()}');
-      // エラー時はローカル状態も元に戻す必要があるが、
-      // 簡略化のため、次回loadStores()で正しい状態に復元される
+      // ローカル状態はデータベースと整合性を保つため、変更しない
     }
   }
 

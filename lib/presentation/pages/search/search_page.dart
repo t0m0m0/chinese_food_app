@@ -338,6 +338,24 @@ class _SearchPageState extends State<SearchPage> {
   Future<void> _addToWantToGo(Store store) async {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
+    // 重複チェック
+    final existingStore = storeProvider.stores
+        .where((s) => s.name == store.name && s.address == store.address)
+        .firstOrNull;
+
+    if (existingStore != null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('この店舗は既に登録されています'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
     try {
       // 検索結果の店舗をステータス付きで追加
       final storeWithStatus = store.copyWith(status: StoreStatus.wantToGo);

@@ -68,8 +68,7 @@ class _SwipePageState extends State<SwipePage> {
       await storeProvider.updateStoreStatus(store.id, status);
       debugPrint('店舗 ${store.name} のステータスを ${status.value} に更新');
 
-      // ローカルリストを更新
-      _updateAvailableStores();
+      // Consumer<StoreProvider>が自動的に更新を処理するため、手動更新は不要
 
       // 成功時のフィードバック
       if (mounted) {

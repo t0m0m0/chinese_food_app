@@ -101,6 +101,24 @@ void main() {
       expect(storeProvider.error, contains('Update failed'));
     });
 
+    test('should maintain data consistency when update fails', () async {
+      when(mockRepository.getAllStores()).thenAnswer((_) async => testStores);
+      when(mockRepository.updateStore(any)).thenThrow(Exception('DB Error'));
+
+      await storeProvider.loadStores();
+      final originalStores = List<Store>.from(storeProvider.stores);
+      final originalStatus = storeProvider.stores.first.status;
+
+      await storeProvider.updateStoreStatus('store-1', StoreStatus.visited);
+
+      // データベース更新失敗後、ローカル状態が変更されていないことを確認
+      expect(storeProvider.stores.first.status, equals(originalStatus));
+      expect(storeProvider.stores.length, equals(originalStores.length));
+      expect(storeProvider.stores.first.id, equals(originalStores.first.id));
+      expect(storeProvider.error, isNotNull);
+      expect(storeProvider.error, contains('DB Error'));
+    });
+
     test('should add new store successfully', () async {
       final newStore = Store(
         id: 'new-store',
