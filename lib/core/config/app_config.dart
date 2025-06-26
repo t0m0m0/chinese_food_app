@@ -3,11 +3,19 @@
 /// 環境変数やAPIキーなどの機密情報を安全に管理します。
 /// 本番環境では適切な設定管理ツールの使用を推奨します。
 class AppConfig {
+  // テスト用のAPIキー保存
+  static String? _testHotpepperApiKey;
+  static String? _testGoogleMapsApiKey;
+
   /// ホットペッパーAPIキー
   ///
   /// 環境変数 HOTPEPPER_API_KEY から取得
   /// 設定されていない場合はnullを返す
   static String? get hotpepperApiKey {
+    // テスト環境ではテスト用APIキーを使用
+    if (_testHotpepperApiKey != null) {
+      return _testHotpepperApiKey;
+    }
     // TODO: 本番環境では flutter_dotenv や secure_storage を使用
     // 現在は開発用として const で定義
     return const String.fromEnvironment('HOTPEPPER_API_KEY');
@@ -51,5 +59,16 @@ class AppConfig {
       'hasHotpepperApiKey': hasHotpepperApiKey,
       'hasGoogleMapsApiKey': hasGoogleMapsApiKey,
     };
+  }
+
+  /// テスト用にAPIキーを設定
+  static void setTestApiKey(String apiKey) {
+    _testHotpepperApiKey = apiKey;
+  }
+
+  /// テスト用APIキーをクリア
+  static void clearTestApiKey() {
+    _testHotpepperApiKey = null;
+    _testGoogleMapsApiKey = null;
   }
 }
