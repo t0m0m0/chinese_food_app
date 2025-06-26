@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
 
@@ -398,7 +399,8 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('ステータス更新に失敗しました: $e'),
+            content: Text(
+                ErrorMessageHelper.getStoreRelatedMessage('update_status')),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),

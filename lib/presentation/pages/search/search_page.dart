@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../../../core/utils/error_message_helper.dart';
 import '../../../data/datasources/hotpepper_api_datasource.dart';
 import '../../../data/repositories/store_repository_impl.dart';
 import '../../../data/datasources/store_local_datasource.dart';
@@ -347,7 +348,8 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('この店舗は既に登録されています'),
+            content: Text(
+                ErrorMessageHelper.getStoreRelatedMessage('duplicate_store')),
             backgroundColor: Colors.orange,
             duration: const Duration(seconds: 2),
           ),
@@ -374,7 +376,8 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('追加に失敗しました: $e'),
+            content:
+                Text(ErrorMessageHelper.getStoreRelatedMessage('add_store')),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),

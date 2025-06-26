@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../core/utils/error_message_helper.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../../domain/usecases/initialize_sample_stores_usecase.dart';
@@ -19,6 +20,11 @@ class StoreProvider extends ChangeNotifier {
   /// エラーメッセージ
   String? _error;
 
+  /// キャッシュされたステータス別店舗リスト
+  List<Store>? _cachedWantToGoStores;
+  List<Store>? _cachedVisitedStores;
+  List<Store>? _cachedBadStores;
+
   StoreProvider({required this.repository});
 
   // Getters
@@ -26,17 +32,26 @@ class StoreProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  /// 「行きたい」ステータスの店舗リスト
-  List<Store> get wantToGoStores =>
-      _stores.where((store) => store.status == StoreStatus.wantToGo).toList();
+  /// 「行きたい」ステータスの店舗リスト（キャッシュ機能付き）
+  List<Store> get wantToGoStores {
+    _cachedWantToGoStores ??=
+        _stores.where((store) => store.status == StoreStatus.wantToGo).toList();
+    return List.unmodifiable(_cachedWantToGoStores!);
+  }
 
-  /// 「行った」ステータスの店舗リスト
-  List<Store> get visitedStores =>
-      _stores.where((store) => store.status == StoreStatus.visited).toList();
+  /// 「行った」ステータスの店舗リスト（キャッシュ機能付き）
+  List<Store> get visitedStores {
+    _cachedVisitedStores ??=
+        _stores.where((store) => store.status == StoreStatus.visited).toList();
+    return List.unmodifiable(_cachedVisitedStores!);
+  }
 
-  /// 「興味なし」ステータスの店舗リスト
-  List<Store> get badStores =>
-      _stores.where((store) => store.status == StoreStatus.bad).toList();
+  /// 「興味なし」ステータスの店舗リスト（キャッシュ機能付き）
+  List<Store> get badStores {
+    _cachedBadStores ??=
+        _stores.where((store) => store.status == StoreStatus.bad).toList();
+    return List.unmodifiable(_cachedBadStores!);
+  }
 
   /// リポジトリから全ての店舗データを取得
   ///
@@ -54,7 +69,7 @@ class StoreProvider extends ChangeNotifier {
       _stores = await repository.getAllStores();
       notifyListeners();
     } catch (e) {
-      _setError('店舗データの読み込みに失敗しました: ${e.toString()}');
+      _setError(ErrorMessageHelper.getStoreRelatedMessage('load_stores'));
     } finally {
       _setLoading(false);
     }
@@ -85,7 +100,7 @@ class StoreProvider extends ChangeNotifier {
       notifyListeners();
       _clearError();
     } catch (e) {
-      _setError('店舗ステータスの更新に失敗しました: ${e.toString()}');
+      _setError(ErrorMessageHelper.getStoreRelatedMessage('update_status'));
       // ローカル状態はデータベースと整合性を保つため、変更しない
     }
   }
@@ -103,13 +118,19 @@ class StoreProvider extends ChangeNotifier {
       notifyListeners();
       _clearError();
     } catch (e) {
-      _setError('店舗の追加に失敗しました: ${e.toString()}');
+      _setError(ErrorMessageHelper.getStoreRelatedMessage('add_store'));
     }
   }
 
   /// エラーをクリア
   void clearError() {
     _clearError();
+  }
+
+  @override
+  void notifyListeners() {
+    _clearCache();
+    super.notifyListeners();
   }
 
   // Private methods
@@ -128,5 +149,12 @@ class StoreProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
     }
+  }
+
+  /// キャッシュされたステータス別リストをクリア
+  void _clearCache() {
+    _cachedWantToGoStores = null;
+    _cachedVisitedStores = null;
+    _cachedBadStores = null;
   }
 }

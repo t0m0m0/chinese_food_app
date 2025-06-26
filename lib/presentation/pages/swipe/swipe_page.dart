@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
+import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
 
@@ -88,7 +89,7 @@ class _SwipePageState extends State<SwipePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('エラーが発生しました: ${e.toString()}'),
+            content: Text(ErrorMessageHelper.getUserFriendlyMessage(e)),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
