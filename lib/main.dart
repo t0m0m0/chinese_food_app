@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'core/constants/app_constants.dart';
+import 'core/di/di_container.dart';
 import 'presentation/pages/my_menu/my_menu_page.dart';
 import 'presentation/pages/search/search_page.dart';
 import 'presentation/pages/swipe/swipe_page.dart';
@@ -14,13 +16,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: AppConstants.appName,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => DIContainer.createStoreProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        title: AppConstants.appName,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+          useMaterial3: true,
+        ),
+        home: const MainScreen(),
       ),
-      home: const MainScreen(),
     );
   }
 }
