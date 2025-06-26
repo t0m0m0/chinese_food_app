@@ -4,15 +4,33 @@ import '../repositories/store_repository.dart';
 /// 店舗検索機能を提供するUsecase
 ///
 /// HotPepper APIを使用して中華料理店を検索し、結果を返す
+/// Clean Architectureのビジネスロジック層を担当する
+///
+/// 使用例:
+/// ```dart
+/// final usecase = SearchStoresUsecase(repository);
+/// final params = SearchStoresParams(lat: 35.6762, lng: 139.6503);
+/// final result = await usecase.execute(params);
+/// 
+/// if (result.isSuccess && result.hasStores) {
+///   print('${result.stores!.length}件の店舗が見つかりました');
+/// }
+/// ```
 class SearchStoresUsecase {
   final StoreRepository repository;
 
+  /// SearchStoresUsecase コンストラクタ
+  ///
+  /// [repository] 店舗データアクセス用のリポジトリ
   SearchStoresUsecase(this.repository);
 
   /// 指定されたパラメータで店舗検索を実行する
   ///
   /// [params] 検索条件を含むパラメータ
-  /// 戻り値として[SearchStoresResult]を返す
+  /// 戻り値: [SearchStoresResult] 検索結果（成功/失敗の状態を含む）
+  /// 
+  /// 検索条件の検証を行い、不正な場合は失敗結果を返す
+  /// API通信エラーやその他の例外は適切にハンドリングされる
   Future<SearchStoresResult> execute(SearchStoresParams params) async {
     // パラメータ検証
     if (!params.hasValidSearchCriteria) {

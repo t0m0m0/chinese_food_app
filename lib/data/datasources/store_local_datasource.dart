@@ -1,165 +1,126 @@
-import 'package:sqflite/sqflite.dart';
-
-import '../../core/database/database_helper.dart';
 import '../../domain/entities/store.dart';
-import '../models/store_model.dart';
+import '../../core/database/database_helper.dart';
 
-class StoreLocalDatasource {
-  final DatabaseHelper _databaseHelper;
+/// ローカルデータベースでの店舗データアクセス
+///
+/// SQLiteを使用した店舗情報のCRUD操作を提供
+abstract class StoreLocalDatasource {
+  Future<void> insertStore(Store store);
+  Future<void> updateStore(Store store);
+  Future<void> deleteStore(String storeId);
+  Future<Store?> getStoreById(String storeId);
+  Future<List<Store>> getAllStores();
+  Future<List<Store>> getStoresByStatus(StoreStatus status);
+  Future<List<Store>> searchStores(String query);
+}
 
-  StoreLocalDatasource(this._databaseHelper);
+/// StoreLocalDatasource の実装クラス
+class StoreLocalDatasourceImpl implements StoreLocalDatasource {
+  final DatabaseHelper dbHelper;
 
-  Future<List<StoreModel>> getAllStores() async {
-    try {
-      final db = await _databaseHelper.database;
-      final List<Map<String, dynamic>> maps = await db.query(
-        'stores',
-        orderBy: 'created_at DESC',
-      );
+  StoreLocalDatasourceImpl({required this.dbHelper});
 
-      return List.generate(maps.length, (i) {
-        return StoreModel.fromMap(maps[i]);
-      });
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to fetch stores: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
-    }
+  @override
+  Future<void> insertStore(Store store) async {
+    final db = await dbHelper.database;
+    await db.insert('stores', _storeToMap(store));
   }
 
-  Future<List<StoreModel>> getStoresPaginated({
-    int page = 0,
-    int pageSize = 20,
-  }) async {
-    try {
-      final offset = page * pageSize;
-      final db = await _databaseHelper.database;
-      final List<Map<String, dynamic>> maps = await db.query(
-        'stores',
-        orderBy: 'created_at DESC',
-        limit: pageSize,
-        offset: offset,
-      );
-
-      return maps.map((map) => StoreModel.fromMap(map)).toList();
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to fetch paginated stores: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
-    }
+  @override
+  Future<void> updateStore(Store store) async {
+    final db = await dbHelper.database;
+    await db.update(
+      'stores',
+      _storeToMap(store),
+      where: 'id = ?',
+      whereArgs: [store.id],
+    );
   }
 
-  Future<List<StoreModel>> getStoresByStatus(StoreStatus status) async {
-    try {
-      final db = await _databaseHelper.database;
-      final List<Map<String, dynamic>> maps = await db.query(
-        'stores',
-        where: 'status = ?',
-        whereArgs: [status.value],
-        orderBy: 'created_at DESC',
-      );
-
-      return List.generate(maps.length, (i) {
-        return StoreModel.fromMap(maps[i]);
-      });
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to fetch stores by status: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
-    }
+  @override
+  Future<void> deleteStore(String storeId) async {
+    final db = await dbHelper.database;
+    await db.delete(
+      'stores',
+      where: 'id = ?',
+      whereArgs: [storeId],
+    );
   }
 
-  Future<StoreModel?> getStoreById(String id) async {
-    try {
-      final db = await _databaseHelper.database;
-      final List<Map<String, dynamic>> maps = await db.query(
-        'stores',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+  @override
+  Future<Store?> getStoreById(String storeId) async {
+    final db = await dbHelper.database;
+    final maps = await db.query(
+      'stores',
+      where: 'id = ?',
+      whereArgs: [storeId],
+    );
 
-      if (maps.isNotEmpty) {
-        return StoreModel.fromMap(maps.first);
-      }
-      return null;
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to fetch store by id: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
+    if (maps.isNotEmpty) {
+      return _mapToStore(maps.first);
     }
+    return null;
   }
 
-  Future<void> insertStore(StoreModel store) async {
-    try {
-      final db = await _databaseHelper.database;
-      await db.insert(
-        'stores',
-        store.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to insert store: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
-    }
+  @override
+  Future<List<Store>> getAllStores() async {
+    final db = await dbHelper.database;
+    final maps = await db.query('stores', orderBy: 'created_at DESC');
+    return maps.map((map) => _mapToStore(map)).toList();
   }
 
-  Future<void> updateStore(StoreModel store) async {
-    try {
-      final db = await _databaseHelper.database;
-      await db.update(
-        'stores',
-        store.toMap(),
-        where: 'id = ?',
-        whereArgs: [store.id],
-      );
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to update store: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
-    }
+  @override
+  Future<List<Store>> getStoresByStatus(StoreStatus status) async {
+    final db = await dbHelper.database;
+    final maps = await db.query(
+      'stores',
+      where: 'status = ?',
+      whereArgs: [status.name],
+      orderBy: 'created_at DESC',
+    );
+    return maps.map((map) => _mapToStore(map)).toList();
   }
 
-  Future<void> deleteStore(String id) async {
-    try {
-      final db = await _databaseHelper.database;
-      await db.delete(
-        'stores',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to delete store: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
-    }
+  @override
+  Future<List<Store>> searchStores(String query) async {
+    final db = await dbHelper.database;
+    final maps = await db.query(
+      'stores',
+      where: 'name LIKE ? OR address LIKE ? OR memo LIKE ?',
+      whereArgs: ['%$query%', '%$query%', '%$query%'],
+      orderBy: 'created_at DESC',
+    );
+    return maps.map((map) => _mapToStore(map)).toList();
   }
 
-  Future<List<StoreModel>> searchStores(String query) async {
-    try {
-      final db = await _databaseHelper.database;
-      final List<Map<String, dynamic>> maps = await db.query(
-        'stores',
-        where: 'name LIKE ? OR address LIKE ?',
-        whereArgs: ['%$query%', '%$query%'],
-        orderBy: 'created_at DESC',
-      );
+  /// Store エンティティを Map に変換
+  Map<String, dynamic> _storeToMap(Store store) {
+    return {
+      'id': store.id,
+      'name': store.name,
+      'address': store.address,
+      'lat': store.lat,
+      'lng': store.lng,
+      'status': store.status?.name,
+      'memo': store.memo,
+      'created_at': store.createdAt.toIso8601String(),
+    };
+  }
 
-      return List.generate(maps.length, (i) {
-        return StoreModel.fromMap(maps[i]);
-      });
-    } on DatabaseException catch (e) {
-      throw Exception(
-          'Database error - Failed to search stores: ${e.toString()}');
-    } catch (e) {
-      throw Exception('Unexpected error: ${e.toString()}');
-    }
+  /// Map を Store エンティティに変換
+  Store _mapToStore(Map<String, dynamic> map) {
+    return Store(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      address: map['address'] as String,
+      lat: map['lat'] as double,
+      lng: map['lng'] as double,
+      status: StoreStatus.values.firstWhere(
+        (s) => s.name == map['status'],
+        orElse: () => StoreStatus.wantToGo,
+      ),
+      memo: map['memo'] as String?,
+      createdAt: DateTime.parse(map['created_at'] as String),
+    );
   }
 }

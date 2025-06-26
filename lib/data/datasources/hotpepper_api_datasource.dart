@@ -3,7 +3,26 @@ import '../../core/constants/app_constants.dart';
 import '../../core/config/app_config.dart';
 import '../models/hotpepper_store_model.dart';
 
+/// HotPepper API データソース抽象クラス
+///
+/// HotPepper API制限:
+/// - 1日3,000リクエスト
+/// - 1秒間5リクエスト
+/// - HTTPSでのアクセス必須
+/// - APIキー必須
 abstract class HotpepperApiDatasource {
+  /// 店舗検索を実行
+  ///
+  /// [lat] 緯度 (-90.0 〜 90.0)
+  /// [lng] 経度 (-180.0 〜 180.0)
+  /// [address] 住所での検索
+  /// [keyword] キーワード検索 (デフォルト: "中華")
+  /// [range] 検索範囲 (1:300m, 2:500m, 3:1000m, 4:2000m, 5:3000m)
+  /// [count] 取得件数 (1-100)
+  /// [start] 検索開始位置 (1以上)
+  ///
+  /// 戻り値: [HotpepperSearchResponse] 検索結果
+  /// 例外: APIキーエラー、レート制限エラー、パラメータエラー等
   Future<HotpepperSearchResponse> searchStores({
     double? lat,
     double? lng,
@@ -102,11 +121,15 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
       if (response.statusCode == 200) {
         return HotpepperSearchResponse.fromJsonString(response.body);
       } else if (response.statusCode == 401) {
-        throw Exception('Invalid API key');
+        throw Exception('Invalid API key - Please check your HotPepper API key configuration');
       } else if (response.statusCode == 429) {
-        throw Exception('API rate limit exceeded');
+        throw Exception('API rate limit exceeded - HotPepper API allows max 5 requests/second and 3000 requests/day');
+      } else if (response.statusCode == 400) {
+        throw Exception('Invalid request parameters - Please check search criteria');
+      } else if (response.statusCode >= 500) {
+        throw Exception('HotPepper API server error (${response.statusCode}) - Please try again later');
       } else {
-        throw Exception('API request failed: ${response.statusCode}');
+        throw Exception('API request failed with status ${response.statusCode}');
       }
     } catch (e) {
       if (e is Exception) {

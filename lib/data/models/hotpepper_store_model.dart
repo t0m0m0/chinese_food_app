@@ -1,21 +1,58 @@
 import 'dart:convert';
 
+/// HotPepper API から取得する店舗情報のデータモデル
+///
+/// HotPepper API のレスポンス形式に対応した店舗データを表現する
+/// Data層でのみ使用され、Domain層のStoreエンティティとは分離される
 class HotpepperStoreModel {
+  /// 店舗ID（HotPepper API固有）
   final String id;
+  
+  /// 店舗名
   final String name;
+  
+  /// 住所
   final String address;
+  
+  /// 緯度 (WGS84)
   final double? lat;
+  
+  /// 経度 (WGS84)
   final double? lng;
+  
+  /// ジャンル名 (例: "中華料理")
   final String? genre;
+  
+  /// 予算 (例: "～1000円")
   final String? budget;
+  
+  /// アクセス情報 (例: "JR新宿駅徒歩5分")
   final String? access;
+  
+  /// PC用URL
   final String? urlPc;
+  
+  /// モバイル用URL
   final String? urlMobile;
+  
+  /// 店舗写真URL (Large サイズ)
   final String? photo;
+  
+  /// 営業時間開始
   final String? open;
+  
+  /// 営業時間終了
   final String? close;
+  
+  /// キャッチコピー・特徴
   final String? catch_;
 
+  /// HotpepperStoreModel コンストラクタ
+  ///
+  /// [id] 店舗ID（必須）
+  /// [name] 店舗名（必須）
+  /// [address] 住所（必須）
+  /// その他のフィールドはオプショナル
   const HotpepperStoreModel({
     required this.id,
     required this.name,
@@ -33,6 +70,10 @@ class HotpepperStoreModel {
     this.catch_,
   });
 
+  /// HotPepper API のJSONレスポンスからモデルを作成
+  ///
+  /// [json] HotPepper API のshopオブジェクト
+  /// 戻り値: [HotpepperStoreModel] インスタンス
   factory HotpepperStoreModel.fromJson(Map<String, dynamic> json) {
     return HotpepperStoreModel(
       id: json['id'] as String,
@@ -52,6 +93,9 @@ class HotpepperStoreModel {
     );
   }
 
+  /// モデルをJSONに変換
+  ///
+  /// 戻り値: JSON形式のMap
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -86,12 +130,28 @@ class HotpepperStoreModel {
   }
 }
 
+/// HotPepper API 検索結果のレスポンスモデル
+///
+/// 店舗検索APIの結果データとページング情報を格納する
 class HotpepperSearchResponse {
+  /// 検索結果の店舗リスト
   final List<HotpepperStoreModel> shops;
+  
+  /// 検索条件に該当する総件数
   final int resultsAvailable;
+  
+  /// 今回のレスポンスで返された件数
   final int resultsReturned;
+  
+  /// 検索開始位置（ページング用）
   final int resultsStart;
 
+  /// HotpepperSearchResponse コンストラクタ
+  ///
+  /// [shops] 店舗リスト
+  /// [resultsAvailable] 総件数
+  /// [resultsReturned] 返却件数
+  /// [resultsStart] 開始位置
   const HotpepperSearchResponse({
     required this.shops,
     required this.resultsAvailable,
@@ -99,6 +159,10 @@ class HotpepperSearchResponse {
     required this.resultsStart,
   });
 
+  /// HotPepper API のJSONレスポンスからモデルを作成
+  ///
+  /// [json] HotPepper API の全体レスポンス
+  /// 戻り値: [HotpepperSearchResponse] インスタンス
   factory HotpepperSearchResponse.fromJson(Map<String, dynamic> json) {
     final results = json['results'] as Map<String, dynamic>;
     final shopList = results['shop'] as List<dynamic>? ?? [];
@@ -114,12 +178,19 @@ class HotpepperSearchResponse {
     );
   }
 
+  /// JSON文字列からレスポンスモデルを作成
+  ///
+  /// [jsonString] HotPepper API からのJSON文字列
+  /// 戻り値: [HotpepperSearchResponse] インスタンス
   static HotpepperSearchResponse fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString) as Map<String, dynamic>;
     return HotpepperSearchResponse.fromJson(json);
   }
 
+  /// 検索結果があるかどうか
   bool get hasResults => shops.isNotEmpty;
+  
+  /// 次のページがあるかどうか
   bool get hasMoreResults =>
       resultsAvailable > resultsStart + resultsReturned - 1;
 
