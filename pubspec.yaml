@@ -54,6 +54,9 @@ dependencies:
   # 状態管理
   # provider: ^6.1.1
   
+  # セキュリティ
+  flutter_secure_storage: ^9.2.2
+  
   # ユーティリティ
   # uuid: ^4.5.1
   # intl: ^0.19.0

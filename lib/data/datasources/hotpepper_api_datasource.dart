@@ -32,8 +32,33 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
     int count = 20,
     int start = 1,
   }) async {
-    final apiKey = AppConfig.hotpepperApiKey;
-    if (!AppConfig.hasHotpepperApiKey) {
+    // パラメータ検証
+    if (lat != null && (lat < -90.0 || lat > 90.0)) {
+      throw ArgumentError('緯度は-90.0から90.0の範囲で指定してください');
+    }
+    if (lng != null && (lng < -180.0 || lng > 180.0)) {
+      throw ArgumentError('経度は-180.0から180.0の範囲で指定してください');
+    }
+    if (range < 1 || range > 5) {
+      throw ArgumentError('検索範囲は1から5の間で指定してください');
+    }
+    if (count < 1 || count > 100) {
+      throw ArgumentError('取得件数は1から100の間で指定してください');
+    }
+    if (start < 1) {
+      throw ArgumentError('検索開始位置は1以上で指定してください');
+    }
+
+    // APIキー取得（本番環境では非同期版を使用）
+    final apiKey = AppConfig.isProduction 
+        ? await AppConfig.hotpepperApiKey 
+        : AppConfig.hotpepperApiKeySync;
+        
+    final hasApiKey = AppConfig.isProduction 
+        ? await AppConfig.hasHotpepperApiKeyAsync 
+        : AppConfig.hasHotpepperApiKey;
+        
+    if (!hasApiKey) {
       throw Exception(
           'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.');
     }
