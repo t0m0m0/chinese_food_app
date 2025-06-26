@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:provider/provider.dart';
 import '../../../domain/entities/store.dart';
+import '../../providers/store_provider.dart';
 
 class SwipePage extends StatefulWidget {
   const SwipePage({super.key});
@@ -11,43 +13,33 @@ class SwipePage extends StatefulWidget {
 
 class _SwipePageState extends State<SwipePage> {
   final CardSwiperController controller = CardSwiperController();
-  List<Store> stores = [];
+  List<Store> _availableStores = [];
 
   @override
   void initState() {
     super.initState();
-    _loadSampleStores();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadStoresFromProvider();
+    });
   }
 
-  void _loadSampleStores() {
-    // サンプルデータ（将来的にはrepositoryから取得）
-    final now = DateTime.now();
-    stores = [
-      Store(
-        id: '1',
-        name: '中華料理 龍',
-        address: '東京都渋谷区1-1-1',
-        lat: 35.6621,
-        lng: 139.7038,
-        createdAt: now,
-      ),
-      Store(
-        id: '2',
-        name: '餃子の王将',
-        address: '東京都新宿区2-2-2',
-        lat: 35.6938,
-        lng: 139.7036,
-        createdAt: now,
-      ),
-      Store(
-        id: '3',
-        name: '町中華 味楽',
-        address: '東京都世田谷区3-3-3',
-        lat: 35.6462,
-        lng: 139.6503,
-        createdAt: now,
-      ),
-    ];
+  /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
+  void _loadStoresFromProvider() {
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+    storeProvider.loadStores().then((_) {
+      if (mounted) {
+        _updateAvailableStores();
+      }
+    });
+  }
+
+  /// 利用可能な店舗リストを更新（状態が未設定の店舗のみ）
+  void _updateAvailableStores() {
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+    setState(() {
+      _availableStores =
+          storeProvider.stores.where((store) => store.status == null).toList();
+    });
   }
 
   bool _onSwipe(
@@ -55,8 +47,8 @@ class _SwipePageState extends State<SwipePage> {
     int? currentIndex,
     CardSwiperDirection direction,
   ) {
-    if (previousIndex < stores.length) {
-      final store = stores[previousIndex];
+    if (previousIndex < _availableStores.length) {
+      final store = _availableStores[previousIndex];
 
       if (direction == CardSwiperDirection.right) {
         // 右スワイプ → 「行きたい」
@@ -70,24 +62,36 @@ class _SwipePageState extends State<SwipePage> {
   }
 
   Future<void> _updateStoreStatus(Store store, StoreStatus status) async {
-    try {
-      // TODO: repositoryを使用してデータベースに保存
-      // final updatedStore = store.copyWith(status: status);
-      // 将来的にはrepository.updateStore(updatedStore)を呼ぶ
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
+    try {
+      await storeProvider.updateStoreStatus(store.id, status);
       debugPrint('店舗 ${store.name} のステータスを ${status.value} に更新');
 
-      // 成功時の処理（スナックバーなど）を追加可能
+      // ローカルリストを更新
+      _updateAvailableStores();
+
+      // 成功時のフィードバック
+      if (mounted) {
+        final statusText = status == StoreStatus.wantToGo ? '行きたい' : '興味なし';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${store.name}を「$statusText」に追加しました'),
+            backgroundColor:
+                status == StoreStatus.wantToGo ? Colors.green : Colors.orange,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (e) {
-      // エラーハンドリング
       debugPrint('店舗ステータス更新エラー: $e');
 
-      // ユーザーへのエラー表示（スナックバーなど）を追加可能
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('エラーが発生しました: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -238,38 +242,98 @@ class _SwipePageState extends State<SwipePage> {
             ),
           ),
           Expanded(
-            child: stores.isEmpty
-                ? Center(
+            child: Consumer<StoreProvider>(
+              builder: (context, storeProvider, child) {
+                if (storeProvider.isLoading) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('店舗データを読み込み中...'),
+                      ],
+                    ),
+                  );
+                }
+
+                if (storeProvider.error != null) {
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.sentiment_neutral,
+                          Icons.error_outline,
                           size: 64,
-                          color: colorScheme.onSurfaceVariant,
+                          color: colorScheme.error,
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'カードがありません',
+                          'エラーが発生しました',
                           style: theme.textTheme.titleLarge?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                            color: colorScheme.error,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          storeProvider.error!,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            storeProvider.clearError();
+                            _loadStoresFromProvider();
+                          },
+                          child: const Text('再試行'),
                         ),
                       ],
                     ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: CardSwiper(
-                      controller: controller,
-                      cardsCount: stores.length,
-                      onSwipe: _onSwipe,
-                      cardBuilder: (context, index, percentThresholdX,
-                          percentThresholdY) {
-                        return _buildStoreCard(stores[index]);
-                      },
-                    ),
-                  ),
+                  );
+                }
+
+                return _availableStores.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.sentiment_satisfied,
+                              size: 64,
+                              color: colorScheme.primary,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'すべての店舗を確認済みです！',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '検索画面で新しい店舗を探してみましょう',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: CardSwiper(
+                          controller: controller,
+                          cardsCount: _availableStores.length,
+                          onSwipe: _onSwipe,
+                          cardBuilder: (context, index, percentThresholdX,
+                              percentThresholdY) {
+                            return _buildStoreCard(_availableStores[index]);
+                          },
+                        ),
+                      );
+              },
+            ),
           ),
           const Text('AppCardSwiper'), // テスト用テキスト
         ],

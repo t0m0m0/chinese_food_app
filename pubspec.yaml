@@ -52,7 +52,7 @@ dependencies:
   # image_picker: ^1.1.2
   
   # 状態管理
-  # provider: ^6.1.1
+  provider: ^6.1.1
   
   # セキュリティ
   flutter_secure_storage: ^9.2.2

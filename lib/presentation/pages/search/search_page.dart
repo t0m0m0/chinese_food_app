@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../../../data/datasources/hotpepper_api_datasource.dart';
 import '../../../data/repositories/store_repository_impl.dart';
 import '../../../data/datasources/store_local_datasource.dart';
@@ -8,6 +9,7 @@ import '../../../core/config/app_config.dart';
 import '../../../domain/usecases/search_stores_usecase.dart';
 import '../../../domain/entities/store.dart';
 import '../../../services/location_service.dart';
+import '../../providers/store_provider.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -302,11 +304,23 @@ class _SearchPageState extends State<SearchPage> {
             ],
           ],
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.favorite_border),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${store.name}を「行きたい」に追加しました')),
+        trailing: Consumer<StoreProvider>(
+          builder: (context, storeProvider, child) {
+            final existingStore = storeProvider.stores
+                .where(
+                    (s) => s.name == store.name && s.address == store.address)
+                .firstOrNull;
+
+            if (existingStore != null) {
+              return Icon(
+                _getStatusIcon(existingStore.status),
+                color: _getStatusColor(existingStore.status),
+              );
+            }
+
+            return IconButton(
+              icon: const Icon(Icons.favorite_border),
+              onPressed: () => _addToWantToGo(store),
             );
           },
         ),
@@ -318,5 +332,63 @@ class _SearchPageState extends State<SearchPage> {
         },
       ),
     );
+  }
+
+  /// 検索結果の店舗を「行きたい」リストに追加
+  Future<void> _addToWantToGo(Store store) async {
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+
+    try {
+      // 検索結果の店舗をステータス付きで追加
+      final storeWithStatus = store.copyWith(status: StoreStatus.wantToGo);
+      await storeProvider.addStore(storeWithStatus);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${store.name}を「行きたい」に追加しました'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('追加に失敗しました: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Color _getStatusColor(StoreStatus? status) {
+    final colorScheme = Theme.of(context).colorScheme;
+    switch (status) {
+      case StoreStatus.wantToGo:
+        return colorScheme.primary;
+      case StoreStatus.visited:
+        return Colors.green;
+      case StoreStatus.bad:
+        return Colors.orange;
+      default:
+        return colorScheme.onSurfaceVariant;
+    }
+  }
+
+  IconData _getStatusIcon(StoreStatus? status) {
+    switch (status) {
+      case StoreStatus.wantToGo:
+        return Icons.favorite;
+      case StoreStatus.visited:
+        return Icons.check_circle;
+      case StoreStatus.bad:
+        return Icons.block;
+      default:
+        return Icons.restaurant;
+    }
   }
 }
