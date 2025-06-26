@@ -39,7 +39,7 @@ void main() {
       final markers = MapService.createMarkersFromStores(testStores);
 
       expect(markers.length, 3);
-      
+
       final markerIds = markers.map((m) => m.markerId.value).toList();
       expect(markerIds, contains('store-1'));
       expect(markerIds, contains('store-2'));
@@ -48,22 +48,20 @@ void main() {
 
     test('should create markers with correct positions', () {
       final markers = MapService.createMarkersFromStores(testStores);
-      
-      final store1Marker = markers.firstWhere(
-        (m) => m.markerId.value == 'store-1'
-      );
-      
+
+      final store1Marker =
+          markers.firstWhere((m) => m.markerId.value == 'store-1');
+
       expect(store1Marker.position.latitude, 35.6917);
       expect(store1Marker.position.longitude, 139.7006);
     });
 
     test('should create markers with correct info windows', () {
       final markers = MapService.createMarkersFromStores(testStores);
-      
-      final store1Marker = markers.firstWhere(
-        (m) => m.markerId.value == 'store-1'
-      );
-      
+
+      final store1Marker =
+          markers.firstWhere((m) => m.markerId.value == 'store-1');
+
       expect(store1Marker.infoWindow.title, '中華料理 龍華楼');
       expect(store1Marker.infoWindow.snippet, '東京都新宿区西新宿1-1-1');
     });
@@ -75,7 +73,7 @@ void main() {
 
     test('should calculate bounds for multiple stores', () {
       final bounds = MapService.calculateBounds(testStores);
-      
+
       expect(bounds, isNotNull);
       expect(bounds!.southwest.latitude, 35.6875); // minimum lat
       expect(bounds.southwest.longitude, 139.6900); // minimum lng
@@ -91,7 +89,7 @@ void main() {
     test('should calculate bounds for single store', () {
       final singleStore = [testStores.first];
       final bounds = MapService.calculateBounds(singleStore);
-      
+
       expect(bounds, isNotNull);
       expect(bounds!.southwest.latitude, 35.6917);
       expect(bounds.southwest.longitude, 139.7006);
@@ -102,7 +100,7 @@ void main() {
     test('should have correct default values', () {
       expect(MapService.defaultMapType, MapType.normal);
       expect(MapService.defaultZoom, 15.0);
-      
+
       // 東京駅の座標をチェック
       expect(MapService.defaultCameraPosition.target.latitude, 35.6812);
       expect(MapService.defaultCameraPosition.target.longitude, 139.7671);

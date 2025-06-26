@@ -121,15 +121,20 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
       if (response.statusCode == 200) {
         return HotpepperSearchResponse.fromJsonString(response.body);
       } else if (response.statusCode == 401) {
-        throw Exception('Invalid API key - Please check your HotPepper API key configuration');
+        throw Exception(
+            'Invalid API key - Please check your HotPepper API key configuration');
       } else if (response.statusCode == 429) {
-        throw Exception('API rate limit exceeded - HotPepper API allows max 5 requests/second and 3000 requests/day');
+        throw Exception(
+            'API rate limit exceeded - HotPepper API allows max 5 requests/second and 3000 requests/day');
       } else if (response.statusCode == 400) {
-        throw Exception('Invalid request parameters - Please check search criteria');
+        throw Exception(
+            'Invalid request parameters - Please check search criteria');
       } else if (response.statusCode >= 500) {
-        throw Exception('HotPepper API server error (${response.statusCode}) - Please try again later');
+        throw Exception(
+            'HotPepper API server error (${response.statusCode}) - Please try again later');
       } else {
-        throw Exception('API request failed with status ${response.statusCode}');
+        throw Exception(
+            'API request failed with status ${response.statusCode}');
       }
     } catch (e) {
       if (e is Exception) {

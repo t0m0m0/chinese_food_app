@@ -7,43 +7,43 @@ import 'dart:convert';
 class HotpepperStoreModel {
   /// 店舗ID（HotPepper API固有）
   final String id;
-  
+
   /// 店舗名
   final String name;
-  
+
   /// 住所
   final String address;
-  
+
   /// 緯度 (WGS84)
   final double? lat;
-  
+
   /// 経度 (WGS84)
   final double? lng;
-  
+
   /// ジャンル名 (例: "中華料理")
   final String? genre;
-  
+
   /// 予算 (例: "～1000円")
   final String? budget;
-  
+
   /// アクセス情報 (例: "JR新宿駅徒歩5分")
   final String? access;
-  
+
   /// PC用URL
   final String? urlPc;
-  
+
   /// モバイル用URL
   final String? urlMobile;
-  
+
   /// 店舗写真URL (Large サイズ)
   final String? photo;
-  
+
   /// 営業時間開始
   final String? open;
-  
+
   /// 営業時間終了
   final String? close;
-  
+
   /// キャッチコピー・特徴
   final String? catch_;
 
@@ -136,13 +136,13 @@ class HotpepperStoreModel {
 class HotpepperSearchResponse {
   /// 検索結果の店舗リスト
   final List<HotpepperStoreModel> shops;
-  
+
   /// 検索条件に該当する総件数
   final int resultsAvailable;
-  
+
   /// 今回のレスポンスで返された件数
   final int resultsReturned;
-  
+
   /// 検索開始位置（ページング用）
   final int resultsStart;
 
@@ -189,7 +189,7 @@ class HotpepperSearchResponse {
 
   /// 検索結果があるかどうか
   bool get hasResults => shops.isNotEmpty;
-  
+
   /// 次のページがあるかどうか
   bool get hasMoreResults =>
       resultsAvailable > resultsStart + resultsReturned - 1;

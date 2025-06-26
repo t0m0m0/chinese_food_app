@@ -30,7 +30,8 @@ class MapService {
   static BitmapDescriptor _getMarkerIcon(StoreStatus status) {
     switch (status) {
       case StoreStatus.wantToGo:
-        return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
+        return BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueOrange);
       case StoreStatus.visited:
         return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
       case StoreStatus.bad:
