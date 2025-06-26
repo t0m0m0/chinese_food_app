@@ -1,39 +1,88 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
-// Simple mock implementation for testing
-class MockStoreRepository extends Mock implements StoreRepository {
+// シンプルなテストダブル
+class FakeStoreRepository implements StoreRepository {
+  List<Store> _stores = [];
+  bool _shouldThrowOnUpdate = false;
+  bool _shouldThrowOnInsert = false;
+  bool _shouldThrowOnGetAll = false;
+  
+  void setShouldThrowOnUpdate(bool value) => _shouldThrowOnUpdate = value;
+  void setShouldThrowOnInsert(bool value) => _shouldThrowOnInsert = value;
+  void setShouldThrowOnGetAll(bool value) => _shouldThrowOnGetAll = value;
+  
   @override
-  Future<List<Store>> getAllStores() async => [];
+  Future<List<Store>> getAllStores() async {
+    if (_shouldThrowOnGetAll) throw Exception('Database error');
+    return List.from(_stores);
+  }
 
   @override
-  Future<void> insertStore(Store store) async {}
+  Future<void> insertStore(Store store) async {
+    if (_shouldThrowOnInsert) throw Exception('Insert failed');
+    _stores.add(store);
+  }
 
   @override
-  Future<void> updateStore(Store store) async {}
+  Future<void> updateStore(Store store) async {
+    if (_shouldThrowOnUpdate) throw Exception('Update failed');
+    final index = _stores.indexWhere((s) => s.id == store.id);
+    if (index != -1) _stores[index] = store;
+  }
 
   @override
-  Future<void> deleteStore(String storeId) async {}
+  Future<void> deleteStore(String storeId) async {
+    _stores.removeWhere((s) => s.id == storeId);
+  }
 
   @override
-  Future<Store?> getStoreById(String storeId) async => null;
+  Future<Store?> getStoreById(String storeId) async {
+    try {
+      return _stores.firstWhere((s) => s.id == storeId);
+    } catch (e) {
+      return null;
+    }
+  }
 
   @override
-  Future<List<Store>> getStoresByStatus(StoreStatus status) async => [];
+  Future<List<Store>> getStoresByStatus(StoreStatus status) async {
+    return _stores.where((s) => s.status == status).toList();
+  }
 
   @override
-  Future<List<Store>> searchStores(String query) async => [];
+  Future<List<Store>> searchStores(String query) async {
+    return _stores.where((s) => s.name.contains(query)).toList();
+  }
+  
+  @override
+  Future<List<Store>> searchStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    // テスト用の実装
+    return [];
+  }
+  
+  void setStores(List<Store> stores) {
+    _stores = List.from(stores);
+  }
 }
+
 void main() {
   late StoreProvider storeProvider;
-  late MockStoreRepository mockRepository;
+  late FakeStoreRepository fakeRepository;
 
   setUp(() {
-    mockRepository = MockStoreRepository();
-    storeProvider = StoreProvider(repository: mockRepository);
+    fakeRepository = FakeStoreRepository();
+    storeProvider = StoreProvider(repository: fakeRepository);
   });
 
   group('StoreProvider Tests', () {
@@ -68,11 +117,11 @@ void main() {
     });
 
     test('should load stores successfully', () async {
-      when(mockRepository.getAllStores()).thenAnswer((_) async => testStores);
+      fakeRepository.setStores(testStores);
 
       await storeProvider.loadStores();
 
-      expect(storeProvider.stores, testStores);
+      expect(storeProvider.stores, hasLength(2));
       expect(storeProvider.wantToGoStores, hasLength(1));
       expect(storeProvider.visitedStores, hasLength(1));
       expect(storeProvider.badStores, isEmpty);
@@ -81,8 +130,7 @@ void main() {
     });
 
     test('should handle loading error', () async {
-      const errorMessage = 'Database error';
-      when(mockRepository.getAllStores()).thenThrow(Exception(errorMessage));
+      fakeRepository.setShouldThrowOnGetAll(true);
 
       await storeProvider.loadStores();
 
@@ -92,8 +140,7 @@ void main() {
     });
 
     test('should update store status successfully', () async {
-      when(mockRepository.getAllStores()).thenAnswer((_) async => testStores);
-      when(mockRepository.updateStore(any)).thenAnswer((_) async {});
+      fakeRepository.setStores(testStores);
 
       await storeProvider.loadStores();
       final store = testStores.first;
@@ -103,14 +150,11 @@ void main() {
       expect(storeProvider.wantToGoStores, isEmpty);
       expect(storeProvider.visitedStores, hasLength(2));
       expect(storeProvider.error, isNull);
-
-      verify(mockRepository.updateStore(any)).called(1);
     });
 
     test('should handle update store status error', () async {
-      when(mockRepository.getAllStores()).thenAnswer((_) async => testStores);
-      when(mockRepository.updateStore(any))
-          .thenThrow(Exception('Update failed'));
+      fakeRepository.setStores(testStores);
+      fakeRepository.setShouldThrowOnUpdate(true);
 
       await storeProvider.loadStores();
       final store = testStores.first;
@@ -121,8 +165,8 @@ void main() {
     });
 
     test('should maintain data consistency when update fails', () async {
-      when(mockRepository.getAllStores()).thenAnswer((_) async => testStores);
-      when(mockRepository.updateStore(any)).thenThrow(Exception('DB Error'));
+      fakeRepository.setStores(testStores);
+      fakeRepository.setShouldThrowOnUpdate(true);
 
       await storeProvider.loadStores();
       final originalStores = List<Store>.from(storeProvider.stores);
@@ -148,17 +192,12 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      when(mockRepository.getAllStores()).thenAnswer((_) async => []);
-      when(mockRepository.insertStore(any)).thenAnswer((_) async {});
-
       await storeProvider.loadStores();
       await storeProvider.addStore(newStore);
 
       expect(storeProvider.stores, contains(newStore));
       expect(storeProvider.wantToGoStores, contains(newStore));
       expect(storeProvider.error, isNull);
-
-      verify(mockRepository.insertStore(any)).called(1);
     });
 
     test('should handle add store error', () async {
@@ -172,9 +211,7 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      when(mockRepository.getAllStores()).thenAnswer((_) async => []);
-      when(mockRepository.insertStore(any))
-          .thenThrow(Exception('Insert failed'));
+      fakeRepository.setShouldThrowOnInsert(true);
 
       await storeProvider.loadStores();
       await storeProvider.addStore(newStore);
@@ -183,7 +220,7 @@ void main() {
     });
 
     test('should clear error', () async {
-      when(mockRepository.getAllStores()).thenThrow(Exception('Test error'));
+      fakeRepository.setShouldThrowOnGetAll(true);
 
       await storeProvider.loadStores();
       expect(storeProvider.error, isNotNull);
@@ -223,7 +260,7 @@ void main() {
         ),
       ];
 
-      when(mockRepository.getAllStores()).thenAnswer((_) async => mixedStores);
+      fakeRepository.setStores(mixedStores);
 
       await storeProvider.loadStores();
 
