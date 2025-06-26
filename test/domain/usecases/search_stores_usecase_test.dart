@@ -269,60 +269,68 @@ void main() {
       // Valid latitude
       expect(() => SearchStoresParams(lat: -90.0, lng: 0.0), returnsNormally);
       expect(() => SearchStoresParams(lat: 90.0, lng: 0.0), returnsNormally);
-      expect(() => SearchStoresParams(lat: 35.6762, lng: 139.6503), returnsNormally);
+      expect(() => SearchStoresParams(lat: 35.6762, lng: 139.6503),
+          returnsNormally);
 
       // Invalid latitude
-      expect(() => SearchStoresParams(lat: -91.0, lng: 0.0), 
-             throwsA(isA<AssertionError>()));
-      expect(() => SearchStoresParams(lat: 91.0, lng: 0.0), 
-             throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(lat: -91.0, lng: 0.0),
+          throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(lat: 91.0, lng: 0.0),
+          throwsA(isA<AssertionError>()));
     });
 
     test('should validate longitude range', () {
       // Valid longitude
       expect(() => SearchStoresParams(lat: 0.0, lng: -180.0), returnsNormally);
       expect(() => SearchStoresParams(lat: 0.0, lng: 180.0), returnsNormally);
-      expect(() => SearchStoresParams(lat: 35.6762, lng: 139.6503), returnsNormally);
+      expect(() => SearchStoresParams(lat: 35.6762, lng: 139.6503),
+          returnsNormally);
 
       // Invalid longitude
-      expect(() => SearchStoresParams(lat: 0.0, lng: -181.0), 
-             throwsA(isA<AssertionError>()));
-      expect(() => SearchStoresParams(lat: 0.0, lng: 181.0), 
-             throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(lat: 0.0, lng: -181.0),
+          throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(lat: 0.0, lng: 181.0),
+          throwsA(isA<AssertionError>()));
     });
 
     test('should validate range parameter', () {
       // Valid range
-      expect(() => SearchStoresParams(range: 1, address: 'test'), returnsNormally);
-      expect(() => SearchStoresParams(range: 5, address: 'test'), returnsNormally);
+      expect(
+          () => SearchStoresParams(range: 1, address: 'test'), returnsNormally);
+      expect(
+          () => SearchStoresParams(range: 5, address: 'test'), returnsNormally);
 
       // Invalid range
-      expect(() => SearchStoresParams(range: 0, address: 'test'), 
-             throwsA(isA<AssertionError>()));
-      expect(() => SearchStoresParams(range: 6, address: 'test'), 
-             throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(range: 0, address: 'test'),
+          throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(range: 6, address: 'test'),
+          throwsA(isA<AssertionError>()));
     });
 
     test('should validate count parameter', () {
       // Valid count
-      expect(() => SearchStoresParams(count: 1, address: 'test'), returnsNormally);
-      expect(() => SearchStoresParams(count: 100, address: 'test'), returnsNormally);
+      expect(
+          () => SearchStoresParams(count: 1, address: 'test'), returnsNormally);
+      expect(() => SearchStoresParams(count: 100, address: 'test'),
+          returnsNormally);
 
       // Invalid count
-      expect(() => SearchStoresParams(count: 0, address: 'test'), 
-             throwsA(isA<AssertionError>()));
-      expect(() => SearchStoresParams(count: 101, address: 'test'), 
-             throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(count: 0, address: 'test'),
+          throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(count: 101, address: 'test'),
+          throwsA(isA<AssertionError>()));
     });
 
     test('should validate start parameter', () {
       // Valid start
-      expect(() => SearchStoresParams(start: 1, address: 'test'), returnsNormally);
-      expect(() => SearchStoresParams(start: 100, address: 'test'), returnsNormally);
+      expect(
+          () => SearchStoresParams(start: 1, address: 'test'), returnsNormally);
+      expect(() => SearchStoresParams(start: 100, address: 'test'),
+          returnsNormally);
 
       // Invalid start
-      expect(() => SearchStoresParams(start: 0, address: 'test'), 
-             throwsA(isA<AssertionError>()));
+      expect(() => SearchStoresParams(start: 0, address: 'test'),
+          throwsA(isA<AssertionError>()));
     });
   });
 

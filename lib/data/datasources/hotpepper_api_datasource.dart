@@ -50,14 +50,14 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
     }
 
     // APIキー取得（本番環境では非同期版を使用）
-    final apiKey = AppConfig.isProduction 
-        ? await AppConfig.hotpepperApiKey 
+    final apiKey = AppConfig.isProduction
+        ? await AppConfig.hotpepperApiKey
         : AppConfig.hotpepperApiKeySync;
-        
-    final hasApiKey = AppConfig.isProduction 
-        ? await AppConfig.hasHotpepperApiKeyAsync 
+
+    final hasApiKey = AppConfig.isProduction
+        ? await AppConfig.hasHotpepperApiKeyAsync
         : AppConfig.hasHotpepperApiKey;
-        
+
     if (!hasApiKey) {
       throw Exception(
           'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.');

@@ -72,16 +72,13 @@ class SearchStoresParams {
     this.range = 3,
     this.count = 20,
     this.start = 1,
-  }) : assert(lat == null || (lat >= -90.0 && lat <= 90.0), 
-           '緯度は-90.0から90.0の範囲で指定してください'),
-       assert(lng == null || (lng >= -180.0 && lng <= 180.0), 
-           '経度は-180.0から180.0の範囲で指定してください'),
-       assert(range >= 1 && range <= 5, 
-           '検索範囲は1から5の間で指定してください'),
-       assert(count >= 1 && count <= 100, 
-           '取得件数は1から100の間で指定してください'),
-       assert(start >= 1, 
-           '検索開始位置は1以上で指定してください');
+  })  : assert(lat == null || (lat >= -90.0 && lat <= 90.0),
+            '緯度は-90.0から90.0の範囲で指定してください'),
+        assert(lng == null || (lng >= -180.0 && lng <= 180.0),
+            '経度は-180.0から180.0の範囲で指定してください'),
+        assert(range >= 1 && range <= 5, '検索範囲は1から5の間で指定してください'),
+        assert(count >= 1 && count <= 100, '取得件数は1から100の間で指定してください'),
+        assert(start >= 1, '検索開始位置は1以上で指定してください');
 
   /// 位置情報による検索が可能かどうか
   bool get hasLocationSearch => lat != null && lng != null;

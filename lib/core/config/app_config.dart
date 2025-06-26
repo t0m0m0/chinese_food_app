@@ -8,7 +8,7 @@ class AppConfig {
   // テスト用のAPIキー保存
   static String? _testHotpepperApiKey;
   static String? _testGoogleMapsApiKey;
-  
+
   // セキュアストレージのインスタンス
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(
@@ -29,7 +29,7 @@ class AppConfig {
     if (_testHotpepperApiKey != null) {
       return _testHotpepperApiKey;
     }
-    
+
     // 本番環境では secure_storage を使用
     if (isProduction) {
       try {
@@ -38,7 +38,7 @@ class AppConfig {
         return null;
       }
     }
-    
+
     // 開発環境では環境変数から取得
     return const String.fromEnvironment('HOTPEPPER_API_KEY');
   }
@@ -50,11 +50,11 @@ class AppConfig {
     if (_testHotpepperApiKey != null) {
       return _testHotpepperApiKey;
     }
-    
+
     if (isProduction) {
       throw UnsupportedError('本番環境では非同期版のAPIキー取得を使用してください');
     }
-    
+
     return const String.fromEnvironment('HOTPEPPER_API_KEY');
   }
 
@@ -74,7 +74,7 @@ class AppConfig {
       // 本番環境では非同期版を使用すべきため、警告を出力
       return false;
     }
-    
+
     final key = hotpepperApiKeySync;
     return key != null && key.isNotEmpty && key != 'YOUR_API_KEY_HERE';
   }
