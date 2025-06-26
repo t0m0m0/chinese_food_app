@@ -152,10 +152,6 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
       
-      print('DEBUG: API returned ${apiStores.length} stores');
-      for (var store in apiStores) {
-        print('DEBUG: API Store: ${store.name}');
-      }
 
       // APIから取得した店舗をローカルリストに追加（重複チェック付き）
       for (final apiStore in apiStores) {
@@ -168,9 +164,6 @@ class StoreProvider extends ChangeNotifier {
           // 新しい店舗として追加（ステータスはnull）
           final newStore = apiStore.copyWith(status: null);
           _stores.add(newStore);
-          print('DEBUG: Added new store: ${newStore.name}');
-        } else {
-          print('DEBUG: Skipped duplicate store: ${apiStore.name}');
         }
       }
 
