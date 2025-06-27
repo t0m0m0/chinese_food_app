@@ -240,11 +240,9 @@ class _SearchPageState extends State<SearchPage> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.search),
-              label: Text(_isGettingLocation 
-                ? '現在地を取得しています...' 
-                : _isLoading 
-                  ? '検索中...' 
-                  : '中華料理店を検索'),
+              label: Text((_isGettingLocation || _isLoading)
+                ? (_isGettingLocation ? '現在地取得中...' : '検索中...')
+                : '中華料理店を検索'),
             ),
           ),
         ],
@@ -260,7 +258,7 @@ class _SearchPageState extends State<SearchPage> {
           children: [
             CircularProgressIndicator(),
             SizedBox(height: 16),
-            Text('現在地を取得しています...'),
+            Text('現在地取得中...'),
           ],
         ),
       );

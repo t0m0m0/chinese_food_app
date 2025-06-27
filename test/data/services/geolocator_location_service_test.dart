@@ -3,9 +3,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/data/services/geolocator_location_service.dart';
 
-/// 🔴 RED: Geolocatorを使った実際の位置情報取得機能のテスト
-/// 現在は実装がないため、全てのテストが失敗するはずです
+/// Geolocatorを使った実際の位置情報取得機能のテスト
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('GeolocatorLocationService Tests', () {
     late GeolocatorLocationService locationService;
 
