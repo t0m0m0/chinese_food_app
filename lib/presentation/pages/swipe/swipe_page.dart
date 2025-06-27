@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
+import '../../../domain/entities/location.dart';
+import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
 
 class SwipePage extends StatefulWidget {
@@ -16,6 +18,8 @@ class SwipePage extends StatefulWidget {
 class _SwipePageState extends State<SwipePage> {
   final CardSwiperController controller = CardSwiperController();
   List<Store> _availableStores = [];
+  bool _isGettingLocation = false;
+  String? _locationError;
 
   @override
   void initState() {
@@ -26,23 +30,80 @@ class _SwipePageState extends State<SwipePage> {
   }
 
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
-  void _loadStoresFromProvider() {
+  void _loadStoresFromProvider() async {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
     // 既存の店舗データを読み込み
-    storeProvider.loadStores().then((_) {
-      // APIから新しい店舗データも取得
-      return storeProvider.loadNewStoresFromApi(
-        // TODO: 将来的には位置情報サービスから取得
+    await storeProvider.loadStores();
+    
+    // 位置情報を取得してAPIから新しい店舗データも取得
+    await _loadStoresWithLocation();
+  }
+
+  /// 位置情報を取得してAPIから店舗データを読み込む
+  Future<void> _loadStoresWithLocation() async {
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+    
+    try {
+      setState(() {
+        _isGettingLocation = true;
+        _locationError = null;
+      });
+
+      // 位置情報サービスを取得（Providerから注入）
+      final locationService = Provider.of<LocationService>(context, listen: false);
+      
+      // 現在位置を取得
+      final location = await locationService.getCurrentLocation();
+      
+      // 位置情報を使ってAPI検索
+      await storeProvider.loadNewStoresFromApi(
+        lat: location.latitude,
+        lng: location.longitude,
+        count: ApiConstants.defaultStoreCount,
+      );
+      
+    } on LocationException {
+      // 位置情報エラーをキャッチし、フォールバック処理
+      setState(() {
+        _locationError = '位置情報の取得に失敗しました';
+      });
+      
+      // フォールバック: デフォルト位置で検索
+      await storeProvider.loadNewStoresFromApi(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
         count: ApiConstants.defaultStoreCount,
       );
-    }).then((_) {
+      
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('デフォルトの場所で検索しています'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      // その他のエラー
+      setState(() {
+        _locationError = 'エラーが発生しました: $e';
+      });
+      
+      // フォールバック: デフォルト位置で検索
+      await storeProvider.loadNewStoresFromApi(
+        lat: ApiConstants.defaultLatitude,
+        lng: ApiConstants.defaultLongitude,
+        count: ApiConstants.defaultStoreCount,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGettingLocation = false;
+        });
         _updateAvailableStores();
       }
-    });
+    }
   }
 
   /// 利用可能な店舗リストを更新（状態が未設定の店舗のみ）
@@ -56,15 +117,8 @@ class _SwipePageState extends State<SwipePage> {
 
   /// プルトゥリフレッシュで新しい店舗データを取得
   Future<void> _refreshStores() async {
-    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
-    await storeProvider.loadNewStoresFromApi(
-      lat: ApiConstants.defaultLatitude,
-      lng: ApiConstants.defaultLongitude,
-      count: ApiConstants.defaultStoreCount,
-    );
-    if (mounted) {
-      _updateAvailableStores();
-    }
+    // 位置情報を再取得してAPIから店舗データを更新
+    await _loadStoresWithLocation();
   }
 
   bool _onSwipe(
@@ -268,6 +322,20 @@ class _SwipePageState extends State<SwipePage> {
           Expanded(
             child: Consumer<StoreProvider>(
               builder: (context, storeProvider, child) {
+                // 位置情報取得中の表示
+                if (_isGettingLocation) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('現在地を取得中...'),
+                      ],
+                    ),
+                  );
+                }
+
                 if (storeProvider.isLoading) {
                   return const Center(
                     child: Column(
@@ -281,7 +349,8 @@ class _SwipePageState extends State<SwipePage> {
                   );
                 }
 
-                if (storeProvider.error != null) {
+                if (storeProvider.error != null || _locationError != null) {
+                  final errorMessage = storeProvider.error ?? _locationError!;
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -300,7 +369,7 @@ class _SwipePageState extends State<SwipePage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          storeProvider.error!,
+                          errorMessage,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium,
                         ),
@@ -308,6 +377,9 @@ class _SwipePageState extends State<SwipePage> {
                         ElevatedButton(
                           onPressed: () {
                             storeProvider.clearError();
+                            setState(() {
+                              _locationError = null;
+                            });
                             _loadStoresFromProvider();
                           },
                           child: const Text('再試行'),
