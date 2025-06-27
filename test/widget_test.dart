@@ -70,7 +70,7 @@ class MockLocationService implements LocationService {
 
 /// テスト用のFakeStoreRepository
 class FakeStoreRepository implements StoreRepository {
-  List<Store> _stores = [];
+  final List<Store> _stores = [];
 
   @override
   Future<List<Store>> getAllStores() async => List.from(_stores);
