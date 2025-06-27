@@ -62,11 +62,12 @@ void main() {
     test('should throw LocationException when location services are disabled', () async {
       // 🔴 このテストは失敗するはずです - サービス無効時の例外処理が実装されていません
       
-      // テスト用にサービス無効状態をシミュレート
-      // （実装時に適切なモック設定が必要）
+      // Mock状態を設定可能なテスト用LocationServiceを作成
+      final testService = MockableGeolocatorLocationService();
+      testService.setLocationServiceEnabled(false);
       
       expect(
-        () async => await locationService.getCurrentLocation(),
+        () async => await testService.getCurrentLocation(),
         throwsA(isA<LocationException>()),
       );
     });
@@ -74,24 +75,42 @@ void main() {
     test('should throw LocationException when permission is denied', () async {
       // 🔴 このテストは失敗するはずです - 権限拒否時の例外処理が実装されていません
       
-      // テスト用に権限拒否状態をシミュレート
-      // （実装時に適切なモック設定が必要）
+      final testService = MockableGeolocatorLocationService();
+      testService.setLocationPermission(LocationPermission.denied);
       
       expect(
-        () async => await locationService.getCurrentLocation(),
+        () async => await testService.getCurrentLocation(),
         throwsA(isA<LocationException>()),
+      );
+    });
+
+    test('should throw LocationException when permission is denied forever', () async {
+      // 🔴 このテストは失敗するはずです - 永続的権限拒否時の例外処理が実装されていません
+      
+      final testService = MockableGeolocatorLocationService();
+      testService.setLocationPermission(LocationPermission.deniedForever);
+      
+      expect(
+        () async => await testService.getCurrentLocation(),
+        throwsA(allOf([
+          isA<LocationException>(),
+          predicate<LocationException>((e) => e.type == LocationExceptionType.permissionDeniedForever),
+        ])),
       );
     });
 
     test('should handle timeout when getting location', () async {
       // 🔴 このテストは失敗するはずです - タイムアウト処理が実装されていません
       
-      // テスト用にタイムアウト状態をシミュレート
-      // （実装時に適切なモック設定が必要）
+      final testService = MockableGeolocatorLocationService();
+      testService.setTimeoutError(true);
       
       expect(
-        () async => await locationService.getCurrentLocation(),
-        throwsA(isA<LocationException>()),
+        () async => await testService.getCurrentLocation(),
+        throwsA(allOf([
+          isA<LocationException>(),
+          predicate<LocationException>((e) => e.type == LocationExceptionType.timeout),
+        ])),
       );
     });
 
@@ -122,4 +141,80 @@ void main() {
       expect(location.timestamp, equals(mockPosition.timestamp));
     });
   });
+}
+
+/// テスト用のMockable GeolocatorLocationService
+/// エラー状態をシミュレートできる
+class MockableGeolocatorLocationService extends GeolocatorLocationService {
+  bool _isLocationServiceEnabled = true;
+  LocationPermission _locationPermission = LocationPermission.whileInUse;
+  bool _shouldTimeoutError = false;
+
+  void setLocationServiceEnabled(bool enabled) {
+    _isLocationServiceEnabled = enabled;
+  }
+
+  void setLocationPermission(LocationPermission permission) {
+    _locationPermission = permission;
+  }
+
+  void setTimeoutError(bool shouldTimeout) {
+    _shouldTimeoutError = shouldTimeout;
+  }
+
+  @override
+  Future<Location> getCurrentLocation() async {
+    // 🔴 このオーバーライドは現在失敗するはずです - エラーハンドリングが実装されていません
+    
+    if (!_isLocationServiceEnabled) {
+      throw LocationException(
+        'Location services are disabled',
+        LocationExceptionType.serviceDisabled,
+      );
+    }
+
+    if (_locationPermission == LocationPermission.denied) {
+      throw LocationException(
+        'Location permission denied',
+        LocationExceptionType.permissionDenied,
+      );
+    }
+
+    if (_locationPermission == LocationPermission.deniedForever) {
+      throw LocationException(
+        'Location permission denied forever',
+        LocationExceptionType.permissionDeniedForever,
+      );
+    }
+
+    if (_shouldTimeoutError) {
+      throw LocationException(
+        'Location request timed out',
+        LocationExceptionType.timeout,
+      );
+    }
+
+    // 正常時は親クラスの実装を呼び出し
+    return super.getCurrentLocation();
+  }
+
+  @override
+  Future<bool> isLocationServiceEnabled() async {
+    return _isLocationServiceEnabled;
+  }
+
+  @override
+  Future<bool> hasLocationPermission() async {
+    return _locationPermission == LocationPermission.whileInUse ||
+           _locationPermission == LocationPermission.always;
+  }
+
+  @override
+  Future<bool> requestLocationPermission() async {
+    if (_locationPermission == LocationPermission.deniedForever) {
+      return false;
+    }
+    _locationPermission = LocationPermission.whileInUse;
+    return true;
+  }
 }
