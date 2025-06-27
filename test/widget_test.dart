@@ -15,6 +15,9 @@ void main() {
     // アプリをビルドしてフレームをトリガー
     await tester.pumpWidget(const MyApp());
 
+    // 非同期処理（API呼び出し）の完了を待つ
+    await tester.pumpAndSettle();
+
     // BottomNavigationBarが表示されることを確認
     expect(find.byType(BottomNavigationBar), findsOneWidget);
 
@@ -40,7 +43,7 @@ void main() {
     // 検索タブをタップして画面遷移をテスト
     await tester.tap(find.descendant(
         of: find.byType(BottomNavigationBar), matching: find.text('検索')));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // 検索ページが表示されることを確認（実装済みUI）
     expect(find.text('現在地で検索'), findsOneWidget);
@@ -49,7 +52,7 @@ void main() {
     // マイメニュータブをタップして画面遷移をテスト
     await tester.tap(find.descendant(
         of: find.byType(BottomNavigationBar), matching: find.text('マイメニュー')));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // マイメニューページが表示されることを確認（実装済み）
     expect(find.text('行きたい'), findsOneWidget);

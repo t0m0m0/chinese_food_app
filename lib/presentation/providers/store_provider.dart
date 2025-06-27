@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/utils/error_message_helper.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
@@ -51,6 +52,11 @@ class StoreProvider extends ChangeNotifier {
     _cachedBadStores ??=
         _stores.where((store) => store.status == StoreStatus.bad).toList();
     return List.unmodifiable(_cachedBadStores!);
+  }
+
+  /// スワイプ用の新しい店舗（ステータス未設定）リスト
+  List<Store> get newStores {
+    return _stores.where((store) => store.status == null).toList();
   }
 
   /// リポジトリから全ての店舗データを取得
@@ -125,6 +131,57 @@ class StoreProvider extends ChangeNotifier {
   /// エラーをクリア
   void clearError() {
     _clearError();
+  }
+
+  /// HotPepper APIから新しい店舗データを検索して追加
+  Future<void> loadNewStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword = '中華',
+    int count = 10,
+  }) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final apiStores = await repository.searchStoresFromApi(
+        lat: lat,
+        lng: lng,
+        address: address,
+        keyword: keyword,
+        count: count,
+      );
+
+      // APIから取得した店舗をローカルリストに追加（強化された重複チェック付き）
+      for (final apiStore in apiStores) {
+        // 既存の店舗と重複しているかチェック（名前・住所・座標）
+        final isDuplicate = _stores.any((store) =>
+            store.name == apiStore.name &&
+            store.address == apiStore.address &&
+            (store.lat - apiStore.lat).abs() <
+                ApiConstants.duplicateThreshold &&
+            (store.lng - apiStore.lng).abs() < ApiConstants.duplicateThreshold);
+
+        if (!isDuplicate) {
+          // 新しい店舗として追加（ステータスはnull）
+          final newStore = apiStore.copyWith(status: null);
+          _stores.add(newStore);
+        }
+      }
+
+      // 空の結果時のユーザーフレンドリーなメッセージ
+      if (apiStores.isEmpty) {
+        _setError('近くに新しい中華料理店が見つかりませんでした。検索範囲を広げてみてください。');
+        return;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      _setError('新しい店舗の取得に失敗しました');
+    } finally {
+      _setLoading(false);
+    }
   }
 
   @override

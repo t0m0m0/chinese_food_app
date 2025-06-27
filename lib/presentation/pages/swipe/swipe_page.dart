@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
@@ -27,7 +28,17 @@ class _SwipePageState extends State<SwipePage> {
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
   void _loadStoresFromProvider() {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+
+    // 既存の店舗データを読み込み
     storeProvider.loadStores().then((_) {
+      // APIから新しい店舗データも取得
+      return storeProvider.loadNewStoresFromApi(
+        // TODO: 将来的には位置情報サービスから取得
+        lat: ApiConstants.defaultLatitude,
+        lng: ApiConstants.defaultLongitude,
+        count: ApiConstants.defaultStoreCount,
+      );
+    }).then((_) {
       if (mounted) {
         _updateAvailableStores();
       }
@@ -41,6 +52,19 @@ class _SwipePageState extends State<SwipePage> {
       _availableStores =
           storeProvider.stores.where((store) => store.status == null).toList();
     });
+  }
+
+  /// プルトゥリフレッシュで新しい店舗データを取得
+  Future<void> _refreshStores() async {
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+    await storeProvider.loadNewStoresFromApi(
+      lat: ApiConstants.defaultLatitude,
+      lng: ApiConstants.defaultLongitude,
+      count: ApiConstants.defaultStoreCount,
+    );
+    if (mounted) {
+      _updateAvailableStores();
+    }
   }
 
   bool _onSwipe(
@@ -251,7 +275,7 @@ class _SwipePageState extends State<SwipePage> {
                       children: [
                         CircularProgressIndicator(),
                         SizedBox(height: 16),
-                        Text('店舗データを読み込み中...'),
+                        Text('新しい店舗を読み込み中...'),
                       ],
                     ),
                   );
@@ -320,16 +344,19 @@ class _SwipePageState extends State<SwipePage> {
                           ],
                         ),
                       )
-                    : Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: CardSwiper(
-                          controller: controller,
-                          cardsCount: _availableStores.length,
-                          onSwipe: _onSwipe,
-                          cardBuilder: (context, index, percentThresholdX,
-                              percentThresholdY) {
-                            return _buildStoreCard(_availableStores[index]);
-                          },
+                    : RefreshIndicator(
+                        onRefresh: _refreshStores,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: CardSwiper(
+                            controller: controller,
+                            cardsCount: _availableStores.length,
+                            onSwipe: _onSwipe,
+                            cardBuilder: (context, index, percentThresholdX,
+                                percentThresholdY) {
+                              return _buildStoreCard(_availableStores[index]);
+                            },
+                          ),
                         ),
                       );
               },
