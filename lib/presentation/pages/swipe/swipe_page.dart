@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
+import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
@@ -32,10 +33,10 @@ class _SwipePageState extends State<SwipePage> {
     storeProvider.loadStores().then((_) {
       // APIから新しい店舗データも取得
       return storeProvider.loadNewStoresFromApi(
-        // テスト環境では現在地を使用（実際の実装では位置情報サービスを使用）
-        lat: 35.6917,
-        lng: 139.7006,
-        count: 10,
+        // TODO: 将来的には位置情報サービスから取得
+        lat: ApiConstants.defaultLatitude,
+        lng: ApiConstants.defaultLongitude,
+        count: ApiConstants.defaultStoreCount,
       );
     }).then((_) {
       if (mounted) {
@@ -57,9 +58,9 @@ class _SwipePageState extends State<SwipePage> {
   Future<void> _refreshStores() async {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
     await storeProvider.loadNewStoresFromApi(
-      lat: 35.6917,
-      lng: 139.7006,
-      count: 10,
+      lat: ApiConstants.defaultLatitude,
+      lng: ApiConstants.defaultLongitude,
+      count: ApiConstants.defaultStoreCount,
     );
     if (mounted) {
       _updateAvailableStores();

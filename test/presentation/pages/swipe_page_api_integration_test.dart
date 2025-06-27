@@ -8,7 +8,7 @@ import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 
 /// 🔴 RED: SwipePageでHotPepper APIから新しい店舗データを表示するための失敗するテスト
 void main() {
-  group('SwipePage API Integration Tests - TDD Red Phase', () {
+  group('SwipePage API Integration Tests', () {
     late FakeStoreRepository fakeRepository;
     late StoreProvider storeProvider;
 
@@ -28,8 +28,7 @@ void main() {
       );
     }
 
-    testWidgets(
-        '🔴 RED: should load and display new stores from HotPepper API for swiping',
+    testWidgets('should load API stores for swiping',
         (WidgetTester tester) async {
       // このテストは現在失敗するはずです
       // SwipePageが新しいAPI店舗データを表示できるようになる必要があります
@@ -87,7 +86,7 @@ void main() {
       expect(find.byType(Card), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('🔴 RED: should show loading indicator while fetching API data',
+    testWidgets('should show loading during API fetch',
         (WidgetTester tester) async {
       // API データ取得中のローディング表示をテスト
       fakeRepository.setShouldDelayApiResponse(true);
@@ -109,7 +108,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('🔴 RED: should handle API error and show retry option',
+    testWidgets('should handle API errors with retry option',
         (WidgetTester tester) async {
       // API エラー時の適切なハンドリングをテスト
       fakeRepository.setShouldThrowOnApiSearch(true);
@@ -126,8 +125,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets(
-        '🔴 RED: should refresh API data when user performs pull-to-refresh',
+    testWidgets('should refresh API data on pull-to-refresh',
         (WidgetTester tester) async {
       // プルトゥリフレッシュでAPIデータを再取得するテスト
       final initialApiStores = [

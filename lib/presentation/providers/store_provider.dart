@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../core/constants/api_constants.dart';
 import '../../core/utils/error_message_helper.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
@@ -152,19 +153,27 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
 
-      // APIから取得した店舗をローカルリストに追加（重複チェック付き）
+      // APIから取得した店舗をローカルリストに追加（強化された重複チェック付き）
       for (final apiStore in apiStores) {
-        // 既存の店舗と重複しているかチェック
-        final isDuplicate = _stores.any(
-          (store) =>
-              store.name == apiStore.name && store.address == apiStore.address,
-        );
+        // 既存の店舗と重複しているかチェック（名前・住所・座標）
+        final isDuplicate = _stores.any((store) =>
+            store.name == apiStore.name &&
+            store.address == apiStore.address &&
+            (store.lat - apiStore.lat).abs() <
+                ApiConstants.duplicateThreshold &&
+            (store.lng - apiStore.lng).abs() < ApiConstants.duplicateThreshold);
 
         if (!isDuplicate) {
           // 新しい店舗として追加（ステータスはnull）
           final newStore = apiStore.copyWith(status: null);
           _stores.add(newStore);
         }
+      }
+
+      // 空の結果時のユーザーフレンドリーなメッセージ
+      if (apiStores.isEmpty) {
+        _setError('近くに新しい中華料理店が見つかりませんでした。検索範囲を広げてみてください。');
+        return;
       }
 
       notifyListeners();
