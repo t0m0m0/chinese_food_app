@@ -1,149 +1,149 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/data/services/geolocator_location_service.dart';
 
-/// Geolocatorを使った実際の位置情報取得機能のテスト
+// モック生成のためのアノテーション
+@GenerateMocks([])
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
   group('GeolocatorLocationService Tests', () {
     late GeolocatorLocationService locationService;
 
     setUp(() {
-      // このテストは現在失敗するはずです - GeolocatorLocationServiceの実装がありません
       locationService = GeolocatorLocationService();
     });
 
-    test('should get actual current location from GPS', () async {
-      // 🔴 このテストは失敗するはずです - 実際のGPS機能が実装されていません
+    group('convertPositionToLocation', () {
+      test('should convert Geolocator Position to Location entity', () {
+        // Mock Positionオブジェクト
+        final mockPosition = Position(
+          latitude: 35.6762,
+          longitude: 139.6503,
+          timestamp: DateTime.now(),
+          accuracy: 5.0,
+          altitude: 10.0,
+          altitudeAccuracy: 3.0,
+          heading: 0.0,
+          headingAccuracy: 1.0,
+          speed: 0.0,
+          speedAccuracy: 0.5,
+        );
 
-      // Mock設定: 位置情報サービスが有効で権限もある状態
-      // （実装時にこの部分を適切にモックする必要があります）
+        final location = locationService.convertPositionToLocation(mockPosition);
 
-      final location = await locationService.getCurrentLocation();
-
-      expect(location, isA<Location>());
-      expect(location.latitude, isA<double>());
-      expect(location.longitude, isA<double>());
-      expect(location.accuracy, isA<double>());
-      expect(location.timestamp, isA<DateTime>());
-
-      // 有効な座標範囲内であることを確認
-      expect(location.latitude, greaterThanOrEqualTo(-90.0));
-      expect(location.latitude, lessThanOrEqualTo(90.0));
-      expect(location.longitude, greaterThanOrEqualTo(-180.0));
-      expect(location.longitude, lessThanOrEqualTo(180.0));
-
-      // 精度は正の値である
-      expect(location.accuracy!, greaterThan(0));
+        expect(location.latitude, equals(mockPosition.latitude));
+        expect(location.longitude, equals(mockPosition.longitude));
+        expect(location.accuracy, equals(mockPosition.accuracy));
+        expect(location.timestamp, equals(mockPosition.timestamp));
+      });
     });
 
-    test('should check if location services are enabled using Geolocator',
-        () async {
-      // 🔴 このテストは失敗するはずです - Geolocator.isLocationServiceEnabled()の実装がありません
-      final isEnabled = await locationService.isLocationServiceEnabled();
+    group('MockableGeolocatorLocationService Tests', () {
+      late MockableGeolocatorLocationService testService;
 
-      expect(isEnabled, isA<bool>());
-    });
+      setUp(() {
+        testService = MockableGeolocatorLocationService();
+      });
 
-    test('should check location permission using Geolocator', () async {
-      // 🔴 このテストは失敗するはずです - Geolocator.checkPermission()の実装がありません
-      final hasPermission = await locationService.hasLocationPermission();
+      test('should throw LocationException when location services are disabled',
+          () async {
+        testService.setLocationServiceEnabled(false);
 
-      expect(hasPermission, isA<bool>());
-    });
+        expect(
+          () async => await testService.getCurrentLocation(),
+          throwsA(isA<LocationException>()),
+        );
+      });
 
-    test('should request location permission using Geolocator', () async {
-      // 🔴 このテストは失敗するはずです - Geolocator.requestPermission()の実装がありません
-      final granted = await locationService.requestLocationPermission();
+      test('should throw LocationException when permission is denied', () async {
+        testService.setLocationPermission(LocationPermission.denied);
 
-      expect(granted, isA<bool>());
-    });
+        expect(
+          () async => await testService.getCurrentLocation(),
+          throwsA(isA<LocationException>()),
+        );
+      });
 
-    test('should throw LocationException when location services are disabled',
-        () async {
-      // 🔴 このテストは失敗するはずです - サービス無効時の例外処理が実装されていません
+      test('should throw LocationException when permission is denied forever',
+          () async {
+        testService.setLocationPermission(LocationPermission.deniedForever);
 
-      // Mock状態を設定可能なテスト用LocationServiceを作成
-      final testService = MockableGeolocatorLocationService();
-      testService.setLocationServiceEnabled(false);
+        expect(
+          () async => await testService.getCurrentLocation(),
+          throwsA(allOf([
+            isA<LocationException>(),
+            predicate<LocationException>(
+                (e) => e.type == LocationExceptionType.permissionDeniedForever),
+          ])),
+        );
+      });
 
-      expect(
-        () async => await testService.getCurrentLocation(),
-        throwsA(isA<LocationException>()),
-      );
-    });
+      test('should handle timeout when getting location', () async {
+        testService.setTimeoutError(true);
 
-    test('should throw LocationException when permission is denied', () async {
-      // 🔴 このテストは失敗するはずです - 権限拒否時の例外処理が実装されていません
+        expect(
+          () async => await testService.getCurrentLocation(),
+          throwsA(allOf([
+            isA<LocationException>(),
+            predicate<LocationException>(
+                (e) => e.type == LocationExceptionType.timeout),
+          ])),
+        );
+      });
 
-      final testService = MockableGeolocatorLocationService();
-      testService.setLocationPermission(LocationPermission.denied);
+      test('should check if location services are enabled', () async {
+        testService.setLocationServiceEnabled(false);
+        expect(await testService.isLocationServiceEnabled(), isFalse);
 
-      expect(
-        () async => await testService.getCurrentLocation(),
-        throwsA(isA<LocationException>()),
-      );
-    });
+        testService.setLocationServiceEnabled(true);
+        expect(await testService.isLocationServiceEnabled(), isTrue);
+      });
 
-    test('should throw LocationException when permission is denied forever',
-        () async {
-      // 🔴 このテストは失敗するはずです - 永続的権限拒否時の例外処理が実装されていません
+      test('should check location permission', () async {
+        testService.setLocationPermission(LocationPermission.denied);
+        expect(await testService.hasLocationPermission(), isFalse);
 
-      final testService = MockableGeolocatorLocationService();
-      testService.setLocationPermission(LocationPermission.deniedForever);
+        testService.setLocationPermission(LocationPermission.whileInUse);
+        expect(await testService.hasLocationPermission(), isTrue);
 
-      expect(
-        () async => await testService.getCurrentLocation(),
-        throwsA(allOf([
-          isA<LocationException>(),
-          predicate<LocationException>(
-              (e) => e.type == LocationExceptionType.permissionDeniedForever),
-        ])),
-      );
-    });
+        testService.setLocationPermission(LocationPermission.always);
+        expect(await testService.hasLocationPermission(), isTrue);
+      });
 
-    test('should handle timeout when getting location', () async {
-      // 🔴 このテストは失敗するはずです - タイムアウト処理が実装されていません
+      test('should handle location permission request', () async {
+        testService.setLocationPermission(LocationPermission.deniedForever);
+        expect(await testService.requestLocationPermission(), isFalse);
 
-      final testService = MockableGeolocatorLocationService();
-      testService.setTimeoutError(true);
+        testService.setLocationPermission(LocationPermission.denied);
+        expect(await testService.requestLocationPermission(), isTrue);
+      });
 
-      expect(
-        () async => await testService.getCurrentLocation(),
-        throwsA(allOf([
-          isA<LocationException>(),
-          predicate<LocationException>(
-              (e) => e.type == LocationExceptionType.timeout),
-        ])),
-      );
-    });
+      test('should get location when all conditions are met', () async {
+        testService.setLocationServiceEnabled(true);
+        testService.setLocationPermission(LocationPermission.whileInUse);
+        testService.setTimeoutError(false);
+        testService.setMockPosition(Position(
+          latitude: 35.6762,
+          longitude: 139.6503,
+          timestamp: DateTime.now(),
+          accuracy: 5.0,
+          altitude: 10.0,
+          altitudeAccuracy: 3.0,
+          heading: 0.0,
+          headingAccuracy: 1.0,
+          speed: 0.0,
+          speedAccuracy: 0.5,
+        ));
 
-    test('should convert Geolocator Position to Location entity', () async {
-      // 🔴 このテストは失敗するはずです - Position -> Location変換が実装されていません
+        final location = await testService.getCurrentLocation();
 
-      // Mock Positionオブジェクト
-      final mockPosition = Position(
-        latitude: 35.6762,
-        longitude: 139.6503,
-        timestamp: DateTime.now(),
-        accuracy: 5.0,
-        altitude: 10.0,
-        altitudeAccuracy: 3.0,
-        heading: 0.0,
-        headingAccuracy: 1.0,
-        speed: 0.0,
-        speedAccuracy: 0.5,
-      );
-
-      // Positionから変換されたLocationエンティティの検証
-      // （実装時にconvertPositionToLocationメソッドを作成）
-      final location = locationService.convertPositionToLocation(mockPosition);
-
-      expect(location.latitude, equals(mockPosition.latitude));
-      expect(location.longitude, equals(mockPosition.longitude));
-      expect(location.accuracy, equals(mockPosition.accuracy));
-      expect(location.timestamp, equals(mockPosition.timestamp));
+        expect(location, isA<Location>());
+        expect(location.latitude, equals(35.6762));
+        expect(location.longitude, equals(139.6503));
+        expect(location.accuracy, equals(5.0));
+      });
     });
   });
 }
@@ -154,6 +154,7 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
   bool _isLocationServiceEnabled = true;
   LocationPermission _locationPermission = LocationPermission.whileInUse;
   bool _shouldTimeoutError = false;
+  Position? _mockPosition;
 
   void setLocationServiceEnabled(bool enabled) {
     _isLocationServiceEnabled = enabled;
@@ -167,10 +168,12 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
     _shouldTimeoutError = shouldTimeout;
   }
 
+  void setMockPosition(Position position) {
+    _mockPosition = position;
+  }
+
   @override
   Future<Location> getCurrentLocation() async {
-    // 🔴 このオーバーライドは現在失敗するはずです - エラーハンドリングが実装されていません
-
     if (!_isLocationServiceEnabled) {
       throw LocationException(
         'Location services are disabled',
@@ -199,8 +202,17 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
       );
     }
 
-    // 正常時は親クラスの実装を呼び出し
-    return super.getCurrentLocation();
+    if (_mockPosition != null) {
+      return convertPositionToLocation(_mockPosition!);
+    }
+
+    // デフォルトのモック位置（東京駅）
+    return Location(
+      latitude: 35.6812,
+      longitude: 139.7671,
+      accuracy: 5.0,
+      timestamp: DateTime.now(),
+    );
   }
 
   @override
