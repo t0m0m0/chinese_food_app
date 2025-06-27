@@ -14,7 +14,7 @@ void main() {
   testWidgets('町中華アプリの基本構造テスト', (WidgetTester tester) async {
     // アプリをビルドしてフレームをトリガー
     await tester.pumpWidget(const MyApp());
-    
+
     // 非同期処理（API呼び出し）の完了を待つ
     await tester.pumpAndSettle();
 
