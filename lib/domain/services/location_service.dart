@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../entities/location.dart';
 
 /// 位置情報サービスのインターフェース
@@ -15,7 +16,12 @@ abstract class LocationService {
   Future<bool> requestLocationPermission();
 }
 
-/// LocationServiceの最小実装（テストを通すため）
+/// LocationServiceのテスト専用実装
+/// 
+/// 注意: この実装は開発・テスト用のダミー実装です。
+/// 本番環境では実際のGeolocatorLocationServiceを使用してください。
+/// TDD開発プロセスの履歴として残されています。
+@visibleForTesting
 class LocationServiceImpl implements LocationService {
   @override
   Future<Location> getCurrentLocation() async {
