@@ -16,7 +16,7 @@ void main() {
     test('should get current location successfully', () async {
       // 🔴 このテストは失敗するはずです - getCurrentLocation()が実装されていません
       final location = await locationService.getCurrentLocation();
-      
+
       expect(location, isA<Location>());
       expect(location.latitude, isA<double>());
       expect(location.longitude, isA<double>());
@@ -29,25 +29,26 @@ void main() {
     test('should check if location services are enabled', () async {
       // 🔴 このテストは失敗するはずです - isLocationServiceEnabled()が実装されていません
       final isEnabled = await locationService.isLocationServiceEnabled();
-      
+
       expect(isEnabled, isA<bool>());
     });
 
     test('should check location permissions', () async {
       // 🔴 このテストは失敗するはずです - hasLocationPermission()が実装されていません
       final hasPermission = await locationService.hasLocationPermission();
-      
+
       expect(hasPermission, isA<bool>());
     });
 
     test('should request location permissions', () async {
       // 🔴 このテストは失敗するはずです - requestLocationPermission()が実装されていません
       final granted = await locationService.requestLocationPermission();
-      
+
       expect(granted, isA<bool>());
     });
 
-    test('should throw LocationException when location services are disabled', () async {
+    test('should throw LocationException when location services are disabled',
+        () async {
       // 🔴 このテストは失敗するはずです - LocationExceptionが定義されていません
       // テスト用のLocationServiceの設定が必要になります（実装時に追加）
       expect(

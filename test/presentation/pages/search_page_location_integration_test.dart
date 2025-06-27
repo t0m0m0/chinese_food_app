@@ -38,7 +38,7 @@ void main() {
     testWidgets('should use current location when "現在地で検索" is selected',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - SearchPageが位置情報サービスを使用していません
-      
+
       // Mock位置情報（新宿）
       final mockLocation = Location(
         latitude: 35.6896,
@@ -47,7 +47,7 @@ void main() {
         timestamp: DateTime.now(),
       );
       mockLocationService.setMockLocation(mockLocation);
-      
+
       // API検索で返される店舗データ
       final locationBasedStores = [
         Store(
@@ -80,7 +80,7 @@ void main() {
       expect(mockLocationService.getCurrentLocationCalled, isTrue);
       expect(fakeRepository.lastSearchLat, equals(mockLocation.latitude));
       expect(fakeRepository.lastSearchLng, equals(mockLocation.longitude));
-      
+
       // 位置ベースの検索結果が表示されることを確認
       expect(find.text('新宿の中華料理店'), findsOneWidget);
     });
@@ -88,14 +88,13 @@ void main() {
     testWidgets('should not use location service when "住所で検索" is selected',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 住所検索時に位置情報を使わない実装がありません
-      
+
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
       // 「住所で検索」を選択
       final addressRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.value == false);
+          widget is RadioListTile<bool> && widget.value == false);
       await tester.tap(addressRadio);
       await tester.pumpAndSettle();
 
@@ -112,7 +111,7 @@ void main() {
 
       // 位置情報サービスが呼ばれていないことを確認
       expect(mockLocationService.getCurrentLocationCalled, isFalse);
-      
+
       // 住所検索が実行されることを確認
       expect(fakeRepository.lastSearchAddress, equals('東京都渋谷区'));
     });
@@ -120,7 +119,7 @@ void main() {
     testWidgets('should show location permission error dialog',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 位置情報権限エラーダイアログが実装されていません
-      
+
       mockLocationService.setLocationError(LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
@@ -143,7 +142,7 @@ void main() {
     testWidgets('should show location loading state during search',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 位置情報取得中のローディング状態が実装されていません
-      
+
       mockLocationService.setLocationDelay(Duration(seconds: 2));
 
       await tester.pumpWidget(createTestWidget());
@@ -167,14 +166,13 @@ void main() {
     testWidgets('should remember search mode preference',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 検索モード記憶機能が実装されていません
-      
+
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
       // 「住所で検索」を選択
       final addressRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.value == false);
+          widget is RadioListTile<bool> && widget.value == false);
       await tester.tap(addressRadio);
       await tester.pumpAndSettle();
 
@@ -250,7 +248,7 @@ class FakeStoreRepository implements StoreRepository {
     lastSearchLat = lat;
     lastSearchLng = lng;
     lastSearchAddress = address;
-    
+
     return List.from(_apiStores);
   }
 }
@@ -281,19 +279,19 @@ class MockLocationService implements LocationService {
   Future<Location> getCurrentLocation() async {
     getCurrentLocationCalled = true;
     getCurrentLocationCallCount++;
-    
+
     if (_delay > Duration.zero) {
       await Future.delayed(_delay);
     }
-    
+
     if (_locationError != null) {
       throw _locationError!;
     }
-    
+
     if (_mockLocation != null) {
       return _mockLocation!;
     }
-    
+
     // デフォルト位置（東京駅）
     return Location(
       latitude: 35.6762,

@@ -35,7 +35,7 @@ class _SwipePageState extends State<SwipePage> {
 
     // 既存の店舗データを読み込み
     await storeProvider.loadStores();
-    
+
     // 位置情報を取得してAPIから新しい店舗データも取得
     await _loadStoresWithLocation();
   }
@@ -43,7 +43,7 @@ class _SwipePageState extends State<SwipePage> {
   /// 位置情報を取得してAPIから店舗データを読み込む
   Future<void> _loadStoresWithLocation() async {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
-    
+
     try {
       setState(() {
         _isGettingLocation = true;
@@ -51,31 +51,31 @@ class _SwipePageState extends State<SwipePage> {
       });
 
       // 位置情報サービスを取得（Providerから注入）
-      final locationService = Provider.of<LocationService>(context, listen: false);
-      
+      final locationService =
+          Provider.of<LocationService>(context, listen: false);
+
       // 現在位置を取得
       final location = await locationService.getCurrentLocation();
-      
+
       // 位置情報を使ってAPI検索
       await storeProvider.loadNewStoresFromApi(
         lat: location.latitude,
         lng: location.longitude,
         count: ApiConstants.defaultStoreCount,
       );
-      
     } on LocationException {
       // 位置情報エラーをキャッチし、フォールバック処理
       setState(() {
         _locationError = '位置情報の取得に失敗しました';
       });
-      
+
       // フォールバック: デフォルト位置で検索
       await storeProvider.loadNewStoresFromApi(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
         count: ApiConstants.defaultStoreCount,
       );
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -89,7 +89,7 @@ class _SwipePageState extends State<SwipePage> {
       setState(() {
         _locationError = 'エラーが発生しました: $e';
       });
-      
+
       // フォールバック: デフォルト位置で検索
       await storeProvider.loadNewStoresFromApi(
         lat: ApiConstants.defaultLatitude,

@@ -35,10 +35,11 @@ void main() {
       );
     }
 
-    testWidgets('should use current location for API search instead of hardcoded coordinates',
+    testWidgets(
+        'should use current location for API search instead of hardcoded coordinates',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - SwipePageが位置情報サービスを使用していません
-      
+
       // Mock位置情報（渋谷）
       final mockLocation = Location(
         latitude: 35.6580,
@@ -47,7 +48,7 @@ void main() {
         timestamp: DateTime.now(),
       );
       mockLocationService.setMockLocation(mockLocation);
-      
+
       // API検索で返される店舗データ
       final locationBasedStores = [
         Store(
@@ -69,7 +70,7 @@ void main() {
       expect(mockLocationService.getCurrentLocationCalled, isTrue);
       expect(fakeRepository.lastSearchLat, equals(mockLocation.latitude));
       expect(fakeRepository.lastSearchLng, equals(mockLocation.longitude));
-      
+
       // 位置ベースの検索結果が表示されることを確認
       expect(find.text('渋谷の中華料理店'), findsOneWidget);
     });
@@ -77,7 +78,7 @@ void main() {
     testWidgets('should handle location permission denied gracefully',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 位置情報権限エラーハンドリングが実装されていません
-      
+
       mockLocationService.setLocationError(LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
@@ -89,7 +90,7 @@ void main() {
       // エラーメッセージまたはフォールバック動作が表示されることを確認
       expect(find.text('位置情報の取得に失敗しました'), findsOneWidget);
       expect(find.text('デフォルトの場所で検索しています'), findsOneWidget);
-      
+
       // フォールバック位置（東京駅）が使用されることを確認
       expect(fakeRepository.lastSearchLat, equals(35.6762));
       expect(fakeRepository.lastSearchLng, equals(139.6503));
@@ -98,7 +99,7 @@ void main() {
     testWidgets('should show loading state while getting location',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 位置情報取得中のローディング状態が実装されていません
-      
+
       mockLocationService.setLocationDelay(Duration(seconds: 2));
 
       await tester.pumpWidget(createTestWidget());
@@ -118,7 +119,7 @@ void main() {
     testWidgets('should refresh location when pull-to-refresh',
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - プルトゥリフレッシュ時の位置情報更新が実装されていません
-      
+
       final initialLocation = Location(
         latitude: 35.6762,
         longitude: 139.6503,
@@ -211,7 +212,7 @@ class FakeStoreRepository implements StoreRepository {
     // 検索座標を記録
     lastSearchLat = lat;
     lastSearchLng = lng;
-    
+
     return List.from(_apiStores);
   }
 }
@@ -242,19 +243,19 @@ class MockLocationService implements LocationService {
   Future<Location> getCurrentLocation() async {
     getCurrentLocationCalled = true;
     getCurrentLocationCallCount++;
-    
+
     if (_delay > Duration.zero) {
       await Future.delayed(_delay);
     }
-    
+
     if (_locationError != null) {
       throw _locationError!;
     }
-    
+
     if (_mockLocation != null) {
       return _mockLocation!;
     }
-    
+
     // デフォルト位置（東京駅）
     return Location(
       latitude: 35.6762,

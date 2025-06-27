@@ -61,7 +61,7 @@ class _SearchPageState extends State<SearchPage> {
           address: _searchController.text.trim(),
           keyword: '中華',
         );
-        
+
         setState(() {
           // 新しく追加された店舗を検索結果として表示
           _searchResults = storeProvider.newStores;
@@ -84,11 +84,12 @@ class _SearchPageState extends State<SearchPage> {
       });
 
       // 位置情報サービスを取得（Providerから注入）
-      final locationService = Provider.of<LocationService>(context, listen: false);
-      
+      final locationService =
+          Provider.of<LocationService>(context, listen: false);
+
       // 現在位置を取得
       final location = await locationService.getCurrentLocation();
-      
+
       setState(() {
         _isGettingLocation = false;
       });
@@ -99,13 +100,12 @@ class _SearchPageState extends State<SearchPage> {
         lng: location.longitude,
         keyword: '中華',
       );
-      
+
       setState(() {
         // 新しく追加された店舗を検索結果として表示
         _searchResults = storeProvider.newStores;
         _isLoading = false;
       });
-      
     } on LocationException catch (e) {
       setState(() {
         _isGettingLocation = false;
@@ -114,7 +114,6 @@ class _SearchPageState extends State<SearchPage> {
 
       // 位置情報エラーダイアログを表示
       await _showLocationErrorDialog(e);
-      
     } catch (e) {
       setState(() {
         _isGettingLocation = false;
@@ -232,7 +231,8 @@ class _SearchPageState extends State<SearchPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: (_isLoading || _isGettingLocation) ? null : _performSearch,
+              onPressed:
+                  (_isLoading || _isGettingLocation) ? null : _performSearch,
               icon: (_isLoading || _isGettingLocation)
                   ? const SizedBox(
                       width: 20,
@@ -241,8 +241,8 @@ class _SearchPageState extends State<SearchPage> {
                     )
                   : const Icon(Icons.search),
               label: Text((_isGettingLocation || _isLoading)
-                ? (_isGettingLocation ? '現在地取得中...' : '検索中...')
-                : '中華料理店を検索'),
+                  ? (_isGettingLocation ? '現在地取得中...' : '検索中...')
+                  : '中華料理店を検索'),
             ),
           ),
         ],

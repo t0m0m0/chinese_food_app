@@ -41,7 +41,7 @@ class GeolocatorLocationService implements LocationService {
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: Duration(seconds: 10),
       );
-      
+
       return convertPositionToLocation(position);
     } on TimeoutException {
       throw LocationException(
@@ -65,14 +65,14 @@ class GeolocatorLocationService implements LocationService {
   Future<bool> hasLocationPermission() async {
     final permission = await Geolocator.checkPermission();
     return permission == LocationPermission.whileInUse ||
-           permission == LocationPermission.always;
+        permission == LocationPermission.always;
   }
 
   @override
   Future<bool> requestLocationPermission() async {
     final permission = await Geolocator.requestPermission();
     return permission == LocationPermission.whileInUse ||
-           permission == LocationPermission.always;
+        permission == LocationPermission.always;
   }
 
   /// GeolocatorのPositionをLocationエンティティに変換
