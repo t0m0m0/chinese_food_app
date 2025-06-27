@@ -166,7 +166,8 @@ void main() {
       test('should handle specific geolocator exceptions', () async {
         testService.setLocationServiceEnabled(true);
         testService.setLocationPermission(LocationPermission.whileInUse);
-        testService.setSpecificError(Exception('LocationServiceDisabledException'));
+        testService
+            .setSpecificError(Exception('LocationServiceDisabledException'));
 
         expect(
           () async => await testService.getCurrentLocation(),
@@ -188,7 +189,7 @@ void main() {
         final customService = MockableGeolocatorLocationServiceWithTimeout(
           timeoutSeconds: 5,
         );
-        
+
         expect(customService.timeoutSeconds, equals(5));
         expect(customService.accuracy, equals(LocationAccuracy.high));
       });
@@ -197,7 +198,7 @@ void main() {
         final customService = MockableGeolocatorLocationServiceWithTimeout(
           accuracy: LocationAccuracy.low,
         );
-        
+
         expect(customService.timeoutSeconds, equals(10));
         expect(customService.accuracy, equals(LocationAccuracy.low));
       });
@@ -304,7 +305,8 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
 }
 
 /// テスト用のカスタムタイムアウト設定可能なMockableGeolocatorLocationService
-class MockableGeolocatorLocationServiceWithTimeout extends GeolocatorLocationService {
+class MockableGeolocatorLocationServiceWithTimeout
+    extends GeolocatorLocationService {
   const MockableGeolocatorLocationServiceWithTimeout({
     super.timeoutSeconds = 10,
     super.accuracy = LocationAccuracy.high,

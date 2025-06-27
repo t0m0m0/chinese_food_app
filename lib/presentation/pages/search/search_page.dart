@@ -154,7 +154,7 @@ class _SearchPageState extends State<SearchPage> {
               child: const Text('設定を開く'),
               onPressed: () async {
                 Navigator.of(context).pop();
-                
+
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
                   await AppSettings.openAppSettings(
