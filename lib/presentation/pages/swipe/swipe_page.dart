@@ -27,7 +27,7 @@ class _SwipePageState extends State<SwipePage> {
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
   void _loadStoresFromProvider() {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
-    
+
     // 既存の店舗データを読み込み
     storeProvider.loadStores().then((_) {
       // APIから新しい店舗データも取得
@@ -352,9 +352,9 @@ class _SwipePageState extends State<SwipePage> {
                             cardsCount: _availableStores.length,
                             onSwipe: _onSwipe,
                             cardBuilder: (context, index, percentThresholdX,
-                              percentThresholdY) {
-                            return _buildStoreCard(_availableStores[index]);
-                          },
+                                percentThresholdY) {
+                              return _buildStoreCard(_availableStores[index]);
+                            },
                           ),
                         ),
                       );

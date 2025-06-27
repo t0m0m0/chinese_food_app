@@ -151,13 +151,13 @@ class StoreProvider extends ChangeNotifier {
         keyword: keyword,
         count: count,
       );
-      
 
       // APIから取得した店舗をローカルリストに追加（重複チェック付き）
       for (final apiStore in apiStores) {
         // 既存の店舗と重複しているかチェック
         final isDuplicate = _stores.any(
-          (store) => store.name == apiStore.name && store.address == apiStore.address,
+          (store) =>
+              store.name == apiStore.name && store.address == apiStore.address,
         );
 
         if (!isDuplicate) {

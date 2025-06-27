@@ -28,11 +28,12 @@ void main() {
       );
     }
 
-    testWidgets('🔴 RED: should load and display new stores from HotPepper API for swiping', 
+    testWidgets(
+        '🔴 RED: should load and display new stores from HotPepper API for swiping',
         (WidgetTester tester) async {
       // このテストは現在失敗するはずです
       // SwipePageが新しいAPI店舗データを表示できるようになる必要があります
-      
+
       // API から取得される新しい店舗データをセットアップ
       final newApiStores = [
         Store(
@@ -45,7 +46,7 @@ void main() {
           createdAt: DateTime.now(),
         ),
         Store(
-          id: 'api_002', 
+          id: 'api_002',
           name: 'HotPepper API店舗 2',
           address: '東京都新宿区API2-2-2',
           lat: 35.6895,
@@ -54,55 +55,56 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      
+
       // APIデータのみを設定
       fakeRepository.setApiStores(newApiStores);
 
       await tester.pumpWidget(createTestWidget());
-      
+
       // 直接APIから店舗データを読み込み（サンプルデータ初期化をスキップ）
       await storeProvider.loadNewStoresFromApi(
         lat: 35.6917,
         lng: 139.7006,
         count: 10,
       );
-      
-      await tester.pumpAndSettle();
 
+      await tester.pumpAndSettle();
 
       // 期待する結果：APIデータが追加されて、店舗数が増加している
       // 初期のサンプルデータ(6つ) + APIデータ(2つ) = 8つ
       expect(storeProvider.stores.length, 8);
       expect(storeProvider.newStores.length, 8);
-      
+
       // APIデータが含まれていることを確認
-      bool hasApiStore1 = storeProvider.stores.any((store) => store.name == 'HotPepper API店舗 1');
-      bool hasApiStore2 = storeProvider.stores.any((store) => store.name == 'HotPepper API店舗 2');
+      bool hasApiStore1 = storeProvider.stores
+          .any((store) => store.name == 'HotPepper API店舗 1');
+      bool hasApiStore2 = storeProvider.stores
+          .any((store) => store.name == 'HotPepper API店舗 2');
       expect(hasApiStore1, true);
       expect(hasApiStore2, true);
-      
+
       // スワイプカードが表示されていることを確認
       expect(find.byType(Card), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('🔴 RED: should show loading indicator while fetching API data', 
+    testWidgets('🔴 RED: should show loading indicator while fetching API data',
         (WidgetTester tester) async {
       // API データ取得中のローディング表示をテスト
       fakeRepository.setShouldDelayApiResponse(true);
 
       await tester.pumpWidget(createTestWidget());
-      
+
       // 手動でAPIローディングを開始
       storeProvider.loadNewStoresFromApi(lat: 35.6917, lng: 139.7006);
       await tester.pump(); // 1フレーム進める
-      
+
       // ローディング状態をテスト
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('新しい店舗を読み込み中...'), findsOneWidget);
 
       // データ読み込み完了を待つ
       await tester.pumpAndSettle(Duration(seconds: 2));
-      
+
       // ローディングが消えて店舗データが表示されることを確認
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
@@ -118,13 +120,14 @@ void main() {
       // エラー表示とリトライボタンの確認
       expect(find.text('新しい店舗の取得に失敗しました'), findsOneWidget);
       expect(find.text('再試行'), findsOneWidget);
-      
+
       // リトライボタンをタップ
       await tester.tap(find.text('再試行'));
       await tester.pumpAndSettle();
     });
 
-    testWidgets('🔴 RED: should refresh API data when user performs pull-to-refresh',
+    testWidgets(
+        '🔴 RED: should refresh API data when user performs pull-to-refresh',
         (WidgetTester tester) async {
       // プルトゥリフレッシュでAPIデータを再取得するテスト
       final initialApiStores = [
@@ -138,11 +141,11 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      
+
       fakeRepository.setApiStores(initialApiStores);
 
       await tester.pumpWidget(createTestWidget());
-      
+
       // 手動で最初のAPI呼び出し
       await storeProvider.loadNewStoresFromApi(lat: 35.6917, lng: 139.7006);
       await tester.pumpAndSettle();
@@ -157,7 +160,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // リフレッシュ機能が動作することを確認（店舗数の変化はなくても、動作したことを確認）
-      expect(storeProvider.stores.length, greaterThanOrEqualTo(initialStoreCount));
+      expect(
+          storeProvider.stores.length, greaterThanOrEqualTo(initialStoreCount));
     });
   });
 }
@@ -220,11 +224,11 @@ class FakeStoreRepository implements StoreRepository {
     if (_shouldDelayApiResponse) {
       await Future.delayed(Duration(seconds: 1));
     }
-    
+
     if (_shouldThrowOnApiSearch) {
       throw Exception('新しい店舗の取得に失敗しました');
     }
-    
+
     return List.from(_apiStores);
   }
 }
