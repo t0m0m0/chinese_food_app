@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import '../../domain/entities/location.dart';
 import '../../domain/services/location_service.dart';
@@ -7,22 +8,46 @@ class GeolocatorLocationService implements LocationService {
   @override
   Future<Location> getCurrentLocation() async {
     try {
-      // 🟢 GREEN: 仮実装 - まずは固定位置を返してテストを通す
-      // 実際のGPS機能は次のステップで実装
-      final position = Position(
-        latitude: 35.6762,
-        longitude: 139.6503,
-        timestamp: DateTime.now(),
-        accuracy: 5.0,
-        altitude: 10.0,
-        altitudeAccuracy: 3.0,
-        heading: 0.0,
-        headingAccuracy: 1.0,
-        speed: 0.0,
-        speedAccuracy: 0.5,
+      // 位置情報サービスが有効かチェック
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw LocationException(
+          'Location services are disabled',
+          LocationExceptionType.serviceDisabled,
+        );
+      }
+
+      // 権限チェック
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw LocationException(
+            'Location permission denied',
+            LocationExceptionType.permissionDenied,
+          );
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw LocationException(
+          'Location permission denied forever',
+          LocationExceptionType.permissionDeniedForever,
+        );
+      }
+
+      // 実際の位置情報取得（タイムアウト付き）
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10),
       );
       
       return convertPositionToLocation(position);
+    } on TimeoutException {
+      throw LocationException(
+        'Location request timed out',
+        LocationExceptionType.timeout,
+      );
     } catch (e) {
       throw LocationException(
         'Failed to get current location: $e',
@@ -33,20 +58,21 @@ class GeolocatorLocationService implements LocationService {
 
   @override
   Future<bool> isLocationServiceEnabled() async {
-    // 🟢 GREEN: 仮実装でテストを通す
-    return true;
+    return await Geolocator.isLocationServiceEnabled();
   }
 
   @override
   Future<bool> hasLocationPermission() async {
-    // 🟢 GREEN: 仮実装でテストを通す
-    return true;
+    final permission = await Geolocator.checkPermission();
+    return permission == LocationPermission.whileInUse ||
+           permission == LocationPermission.always;
   }
 
   @override
   Future<bool> requestLocationPermission() async {
-    // 🟢 GREEN: 仮実装でテストを通す
-    return true;
+    final permission = await Geolocator.requestPermission();
+    return permission == LocationPermission.whileInUse ||
+           permission == LocationPermission.always;
   }
 
   /// GeolocatorのPositionをLocationエンティティに変換
