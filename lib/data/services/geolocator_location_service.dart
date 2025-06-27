@@ -8,25 +8,28 @@ import '../../domain/services/location_service.dart';
 class GeolocatorLocationService implements LocationService {
   /// 位置情報取得のタイムアウト時間（秒）
   final int timeoutSeconds;
-  
+
   /// 位置情報の精度設定
   final LocationAccuracy accuracy;
-  
+
   const GeolocatorLocationService({
     this.timeoutSeconds = 10,
     this.accuracy = LocationAccuracy.high,
   });
   @override
   Future<Location> getCurrentLocation() async {
-    developer.log('Starting location request with timeout: ${timeoutSeconds}s', name: 'LocationService');
-    
+    developer.log('Starting location request with timeout: ${timeoutSeconds}s',
+        name: 'LocationService');
+
     try {
       // 位置情報サービスが有効かチェック
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      developer.log('Location service enabled: $serviceEnabled', name: 'LocationService');
-      
+      developer.log('Location service enabled: $serviceEnabled',
+          name: 'LocationService');
+
       if (!serviceEnabled) {
-        developer.log('Location service disabled, throwing exception', name: 'LocationService');
+        developer.log('Location service disabled, throwing exception',
+            name: 'LocationService');
         throw LocationException(
           'Location services are disabled',
           LocationExceptionType.serviceDisabled,
@@ -53,30 +56,36 @@ class GeolocatorLocationService implements LocationService {
       }
 
       // 実際の位置情報取得（タイムアウト付き）
-      developer.log('Requesting location with accuracy: $accuracy', name: 'LocationService');
+      developer.log('Requesting location with accuracy: $accuracy',
+          name: 'LocationService');
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: accuracy,
         timeLimit: Duration(seconds: timeoutSeconds),
       );
 
       final location = convertPositionToLocation(position);
-      developer.log('Location obtained: ${location.latitude}, ${location.longitude} (accuracy: ${location.accuracy}m)', name: 'LocationService');
-      
+      developer.log(
+          'Location obtained: ${location.latitude}, ${location.longitude} (accuracy: ${location.accuracy}m)',
+          name: 'LocationService');
+
       return location;
     } on TimeoutException {
-      developer.log('Location request timed out after ${timeoutSeconds}s', name: 'LocationService');
+      developer.log('Location request timed out after ${timeoutSeconds}s',
+          name: 'LocationService');
       throw LocationException(
         'Location request timed out',
         LocationExceptionType.timeout,
       );
     } on LocationServiceDisabledException {
-      developer.log('Location service disabled exception', name: 'LocationService');
+      developer.log('Location service disabled exception',
+          name: 'LocationService');
       throw LocationException(
         'Location services are disabled',
         LocationExceptionType.serviceDisabled,
       );
     } on PermissionDeniedException {
-      developer.log('Location permission denied exception', name: 'LocationService');
+      developer.log('Location permission denied exception',
+          name: 'LocationService');
       throw LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
@@ -89,7 +98,8 @@ class GeolocatorLocationService implements LocationService {
           'Location permission error: $e',
           LocationExceptionType.permissionDenied,
         );
-      } else if (e.toString().contains('disabled') || e.toString().contains('unavailable')) {
+      } else if (e.toString().contains('disabled') ||
+          e.toString().contains('unavailable')) {
         throw LocationException(
           'Location service unavailable: $e',
           LocationExceptionType.serviceDisabled,

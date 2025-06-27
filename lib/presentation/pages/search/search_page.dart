@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:app_settings/app_settings.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/entities/location.dart';
@@ -151,12 +152,24 @@ class _SearchPageState extends State<SearchPage> {
             ),
             TextButton(
               child: const Text('設定を開く'),
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                // TODO: 設定画面を開く実装
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('設定画面は実装予定です')),
-                );
+                
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                try {
+                  await AppSettings.openAppSettings(
+                    type: AppSettingsType.location,
+                  );
+                } catch (e) {
+                  if (mounted) {
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('設定画面を開けませんでした。手動で設定をご確認ください。'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
               },
             ),
           ],

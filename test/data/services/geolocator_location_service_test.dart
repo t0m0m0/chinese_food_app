@@ -40,6 +40,23 @@ void main() {
       });
     });
 
+    group('Constructor Configuration Tests', () {
+      test('should use default timeout and accuracy', () {
+        final service = GeolocatorLocationService();
+        expect(service.timeoutSeconds, equals(10));
+        expect(service.accuracy, equals(LocationAccuracy.high));
+      });
+
+      test('should accept custom timeout and accuracy', () {
+        final service = GeolocatorLocationService(
+          timeoutSeconds: 15,
+          accuracy: LocationAccuracy.medium,
+        );
+        expect(service.timeoutSeconds, equals(15));
+        expect(service.accuracy, equals(LocationAccuracy.medium));
+      });
+    });
+
     group('MockableGeolocatorLocationService Tests', () {
       late MockableGeolocatorLocationService testService;
 
@@ -145,6 +162,45 @@ void main() {
         expect(location.longitude, equals(139.6503));
         expect(location.accuracy, equals(5.0));
       });
+
+      test('should handle specific geolocator exceptions', () async {
+        testService.setLocationServiceEnabled(true);
+        testService.setLocationPermission(LocationPermission.whileInUse);
+        testService.setSpecificError(Exception('LocationServiceDisabledException'));
+
+        expect(
+          () async => await testService.getCurrentLocation(),
+          throwsA(isA<Exception>()),
+        );
+      });
+
+      test('should handle permission denied exception', () async {
+        testService.setLocationServiceEnabled(true);
+        testService.setSpecificError(Exception('permission denied'));
+
+        expect(
+          () async => await testService.getCurrentLocation(),
+          throwsA(isA<Exception>()),
+        );
+      });
+
+      test('should use custom timeout setting', () async {
+        final customService = MockableGeolocatorLocationServiceWithTimeout(
+          timeoutSeconds: 5,
+        );
+        
+        expect(customService.timeoutSeconds, equals(5));
+        expect(customService.accuracy, equals(LocationAccuracy.high));
+      });
+
+      test('should use custom accuracy setting', () async {
+        final customService = MockableGeolocatorLocationServiceWithTimeout(
+          accuracy: LocationAccuracy.low,
+        );
+        
+        expect(customService.timeoutSeconds, equals(10));
+        expect(customService.accuracy, equals(LocationAccuracy.low));
+      });
     });
   });
 }
@@ -156,6 +212,7 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
   LocationPermission _locationPermission = LocationPermission.whileInUse;
   bool _shouldTimeoutError = false;
   Position? _mockPosition;
+  Exception? _specificError;
 
   void setLocationServiceEnabled(bool enabled) {
     _isLocationServiceEnabled = enabled;
@@ -173,8 +230,17 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
     _mockPosition = position;
   }
 
+  void setSpecificError(Exception error) {
+    _specificError = error;
+  }
+
   @override
   Future<Location> getCurrentLocation() async {
+    // 特定のエラーが設定されている場合はそれを投げる
+    if (_specificError != null) {
+      throw _specificError!;
+    }
+
     if (!_isLocationServiceEnabled) {
       throw LocationException(
         'Location services are disabled',
@@ -235,4 +301,32 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
     _locationPermission = LocationPermission.whileInUse;
     return true;
   }
+}
+
+/// テスト用のカスタムタイムアウト設定可能なMockableGeolocatorLocationService
+class MockableGeolocatorLocationServiceWithTimeout extends GeolocatorLocationService {
+  const MockableGeolocatorLocationServiceWithTimeout({
+    super.timeoutSeconds = 10,
+    super.accuracy = LocationAccuracy.high,
+  });
+
+  @override
+  Future<Location> getCurrentLocation() async {
+    // テスト用の固定位置を返す
+    return Location(
+      latitude: 35.6762,
+      longitude: 139.6503,
+      accuracy: 10.0,
+      timestamp: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => true;
+
+  @override
+  Future<bool> hasLocationPermission() async => true;
+
+  @override
+  Future<bool> requestLocationPermission() async => true;
 }

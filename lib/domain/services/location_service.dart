@@ -17,7 +17,7 @@ abstract class LocationService {
 }
 
 /// LocationServiceのテスト専用実装
-/// 
+///
 /// 注意: この実装は開発・テスト用のダミー実装です。
 /// 本番環境では実際のGeolocatorLocationServiceを使用してください。
 /// TDD開発プロセスの履歴として残されています。
