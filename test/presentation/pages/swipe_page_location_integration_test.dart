@@ -84,7 +84,8 @@ void main() {
 
       // 位置ベースの検索結果がストアプロバイダーに追加されることを確認
       expect(storeProvider.stores.length, greaterThan(1)); // サンプル + API
-      expect(storeProvider.stores.any((store) => store.name == '渋谷の中華料理店'), isTrue);
+      expect(storeProvider.stores.any((store) => store.name == '渋谷の中華料理店'),
+          isTrue);
     });
 
     testWidgets('should handle location permission denied gracefully',

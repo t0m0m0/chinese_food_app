@@ -126,12 +126,12 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      
+
       fakeRepository.setApiStores(apiStores);
       fakeRepository.setShouldDelayApiResponse(true);
 
       await tester.pumpWidget(createTestWidget());
-      
+
       // 最初のフレームを待つ
       await tester.pump();
 

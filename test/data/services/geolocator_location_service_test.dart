@@ -31,7 +31,8 @@ void main() {
           speedAccuracy: 0.5,
         );
 
-        final location = locationService.convertPositionToLocation(mockPosition);
+        final location =
+            locationService.convertPositionToLocation(mockPosition);
 
         expect(location.latitude, equals(mockPosition.latitude));
         expect(location.longitude, equals(mockPosition.longitude));
@@ -57,7 +58,8 @@ void main() {
         );
       });
 
-      test('should throw LocationException when permission is denied', () async {
+      test('should throw LocationException when permission is denied',
+          () async {
         testService.setLocationPermission(LocationPermission.denied);
 
         expect(
