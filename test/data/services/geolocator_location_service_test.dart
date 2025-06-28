@@ -23,9 +23,7 @@ void main() {
           timestamp: DateTime.now(),
           accuracy: 5.0,
           altitude: 10.0,
-          altitudeAccuracy: 3.0,
           heading: 0.0,
-          headingAccuracy: 1.0,
           speed: 0.0,
           speedAccuracy: 0.5,
         );
@@ -148,9 +146,7 @@ void main() {
           timestamp: DateTime.now(),
           accuracy: 5.0,
           altitude: 10.0,
-          altitudeAccuracy: 3.0,
           heading: 0.0,
-          headingAccuracy: 1.0,
           speed: 0.0,
           speedAccuracy: 0.5,
         ));

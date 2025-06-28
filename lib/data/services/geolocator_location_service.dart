@@ -138,7 +138,7 @@ class GeolocatorLocationService implements LocationService {
       latitude: position.latitude,
       longitude: position.longitude,
       accuracy: position.accuracy,
-      timestamp: position.timestamp,
+      timestamp: position.timestamp ?? DateTime.now(),
     );
   }
 }
