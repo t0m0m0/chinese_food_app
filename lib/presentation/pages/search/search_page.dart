@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:app_settings/app_settings.dart';
 import '../../../core/utils/error_message_helper.dart';
-import '../../../data/datasources/hotpepper_api_datasource.dart';
-import '../../../data/repositories/store_repository_impl.dart';
-import '../../../data/datasources/store_local_datasource.dart';
-import '../../../core/database/database_helper.dart';
-import '../../../core/config/app_config.dart';
-import '../../../domain/usecases/search_stores_usecase.dart';
 import '../../../domain/entities/store.dart';
-import '../../../services/location_service.dart';
+import '../../../domain/entities/location.dart';
+import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
 
 class SearchPage extends StatefulWidget {
@@ -21,41 +16,17 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final _searchController = TextEditingController();
-  final _locationService = LocationService();
 
   List<Store> _searchResults = [];
   bool _isLoading = false;
+  bool _isGettingLocation = false;
   String? _errorMessage;
   bool _useCurrentLocation = true;
   bool _hasSearched = false; // 検索が実行されたかどうかのフラグ
 
-  late final SearchStoresUsecase _searchUsecase;
-
   @override
   void initState() {
     super.initState();
-    _initializeServices();
-  }
-
-  void _initializeServices() {
-    // 本番環境ではAPIキーが設定されている場合のみ実API使用
-    final HotpepperApiDatasource apiDatasource;
-    if (AppConfig.hasHotpepperApiKey && AppConfig.isProduction) {
-      apiDatasource = HotpepperApiDatasourceImpl(
-        client: http.Client(),
-      );
-    } else {
-      // 開発環境またはAPIキー未設定時はモック使用
-      apiDatasource = MockHotpepperApiDatasource();
-    }
-
-    final localDatasource =
-        StoreLocalDatasourceImpl(dbHelper: DatabaseHelper());
-    final repository = StoreRepositoryImpl(
-      apiDatasource: apiDatasource,
-      localDatasource: localDatasource,
-    );
-    _searchUsecase = SearchStoresUsecase(repository);
   }
 
   @override
@@ -80,50 +51,131 @@ class _SearchPageState extends State<SearchPage> {
     });
 
     try {
-      SearchStoresParams params;
+      final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
       if (_useCurrentLocation) {
-        final locationResult = await _locationService.getCurrentPosition();
-        if (!locationResult.isSuccess) {
-          setState(() {
-            _errorMessage = locationResult.error;
-            _isLoading = false;
-          });
-          return;
-        }
-
-        params = SearchStoresParams(
-          lat: locationResult.lat,
-          lng: locationResult.lng,
-          keyword: '中華',
-        );
+        // 位置情報を取得してAPI検索
+        await _searchWithCurrentLocation(storeProvider);
       } else {
-        params = SearchStoresParams(
+        // 住所を使ってAPI検索
+        await storeProvider.loadNewStoresFromApi(
           address: _searchController.text.trim(),
           keyword: '中華',
         );
+
+        setState(() {
+          // 新しく追加された店舗を検索結果として表示
+          _searchResults = storeProvider.newStores;
+          _isLoading = false;
+        });
       }
-
-      final result = await _searchUsecase.execute(params);
-
-      setState(() {
-        _isLoading = false;
-        if (result.isSuccess) {
-          _searchResults = result.stores ?? [];
-          // 座標フィルタリングで結果が空になった場合の追加情報
-          if (_searchResults.isEmpty) {
-            _errorMessage = '検索範囲内に有効な座標を持つ店舗が見つかりませんでした。';
-          }
-        } else {
-          _errorMessage = result.error;
-        }
-      });
     } catch (e) {
       setState(() {
         _isLoading = false;
         _errorMessage = e.toString();
       });
     }
+  }
+
+  /// 現在位置を取得してAPI検索を実行
+  Future<void> _searchWithCurrentLocation(StoreProvider storeProvider) async {
+    try {
+      setState(() {
+        _isGettingLocation = true;
+      });
+
+      // 位置情報サービスを取得（Providerから注入）
+      final locationService =
+          Provider.of<LocationService>(context, listen: false);
+
+      // 現在位置を取得
+      final location = await locationService.getCurrentLocation();
+
+      setState(() {
+        _isGettingLocation = false;
+      });
+
+      // 位置情報を使ってAPI検索
+      await storeProvider.loadNewStoresFromApi(
+        lat: location.latitude,
+        lng: location.longitude,
+        keyword: '中華',
+      );
+
+      setState(() {
+        // 新しく追加された店舗を検索結果として表示
+        _searchResults = storeProvider.newStores;
+        _isLoading = false;
+      });
+    } on LocationException catch (e) {
+      setState(() {
+        _isGettingLocation = false;
+        _isLoading = false;
+      });
+
+      // 位置情報エラーダイアログを表示
+      await _showLocationErrorDialog(e);
+    } catch (e) {
+      setState(() {
+        _isGettingLocation = false;
+        _isLoading = false;
+        _errorMessage = e.toString();
+      });
+    }
+  }
+
+  /// 位置情報エラーダイアログを表示
+  Future<void> _showLocationErrorDialog(LocationException error) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('位置情報の取得に失敗しました'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('位置情報の権限を確認してください'),
+              const SizedBox(height: 8),
+              Text('エラー: ${error.message}'),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('住所で検索する'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _useCurrentLocation = false;
+                });
+              },
+            ),
+            TextButton(
+              child: const Text('設定を開く'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                try {
+                  await AppSettings.openAppSettings(
+                    type: AppSettingsType.location,
+                  );
+                } catch (e) {
+                  if (mounted) {
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('設定画面を開けませんでした。手動で設定をご確認ください。'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -192,15 +244,18 @@ class _SearchPageState extends State<SearchPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _performSearch,
-              icon: _isLoading
+              onPressed:
+                  (_isLoading || _isGettingLocation) ? null : _performSearch,
+              icon: (_isLoading || _isGettingLocation)
                   ? const SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.search),
-              label: Text(_isLoading ? '検索中...' : '中華料理店を検索'),
+              label: Text((_isGettingLocation || _isLoading)
+                  ? (_isGettingLocation ? '現在地取得中...' : '検索中...')
+                  : '中華料理店を検索'),
             ),
           ),
         ],
@@ -209,6 +264,19 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildSearchResults() {
+    if (_isGettingLocation) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('現在地取得中...'),
+          ],
+        ),
+      );
+    }
+
     if (_isLoading) {
       return const Center(
         child: Column(

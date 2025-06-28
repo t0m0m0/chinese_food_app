@@ -21,6 +21,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => DIContainer.createStoreProvider(),
         ),
+        Provider(
+          create: (_) => DIContainer.createLocationService(),
+        ),
       ],
       child: MaterialApp(
         title: AppConstants.appName,

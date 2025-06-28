@@ -219,7 +219,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: _getStatusColor(store.status, colorScheme)
-                          .withOpacity(0.1),
+                          .withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

@@ -26,7 +26,6 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.example.chinese_food_app"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -39,8 +38,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.chinese_food_app"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 21
+        targetSdk = 35
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
         
