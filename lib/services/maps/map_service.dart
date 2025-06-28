@@ -36,8 +36,6 @@ class MapService {
         return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
       case StoreStatus.bad:
         return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
-      default:
-        return BitmapDescriptor.defaultMarker;
     }
   }
 
