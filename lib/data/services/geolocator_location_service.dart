@@ -59,8 +59,10 @@ class GeolocatorLocationService implements LocationService {
       developer.log('Requesting location with accuracy: $accuracy',
           name: 'LocationService');
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: accuracy,
-        timeLimit: Duration(seconds: timeoutSeconds),
+        locationSettings: LocationSettings(
+          accuracy: accuracy,
+          timeLimit: Duration(seconds: timeoutSeconds),
+        ),
       );
 
       final location = convertPositionToLocation(position);
@@ -160,7 +162,7 @@ class GeolocatorLocationService implements LocationService {
       latitude: position.latitude,
       longitude: position.longitude,
       accuracy: position.accuracy,
-      timestamp: position.timestamp ?? DateTime.now(),
+      timestamp: position.timestamp,
     );
   }
 }
