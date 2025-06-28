@@ -90,19 +90,40 @@ class GeolocatorLocationService implements LocationService {
         'Location permission denied',
         LocationExceptionType.permissionDenied,
       );
+    } on PermissionRequestInProgressException {
+      developer.log('Permission request already in progress',
+          name: 'LocationService');
+      throw LocationException(
+        'Location permission request is already in progress',
+        LocationExceptionType.permissionDenied,
+      );
+    } on PermissionDefinitionsNotFoundException {
+      developer.log('Location permission definitions not found',
+          name: 'LocationService');
+      throw LocationException(
+        'Location permission settings are not configured properly',
+        LocationExceptionType.permissionDenied,
+      );
     } catch (e) {
       developer.log('Unexpected location error: $e', name: 'LocationService');
-      // Geolocatorの予期しないエラーをより適切に分類
-      if (e.toString().contains('permission')) {
+      // より適切なエラー分類（文字列チェックによるフォールバック）
+      final errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('permission') || errorMessage.contains('denied')) {
         throw LocationException(
           'Location permission error: $e',
           LocationExceptionType.permissionDenied,
         );
-      } else if (e.toString().contains('disabled') ||
-          e.toString().contains('unavailable')) {
+      } else if (errorMessage.contains('disabled') || 
+                 errorMessage.contains('unavailable') ||
+                 errorMessage.contains('service')) {
         throw LocationException(
           'Location service unavailable: $e',
           LocationExceptionType.serviceDisabled,
+        );
+      } else if (errorMessage.contains('timeout')) {
+        throw LocationException(
+          'Location request timeout: $e',
+          LocationExceptionType.timeout,
         );
       } else {
         throw LocationException(
