@@ -97,7 +97,7 @@ jobs:
     - name: Flutter環境をセットアップ
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'
+        flutter-version: '3.32.5'
         channel: 'stable'
         cache: true
         
@@ -139,7 +139,7 @@ jobs:
     - name: Flutter環境をセットアップ
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'
+        flutter-version: '3.32.5'
         channel: 'stable'
         cache: true
         
@@ -181,7 +181,7 @@ jobs:
     - name: Flutter環境をセットアップ
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'
+        flutter-version: '3.32.5'
         channel: 'stable'
         cache: true
         
