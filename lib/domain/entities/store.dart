@@ -160,6 +160,8 @@ class Store {
   }
 
   /// Store エンティティをコピーして一部を変更
+  ///
+  /// [clearStatus] を true にすると status を明示的に null に設定できます
   Store copyWith({
     String? id,
     String? name,
@@ -167,6 +169,7 @@ class Store {
     double? lat,
     double? lng,
     StoreStatus? status,
+    bool clearStatus = false,
     String? memo,
     DateTime? createdAt,
   }) {
@@ -176,7 +179,7 @@ class Store {
       address: address ?? this.address,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
-      status: status ?? this.status,
+      status: clearStatus ? null : (status ?? this.status),
       memo: memo ?? this.memo,
       createdAt: createdAt ?? this.createdAt,
     );
