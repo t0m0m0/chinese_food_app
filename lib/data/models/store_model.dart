@@ -64,6 +64,7 @@ class StoreModel extends Store {
     double? lat,
     double? lng,
     StoreStatus? status,
+    bool resetStatus = false,
     String? memo,
     DateTime? createdAt,
   }) {
@@ -73,7 +74,7 @@ class StoreModel extends Store {
       address: address ?? this.address,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
-      status: status ?? this.status,
+      status: resetStatus ? null : (status ?? this.status),
       memo: memo ?? this.memo,
       createdAt: createdAt ?? this.createdAt,
     );

@@ -165,7 +165,7 @@ class StoreProvider extends ChangeNotifier {
 
         if (!isDuplicate) {
           // 新しい店舗として追加（ステータスはnull）
-          final newStore = apiStore.copyWith(status: null);
+          final newStore = apiStore.copyWith(resetStatus: true);
           _stores.add(newStore);
         }
       }
