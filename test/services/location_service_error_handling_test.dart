@@ -37,6 +37,24 @@ void main() {
         expect(error.message, '位置取得がタイムアウトしました');
       });
 
+      test('should create LocationGeocodeError instance', () {
+        // Act
+        final error = LocationGeocodeError('ジオコーディングに失敗しました');
+
+        // Assert
+        expect(error, isA<LocationGeocodeError>());
+        expect(error.message, 'ジオコーディングに失敗しました');
+      });
+
+      test('should create LocationNetworkError instance', () {
+        // Act
+        final error = LocationNetworkError('ネットワーク接続に失敗しました');
+
+        // Assert
+        expect(error, isA<LocationNetworkError>());
+        expect(error.message, 'ネットワーク接続に失敗しました');
+      });
+
       test('should return specific error types instead of generic string',
           () async {
         // RED: このテストは失敗するはず（現在は e.toString() を返している）

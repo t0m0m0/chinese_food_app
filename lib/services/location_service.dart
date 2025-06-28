@@ -32,6 +32,20 @@ class LocationTimeoutError extends LocationError {
   String toString() => 'LocationTimeoutError: $message';
 }
 
+class LocationGeocodeError extends LocationError {
+  LocationGeocodeError(super.message);
+
+  @override
+  String toString() => 'LocationGeocodeError: $message';
+}
+
+class LocationNetworkError extends LocationError {
+  LocationNetworkError(super.message);
+
+  @override
+  String toString() => 'LocationNetworkError: $message';
+}
+
 // TDD GREEN段階: PermissionResult型の定義
 class PermissionResult {
   final bool isGranted;
@@ -63,9 +77,31 @@ class LocationService {
   //   distanceFilter: 100,
   // );
 
-  // TDD GREEN段階: 最小限のcheckLocationPermissionメソッド
+  // TDD REFACTOR段階: 環境変数による権限チェック制御
   Future<PermissionResult> checkLocationPermission() async {
-    // 仮実装: 常に権限が許可されていると返す（三角測量で後で改善）
+    final permissionTestMode = Platform.environment['PERMISSION_TEST_MODE'];
+    
+    // テスト環境での権限拒否シミュレーション
+    if (permissionTestMode == 'denied') {
+      return PermissionResult.denied(
+        '位置情報の権限が拒否されました',
+        errorType: LocationPermissionDeniedError('テスト用権限拒否'),
+      );
+    } else if (permissionTestMode == 'denied_forever') {
+      return PermissionResult.denied(
+        '位置情報の権限が永続的に拒否されています。設定から許可してください',
+        errorType: LocationPermissionDeniedError('永続的権限拒否'),
+      );
+    } else if (permissionTestMode == 'service_disabled') {
+      return PermissionResult.denied(
+        '位置情報サービスが無効です',
+        errorType: LocationServiceDisabledError('サービス無効'),
+      );
+    }
+    
+    // TODO: 本番環境では実際のGeolocator.checkPermission()を使用
+    // final permission = await Geolocator.checkPermission();
+    // 現時点では権限許可として扱う（実GPS実装時に修正）
     return PermissionResult.granted();
   }
 
@@ -75,22 +111,36 @@ class LocationService {
       final locationMode = Platform.environment['LOCATION_MODE'] ?? 'test';
 
       if (locationMode == 'production') {
+        // 本番環境: 権限チェック後にGPS取得（実GPS実装準備）
+        final permission = await checkLocationPermission();
+        if (!permission.isGranted) {
+          return LocationServiceResult.failure(
+            permission.errorMessage ?? 'Permission denied'
+          );
+        }
+        
         // TODO: 実際のGPS実装（後で実装）
-        // final permission = await checkLocationPermission();
-        // if (!permission.isGranted) {
-        //   return LocationServiceResult.failure(permission.errorMessage ?? 'Permission denied');
-        // }
-        //
         // final position = await Geolocator.getCurrentPosition();
         // return LocationServiceResult.success(lat: position.latitude, lng: position.longitude);
-
-        // 暫定的にダミーデータを返す（実GPS実装前）
+        
+        // 暫定的にダミーデータを返す（権限チェック後）
         return LocationServiceResult.success(
           lat: 35.6762, // 東京駅
           lng: 139.6503,
         );
       } else {
-        // テスト環境：ダミーデータを返す
+        // テスト環境：環境変数でエラーシミュレーション可能
+        final errorMode = Platform.environment['LOCATION_ERROR_MODE'];
+        
+        if (errorMode == 'permission_denied') {
+          return LocationServiceResult.failure('権限が拒否されました');
+        } else if (errorMode == 'service_disabled') {
+          return LocationServiceResult.failure('位置情報サービスが無効です');
+        } else if (errorMode == 'timeout') {
+          return LocationServiceResult.failure('位置取得がタイムアウトしました');
+        }
+        
+        // テスト環境：正常時はダミーデータ
         return LocationServiceResult.success(
           lat: 35.6762, // 東京駅
           lng: 139.6503,
@@ -116,7 +166,16 @@ class LocationService {
 
       return GeocodeResult.success(address);
     } catch (e) {
-      return GeocodeResult.failure(e.toString());
+      // 具体的なエラー型による改善されたエラーハンドリング
+      if (e.toString().contains('network') || e.toString().contains('connection')) {
+        return GeocodeResult.failure('ネットワークエラーが発生しました');
+      } else if (e.toString().contains('format') || e.toString().contains('invalid')) {
+        return GeocodeResult.failure('座標の形式が正しくありません');
+      } else if (e.toString().contains('timeout')) {
+        return GeocodeResult.failure('リバースジオコーディングがタイムアウトしました');
+      } else {
+        return GeocodeResult.failure('リバースジオコーディングエラー: ${e.runtimeType}');
+      }
     }
   }
 
@@ -134,7 +193,16 @@ class LocationService {
         lng: location.longitude,
       );
     } catch (e) {
-      return GeocodeResult.failure(e.toString());
+      // 具体的なエラー型による改善されたエラーハンドリング
+      if (e.toString().contains('network') || e.toString().contains('connection')) {
+        return GeocodeResult.failure('ネットワークエラーが発生しました');
+      } else if (e.toString().contains('format') || e.toString().contains('invalid')) {
+        return GeocodeResult.failure('住所の形式が正しくありません');
+      } else if (e.toString().contains('timeout')) {
+        return GeocodeResult.failure('ジオコーディングがタイムアウトしました');
+      } else {
+        return GeocodeResult.failure('ジオコーディングエラー: ${e.runtimeType}');
+      }
     }
   }
 
