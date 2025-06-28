@@ -99,7 +99,8 @@ class LocationService {
       );
     }
     
-    // TODO: 本番環境では実際のGeolocator.checkPermission()を使用
+    // TODO(#42): [HIGH] 本番環境では実際のGeolocator.checkPermission()を使用 - Sprint 2.1で対応予定
+    // 実装内容: Geolocatorパッケージの有効化、実際の権限チェック機能
     // final permission = await Geolocator.checkPermission();
     // 現時点では権限許可として扱う（実GPS実装時に修正）
     return PermissionResult.granted();
@@ -119,8 +120,9 @@ class LocationService {
           );
         }
         
-        // TODO: 実際のGPS実装（後で実装）
-        // final position = await Geolocator.getCurrentPosition();
+        // TODO(#42): [HIGH] 実際のGPS実装 - Sprint 2.1で対応予定  
+        // 実装内容: Geolocatorパッケージ有効化、LocationSettings設定、実座標取得
+        // final position = await Geolocator.getCurrentPosition(locationSettings: _locationSettings);
         // return LocationServiceResult.success(lat: position.latitude, lng: position.longitude);
         
         // 暫定的にダミーデータを返す（権限チェック後）
