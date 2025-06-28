@@ -69,15 +69,16 @@ void main() {
         expect(permissionResult.isGranted, true);
       });
 
-      test('should simulate location errors via environment variables', () async {
+      test('should simulate location errors via environment variables',
+          () async {
         // LOCATION_ERROR_MODE環境変数でのエラーシミュレーションテスト
         final result = await locationService.getCurrentPosition();
-        
+
         // 通常実行時（環境変数未設定）は成功
         expect(result.isSuccess, true);
         expect(result.lat, 35.6762);
         expect(result.lng, 139.6503);
-        
+
         // テストドキュメント: 環境変数設定時の期待動作
         // LOCATION_ERROR_MODE=permission_denied → failure('権限が拒否されました')
         // LOCATION_ERROR_MODE=service_disabled → failure('位置情報サービスが無効です')
@@ -87,10 +88,10 @@ void main() {
       test('should support production mode environment switching', () async {
         // 本番環境モードでの動作テスト（権限チェック統合確認）
         final result = await locationService.getCurrentPosition();
-        
+
         // 本番環境でも権限チェック後にダミーデータ返却（実GPS実装前）
         expect(result.isSuccess, true);
-        
+
         // テストドキュメント: LOCATION_MODE=production での動作
         // 1. checkLocationPermission()が呼ばれる
         // 2. 権限OK時: ダミーデータ返却（将来は実GPS）
@@ -101,13 +102,13 @@ void main() {
     group('Comprehensive Error Simulation', () {
       test('should provide comprehensive error testing capabilities', () {
         // 包括的エラーテスト機能の説明とドキュメント化
-        
+
         expect(() => LocationService(), returnsNormally);
-        
+
         // CI/CDでの使用例ドキュメント:
-        // 
+        //
         // ジョブ1: PERMISSION_TEST_MODE=denied flutter test
-        // ジョブ2: PERMISSION_TEST_MODE=service_disabled flutter test  
+        // ジョブ2: PERMISSION_TEST_MODE=service_disabled flutter test
         // ジョブ3: LOCATION_ERROR_MODE=timeout flutter test
         // ジョブ4: LOCATION_MODE=production flutter test
         //

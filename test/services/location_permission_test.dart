@@ -53,7 +53,8 @@ void main() {
         // 将来的には環境変数制御でのテストケース追加予定
       });
 
-      test('should simulate permission denied via environment variable', () async {
+      test('should simulate permission denied via environment variable',
+          () async {
         // 注意: このテストは環境変数の説明用テストケース
         // 実際のCI/CDでは PERMISSION_TEST_MODE=denied で実行される
 
@@ -95,11 +96,11 @@ void main() {
       test('should handle permission denied simulation', () async {
         // 環境変数で権限拒否をシミュレート
         final service = LocationService();
-        
+
         // 通常実行時（PERMISSION_TEST_MODE未設定）
         final result = await service.checkLocationPermission();
         expect(result.isGranted, true);
-        
+
         // テストドキュメント: 環境変数設定時の期待動作
         // PERMISSION_TEST_MODE=denied で実行すると:
         // expect(result.isGranted, false);
@@ -110,10 +111,10 @@ void main() {
       test('should handle service disabled simulation', () async {
         // サービス無効化シミュレーションのテスト
         final service = LocationService();
-        
+
         final result = await service.checkLocationPermission();
         expect(result, isA<PermissionResult>());
-        
+
         // テストドキュメント: PERMISSION_TEST_MODE=service_disabled で実行すると:
         // expect(result.isGranted, false);
         // expect(result.errorMessage, contains('無効'));
@@ -123,10 +124,10 @@ void main() {
       test('should handle permanent denial simulation', () async {
         // 永続的権限拒否シミュレーションのテスト
         final service = LocationService();
-        
+
         final result = await service.checkLocationPermission();
         expect(result, isA<PermissionResult>());
-        
+
         // テストドキュメント: PERMISSION_TEST_MODE=denied_forever で実行すると:
         // expect(result.isGranted, false);
         // expect(result.errorMessage, contains('永続的'));

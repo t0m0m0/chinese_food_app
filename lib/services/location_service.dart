@@ -80,7 +80,7 @@ class LocationService {
   // TDD REFACTOR段階: 環境変数による権限チェック制御
   Future<PermissionResult> checkLocationPermission() async {
     final permissionTestMode = Platform.environment['PERMISSION_TEST_MODE'];
-    
+
     // テスト環境での権限拒否シミュレーション
     if (permissionTestMode == 'denied') {
       return PermissionResult.denied(
@@ -98,7 +98,7 @@ class LocationService {
         errorType: LocationServiceDisabledError('サービス無効'),
       );
     }
-    
+
     // TODO(#42): [HIGH] 本番環境では実際のGeolocator.checkPermission()を使用 - Sprint 2.1で対応予定
     // 実装内容: Geolocatorパッケージの有効化、実際の権限チェック機能
     // final permission = await Geolocator.checkPermission();
@@ -116,15 +116,14 @@ class LocationService {
         final permission = await checkLocationPermission();
         if (!permission.isGranted) {
           return LocationServiceResult.failure(
-            permission.errorMessage ?? 'Permission denied'
-          );
+              permission.errorMessage ?? 'Permission denied');
         }
-        
-        // TODO(#42): [HIGH] 実際のGPS実装 - Sprint 2.1で対応予定  
+
+        // TODO(#42): [HIGH] 実際のGPS実装 - Sprint 2.1で対応予定
         // 実装内容: Geolocatorパッケージ有効化、LocationSettings設定、実座標取得
         // final position = await Geolocator.getCurrentPosition(locationSettings: _locationSettings);
         // return LocationServiceResult.success(lat: position.latitude, lng: position.longitude);
-        
+
         // 暫定的にダミーデータを返す（権限チェック後）
         return LocationServiceResult.success(
           lat: 35.6762, // 東京駅
@@ -133,7 +132,7 @@ class LocationService {
       } else {
         // テスト環境：環境変数でエラーシミュレーション可能
         final errorMode = Platform.environment['LOCATION_ERROR_MODE'];
-        
+
         if (errorMode == 'permission_denied') {
           return LocationServiceResult.failure('権限が拒否されました');
         } else if (errorMode == 'service_disabled') {
@@ -141,7 +140,7 @@ class LocationService {
         } else if (errorMode == 'timeout') {
           return LocationServiceResult.failure('位置取得がタイムアウトしました');
         }
-        
+
         // テスト環境：正常時はダミーデータ
         return LocationServiceResult.success(
           lat: 35.6762, // 東京駅
@@ -169,9 +168,11 @@ class LocationService {
       return GeocodeResult.success(address);
     } catch (e) {
       // 具体的なエラー型による改善されたエラーハンドリング
-      if (e.toString().contains('network') || e.toString().contains('connection')) {
+      if (e.toString().contains('network') ||
+          e.toString().contains('connection')) {
         return GeocodeResult.failure('ネットワークエラーが発生しました');
-      } else if (e.toString().contains('format') || e.toString().contains('invalid')) {
+      } else if (e.toString().contains('format') ||
+          e.toString().contains('invalid')) {
         return GeocodeResult.failure('座標の形式が正しくありません');
       } else if (e.toString().contains('timeout')) {
         return GeocodeResult.failure('リバースジオコーディングがタイムアウトしました');
@@ -196,9 +197,11 @@ class LocationService {
       );
     } catch (e) {
       // 具体的なエラー型による改善されたエラーハンドリング
-      if (e.toString().contains('network') || e.toString().contains('connection')) {
+      if (e.toString().contains('network') ||
+          e.toString().contains('connection')) {
         return GeocodeResult.failure('ネットワークエラーが発生しました');
-      } else if (e.toString().contains('format') || e.toString().contains('invalid')) {
+      } else if (e.toString().contains('format') ||
+          e.toString().contains('invalid')) {
         return GeocodeResult.failure('住所の形式が正しくありません');
       } else if (e.toString().contains('timeout')) {
         return GeocodeResult.failure('ジオコーディングがタイムアウトしました');
