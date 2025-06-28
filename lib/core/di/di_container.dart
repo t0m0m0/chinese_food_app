@@ -4,6 +4,8 @@ import '../database/database_helper.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/repositories/store_repository_impl.dart';
+import '../../data/services/geolocator_location_service.dart';
+import '../../domain/services/location_service.dart';
 import '../../presentation/providers/store_provider.dart';
 
 /// 依存性注入コンテナ
@@ -46,6 +48,11 @@ class DIContainer {
   /// ローカルデータソースを作成
   static StoreLocalDatasource _createLocalDatasource() {
     return StoreLocalDatasourceImpl(dbHelper: DatabaseHelper());
+  }
+
+  /// LocationServiceを作成
+  static LocationService createLocationService() {
+    return GeolocatorLocationService();
   }
 
   // 将来の拡張用メソッド
