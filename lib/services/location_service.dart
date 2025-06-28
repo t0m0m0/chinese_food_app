@@ -1,11 +1,72 @@
 // import 'package:geolocator/geolocator.dart';  // 一時的に無効化
 import 'package:geocoding/geocoding.dart';
 
+// TDD GREEN段階: 最小限のエラー型定義
+abstract class LocationError extends Error {
+  final String message;
+  LocationError(this.message);
+  
+  @override
+  String toString() => 'LocationError: $message';
+}
+
+class LocationPermissionDeniedError extends LocationError {
+  LocationPermissionDeniedError(super.message);
+  
+  @override
+  String toString() => 'LocationPermissionDeniedError: $message';
+}
+
+class LocationServiceDisabledError extends LocationError {
+  LocationServiceDisabledError(super.message);
+  
+  @override
+  String toString() => 'LocationServiceDisabledError: $message';
+}
+
+class LocationTimeoutError extends LocationError {
+  LocationTimeoutError(super.message);
+  
+  @override
+  String toString() => 'LocationTimeoutError: $message';
+}
+
+// TDD GREEN段階: PermissionResult型の定義
+class PermissionResult {
+  final bool isGranted;
+  final String? errorMessage;
+  final LocationError? errorType;
+
+  const PermissionResult._({
+    required this.isGranted,
+    this.errorMessage,
+    this.errorType,
+  });
+
+  factory PermissionResult.granted() {
+    return const PermissionResult._(isGranted: true);
+  }
+
+  factory PermissionResult.denied(String message, {LocationError? errorType}) {
+    return PermissionResult._(
+      isGranted: false,
+      errorMessage: message,
+      errorType: errorType,
+    );
+  }
+}
+
 class LocationService {
   // static const LocationSettings _locationSettings = LocationSettings(
   //   accuracy: LocationAccuracy.high,
   //   distanceFilter: 100,
   // );
+
+  // TDD GREEN段階: 最小限のcheckLocationPermissionメソッド
+  Future<PermissionResult> checkLocationPermission() async {
+    // 仮実装: 常に権限が許可されていると返す（三角測量で後で改善）
+    return PermissionResult.granted();
+  }
 
   Future<LocationServiceResult> getCurrentPosition() async {
     try {
