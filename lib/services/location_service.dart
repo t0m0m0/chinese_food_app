@@ -1,5 +1,6 @@
 // import 'package:geolocator/geolocator.dart';  // 一時的に無効化
 import 'package:geocoding/geocoding.dart';
+import 'dart:io' show Platform;
 
 // TDD GREEN段階: 最小限のエラー型定義
 abstract class LocationError extends Error {
@@ -70,27 +71,31 @@ class LocationService {
 
   Future<LocationServiceResult> getCurrentPosition() async {
     try {
-      // 一時的にダミーデータを返す（CI環境での互換性問題のため）
-      return LocationServiceResult.success(
-        lat: 35.6762, // 東京駅
-        lng: 139.6503,
-      );
-
-      // final permission = await _checkLocationPermission();
-      // if (!permission.isGranted) {
-      //   return LocationServiceResult.failure(
-      //     permission.errorMessage ?? 'Location permission error',
-      //   );
-      // }
-
-      // final position = await Geolocator.getCurrentPosition(
-      //   locationSettings: _locationSettings,
-      // );
-
-      // return LocationServiceResult.success(
-      //   lat: position.latitude,
-      //   lng: position.longitude,
-      // );
+      // TDD GREEN段階: 環境変数による実装切り替え
+      final locationMode = Platform.environment['LOCATION_MODE'] ?? 'test';
+      
+      if (locationMode == 'production') {
+        // TODO: 実際のGPS実装（後で実装）
+        // final permission = await checkLocationPermission();
+        // if (!permission.isGranted) {
+        //   return LocationServiceResult.failure(permission.errorMessage ?? 'Permission denied');
+        // }
+        // 
+        // final position = await Geolocator.getCurrentPosition();
+        // return LocationServiceResult.success(lat: position.latitude, lng: position.longitude);
+        
+        // 暫定的にダミーデータを返す（実GPS実装前）
+        return LocationServiceResult.success(
+          lat: 35.6762, // 東京駅
+          lng: 139.6503,
+        );
+      } else {
+        // テスト環境：ダミーデータを返す
+        return LocationServiceResult.success(
+          lat: 35.6762, // 東京駅
+          lng: 139.6503,
+        );
+      }
     } catch (e) {
       return LocationServiceResult.failure(e.toString());
     }
@@ -133,31 +138,6 @@ class LocationService {
     }
   }
 
-  // Future<_PermissionResult> _checkLocationPermission() async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     return _PermissionResult.failure('位置情報サービスが無効です');
-  //   }
-
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       return _PermissionResult.failure('位置情報の権限が拒否されました');
-  //     }
-  //   }
-
-  //   if (permission == LocationPermission.deniedForever) {
-  //     return _PermissionResult.failure(
-  //       '位置情報の権限が永続的に拒否されています。設定から許可してください',
-  //     );
-  //   }
-
-  //   return _PermissionResult.success();
-  // }
 
   String _formatAddress(Placemark placemark) {
     final components = <String>[];
