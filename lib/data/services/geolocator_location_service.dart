@@ -108,14 +108,15 @@ class GeolocatorLocationService implements LocationService {
       developer.log('Unexpected location error: $e', name: 'LocationService');
       // より適切なエラー分類（文字列チェックによるフォールバック）
       final errorMessage = e.toString().toLowerCase();
-      if (errorMessage.contains('permission') || errorMessage.contains('denied')) {
+      if (errorMessage.contains('permission') ||
+          errorMessage.contains('denied')) {
         throw LocationException(
           'Location permission error: $e',
           LocationExceptionType.permissionDenied,
         );
-      } else if (errorMessage.contains('disabled') || 
-                 errorMessage.contains('unavailable') ||
-                 errorMessage.contains('service')) {
+      } else if (errorMessage.contains('disabled') ||
+          errorMessage.contains('unavailable') ||
+          errorMessage.contains('service')) {
         throw LocationException(
           'Location service unavailable: $e',
           LocationExceptionType.serviceDisabled,

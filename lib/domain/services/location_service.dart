@@ -14,4 +14,3 @@ abstract class LocationService {
   /// 位置情報権限をリクエスト
   Future<bool> requestLocationPermission();
 }
-
