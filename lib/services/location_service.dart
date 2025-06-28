@@ -6,28 +6,28 @@ import 'dart:io' show Platform;
 abstract class LocationError extends Error {
   final String message;
   LocationError(this.message);
-  
+
   @override
   String toString() => 'LocationError: $message';
 }
 
 class LocationPermissionDeniedError extends LocationError {
   LocationPermissionDeniedError(super.message);
-  
+
   @override
   String toString() => 'LocationPermissionDeniedError: $message';
 }
 
 class LocationServiceDisabledError extends LocationError {
   LocationServiceDisabledError(super.message);
-  
+
   @override
   String toString() => 'LocationServiceDisabledError: $message';
 }
 
 class LocationTimeoutError extends LocationError {
   LocationTimeoutError(super.message);
-  
+
   @override
   String toString() => 'LocationTimeoutError: $message';
 }
@@ -73,17 +73,17 @@ class LocationService {
     try {
       // TDD GREEN段階: 環境変数による実装切り替え
       final locationMode = Platform.environment['LOCATION_MODE'] ?? 'test';
-      
+
       if (locationMode == 'production') {
         // TODO: 実際のGPS実装（後で実装）
         // final permission = await checkLocationPermission();
         // if (!permission.isGranted) {
         //   return LocationServiceResult.failure(permission.errorMessage ?? 'Permission denied');
         // }
-        // 
+        //
         // final position = await Geolocator.getCurrentPosition();
         // return LocationServiceResult.success(lat: position.latitude, lng: position.longitude);
-        
+
         // 暫定的にダミーデータを返す（実GPS実装前）
         return LocationServiceResult.success(
           lat: 35.6762, // 東京駅
@@ -137,7 +137,6 @@ class LocationService {
       return GeocodeResult.failure(e.toString());
     }
   }
-
 
   String _formatAddress(Placemark placemark) {
     final components = <String>[];
