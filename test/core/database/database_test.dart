@@ -154,7 +154,7 @@ void main() {
     test('should handle database version upgrades', () async {
       // Red: This test should fail initially
       final version = await database.getVersion();
-      expect(version, 1);
+      expect(version, 2); // Updated to current database version
 
       // Test migration to version 2
       await databaseHelper.close();
@@ -242,7 +242,7 @@ void main() {
       final stats = await databaseHelper.getDatabaseStats();
 
       expect(stats, isA<Map<String, dynamic>>());
-      expect(stats['version'], 1);
+      expect(stats['version'], 2); // Updated to current database version
       expect(stats['tables'], greaterThan(0));
       expect(stats['foreign_keys_enabled'], isTrue);
     });

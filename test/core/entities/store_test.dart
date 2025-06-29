@@ -21,6 +21,7 @@ void main() {
       expect(store.address, '東京都渋谷区テスト1-1-1');
       expect(store.lat, 35.6762);
       expect(store.lng, 139.6503);
+      expect(store.imageUrl, isNull); // imageUrl is optional
       expect(store.status, StoreStatus.wantToGo);
       expect(store.memo, 'テスト用の店舗');
       expect(store.createdAt, DateTime(2025, 6, 23, 16, 0, 0));
@@ -38,6 +39,21 @@ void main() {
       );
 
       expect(store.memo, isEmpty);
+    });
+
+    test('should create Store entity with imageUrl', () {
+      final store = Store(
+        id: 'test-store-id',
+        name: '中華料理 テスト',
+        address: '東京都渋谷区テスト1-1-1',
+        lat: 35.6762,
+        lng: 139.6503,
+        imageUrl: 'https://example.com/test-image.jpg',
+        status: StoreStatus.wantToGo,
+        createdAt: DateTime(2025, 6, 23, 16, 0, 0),
+      );
+
+      expect(store.imageUrl, 'https://example.com/test-image.jpg');
     });
 
     test('should support all store status types', () {
@@ -159,6 +175,7 @@ void main() {
         address: '東京都渋谷区テスト1-1-1',
         lat: 35.6762,
         lng: 139.6503,
+        imageUrl: 'https://example.com/test-image.jpg',
         status: StoreStatus.wantToGo,
         memo: 'テスト用の店舗',
         createdAt: DateTime(2025, 6, 23, 16, 0, 0),
@@ -172,6 +189,7 @@ void main() {
       expect(reconstructedStore.address, originalStore.address);
       expect(reconstructedStore.lat, originalStore.lat);
       expect(reconstructedStore.lng, originalStore.lng);
+      expect(reconstructedStore.imageUrl, originalStore.imageUrl);
       expect(reconstructedStore.status, originalStore.status);
       expect(reconstructedStore.memo, originalStore.memo);
       expect(reconstructedStore.createdAt, originalStore.createdAt);
@@ -184,6 +202,7 @@ void main() {
         address: '東京都渋谷区テスト1-1-1',
         lat: 35.6762,
         lng: 139.6503,
+        imageUrl: 'https://example.com/test-image.jpg',
         status: StoreStatus.wantToGo,
         memo: 'テスト用の店舗',
         createdAt: DateTime(2025, 6, 23, 16, 0, 0),
@@ -195,6 +214,7 @@ void main() {
         address: '東京都渋谷区テスト1-1-1',
         lat: 35.6762,
         lng: 139.6503,
+        imageUrl: 'https://example.com/test-image.jpg',
         status: StoreStatus.wantToGo,
         memo: 'テスト用の店舗',
         createdAt: DateTime(2025, 6, 23, 16, 0, 0),
@@ -206,6 +226,7 @@ void main() {
         address: '東京都渋谷区テスト1-1-1',
         lat: 35.6762,
         lng: 139.6503,
+        imageUrl: 'https://example.com/test-image.jpg',
         status: StoreStatus.wantToGo,
         memo: 'テスト用の店舗',
         createdAt: DateTime(2025, 6, 23, 16, 0, 0),
