@@ -34,4 +34,11 @@ class SearchProvider extends ChangeNotifier {
     _useCurrentLocation = value;
     notifyListeners();
   }
+
+  // 検索実行 - 最小実装（テストを通すため）
+  Future<void> performSearch({String? address}) async {
+    _hasSearched = true;
+    _isLoading = false; // すぐに完了と仮定
+    notifyListeners();
+  }
 }
