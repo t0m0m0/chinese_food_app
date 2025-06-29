@@ -54,5 +54,11 @@
 	<string>このアプリは近くの中華料理店を検索するために位置情報を使用します</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>このアプリは近くの中華料理店を検索するために位置情報を使用します</string>
+	
+	<!-- カメラと写真機能のアクセス権限の説明 -->
+	<key>NSCameraUsageDescription</key>
+	<string>このアプリは訪問した中華料理店の写真を撮影するためにカメラを使用します</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>このアプリは中華料理店の写真を保存・選択するためにフォトライブラリにアクセスします</string>
 </dict>
 </plist>

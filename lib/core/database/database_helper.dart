@@ -41,6 +41,7 @@ class DatabaseHelper {
         address TEXT NOT NULL CHECK(length(address) > 0),
         lat REAL NOT NULL CHECK(lat BETWEEN -90 AND 90),
         lng REAL NOT NULL CHECK(lng BETWEEN -180 AND 180),
+        image_url TEXT,
         status TEXT NOT NULL CHECK(status IN ('want_to_go', 'visited', 'bad')),
         memo TEXT DEFAULT '',
         created_at TEXT NOT NULL
@@ -100,11 +101,13 @@ class DatabaseHelper {
   }
 
   Future<void> _upgradeToVersion2(Database db) async {
-    // 例: storesテーブルにratingカラムを追加
-    await db.execute('ALTER TABLE stores ADD COLUMN rating REAL DEFAULT 0.0');
+    // storesテーブルにimage_urlカラムを追加
+    await db.execute('ALTER TABLE stores ADD COLUMN image_url TEXT');
 
-    // 新しいインデックスを追加
-    await db.execute('CREATE INDEX idx_stores_rating ON stores (rating)');
+    // 画像URL検索のパフォーマンス向上のためのインデックス追加
+    // 将来的に「画像がある店舗」の検索が頻繁になる場合に有効
+    await db.execute(
+        'CREATE INDEX idx_stores_image_url ON stores (image_url) WHERE image_url IS NOT NULL');
   }
 
   Future<void> _upgradeToVersion3(Database db) async {

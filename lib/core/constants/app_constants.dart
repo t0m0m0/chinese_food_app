@@ -9,7 +9,7 @@ class AppConstants {
 
   // データベース
   static const String databaseName = 'machiapp.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   // UI関連
   static const double cardBorderRadius = 12.0;

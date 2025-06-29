@@ -45,6 +45,7 @@ class StoreRepositoryImpl implements StoreRepository {
           address: hotpepperStore.address,
           lat: hotpepperStore.lat ?? 0.0,
           lng: hotpepperStore.lng ?? 0.0,
+          imageUrl: hotpepperStore.photo, // 画像URLを追加
           status: StoreStatus.wantToGo, // API検索結果はデフォルトで「行きたい」
           memo: hotpepperStore.catch_,
           createdAt: DateTime.now(),

@@ -6,6 +6,7 @@ import '../../../domain/entities/store.dart';
 import '../../../domain/entities/location.dart';
 import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
+import '../../widgets/cached_store_image.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -350,8 +351,16 @@ class _SearchPageState extends State<SearchPage> {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
-        leading: const CircleAvatar(
-          child: Icon(Icons.restaurant),
+        leading: SizedBox(
+          width: 56,
+          height: 56,
+          child: CachedStoreImage(
+            imageUrl: store.imageUrl,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            fit: BoxFit.cover,
+          ),
         ),
         title: Text(
           store.name,
