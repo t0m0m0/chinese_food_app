@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/presentation/providers/search_provider.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
@@ -9,26 +10,27 @@ class MockStoreProvider extends Mock implements StoreProvider {
   @override
   Future<void> loadNewStoresFromApi({
     double? lat,
-    double? lng,  
+    double? lng,
     String? address,
     String? keyword = '中華',
     int count = 10,
-  }) => super.noSuchMethod(
-    Invocation.method(#loadNewStoresFromApi, [], {
-      #lat: lat,
-      #lng: lng,
-      #address: address,
-      #keyword: keyword,
-      #count: count,
-    }),
-    returnValue: Future<void>.value(),
-  );
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(#loadNewStoresFromApi, [], {
+          #lat: lat,
+          #lng: lng,
+          #address: address,
+          #keyword: keyword,
+          #count: count,
+        }),
+        returnValue: Future<void>.value(),
+      );
 
   @override
   List<Store> get newStores => super.noSuchMethod(
-    Invocation.getter(#newStores),
-    returnValue: <Store>[],
-  );
+        Invocation.getter(#newStores),
+        returnValue: <Store>[],
+      );
 }
 
 class MockLocationService extends Mock implements LocationService {}
@@ -84,7 +86,8 @@ void main() {
       expect(searchProvider.isLoading, false);
     });
 
-    test('should call StoreProvider.loadNewStoresFromApi during search', () async {
+    test('should call StoreProvider.loadNewStoresFromApi during search',
+        () async {
       // StoreProviderのモックメソッドを設定
       when(mockStoreProvider.loadNewStoresFromApi(
         address: anyNamed('address'),
@@ -96,9 +99,36 @@ void main() {
       searchProvider.setUseCurrentLocation(false);
       await searchProvider.performSearch(address: '東京都新宿区');
 
-      // StoreProviderのloadNewStoresFromApiが呼ばれたことを確認 - 現在の実装では呼ばれないので失敗する
+      // StoreProviderのloadNewStoresFromApiが呼ばれたことを確認
       verify(mockStoreProvider.loadNewStoresFromApi(
         address: '東京都新宿区',
+        keyword: '中華',
+      )).called(1);
+    });
+
+    test('should perform search with current location', () async {
+      // 現在地検索の設定
+      searchProvider.setUseCurrentLocation(true);
+
+      // LocationServiceのモックを設定
+      when(mockLocationService.getCurrentLocation()).thenAnswer(
+        (_) async => Location(
+          latitude: 35.6762,
+          longitude: 139.6503,
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      // 現在地検索を実行 - まだperformSearchが現在地検索に対応していないので失敗する
+      await searchProvider.performSearchWithCurrentLocation();
+
+      // LocationServiceが呼ばれたことを確認
+      verify(mockLocationService.getCurrentLocation()).called(1);
+
+      // StoreProviderが位置情報で呼ばれたことを確認
+      verify(mockStoreProvider.loadNewStoresFromApi(
+        lat: 35.6762,
+        lng: 139.6503,
         keyword: '中華',
       )).called(1);
     });
