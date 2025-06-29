@@ -35,10 +35,30 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 検索実行 - 最小実装（テストを通すため）
+  // 検索実行
   Future<void> performSearch({String? address}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _searchResults.clear();
     _hasSearched = true;
-    _isLoading = false; // すぐに完了と仮定
     notifyListeners();
+
+    try {
+      if (address != null && address.isNotEmpty) {
+        // 住所での検索
+        await storeProvider.loadNewStoresFromApi(
+          address: address,
+          keyword: '中華',
+        );
+        _searchResults = List.from(storeProvider.newStores);
+      }
+      
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
   }
 }

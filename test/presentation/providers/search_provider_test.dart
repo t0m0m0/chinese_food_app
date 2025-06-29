@@ -5,7 +5,31 @@ import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/presentation/providers/search_provider.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
-class MockStoreProvider extends Mock implements StoreProvider {}
+class MockStoreProvider extends Mock implements StoreProvider {
+  @override
+  Future<void> loadNewStoresFromApi({
+    double? lat,
+    double? lng,  
+    String? address,
+    String? keyword = '中華',
+    int count = 10,
+  }) => super.noSuchMethod(
+    Invocation.method(#loadNewStoresFromApi, [], {
+      #lat: lat,
+      #lng: lng,
+      #address: address,
+      #keyword: keyword,
+      #count: count,
+    }),
+    returnValue: Future<void>.value(),
+  );
+
+  @override
+  List<Store> get newStores => super.noSuchMethod(
+    Invocation.getter(#newStores),
+    returnValue: <Store>[],
+  );
+}
 
 class MockLocationService extends Mock implements LocationService {}
 
