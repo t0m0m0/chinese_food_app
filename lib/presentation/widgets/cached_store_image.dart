@@ -37,6 +37,11 @@ class CachedStoreImage extends StatelessWidget {
               width: width,
               height: height,
               fit: fit,
+              // メモリ効率改善のための設定
+              memCacheWidth: width?.toInt(),
+              memCacheHeight: height?.toInt(),
+              maxWidthDiskCache: 500,
+              maxHeightDiskCache: 500,
               placeholder: (context, url) => Container(
                 width: width,
                 height: height,
@@ -53,6 +58,7 @@ class CachedStoreImage extends StatelessWidget {
                   Icons.restaurant,
                   color: Colors.grey,
                   size: 40,
+                  semanticLabel: '店舗画像なし',
                 ),
               ),
             )
@@ -64,6 +70,7 @@ class CachedStoreImage extends StatelessWidget {
                 Icons.restaurant,
                 color: Colors.grey,
                 size: 40,
+                semanticLabel: '店舗画像なし',
               ),
             ),
     );
