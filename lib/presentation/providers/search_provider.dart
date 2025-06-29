@@ -35,6 +35,25 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // エラーメッセージのフォーマット
+  String _formatErrorMessage(dynamic error) {
+    final errorString = error.toString();
+
+    if (errorString.contains('位置情報') ||
+        errorString.contains('Location') ||
+        errorString.contains('permission')) {
+      return '位置情報の取得に失敗しました。設定を確認してください。';
+    } else if (errorString.contains('ネットワーク') ||
+        errorString.contains('network') ||
+        errorString.contains('Network')) {
+      return 'ネットワークエラーが発生しました。接続を確認してください。';
+    } else if (errorString.contains('API') || errorString.contains('api')) {
+      return 'サーバーエラーが発生しました。しばらく時間をおいて再度お試しください。';
+    } else {
+      return '予期しないエラーが発生しました。再度お試しください。';
+    }
+  }
+
   // 検索実行
   Future<void> performSearch({String? address}) async {
     _isLoading = true;
@@ -50,14 +69,14 @@ class SearchProvider extends ChangeNotifier {
           address: address,
           keyword: '中華',
         );
-        _searchResults = List.from(storeProvider.newStores);
+        _searchResults = List<Store>.from(storeProvider.newStores);
       }
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = _formatErrorMessage(e);
       notifyListeners();
     }
   }
@@ -84,14 +103,14 @@ class SearchProvider extends ChangeNotifier {
         lng: location.longitude,
         keyword: '中華',
       );
-      _searchResults = List.from(storeProvider.newStores);
+      _searchResults = List<Store>.from(storeProvider.newStores);
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _isGettingLocation = false;
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = _formatErrorMessage(e);
       notifyListeners();
     }
   }

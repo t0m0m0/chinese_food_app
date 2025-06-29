@@ -56,7 +56,6 @@ void main() {
     setUp(() {
       mockStoreProvider = MockStoreProvider();
       mockLocationService = MockLocationService();
-      // この行は失敗する - SearchProviderがまだ実装されていない
       searchProvider = SearchProvider(
         storeProvider: mockStoreProvider,
         locationService: mockLocationService,
@@ -77,7 +76,7 @@ void main() {
       // 最初は現在地検索
       expect(searchProvider.useCurrentLocation, true);
 
-      // 住所検索に切り替え - このメソッドはまだ実装されていないので失敗する
+      // 住所検索に切り替え
       searchProvider.setUseCurrentLocation(false);
       expect(searchProvider.useCurrentLocation, false);
 
@@ -90,7 +89,7 @@ void main() {
       // 住所検索モードに設定
       searchProvider.setUseCurrentLocation(false);
 
-      // アドレス検索を実行 - このメソッドはまだ実装されていないので失敗する
+      // アドレス検索を実行
       await searchProvider.performSearch(address: '東京都新宿区');
 
       // 検索後の状態確認
@@ -131,7 +130,7 @@ void main() {
         ),
       );
 
-      // 現在地検索を実行 - まだperformSearchが現在地検索に対応していないので失敗する
+      // 現在地検索を実行
       await searchProvider.performSearchWithCurrentLocation();
 
       // LocationServiceが呼ばれたことを確認
@@ -171,7 +170,7 @@ void main() {
       await searchProvider.performSearch(address: '東京都新宿区');
 
       // エラーメッセージが設定されることを確認
-      expect(searchProvider.errorMessage, contains('API通信エラー'));
+      expect(searchProvider.errorMessage, contains('サーバーエラーが発生しました'));
       expect(searchProvider.isLoading, false);
     });
   });
