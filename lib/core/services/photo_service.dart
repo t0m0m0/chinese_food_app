@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// 写真撮影・選択のサービスクラス
-/// 
+///
 /// 使用例:
 /// ```dart
 /// final photoService = PhotoService();
 /// final file = await photoService.takePhotoFromCamera();
 /// ```
-/// 
+///
 /// 制限事項:
 /// - 画像品質は80%に固定
 /// - サポート形式: JPEG, PNG
@@ -92,21 +92,21 @@ class PhotoService {
   /// 画像ファイルの検証と処理
   Future<File> _validateAndProcessImage(XFile image) async {
     final file = File(image.path);
-    
+
     // ファイルサイズ制限チェック（5MB）
     final fileSize = await file.length();
     const maxFileSize = 5 * 1024 * 1024; // 5MB
     if (fileSize > maxFileSize) {
       throw PhotoServiceException('ファイルサイズが大きすぎます（5MB以下にしてください）');
     }
-    
+
     // 許可される拡張子チェック
     final allowedExtensions = ['.jpg', '.jpeg', '.png'];
     final fileName = image.path.toLowerCase();
     if (!allowedExtensions.any((ext) => fileName.endsWith(ext))) {
       throw PhotoServiceException('サポートされていないファイル形式です（JPEG, PNG のみ対応）');
     }
-    
+
     return file;
   }
 }
