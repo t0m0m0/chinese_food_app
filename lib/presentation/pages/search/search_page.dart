@@ -24,7 +24,8 @@ class _SearchPageState extends State<SearchPage> {
     super.initState();
     // SearchProviderを初期化
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
-    final locationService = Provider.of<LocationService>(context, listen: false);
+    final locationService =
+        Provider.of<LocationService>(context, listen: false);
     _searchProvider = SearchProvider(
       storeProvider: storeProvider,
       locationService: locationService,
@@ -39,7 +40,8 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _performSearch() async {
-    if (!_searchProvider.useCurrentLocation && _searchController.text.trim().isEmpty) {
+    if (!_searchProvider.useCurrentLocation &&
+        _searchController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('住所を入力してください')),
       );
@@ -49,10 +51,10 @@ class _SearchPageState extends State<SearchPage> {
     if (_searchProvider.useCurrentLocation) {
       await _searchProvider.performSearchWithCurrentLocation();
     } else {
-      await _searchProvider.performSearch(address: _searchController.text.trim());
+      await _searchProvider.performSearch(
+          address: _searchController.text.trim());
     }
   }
-
 
   /// 位置情報エラーダイアログを表示
   Future<void> _showLocationErrorDialog(String errorMessage) async {
@@ -173,18 +175,23 @@ class _SearchPageState extends State<SearchPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: (searchProvider.isLoading || searchProvider.isGettingLocation) 
-                      ? null 
+                  onPressed: (searchProvider.isLoading ||
+                          searchProvider.isGettingLocation)
+                      ? null
                       : _performSearch,
-                  icon: (searchProvider.isLoading || searchProvider.isGettingLocation)
+                  icon: (searchProvider.isLoading ||
+                          searchProvider.isGettingLocation)
                       ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.search),
-                  label: Text((searchProvider.isGettingLocation || searchProvider.isLoading)
-                      ? (searchProvider.isGettingLocation ? '現在地取得中...' : '検索中...')
+                  label: Text((searchProvider.isGettingLocation ||
+                          searchProvider.isLoading)
+                      ? (searchProvider.isGettingLocation
+                          ? '現在地取得中...'
+                          : '検索中...')
                       : '中華料理店を検索'),
                 ),
               ),
@@ -231,7 +238,7 @@ class _SearchPageState extends State<SearchPage> {
               _showLocationErrorDialog(searchProvider.errorMessage!);
             });
           }
-          
+
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -262,8 +269,11 @@ class _SearchPageState extends State<SearchPage> {
                 Icon(Icons.search, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
                 Text(
-                  searchProvider.hasSearched ? '検索結果が見つかりません' : '検索ボタンを押して中華料理店を探しましょう',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  searchProvider.hasSearched
+                      ? '検索結果が見つかりません'
+                      : '検索ボタンを押して中華料理店を探しましょう',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 if (searchProvider.hasSearched) ...[
                   const SizedBox(height: 8),

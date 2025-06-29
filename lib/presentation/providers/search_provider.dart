@@ -74,7 +74,7 @@ class SearchProvider extends ChangeNotifier {
     try {
       // 現在位置を取得
       final location = await locationService.getCurrentLocation();
-      
+
       _isGettingLocation = false;
       notifyListeners();
 

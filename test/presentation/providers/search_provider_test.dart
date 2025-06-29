@@ -36,15 +36,15 @@ class MockStoreProvider extends Mock implements StoreProvider {
 class MockLocationService extends Mock implements LocationService {
   @override
   Future<Location> getCurrentLocation() => super.noSuchMethod(
-    Invocation.method(#getCurrentLocation, []),
-    returnValue: Future<Location>.value(
-      Location(
-        latitude: 0.0,
-        longitude: 0.0,
-        timestamp: DateTime.now(),
-      ),
-    ),
-  );
+        Invocation.method(#getCurrentLocation, []),
+        returnValue: Future<Location>.value(
+          Location(
+            latitude: 0.0,
+            longitude: 0.0,
+            timestamp: DateTime.now(),
+          ),
+        ),
+      );
 }
 
 void main() {
