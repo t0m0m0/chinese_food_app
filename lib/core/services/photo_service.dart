@@ -65,9 +65,9 @@ class PhotoService {
 /// PhotoService専用の例外クラス
 class PhotoServiceException implements Exception {
   final String message;
-  
+
   const PhotoServiceException(this.message);
-  
+
   @override
   String toString() => 'PhotoServiceException: $message';
 }
