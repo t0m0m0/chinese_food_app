@@ -13,11 +13,25 @@ class SearchProvider extends ChangeNotifier {
     required this.locationService,
   });
 
-  // 状態管理フィールド - 仮実装（テストを通すため）
-  bool get isLoading => false;
-  bool get isGettingLocation => false;
-  String? get errorMessage => null;
-  List<Store> get searchResults => [];
-  bool get useCurrentLocation => true;
-  bool get hasSearched => false;
+  // 状態管理フィールド
+  bool _isLoading = false;
+  bool _isGettingLocation = false;
+  String? _errorMessage;
+  List<Store> _searchResults = [];
+  bool _useCurrentLocation = true;
+  bool _hasSearched = false;
+
+  // ゲッター
+  bool get isLoading => _isLoading;
+  bool get isGettingLocation => _isGettingLocation;
+  String? get errorMessage => _errorMessage;
+  List<Store> get searchResults => _searchResults;
+  bool get useCurrentLocation => _useCurrentLocation;
+  bool get hasSearched => _hasSearched;
+
+  // 検索モード切り替え
+  void setUseCurrentLocation(bool value) {
+    _useCurrentLocation = value;
+    notifyListeners();
+  }
 }
