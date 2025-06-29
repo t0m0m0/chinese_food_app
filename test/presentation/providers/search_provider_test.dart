@@ -24,13 +24,26 @@ void main() {
     });
 
     test('should be created with initial state', () {
-      // 初期状態のテスト - これも失敗する
+      // 初期状態のテスト
       expect(searchProvider.isLoading, false);
       expect(searchProvider.isGettingLocation, false);
       expect(searchProvider.errorMessage, null);
       expect(searchProvider.searchResults, isEmpty);
       expect(searchProvider.useCurrentLocation, true);
       expect(searchProvider.hasSearched, false);
+    });
+
+    test('should toggle search mode between current location and address', () {
+      // 最初は現在地検索
+      expect(searchProvider.useCurrentLocation, true);
+      
+      // 住所検索に切り替え - このメソッドはまだ実装されていないので失敗する
+      searchProvider.setUseCurrentLocation(false);
+      expect(searchProvider.useCurrentLocation, false);
+      
+      // 現在地検索に戻す
+      searchProvider.setUseCurrentLocation(true);  
+      expect(searchProvider.useCurrentLocation, true);
     });
   });
 }
