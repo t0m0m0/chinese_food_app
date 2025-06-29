@@ -103,6 +103,11 @@ class DatabaseHelper {
   Future<void> _upgradeToVersion2(Database db) async {
     // storesテーブルにimage_urlカラムを追加
     await db.execute('ALTER TABLE stores ADD COLUMN image_url TEXT');
+
+    // 画像URL検索のパフォーマンス向上のためのインデックス追加
+    // 将来的に「画像がある店舗」の検索が頻繁になる場合に有効
+    await db.execute(
+        'CREATE INDEX idx_stores_image_url ON stores (image_url) WHERE image_url IS NOT NULL');
   }
 
   Future<void> _upgradeToVersion3(Database db) async {
