@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import '../../../lib/domain/entities/store.dart';
-import '../../../lib/domain/entities/location.dart';
-import '../../../lib/domain/services/location_service.dart';
-import '../../../lib/presentation/providers/search_provider.dart';
-import '../../../lib/presentation/providers/store_provider.dart';
+import 'package:chinese_food_app/domain/services/location_service.dart';
+import 'package:chinese_food_app/presentation/providers/search_provider.dart';
+import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
 class MockStoreProvider extends Mock implements StoreProvider {}
 class MockLocationService extends Mock implements LocationService {}
