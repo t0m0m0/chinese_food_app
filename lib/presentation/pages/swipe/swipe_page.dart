@@ -7,6 +7,7 @@ import '../../../domain/entities/store.dart';
 import '../../../domain/entities/location.dart';
 import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
+import '../../widgets/cached_store_image.dart';
 
 class SwipePage extends StatefulWidget {
   const SwipePage({super.key});
@@ -208,17 +209,13 @@ class _SwipePageState extends State<SwipePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.restaurant,
-                size: 64,
-                color: colorScheme.primary,
-              ),
+            // 店舗画像表示
+            CachedStoreImage(
+              imageUrl: store.imageUrl,
+              width: 120,
+              height: 120,
+              borderRadius: 60, // 円形にするため幅/高さの半分
+              fit: BoxFit.cover,
             ),
             const SizedBox(height: 24),
             Text(

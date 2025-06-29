@@ -50,8 +50,8 @@ dependencies:
   
   # UI・UX関連
   flutter_card_swiper: ^7.0.2
-  # cached_network_image: ^3.4.1
-  # image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+  image_picker: ^1.1.2
   
   # 状態管理
   provider: ^6.1.1
@@ -60,7 +60,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   
   # ユーティリティ
-  # uuid: ^4.5.1
+  uuid: ^4.5.1
   # intl: ^0.19.0
 
 dev_dependencies:
@@ -78,7 +78,6 @@ dev_dependencies:
   sqflite_common_ffi: ^2.3.0  # SQLite testing support
   mockito: ^5.4.4             # Mocking framework
   build_runner: ^2.4.13       # Code generation
-  uuid: ^4.5.1                # UUID generation for testing
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -44,6 +44,9 @@ class Store {
   /// 経度
   final double lng;
 
+  /// 画像URL
+  final String? imageUrl;
+
   /// ステータス
   final StoreStatus? status;
 
@@ -60,6 +63,7 @@ class Store {
   /// [address] - 住所（必須、空文字不可）
   /// [lat] - 緯度（必須、-90.0~90.0の範囲）
   /// [lng] - 経度（必須、-180.0~180.0の範囲）
+  /// [imageUrl] - 画像URL（任意）
   /// [status] - ステータス（任意）
   /// [memo] - メモ（任意、デフォルト空文字）
   /// [createdAt] - 作成日時（必須）
@@ -69,6 +73,7 @@ class Store {
     required this.address,
     required this.lat,
     required this.lng,
+    this.imageUrl,
     this.status,
     this.memo = '',
     required this.createdAt,
@@ -100,6 +105,7 @@ class Store {
       address: json['address'] as String,
       lat: (json['lat'] as num).toDouble(),
       lng: (json['lng'] as num).toDouble(),
+      imageUrl: json['image_url'] as String?,
       status: json['status'] != null
           ? StoreStatus.fromString(json['status'] as String)
           : null,
@@ -116,6 +122,7 @@ class Store {
       'address': address,
       'lat': lat,
       'lng': lng,
+      'image_url': imageUrl,
       'status': status?.value,
       'memo': memo,
       'created_at': createdAt.toIso8601String(),
@@ -133,6 +140,7 @@ class Store {
         address == other.address &&
         lat == other.lat &&
         lng == other.lng &&
+        imageUrl == other.imageUrl &&
         status == other.status &&
         memo == other.memo &&
         createdAt == other.createdAt;
@@ -147,6 +155,7 @@ class Store {
       address,
       lat,
       lng,
+      imageUrl,
       status,
       memo,
       createdAt,
@@ -156,7 +165,7 @@ class Store {
   /// デバッグ用文字列表現
   @override
   String toString() {
-    return 'Store{id: $id, name: $name, address: $address, lat: $lat, lng: $lng, status: $status, memo: $memo, createdAt: $createdAt}';
+    return 'Store{id: $id, name: $name, address: $address, lat: $lat, lng: $lng, imageUrl: $imageUrl, status: $status, memo: $memo, createdAt: $createdAt}';
   }
 
   /// Store エンティティをコピーして一部を変更
@@ -168,6 +177,7 @@ class Store {
     String? address,
     double? lat,
     double? lng,
+    String? imageUrl,
     StoreStatus? status,
     bool resetStatus = false,
     String? memo,
@@ -179,6 +189,7 @@ class Store {
       address: address ?? this.address,
       lat: lat ?? this.lat,
       lng: lng ?? this.lng,
+      imageUrl: imageUrl ?? this.imageUrl,
       status: resetStatus ? null : (status ?? this.status),
       memo: memo ?? this.memo,
       createdAt: createdAt ?? this.createdAt,
