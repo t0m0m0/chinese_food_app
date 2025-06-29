@@ -6,7 +6,9 @@ import 'package:mockito/mockito.dart';
 import 'package:chinese_food_app/presentation/pages/search/search_page.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/domain/services/location_service.dart';
 
 // Simple mock implementation for testing
 class MockStoreRepository extends Mock implements StoreRepository {
@@ -32,13 +34,24 @@ class MockStoreRepository extends Mock implements StoreRepository {
   Future<List<Store>> searchStores(String query) async => [];
 }
 
+class MockLocationService extends Mock implements LocationService {
+  @override
+  Future<Location> getCurrentLocation() async => Location(
+        latitude: 35.6762,
+        longitude: 139.6503,
+        timestamp: DateTime.now(),
+      );
+}
+
 void main() {
   late MockStoreRepository mockRepository;
   late StoreProvider storeProvider;
+  late MockLocationService mockLocationService;
 
   setUp(() {
     mockRepository = MockStoreRepository();
     storeProvider = StoreProvider(repository: mockRepository);
+    mockLocationService = MockLocationService();
   });
 
   Widget createTestWidget() {
@@ -46,6 +59,7 @@ void main() {
       home: MultiProvider(
         providers: [
           ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
+          Provider<LocationService>.value(value: mockLocationService),
         ],
         child: SearchPage(),
       ),
