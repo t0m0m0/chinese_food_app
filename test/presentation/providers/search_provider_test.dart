@@ -33,7 +33,19 @@ class MockStoreProvider extends Mock implements StoreProvider {
       );
 }
 
-class MockLocationService extends Mock implements LocationService {}
+class MockLocationService extends Mock implements LocationService {
+  @override
+  Future<Location> getCurrentLocation() => super.noSuchMethod(
+    Invocation.method(#getCurrentLocation, []),
+    returnValue: Future<Location>.value(
+      Location(
+        latitude: 0.0,
+        longitude: 0.0,
+        timestamp: DateTime.now(),
+      ),
+    ),
+  );
+}
 
 void main() {
   group('SearchProvider Tests', () {
@@ -131,6 +143,36 @@ void main() {
         lng: 139.6503,
         keyword: '中華',
       )).called(1);
+    });
+
+    test('should handle location service error', () async {
+      // LocationServiceでエラーが発生するように設定
+      when(mockLocationService.getCurrentLocation())
+          .thenThrow(Exception('位置情報の取得に失敗しました'));
+
+      // 現在地検索を実行
+      await searchProvider.performSearchWithCurrentLocation();
+
+      // エラーメッセージが設定されることを確認
+      expect(searchProvider.errorMessage, contains('位置情報の取得に失敗しました'));
+      expect(searchProvider.isLoading, false);
+      expect(searchProvider.isGettingLocation, false);
+    });
+
+    test('should handle store provider error during address search', () async {
+      // StoreProviderでエラーが発生するように設定
+      when(mockStoreProvider.loadNewStoresFromApi(
+        address: anyNamed('address'),
+        keyword: anyNamed('keyword'),
+      )).thenThrow(Exception('API通信エラー'));
+
+      // 住所検索を実行
+      searchProvider.setUseCurrentLocation(false);
+      await searchProvider.performSearch(address: '東京都新宿区');
+
+      // エラーメッセージが設定されることを確認
+      expect(searchProvider.errorMessage, contains('API通信エラー'));
+      expect(searchProvider.isLoading, false);
     });
   });
 }

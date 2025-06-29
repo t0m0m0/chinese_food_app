@@ -52,10 +52,44 @@ class SearchProvider extends ChangeNotifier {
         );
         _searchResults = List.from(storeProvider.newStores);
       }
-      
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  // 現在地検索実行
+  Future<void> performSearchWithCurrentLocation() async {
+    _isLoading = true;
+    _isGettingLocation = true;
+    _errorMessage = null;
+    _searchResults.clear();
+    _hasSearched = true;
+    notifyListeners();
+
+    try {
+      // 現在位置を取得
+      final location = await locationService.getCurrentLocation();
+      
+      _isGettingLocation = false;
+      notifyListeners();
+
+      // 位置情報を使ってAPI検索
+      await storeProvider.loadNewStoresFromApi(
+        lat: location.latitude,
+        lng: location.longitude,
+        keyword: '中華',
+      );
+      _searchResults = List.from(storeProvider.newStores);
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isGettingLocation = false;
       _isLoading = false;
       _errorMessage = e.toString();
       notifyListeners();
