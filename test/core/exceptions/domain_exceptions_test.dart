@@ -8,10 +8,10 @@ void main() {
       // Arrange
       const message = 'Invalid input format';
       const fieldName = 'email';
-      
+
       // Act
       final exception = ValidationException(message, fieldName: fieldName);
-      
+
       // Assert
       expect(exception.message, equals(message));
       expect(exception.fieldName, equals(fieldName));
@@ -21,10 +21,10 @@ void main() {
     test('should create validation exception without field name', () {
       // Arrange
       const message = 'Form validation failed';
-      
+
       // Act
       final exception = ValidationException(message);
-      
+
       // Assert
       expect(exception.message, equals(message));
       expect(exception.fieldName, isNull);
@@ -34,12 +34,13 @@ void main() {
       // Arrange
       const message = 'Invalid email format';
       const fieldName = 'email';
-      
+
       // Act
       final exception = ValidationException(message, fieldName: fieldName);
-      
+
       // Assert
-      expect(exception.toString(), equals('ValidationException: $message (Field: $fieldName)'));
+      expect(exception.toString(),
+          equals('ValidationException: $message (Field: $fieldName)'));
     });
   });
 
@@ -48,10 +49,10 @@ void main() {
       // Arrange
       const message = 'Request failed';
       const statusCode = 404;
-      
+
       // Act
       final exception = NetworkException(message, statusCode: statusCode);
-      
+
       // Assert
       expect(exception.message, equals(message));
       expect(exception.statusCode, equals(statusCode));
@@ -61,10 +62,10 @@ void main() {
     test('should create network exception without status code', () {
       // Arrange
       const message = 'Network timeout';
-      
+
       // Act
       final exception = NetworkException(message);
-      
+
       // Assert
       expect(exception.message, equals(message));
       expect(exception.statusCode, isNull);
@@ -78,14 +79,14 @@ void main() {
       const message = 'Failed to insert record';
       const operation = 'INSERT';
       const table = 'stores';
-      
+
       // Act
       final exception = DatabaseException(
         message,
         operation: operation,
         table: table,
       );
-      
+
       // Assert
       expect(exception.message, equals(message));
       expect(exception.operation, equals(operation));
@@ -99,10 +100,10 @@ void main() {
       // Arrange
       const message = 'Location access denied';
       const reason = LocationExceptionReason.permissionDenied;
-      
+
       // Act
       final exception = LocationException(message, reason: reason);
-      
+
       // Assert
       expect(exception.message, equals(message));
       expect(exception.reason, equals(reason));
@@ -110,4 +111,3 @@ void main() {
     });
   });
 }
-
