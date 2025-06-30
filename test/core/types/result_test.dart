@@ -140,12 +140,10 @@ void main() {
         // Act & Assert
         String successMessage = switch (successResult) {
           Success<String>() => 'Got success: ${successResult.data}',
-          Failure<String>() => 'Got failure',
         };
         expect(successMessage, equals('Got success: success'));
 
         String failureMessage = switch (failureResult) {
-          Success<String>() => 'Got success',
           Failure<String>() =>
             'Got failure: ${failureResult.exception.message}',
         };
@@ -158,10 +156,8 @@ void main() {
         final failure = Failure<int>(AppException('error'));
 
         // Act & Assert
-        expect(success is Success, isTrue);
-        expect(success is Failure, isFalse);
-        expect(failure is Success, isFalse);
-        expect(failure is Failure, isTrue);
+        expect(success, isA<Success<int>>());
+        expect(failure, isA<Failure<int>>());
       });
     });
 

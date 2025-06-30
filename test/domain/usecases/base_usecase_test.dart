@@ -169,7 +169,6 @@ void main() {
       test('should handle failure propagation in chains', () async {
         // Arrange
         final failingUseCase = _FailureUseCase();
-        final secondUseCase = _SecondStepUseCase();
 
         // Act
         final firstResult = await failingUseCase.call('input');
