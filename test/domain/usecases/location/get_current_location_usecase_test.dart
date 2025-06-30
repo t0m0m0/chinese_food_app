@@ -23,9 +23,20 @@ void main() {
         expect(useCase, isA<BaseUseCase<NoParams, Location>>());
       });
 
-      test('should accept NoParams as input', () {
+      test('should accept NoParams as input', () async {
+        // Arrange
+        mockRepository.setMockResult(Success(Location(
+          latitude: 35.6762,
+          longitude: 139.6503,
+          timestamp: DateTime.now(),
+        )));
+
         // Act & Assert
         expect(() => useCase.call(const NoParams()), returnsNormally);
+        
+        // Verify it actually works
+        final result = await useCase.call(const NoParams());
+        expect(result, isA<Success<Location>>());
       });
 
       test('should return Future<Result<Location>>', () {
