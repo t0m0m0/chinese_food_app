@@ -53,6 +53,17 @@ class AppException implements Exception {
   }) : timestamp = DateTime.now();
 
   @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AppException &&
+          runtimeType == other.runtimeType &&
+          message == other.message &&
+          severity == other.severity;
+
+  @override
+  int get hashCode => Object.hash(message, severity);
+
+  @override
   String toString() {
     final buffer = StringBuffer('AppException: $message');
     if (cause != null) {
