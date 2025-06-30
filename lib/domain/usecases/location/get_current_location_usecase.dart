@@ -20,7 +20,7 @@ import '../../../core/types/result.dart';
 /// ```dart
 /// final useCase = GetCurrentLocationUseCase(locationRepository);
 /// final result = await useCase.call(NoParams());
-/// 
+///
 /// switch (result) {
 ///   case Success<Location>():
 ///     print('Current location: ${result.data}');

@@ -4,7 +4,8 @@ import 'package:chinese_food_app/domain/repositories/location_repository.dart';
 import 'package:chinese_food_app/domain/strategies/location_strategy.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/core/types/result.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart' as domain;
+import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart'
+    as domain;
 
 void main() {
   group('LocationRepositoryImpl', () {
@@ -22,7 +23,8 @@ void main() {
         expect(repository, isA<LocationRepository>());
       });
 
-      test('should return Future<Result<Location>> from getCurrentLocation', () {
+      test('should return Future<Result<Location>> from getCurrentLocation',
+          () {
         // Arrange
         mockStrategy.setMockResult(Success(Location(
           latitude: 35.6762,
@@ -111,11 +113,12 @@ void main() {
         expect(result, isA<Success<Location>>());
         final success = result as Success<Location>;
         final location = success.data;
-        
+
         expect(location.latitude, equals(-34.6037));
         expect(location.longitude, equals(-58.3816));
         expect(location.accuracy, equals(10.5));
-        expect(location.timestamp, equals(DateTime.parse('2023-01-01T12:00:00Z')));
+        expect(
+            location.timestamp, equals(DateTime.parse('2023-01-01T12:00:00Z')));
       });
     });
 
@@ -153,7 +156,7 @@ void main() {
           final failure = result as Failure<Location>;
           expect(failure.exception, equals(testException));
           expect((failure.exception as domain.LocationException).reason,
-                 equals(testException.reason));
+              equals(testException.reason));
         }
       });
 
@@ -188,10 +191,10 @@ void main() {
         // Assert
         expect(result1, isA<Success<Location>>());
         expect(result2, isA<Success<Location>>());
-        
+
         final location1 = (result1 as Success<Location>).data;
         final location2 = (result2 as Success<Location>).data;
-        
+
         // Results should be different based on strategy
         expect(location1.latitude, isNot(equals(location2.latitude)));
       });
@@ -307,7 +310,8 @@ void main() {
         final testCases = [
           Location(latitude: 0.0, longitude: 0.0, timestamp: DateTime.now()),
           Location(latitude: 90.0, longitude: 180.0, timestamp: DateTime.now()),
-          Location(latitude: -90.0, longitude: -180.0, timestamp: DateTime.now()),
+          Location(
+              latitude: -90.0, longitude: -180.0, timestamp: DateTime.now()),
         ];
 
         for (final testLocation in testCases) {
@@ -343,11 +347,11 @@ class MockLocationStrategy implements LocationStrategy {
   Future<Result<Location>> getCurrentLocation() async {
     getCurrentLocationCalled = true;
     getCurrentLocationCallCount++;
-    
+
     if (_mockResult == null) {
       throw StateError('Mock result not set');
     }
-    
+
     return _mockResult!;
   }
 

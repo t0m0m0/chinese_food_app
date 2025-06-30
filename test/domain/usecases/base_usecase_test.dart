@@ -21,7 +21,7 @@ void main() {
       test('should support parameterless use cases', () {
         // Arrange & Act
         final useCase = _ParameterlessUseCase();
-        
+
         // Assert
         expect(useCase, isA<BaseUseCase<NoParams, String>>());
       });
@@ -29,8 +29,8 @@ void main() {
       test('should support parameterized use cases', () {
         // Arrange & Act
         final useCase = _ParameterizedUseCase();
-        
-        // Assert  
+
+        // Assert
         expect(useCase, isA<BaseUseCase<_TestParams, int>>());
       });
     });
@@ -156,11 +156,11 @@ void main() {
         final firstResult = await firstUseCase.call('input');
         if (firstResult is Success<String>) {
           final secondResult = await secondUseCase.call(firstResult.data);
-          
+
           // Assert
           expect(secondResult, isA<Success<String>>());
-          expect((secondResult as Success<String>).data, 
-                 equals('Second: First: input'));
+          expect((secondResult as Success<String>).data,
+              equals('Second: First: input'));
         } else {
           fail('First step should succeed');
         }
@@ -173,7 +173,7 @@ void main() {
 
         // Act
         final firstResult = await failingUseCase.call('input');
-        
+
         // Assert
         expect(firstResult, isA<Failure<String>>());
         // Second use case should not be called if first fails
@@ -287,11 +287,11 @@ class _MultipleExceptionUseCase extends BaseUseCase<String, String> {
   Future<Result<String>> call(String params) async {
     switch (params) {
       case 'validation-error':
-        return Failure(AppException('Validation failed', 
-                                  severity: ExceptionSeverity.medium));
+        return Failure(AppException('Validation failed',
+            severity: ExceptionSeverity.medium));
       case 'network-error':
-        return Failure(AppException('Network error', 
-                                  severity: ExceptionSeverity.high));
+        return Failure(
+            AppException('Network error', severity: ExceptionSeverity.high));
       case 'generic-error':
         return Failure(AppException('Generic error'));
       default:

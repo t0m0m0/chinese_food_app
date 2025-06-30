@@ -15,9 +15,9 @@ import '../../core/types/result.dart';
 /// ```dart
 /// class GetCurrentLocationUseCase extends BaseUseCase<NoParams, Location> {
 ///   final LocationRepository _repository;
-///   
+///
 ///   GetCurrentLocationUseCase(this._repository);
-///   
+///
 ///   @override
 ///   Future<Result<Location>> call(NoParams params) async {
 ///     return await _repository.getCurrentLocation();
@@ -68,8 +68,7 @@ class NoParams {
   const NoParams();
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is NoParams;
+  bool operator ==(Object other) => identical(this, other) || other is NoParams;
 
   @override
   int get hashCode => 0;

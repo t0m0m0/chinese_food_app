@@ -4,7 +4,8 @@ import 'package:chinese_food_app/domain/usecases/base_usecase.dart';
 import 'package:chinese_food_app/domain/repositories/location_repository.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/core/types/result.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart' as domain;
+import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart'
+    as domain;
 
 void main() {
   group('GetCurrentLocationUseCase', () {
@@ -169,8 +170,8 @@ void main() {
           expect(result, isA<Failure<Location>>());
           final failure = result as Failure<Location>;
           expect(failure.exception, equals(testException));
-          expect((failure.exception as domain.LocationException).reason, 
-                 equals(testException.reason));
+          expect((failure.exception as domain.LocationException).reason,
+              equals(testException.reason));
         }
       });
 
@@ -271,7 +272,8 @@ void main() {
         stopwatch.stop();
 
         // Assert
-        expect(stopwatch.elapsedMilliseconds, lessThan(1000)); // Should complete within 1 second
+        expect(stopwatch.elapsedMilliseconds,
+            lessThan(1000)); // Should complete within 1 second
       });
 
       test('should be stateless between calls', () async {
@@ -314,11 +316,11 @@ class MockLocationRepository implements LocationRepository {
   Future<Result<Location>> getCurrentLocation() async {
     getCurrentLocationCalled = true;
     getCurrentLocationCallCount++;
-    
+
     if (_mockResult == null) {
       throw StateError('Mock result not set');
     }
-    
+
     return _mockResult!;
   }
 }

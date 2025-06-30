@@ -18,9 +18,9 @@ import '../../core/types/result.dart';
 /// ```dart
 /// class LocationService {
 ///   final LocationRepository _repository;
-///   
+///
 ///   LocationService(this._repository);
-///   
+///
 ///   Future<Result<Location>> getCurrentLocation() async {
 ///     return await _repository.getCurrentLocation();
 ///   }
