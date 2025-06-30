@@ -57,5 +57,57 @@ void main() {
           exception.timestamp.isBefore(afterCreation.add(Duration(seconds: 1))),
           isTrue);
     });
+
+    test('should support exception chaining with cause', () {
+      // Arrange
+      const message = 'Wrapper exception';
+      final causeException = FormatException('Original cause');
+
+      // Act
+      final exception = AppException(message, cause: causeException);
+
+      // Assert
+      expect(exception.message, equals(message));
+      expect(exception.cause, equals(causeException));
+    });
+
+    test('should support stack trace preservation', () {
+      // Arrange
+      const message = 'Exception with stack trace';
+      final stackTrace = StackTrace.current;
+
+      // Act
+      final exception = AppException(message, stackTrace: stackTrace);
+
+      // Assert
+      expect(exception.message, equals(message));
+      expect(exception.stackTrace, equals(stackTrace));
+    });
+
+    test('should format toString with cause information', () {
+      // Arrange
+      const message = 'Main exception';
+      final causeException = FormatException('Invalid argument');
+
+      // Act
+      final exception = AppException(message, cause: causeException);
+
+      // Assert
+      expect(exception.toString(), contains(message));
+      expect(exception.toString(), contains('Caused by'));
+      expect(exception.toString(), contains('Invalid argument'));
+    });
+
+    test('should format toString without cause when cause is null', () {
+      // Arrange
+      const message = 'Simple exception';
+
+      // Act
+      final exception = AppException(message);
+
+      // Assert
+      expect(exception.toString(), equals('AppException: $message'));
+      expect(exception.toString(), isNot(contains('Caused by')));
+    });
   });
 }

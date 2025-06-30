@@ -106,7 +106,7 @@ class ExceptionHandler {
       : _logger = logger ?? DeveloperExceptionLogger();
 
   /// Handle any exception and return a formatted result
-  ExceptionResult<T> handle<T>(Exception exception) {
+  ExceptionResult<T> handle<T>(Exception exception, [StackTrace? stackTrace]) {
     // Convert to AppException if needed
     final AppException appException;
     if (exception is AppException) {
@@ -115,6 +115,8 @@ class ExceptionHandler {
       appException = AppException(
         exception.toString(),
         severity: ExceptionSeverity.medium,
+        cause: exception,
+        stackTrace: stackTrace,
       );
     }
 
@@ -137,11 +139,11 @@ class ExceptionHandler {
     try {
       final result = operation();
       return success(result);
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (e is Exception) {
-        return handle(e);
+        return handle(e, stackTrace);
       } else {
-        return handle(Exception(e.toString()));
+        return handle(Exception(e.toString()), stackTrace);
       }
     }
   }
@@ -152,11 +154,11 @@ class ExceptionHandler {
     try {
       final result = await operation();
       return success(result);
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (e is Exception) {
-        return handle(e);
+        return handle(e, stackTrace);
       } else {
-        return handle(Exception(e.toString()));
+        return handle(Exception(e.toString()), stackTrace);
       }
     }
   }

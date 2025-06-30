@@ -33,15 +33,31 @@ class AppException implements Exception {
   /// When this exception was created
   final DateTime timestamp;
 
-  /// Creates a new AppException with the given message and optional severity
+  /// The underlying exception that caused this exception (optional)
+  final Exception? cause;
+
+  /// The stack trace when this exception was created (optional)
+  final StackTrace? stackTrace;
+
+  /// Creates a new AppException with the given message and optional parameters
   ///
   /// [message] - Description of the error
   /// [severity] - Severity level (defaults to medium)
+  /// [cause] - The underlying exception that caused this exception
+  /// [stackTrace] - Stack trace when this exception was created
   AppException(
     this.message, {
     this.severity = ExceptionSeverity.medium,
+    this.cause,
+    this.stackTrace,
   }) : timestamp = DateTime.now();
 
   @override
-  String toString() => 'AppException: $message';
+  String toString() {
+    final buffer = StringBuffer('AppException: $message');
+    if (cause != null) {
+      buffer.write('\nCaused by: $cause');
+    }
+    return buffer.toString();
+  }
 }
