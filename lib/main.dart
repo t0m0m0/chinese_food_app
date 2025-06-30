@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/constants/app_constants.dart';
-import 'core/di/di_container.dart';
+import 'core/di/app_di_container.dart';
+import 'core/di/di_container_interface.dart';
 import 'presentation/pages/my_menu/my_menu_page.dart';
 import 'presentation/pages/search/search_page.dart';
 import 'presentation/pages/swipe/swipe_page.dart';
@@ -16,13 +17,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Create and configure DI container
+    final DIContainerInterface container = AppDIContainer();
+    container.configure();
+
     return MultiProvider(
       providers: [
+        // Provide the DI container itself for testing and debugging
+        Provider<DIContainerInterface>.value(value: container),
+
+        // Provide services from DI container
         ChangeNotifierProvider(
-          create: (_) => DIContainer.createStoreProvider(),
+          create: (_) => container.getStoreProvider(),
         ),
         Provider(
-          create: (_) => DIContainer.createLocationService(),
+          create: (_) => container.getLocationService(),
         ),
       ],
       child: MaterialApp(
