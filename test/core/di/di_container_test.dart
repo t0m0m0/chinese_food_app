@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:chinese_food_app/core/di/service_container.dart';
 
 void main() {
-  group('DIContainer', () {
+  group('ServiceContainer', () {
     test('should have a register method', () {
       // Arrange
-      final container = DIContainer();
+      final container = ServiceContainer();
       
       // Act & Assert
       expect(() => container.register<TestService>(() => TestService()), 
@@ -13,7 +14,7 @@ void main() {
 
     test('should have a resolve method', () {
       // Arrange
-      final container = DIContainer();
+      final container = ServiceContainer();
       container.register<TestService>(() => TestService());
       
       // Act & Assert
@@ -23,7 +24,7 @@ void main() {
 
     test('should register and resolve a simple service', () {
       // Arrange
-      final container = DIContainer();
+      final container = ServiceContainer();
       container.register<TestService>(() => TestService());
       
       // Act
@@ -36,7 +37,7 @@ void main() {
 
     test('should register and resolve different services', () {
       // Arrange
-      final container = DIContainer();
+      final container = ServiceContainer();
       container.register<TestService>(() => TestService());
       container.register<AnotherService>(() => AnotherService());
       
@@ -61,18 +62,3 @@ class AnotherService {
   final int value = 42;
 }
 
-class DIContainer {
-  final Map<Type, Function> _factories = {};
-
-  void register<T>(T Function() factory) {
-    _factories[T] = factory;
-  }
-  
-  T resolve<T>() {
-    final factory = _factories[T];
-    if (factory == null) {
-      throw Exception('Service of type $T is not registered');
-    }
-    return factory() as T;
-  }
-}
