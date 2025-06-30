@@ -49,7 +49,8 @@ class LocationUpdatedEvent extends BaseEvent {
   int get hashCode => Object.hash(location, timestamp);
 
   @override
-  String toString() => 'LocationUpdatedEvent(location: $location, timestamp: $timestamp)';
+  String toString() =>
+      'LocationUpdatedEvent(location: $location, timestamp: $timestamp)';
 }
 
 /// Event fired when location access fails
@@ -107,7 +108,8 @@ class LocationErrorEvent extends BaseEvent {
   int get hashCode => Object.hash(error, errorCode, timestamp);
 
   @override
-  String toString() => 'LocationErrorEvent(error: $error, errorCode: $errorCode, timestamp: $timestamp)';
+  String toString() =>
+      'LocationErrorEvent(error: $error, errorCode: $errorCode, timestamp: $timestamp)';
 }
 
 /// Event fired when location permission status changes
@@ -160,5 +162,6 @@ class LocationPermissionChangedEvent extends BaseEvent {
   int get hashCode => Object.hash(hasPermission, timestamp);
 
   @override
-  String toString() => 'LocationPermissionChangedEvent(hasPermission: $hasPermission, timestamp: $timestamp)';
+  String toString() =>
+      'LocationPermissionChangedEvent(hasPermission: $hasPermission, timestamp: $timestamp)';
 }

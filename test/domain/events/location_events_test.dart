@@ -367,7 +367,7 @@ void main() {
       test('should be usable with EventBus', () {
         // This test verifies that the events can be used with the EventBus
         // without actually creating an EventBus instance (to avoid dependencies)
-        
+
         // Arrange
         final location = Location(
           latitude: 35.6762,
@@ -422,9 +422,12 @@ void main() {
         );
 
         // Assert - Each event type should have a unique runtime type
-        expect(locationEvent.runtimeType, isNot(equals(errorEvent.runtimeType)));
-        expect(locationEvent.runtimeType, isNot(equals(permissionEvent.runtimeType)));
-        expect(errorEvent.runtimeType, isNot(equals(permissionEvent.runtimeType)));
+        expect(
+            locationEvent.runtimeType, isNot(equals(errorEvent.runtimeType)));
+        expect(locationEvent.runtimeType,
+            isNot(equals(permissionEvent.runtimeType)));
+        expect(
+            errorEvent.runtimeType, isNot(equals(permissionEvent.runtimeType)));
       });
     });
   });

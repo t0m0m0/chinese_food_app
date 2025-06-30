@@ -26,7 +26,7 @@ void main() {
       });
 
       eventBus.emit(testEvent);
-      
+
       // Give time for async processing
       await Future.delayed(const Duration(milliseconds: 10));
 
@@ -40,7 +40,7 @@ void main() {
       final otherEvent = _OtherSimpleEvent(42);
       final testStream = eventBus.on<_SimpleTestEvent>();
       final otherStream = eventBus.on<_OtherSimpleEvent>();
-      
+
       _SimpleTestEvent? receivedTestEvent;
       _OtherSimpleEvent? receivedOtherEvent;
 
@@ -50,7 +50,7 @@ void main() {
 
       eventBus.emit(testEvent);
       eventBus.emit(otherEvent);
-      
+
       // Give time for async processing
       await Future.delayed(const Duration(milliseconds: 10));
 
@@ -81,9 +81,10 @@ void main() {
       // Arrange
       final event1 = _SimpleTestEvent('include');
       final event2 = _SimpleTestEvent('exclude');
-      final filteredStream = eventBus.on<_SimpleTestEvent>()
+      final filteredStream = eventBus
+          .on<_SimpleTestEvent>()
           .where((event) => event.message.contains('include'));
-      
+
       final receivedEvents = <_SimpleTestEvent>[];
 
       // Act
@@ -91,7 +92,7 @@ void main() {
 
       eventBus.emit(event1);
       eventBus.emit(event2);
-      
+
       // Give time for async processing
       await Future.delayed(const Duration(milliseconds: 10));
 
