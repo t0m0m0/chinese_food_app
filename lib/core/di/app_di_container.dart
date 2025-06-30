@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import '../database/database_helper.dart';
@@ -117,13 +118,17 @@ class AppDIContainer implements DIContainerInterface {
     if (forceReal) {
       // Check if API key is available, fallback to mock if not
       if (AppConfig.hasHotpepperApiKey) {
+        developer.log('Using real HotPepper API datasource', name: 'DI');
         return HotpepperApiDatasourceImpl(client: http.Client());
       } else {
+        developer.log('API key not available, falling back to mock datasource',
+            name: 'DI', level: 900); // WARNING level
         return MockHotpepperApiDatasource();
       }
     }
 
     // In development, use mock by default for faster development
+    developer.log('Using mock API datasource for development', name: 'DI');
     return MockHotpepperApiDatasource();
   }
 
@@ -155,27 +160,46 @@ class AppDIContainer implements DIContainerInterface {
     );
   }
 
+  /// Valid environment values for APP_ENV
+  static const _validEnvironments = {
+    'production',
+    'prod',
+    'test',
+    'testing',
+    'development',
+    'dev'
+  };
+
   /// Determine current environment based on configuration
   Environment _determineEnvironment() {
     // Check for test environment first (for Flutter test framework)
     if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+      developer.log('Environment: test (Flutter test framework)', name: 'DI');
       return Environment.test;
     }
 
     // Check for explicit environment variable
     const envMode = String.fromEnvironment('APP_ENV', defaultValue: '');
-    switch (envMode.toLowerCase()) {
-      case 'production':
-      case 'prod':
-        return Environment.production;
-      case 'test':
-      case 'testing':
-        return Environment.test;
-      case 'development':
-      case 'dev':
-      default:
-        return Environment.development;
+
+    // Validate environment variable if provided
+    if (envMode.isNotEmpty &&
+        !_validEnvironments.contains(envMode.toLowerCase())) {
+      developer.log(
+          'Unknown APP_ENV value: "$envMode", falling back to development',
+          name: 'DI',
+          level: 900); // WARNING level
     }
+
+    final environment = switch (envMode.toLowerCase()) {
+      'production' || 'prod' => Environment.production,
+      'test' || 'testing' => Environment.test,
+      'development' || 'dev' || _ => Environment.development,
+    };
+
+    developer.log(
+        'Environment: ${environment.name}${envMode.isNotEmpty ? ' (APP_ENV=$envMode)' : ' (default)'}',
+        name: 'DI');
+    return environment;
   }
 
   /// Ensure container is configured before accessing services
