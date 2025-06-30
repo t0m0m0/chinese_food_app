@@ -242,7 +242,16 @@ abstract class BaseApiService {
         return parser(null);
       }
 
-      // Parse JSON data
+      // Parse JSON data with large response monitoring
+      if (response.data.length > 1024 * 1024) {
+        // 1MB
+        developer.log(
+          'Large response detected: ${response.data.length} bytes',
+          name: 'API',
+          level: 900, // WARNING level
+        );
+      }
+
       final jsonData = jsonDecode(response.data);
       developer.log('Response parsed successfully', name: 'API');
 
