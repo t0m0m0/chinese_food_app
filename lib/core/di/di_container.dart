@@ -1,6 +1,6 @@
-import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import '../database/database_helper.dart';
+import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/repositories/store_repository_impl.dart';
@@ -38,7 +38,7 @@ class DIContainer {
   static HotpepperApiDatasource _createApiDatasource() {
     if (AppConfig.hasHotpepperApiKey && AppConfig.isProduction) {
       // 本番環境ではAPIキーが設定されている場合のみ実API使用
-      return HotpepperApiDatasourceImpl(client: http.Client());
+      return HotpepperApiDatasourceImpl(AppHttpClient());
     } else {
       // 開発環境またはAPIキー未設定時はモック使用
       return MockHotpepperApiDatasource();

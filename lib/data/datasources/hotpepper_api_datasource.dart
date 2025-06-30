@@ -1,6 +1,7 @@
-import 'package:http/http.dart' as http;
 import '../../core/constants/app_constants.dart';
 import '../../core/config/app_config.dart';
+import '../../core/network/base_api_service.dart';
+import '../../core/exceptions/domain_exceptions.dart';
 import '../models/hotpepper_store_model.dart';
 
 /// HotPepper API データソース抽象クラス
@@ -34,12 +35,9 @@ abstract class HotpepperApiDatasource {
   });
 }
 
-class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
-  final http.Client client;
-
-  HotpepperApiDatasourceImpl({
-    required this.client,
-  });
+class HotpepperApiDatasourceImpl extends BaseApiService
+    implements HotpepperApiDatasource {
+  HotpepperApiDatasourceImpl(super.httpClient);
 
   @override
   Future<HotpepperSearchResponse> searchStores({
@@ -52,23 +50,65 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
     int start = 1,
   }) async {
     // パラメータ検証
+    _validateParameters(lat, lng, range, count, start);
+
+    // APIキー取得と検証
+    final apiKey = await _getApiKey();
+
+    // クエリパラメータ構築
+    final queryParams = _buildQueryParameters(
+      apiKey: apiKey,
+      lat: lat,
+      lng: lng,
+      address: address,
+      keyword: keyword,
+      range: range,
+      count: count,
+      start: start,
+    );
+
+    try {
+      // 新しいHTTPシステムを使用してAPIリクエスト実行
+      return await getAndParse<HotpepperSearchResponse>(
+        AppConstants.hotpepperApiUrl,
+        (json) =>
+            HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
+        queryParameters: queryParams,
+        headers: {
+          'User-Agent': 'MachiApp/1.0.0',
+        },
+      );
+    } on NetworkException catch (e) {
+      // 特定のHTTPステータスコードに基づいて適切なエラーメッセージを提供
+      throw _handleNetworkException(e);
+    } catch (e) {
+      throw ApiException('HotPepper API request failed: ${e.toString()}');
+    }
+  }
+
+  /// パラメータの妥当性を検証
+  void _validateParameters(
+      double? lat, double? lng, int range, int count, int start) {
     if (lat != null && (lat < -90.0 || lat > 90.0)) {
-      throw ArgumentError('緯度は-90.0から90.0の範囲で指定してください');
+      throw ValidationException('緯度は-90.0から90.0の範囲で指定してください', fieldName: 'lat');
     }
     if (lng != null && (lng < -180.0 || lng > 180.0)) {
-      throw ArgumentError('経度は-180.0から180.0の範囲で指定してください');
+      throw ValidationException('経度は-180.0から180.0の範囲で指定してください',
+          fieldName: 'lng');
     }
     if (range < 1 || range > 5) {
-      throw ArgumentError('検索範囲は1から5の間で指定してください');
+      throw ValidationException('検索範囲は1から5の間で指定してください', fieldName: 'range');
     }
     if (count < 1 || count > 100) {
-      throw ArgumentError('取得件数は1から100の間で指定してください');
+      throw ValidationException('取得件数は1から100の間で指定してください', fieldName: 'count');
     }
     if (start < 1) {
-      throw ArgumentError('検索開始位置は1以上で指定してください');
+      throw ValidationException('検索開始位置は1以上で指定してください', fieldName: 'start');
     }
+  }
 
-    // APIキー取得（本番環境では非同期版を使用）
+  /// APIキーの取得と存在確認
+  Future<String> _getApiKey() async {
     final apiKey = AppConfig.isProduction
         ? await AppConfig.hotpepperApiKey
         : AppConfig.hotpepperApiKeySync;
@@ -77,13 +117,28 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
         ? await AppConfig.hasHotpepperApiKeyAsync
         : AppConfig.hasHotpepperApiKey;
 
-    if (!hasApiKey) {
-      throw Exception(
-          'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.');
+    if (!hasApiKey || apiKey == null) {
+      throw ApiException(
+        'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.',
+      );
     }
 
+    return apiKey;
+  }
+
+  /// クエリパラメータの構築
+  Map<String, String> _buildQueryParameters({
+    required String apiKey,
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    required int range,
+    required int count,
+    required int start,
+  }) {
     final queryParams = <String, String>{
-      'key': apiKey!,
+      'key': apiKey,
       'format': 'json',
       'count': count.toString(),
       'start': start.toString(),
@@ -99,48 +154,47 @@ class HotpepperApiDatasourceImpl implements HotpepperApiDatasource {
       queryParams['address'] = address;
     }
 
-    if (keyword != null && keyword.isNotEmpty) {
-      queryParams['keyword'] = keyword;
-    } else {
-      queryParams['keyword'] = '中華';
+    // キーワードが指定されていない場合はデフォルトで「中華」を設定
+    queryParams['keyword'] =
+        (keyword != null && keyword.isNotEmpty) ? keyword : '中華';
+
+    return queryParams;
+  }
+
+  /// NetworkExceptionを適切なApiExceptionに変換
+  ApiException _handleNetworkException(NetworkException e) {
+    final statusCode = e.statusCode;
+
+    if (statusCode == null) {
+      return ApiException('Network error: ${e.message}');
     }
 
-    final uri = Uri.parse(AppConstants.hotpepperApiUrl).replace(
-      queryParameters: queryParams,
-    );
-
-    try {
-      final response = await client.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'MachiApp/1.0.0',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return HotpepperSearchResponse.fromJsonString(response.body);
-      } else if (response.statusCode == 401) {
-        throw Exception(
-            'Invalid API key - Please check your HotPepper API key configuration');
-      } else if (response.statusCode == 429) {
-        throw Exception(
-            'API rate limit exceeded - HotPepper API allows max 5 requests/second and 3000 requests/day');
-      } else if (response.statusCode == 400) {
-        throw Exception(
-            'Invalid request parameters - Please check search criteria');
-      } else if (response.statusCode >= 500) {
-        throw Exception(
-            'HotPepper API server error (${response.statusCode}) - Please try again later');
-      } else {
-        throw Exception(
-            'API request failed with status ${response.statusCode}');
-      }
-    } catch (e) {
-      if (e is Exception) {
-        rethrow;
-      }
-      throw Exception('Network error: $e');
+    switch (statusCode) {
+      case 401:
+        return ApiException(
+          'Invalid API key - Please check your HotPepper API key configuration',
+          statusCode: statusCode,
+        );
+      case 429:
+        return ApiException(
+          'API rate limit exceeded - HotPepper API allows max 5 requests/second and 3000 requests/day',
+          statusCode: statusCode,
+        );
+      case 400:
+        return ApiException(
+          'Invalid request parameters - Please check search criteria',
+          statusCode: statusCode,
+        );
+      case >= 500:
+        return ApiException(
+          'HotPepper API server error ($statusCode) - Please try again later',
+          statusCode: statusCode,
+        );
+      default:
+        return ApiException(
+          'API request failed with status $statusCode: ${e.message}',
+          statusCode: statusCode,
+        );
     }
   }
 }
