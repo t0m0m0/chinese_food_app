@@ -93,7 +93,7 @@ void main() {
         // Arrange
         final testEvent = _TestEvent('test');
         final otherEvents = <_OtherTestEvent>[];
-        
+
         // Subscribe to different event type
         eventBus.on<_OtherTestEvent>().listen((event) {
           otherEvents.add(event);
@@ -104,7 +104,7 @@ void main() {
 
         // Give some time to ensure no emission
         await Future.delayed(const Duration(milliseconds: 10));
-        
+
         // Assert - No events should be received by wrong type subscriber
         expect(otherEvents, isEmpty);
       });
@@ -157,11 +157,11 @@ void main() {
         final event1 = _TestEvent('include');
         final event2 = _TestEvent('exclude');
         final filteredEvents = <_TestEvent>[];
-        
+
         final stream = eventBus
             .on<_TestEvent>()
             .where((event) => event.message.contains('include'));
-            
+
         stream.listen((event) {
           filteredEvents.add(event);
         });
@@ -171,7 +171,7 @@ void main() {
         eventBus.emit(event2);
 
         await Future.delayed(const Duration(milliseconds: 10));
-        
+
         // Assert - Only 'include' event should be received
         expect(filteredEvents, hasLength(1));
         expect(filteredEvents.first, equals(event1));

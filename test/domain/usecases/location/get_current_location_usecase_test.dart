@@ -33,7 +33,7 @@ void main() {
 
         // Act & Assert
         expect(() => useCase.call(const NoParams()), returnsNormally);
-        
+
         // Verify it actually works
         final result = await useCase.call(const NoParams());
         expect(result, isA<Success<Location>>());
