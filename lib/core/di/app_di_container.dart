@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
-import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import '../database/database_helper.dart';
+import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/repositories/store_repository_impl.dart';
@@ -119,7 +119,7 @@ class AppDIContainer implements DIContainerInterface {
       // Check if API key is available, fallback to mock if not
       if (AppConfig.hasHotpepperApiKey) {
         developer.log('Using real HotPepper API datasource', name: 'DI');
-        return HotpepperApiDatasourceImpl(client: http.Client());
+        return HotpepperApiDatasourceImpl(AppHttpClient());
       } else {
         developer.log('API key not available, falling back to mock datasource',
             name: 'DI', level: 900); // WARNING level
