@@ -1,0 +1,24 @@
+# Flutter テスト設定ファイル
+# テスト性能最適化のための設定
+
+# 並列実行設定
+concurrency_multiplier: 4
+timeout: 30s
+
+# テストランナー設定
+test_randomize_ordering_seed: random
+
+# レポート設定
+reporter: expanded
+
+# プラットフォーム設定
+platforms:
+  - vm
+
+# 除外設定（必要に応じて）
+# skip_tags:
+#   - slow
+#   - integration
+
+# グローバルテストタイムアウト
+global_timeout: 2m
