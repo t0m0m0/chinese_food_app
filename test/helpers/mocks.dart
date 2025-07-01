@@ -9,29 +9,29 @@ import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
 import 'package:http/http.dart' as http;
 
 /// 統一されたMockito生成用のアノテーション
-/// 
+///
 /// このファイルは以下のコマンドでMockクラスを生成する：
 /// ```bash
 /// flutter packages pub run build_runner build
 /// ```
-/// 
+///
 /// 使用例：
 /// ```dart
 /// import 'mocks.mocks.dart';
-/// 
+///
 /// void main() {
 ///   group('ServiceTest', () {
 ///     late MockLocationService mockLocationService;
-///     
+///
 ///     setUp(() {
 ///       mockLocationService = MockLocationService();
 ///     });
-///     
+///
 ///     test('should return location', () async {
 ///       // Given
 ///       when(mockLocationService.getCurrentLocation())
 ///           .thenAnswer((_) async => Location(...));
-///       
+///
 ///       // When & Then
 ///       final result = await mockLocationService.getCurrentLocation();
 ///       expect(result, isA<Location>());
@@ -42,17 +42,17 @@ import 'package:http/http.dart' as http;
 @GenerateMocks([
   // Services
   LocationService,
-  
+
   // Repositories
   StoreRepository,
   LocationRepository,
   VisitRecordRepository,
   PhotoRepository,
-  
+
   // Data Sources
   HotpepperApiDatasource,
   StoreLocalDatasource,
-  
+
   // External Dependencies
   http.Client,
 ])

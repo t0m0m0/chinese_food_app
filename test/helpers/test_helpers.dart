@@ -6,11 +6,11 @@ import 'package:chinese_food_app/domain/entities/store.dart';
 import 'fakes.dart';
 
 /// 統一されたテストヘルパークラス
-/// 
+///
 /// テスト間での重複コードを削減し、一貫したテストセットアップを提供する。
 class TestHelpers {
   /// ウィジェットテスト用のMaterialApp + Provider構成を作成
-  /// 
+  ///
   /// 使用例：
   /// ```dart
   /// testWidgets('should display widget', (tester) async {
@@ -20,7 +20,7 @@ class TestHelpers {
   ///       locationService: FakeLocationService()..setCurrentLocation(testLocation),
   ///     ),
   ///   );
-  ///   
+  ///
   ///   expect(find.text('Test Location'), findsOneWidget);
   /// });
   /// ```
@@ -33,10 +33,8 @@ class TestHelpers {
     return MaterialApp(
       home: MultiProvider(
         providers: [
-          if (locationService != null)
-            Provider.value(value: locationService),
-          if (storeRepository != null)
-            Provider.value(value: storeRepository),
+          if (locationService != null) Provider.value(value: locationService),
+          if (storeRepository != null) Provider.value(value: storeRepository),
           if (locationRepository != null)
             Provider.value(value: locationRepository),
         ],
@@ -79,7 +77,7 @@ class TestHelpers {
 }
 
 /// テストデータビルダークラス
-/// 
+///
 /// 一貫したテストデータを簡単に作成するためのヘルパー。
 class TestDataBuilders {
   /// デフォルトのテスト用Location作成

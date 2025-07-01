@@ -13,7 +13,7 @@ import 'fakes.dart';
 import 'test_helpers.dart';
 
 /// 統一されたテストダブルの使用例
-/// 
+///
 /// このファイルは新しいテストダブル統一化アプローチのデモンストレーションです。
 void main() {
   group('Unified Test Doubles Example', () {
@@ -113,28 +113,30 @@ void main() {
 
         // Then
         expect(result, hasLength(2));
-        expect(result[0], CustomMatchers.hasStoreProperties(
-          name: 'テスト中華料理店 1',
-          status: StoreStatus.wantToGo,
-        ));
+        expect(
+            result[0],
+            CustomMatchers.hasStoreProperties(
+              name: 'テスト中華料理店 1',
+              status: StoreStatus.wantToGo,
+            ));
       });
 
       test('should filter stores by status', () async {
         // Given
-        final wantToGoStores = TestDataBuilders.createTestStores(2, 
-          status: StoreStatus.wantToGo);
-        final visitedStores = TestDataBuilders.createTestStores(1, 
-          status: StoreStatus.visited);
-        
+        final wantToGoStores =
+            TestDataBuilders.createTestStores(2, status: StoreStatus.wantToGo);
+        final visitedStores =
+            TestDataBuilders.createTestStores(1, status: StoreStatus.visited);
+
         for (final store in [...wantToGoStores, ...visitedStores]) {
           fakeStoreRepository.addStore(store);
         }
 
         // When
-        final wantToGoResult = await fakeStoreRepository
-            .getStoresByStatus(StoreStatus.wantToGo);
-        final visitedResult = await fakeStoreRepository
-            .getStoresByStatus(StoreStatus.visited);
+        final wantToGoResult =
+            await fakeStoreRepository.getStoresByStatus(StoreStatus.wantToGo);
+        final visitedResult =
+            await fakeStoreRepository.getStoresByStatus(StoreStatus.visited);
 
         // Then
         expect(wantToGoResult, hasLength(2));
@@ -155,7 +157,7 @@ void main() {
         expect(location1.latitude, 35.6762);
         expect(location1.longitude, 139.6503);
         expect(location1.accuracy, 10.0);
-        
+
         expect(location2.latitude, 35.999);
         expect(location2.longitude, 139.999);
       });
@@ -169,7 +171,7 @@ void main() {
         expect(stores[0].name, 'テスト中華料理店 1');
         expect(stores[1].name, 'テスト中華料理店 2');
         expect(stores[2].name, 'テスト中華料理店 3');
-        
+
         // Verify locations are different
         expect(stores[0].lat, lessThan(stores[1].lat));
         expect(stores[1].lat, lessThan(stores[2].lat));
@@ -193,10 +195,12 @@ void main() {
         );
 
         // Then
-        expect(location2, CustomMatchers.isLocationNear(location1, 
-          tolerance: 0.001));
-        expect(location2, isNot(CustomMatchers.isLocationNear(location1, 
-          tolerance: 0.00001)));
+        expect(location2,
+            CustomMatchers.isLocationNear(location1, tolerance: 0.001));
+        expect(
+            location2,
+            isNot(
+                CustomMatchers.isLocationNear(location1, tolerance: 0.00001)));
       });
 
       test('should match store properties', () {
@@ -208,13 +212,17 @@ void main() {
         );
 
         // Then
-        expect(store, CustomMatchers.hasStoreProperties(
-          name: 'カスタム店名',
-          status: StoreStatus.visited,
-        ));
-        expect(store, CustomMatchers.hasStoreProperties(
-          name: 'カスタム店名', // 部分マッチもサポート
-        ));
+        expect(
+            store,
+            CustomMatchers.hasStoreProperties(
+              name: 'カスタム店名',
+              status: StoreStatus.visited,
+            ));
+        expect(
+            store,
+            CustomMatchers.hasStoreProperties(
+              name: 'カスタム店名', // 部分マッチもサポート
+            ));
       });
     });
   });

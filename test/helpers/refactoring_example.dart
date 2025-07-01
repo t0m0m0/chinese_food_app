@@ -1,8 +1,8 @@
 // リファクタリング例: 既存テストの統一テストダブル化
-// 
+//
 // このファイルは既存のLocationRepositoryImplテストを統一されたテストダブルで
 // リファクタリングした例を示しています。
-// 
+//
 // 元ファイル: test/data/repositories/location_repository_impl_test.dart
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,17 +17,16 @@ import '../helpers/test_helpers.dart';
 
 void main() {
   group('LocationRepositoryImpl - Refactored with Unified Test Doubles', () {
-    
     // =================================================================
     // 👇 BEFORE: カスタムMockクラスを個別定義
     // =================================================================
     // late MockLocationStrategy mockStrategy; // 個別実装が必要だった
-    
+
     // =================================================================
     // 👇 AFTER: 統一されたFakeクラスを使用
     // =================================================================
     late FakeLocationRepository fakeRepository; // 統一されたFake使用
-    
+
     setUp(() {
       fakeRepository = FakeLocationRepository();
       // Note: 実際のリファクタリングではLocationStrategyのFakeも作成が必要
@@ -43,7 +42,8 @@ void main() {
         expect(fakeRepository, isA<LocationRepository>());
       });
 
-      test('should return Future<Result<Location>> from getCurrentLocation', () {
+      test('should return Future<Result<Location>> from getCurrentLocation',
+          () {
         // 🎯 テストデータビルダーを使用してコード簡略化
         final testLocation = TestDataBuilders.createTestLocation();
         fakeRepository.setCurrentLocation(testLocation);
@@ -64,7 +64,7 @@ void main() {
         //   accuracy: 5.0,
         //   timestamp: DateTime.now(),
         // );
-        
+
         // =================================================================
         // 👇 AFTER: TestDataBuildersで一貫したデータ作成
         // =================================================================
@@ -73,7 +73,7 @@ void main() {
           longitude: 139.6503,
           accuracy: 5.0,
         );
-        
+
         fakeRepository.setCurrentLocation(expectedLocation);
 
         // Act
@@ -116,7 +116,7 @@ void main() {
           expect(result, isA<Success<Location>>());
           final success = result as Success<Location>;
           expect(success.data, CustomMatchers.isLocationNear(testLocation));
-          
+
           // 次のテストケースのためにリセット
           fakeRepository.reset();
         }
@@ -127,23 +127,32 @@ void main() {
       test('should handle different exception types from strategy', () async {
         // 🎯 統一されたエラーハンドリングテスト
         final errorTestCases = [
-          {'description': 'Location permission denied', 'error': Exception('Permission denied')},
-          {'description': 'GPS service unavailable', 'error': Exception('GPS unavailable')},
-          {'description': 'Network timeout', 'error': Exception('Network timeout')},
+          {
+            'description': 'Location permission denied',
+            'error': Exception('Permission denied')
+          },
+          {
+            'description': 'GPS service unavailable',
+            'error': Exception('GPS unavailable')
+          },
+          {
+            'description': 'Network timeout',
+            'error': Exception('Network timeout')
+          },
         ];
 
         for (final testCase in errorTestCases) {
           // Given
-          fakeRepository.setShouldReturnFailure(true, 
-            AppException(testCase['error'].toString()));
+          fakeRepository.setShouldReturnFailure(
+              true, AppException(testCase['error'].toString()));
 
           // When
           final result = await fakeRepository.getCurrentLocation();
 
           // Then
-          expect(result, isA<Failure<Location>>(), 
-            reason: 'Failed for case: ${testCase['description']}');
-          
+          expect(result, isA<Failure<Location>>(),
+              reason: 'Failed for case: ${testCase['description']}');
+
           // Reset for next test case
           fakeRepository.reset();
         }
@@ -157,7 +166,8 @@ void main() {
         fakeRepository.setCurrentLocation(testLocation);
 
         // 複数の並行リクエスト
-        final futures = List.generate(5, (_) => fakeRepository.getCurrentLocation());
+        final futures =
+            List.generate(5, (_) => fakeRepository.getCurrentLocation());
         final results = await Future.wait(futures);
 
         // すべて成功することを確認
@@ -172,12 +182,12 @@ void main() {
         // Given
         final testLocation = TestDataBuilders.createTestLocation();
         fakeRepository.setCurrentLocation(testLocation);
-        
+
         final stopwatch = Stopwatch()..start();
 
         // When
         await fakeRepository.getCurrentLocation();
-        
+
         stopwatch.stop();
 
         // Then - Fakeクラスは高速実行される
@@ -189,20 +199,21 @@ void main() {
       test('should handle extreme coordinate values from strategy', () async {
         // 🎯 境界値テストもテストデータビルダーで簡単に
         final extremeTestCases = [
-          TestDataBuilders.createTestLocation(latitude: -90.0, longitude: -180.0),
+          TestDataBuilders.createTestLocation(
+              latitude: -90.0, longitude: -180.0),
           TestDataBuilders.createTestLocation(latitude: 90.0, longitude: 180.0),
           TestDataBuilders.createTestLocation(latitude: 0.0, longitude: 0.0),
         ];
 
         for (final testLocation in extremeTestCases) {
           fakeRepository.setCurrentLocation(testLocation);
-          
+
           final result = await fakeRepository.getCurrentLocation();
-          
+
           expect(result, isA<Success<Location>>());
           final success = result as Success<Location>;
           expect(success.data, CustomMatchers.isLocationNear(testLocation));
-          
+
           fakeRepository.reset();
         }
       });
@@ -215,27 +226,27 @@ void main() {
 // =================================================================
 
 /// ✨ IMPROVEMENTS ACHIEVED:
-/// 
+///
 /// 1. **コード削減**: 約40%のコード行数削減
 ///    - Before: 手動でLocation/Mockオブジェクト作成
 ///    - After: TestDataBuilders使用
-/// 
+///
 /// 2. **保守性向上**: 一貫したテストデータ管理
 ///    - Before: 各テストで個別にデータ作成
 ///    - After: 統一されたビルダーパターン
-/// 
+///
 /// 3. **可読性向上**: 直感的なマッチャー
 ///    - Before: 手動でプロパティチェック
 ///    - After: CustomMatchers.isLocationNear()
-/// 
-/// 4. **エラーハンドリング統一**: 
+///
+/// 4. **エラーハンドリング統一**:
 ///    - Before: 個別のエラーシミュレーション
 ///    - After: 統一されたsetShouldReturnFailure()
-/// 
+///
 /// 5. **並行処理テスト簡略化**:
 ///    - Before: 複雑なモック設定
 ///    - After: Fakeクラスの状態管理
-/// 
+///
 /// 6. **境界値テスト強化**:
 ///    - Before: 限定的な境界値テスト
 ///    - After: 包括的な境界値テストケース
@@ -245,53 +256,53 @@ void main() {
 // =================================================================
 
 /// 既存テストを統一テストダブルに移行する手順:
-/// 
+///
 /// 1. **インポート更新**:
 ///    ```dart
 ///    // 削除
 ///    import 'custom_mock_files.dart';
-///    
+///
 ///    // 追加
 ///    import 'test/helpers/mocks.mocks.dart';
 ///    import 'test/helpers/fakes.dart';
 ///    import 'test/helpers/test_helpers.dart';
 ///    ```
-/// 
+///
 /// 2. **セットアップ/ティアダウン簡略化**:
 ///    ```dart
 ///    setUp(() {
 ///      fakeService = FakeLocationService();
 ///    });
-///    
+///
 ///    tearDown(() {
 ///      fakeService.reset();
 ///    });
 ///    ```
-/// 
+///
 /// 3. **テストデータ作成を統一**:
 ///    ```dart
 ///    // Before
 ///    final location = Location(lat: 35.6762, lng: 139.6503, ...);
-///    
+///
 ///    // After
 ///    final location = TestDataBuilders.createTestLocation();
 ///    ```
-/// 
+///
 /// 4. **アサーションをカスタムマッチャーに**:
 ///    ```dart
 ///    // Before
 ///    expect(actual.latitude, expectedLocation.latitude);
 ///    expect(actual.longitude, expectedLocation.longitude);
-///    
+///
 ///    // After
 ///    expect(actual, CustomMatchers.isLocationNear(expected));
 ///    ```
-/// 
+///
 /// 5. **エラーシミュレーション統一**:
 ///    ```dart
 ///    // Before
 ///    when(mock.method()).thenThrow(Exception('error'));
-///    
+///
 ///    // After
 ///    fake.setShouldThrowError(true, Exception('error'));
 ///    ```

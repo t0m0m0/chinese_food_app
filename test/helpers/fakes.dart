@@ -7,9 +7,9 @@ import 'package:chinese_food_app/core/types/result.dart';
 import 'package:chinese_food_app/core/exceptions/app_exception.dart';
 
 /// 設定可能なLocationServiceのFake実装
-/// 
+///
 /// 状態を持つテストダブルで、統合テストや複雑なシナリオテストに適している。
-/// 
+///
 /// 使用例：
 /// ```dart
 /// test('location scenario test', () async {
@@ -17,7 +17,7 @@ import 'package:chinese_food_app/core/exceptions/app_exception.dart';
 ///     ..setCurrentLocation(Location(latitude: 35.6762, longitude: 139.6503))
 ///     ..setServiceEnabled(true)
 ///     ..setPermissionGranted(true);
-///     
+///
 ///   final result = await fakeService.getCurrentLocation();
 ///   expect(result.latitude, 35.6762);
 /// });
@@ -64,16 +64,16 @@ class FakeLocationService implements LocationService {
     if (_shouldThrowError) {
       throw _errorToThrow ?? Exception('Location error');
     }
-    
+
     if (!_serviceEnabled) {
       throw Exception('Location service disabled');
     }
-    
+
     if (!_permissionGranted) {
       throw Exception('Location permission denied');
     }
 
-    return _currentLocation ?? 
+    return _currentLocation ??
         Location(
           latitude: 35.6762,
           longitude: 139.6503,
@@ -99,7 +99,7 @@ class FakeLocationService implements LocationService {
 }
 
 /// 設定可能なStoreRepositoryのFake実装
-/// 
+///
 /// インメモリでストアデータを管理するテストダブル。
 /// 複雑なデータ操作シナリオのテストに適している。
 class FakeStoreRepository implements StoreRepository {
@@ -176,7 +176,7 @@ class FakeStoreRepository implements StoreRepository {
   Future<List<Store>> searchStores(String query) async {
     _throwIfNeeded();
     return _stores
-        .where((store) => 
+        .where((store) =>
             store.name.toLowerCase().contains(query.toLowerCase()) ||
             store.address.toLowerCase().contains(query.toLowerCase()))
         .toList();
@@ -225,10 +225,11 @@ class FakeLocationRepository implements LocationRepository {
   @override
   Future<Result<Location>> getCurrentLocation() async {
     if (_shouldReturnFailure) {
-      return Failure(_exceptionToReturn ?? AppException('Location repository error'));
+      return Failure(
+          _exceptionToReturn ?? AppException('Location repository error'));
     }
 
-    final location = _currentLocation ?? 
+    final location = _currentLocation ??
         Location(
           latitude: 35.6762,
           longitude: 139.6503,
