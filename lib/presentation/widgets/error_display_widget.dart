@@ -8,6 +8,10 @@ class ErrorDisplayWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
 
+  /// UI constants for consistent styling
+  static const double _iconSize = 64.0;
+  static const double _spacing = 16.0;
+
   const ErrorDisplayWidget({
     super.key,
     required this.exception,
@@ -72,19 +76,20 @@ class ErrorDisplayWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline,
-            size: 64,
-            color: Colors.red,
+            size: _iconSize,
+            color: Theme.of(context).colorScheme.error,
+            semanticLabel: 'エラーアイコン',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: _spacing),
           Text(
             message,
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: _spacing),
             ElevatedButton(
               onPressed: onRetry,
               child: const Text('再試行'),

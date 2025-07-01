@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'domain_exceptions.dart';
 import 'exception_handler.dart';
 
 /// Handler for retry logic with configurable retry policies
 class RetryHandler {
   final ExceptionHandler _exceptionHandler;
+
+  /// Maximum delay for exponential backoff (30 seconds)
+  static const int _maxDelayMs = 30000;
 
   /// Creates a retry handler with optional exception handler
   RetryHandler({ExceptionHandler? exceptionHandler})
@@ -44,8 +48,10 @@ class RetryHandler {
           await Future.delayed(currentDelay);
 
           if (useExponentialBackoff) {
-            currentDelay =
-                Duration(milliseconds: currentDelay.inMilliseconds * 2);
+            final newDelayMs = currentDelay.inMilliseconds * 2;
+            currentDelay = Duration(
+              milliseconds: math.min(newDelayMs, _maxDelayMs),
+            );
           }
         }
       }
