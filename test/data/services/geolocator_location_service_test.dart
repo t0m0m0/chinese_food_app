@@ -9,6 +9,7 @@ import 'package:chinese_food_app/data/services/geolocator_location_service.dart'
 void main() {
   // テスト前の初期化を最小限にして高速化
   setUpAll(() {
+    // Geolocatorの重い初期化処理を回避し、テスト高速化を実現
     // 必要な場合のみ初期化処理を追加
   });
   group('GeolocatorLocationService Tests', () {
