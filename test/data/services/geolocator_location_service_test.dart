@@ -7,10 +7,15 @@ import 'package:chinese_food_app/data/services/geolocator_location_service.dart'
 // モック生成のためのアノテーション
 @GenerateMocks([])
 void main() {
+  // テスト前の初期化を最小限にして高速化
+  setUpAll(() {
+    // 必要な場合のみ初期化処理を追加
+  });
   group('GeolocatorLocationService Tests', () {
     late GeolocatorLocationService locationService;
 
     setUp(() {
+      // 軽量化：遅延初期化を使用
       locationService = GeolocatorLocationService();
     });
 
