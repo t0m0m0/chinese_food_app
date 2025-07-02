@@ -28,12 +28,13 @@ jobs:
       
     - name: コード生成（必要に応じて）
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
-      
-    - name: 変更されたファイルを取得
+
+    - name: 変更されたファイルを取得（削除ファイルを除外）
       id: changed-files
       run: |
-        git diff --name-only origin/${{ github.base_ref }}..HEAD > changed_files.txt
-        echo "Changed files:"
+        git diff --name-status origin/${{ github.base_ref }}..HEAD \
+          | awk '$1 != "D" { print $2 }' > changed_files.txt
+        echo "Changed files (excluding deleted):"
         cat changed_files.txt
         
     - name: Dartファイルの変更をチェック
@@ -76,11 +77,9 @@ jobs:
         
     - name: コミットメッセージをチェック
       run: |
-        # 最新のコミットメッセージを取得
         COMMIT_MSG=$(git log -1 --pretty=%B)
         echo "最新のコミットメッセージ: $COMMIT_MSG"
-        
-        # Claude Code署名をチェック
+
         if echo "$COMMIT_MSG" | grep -q "🤖 Generated with \[Claude Code\]"; then
           echo "✅ Claude Code署名を確認"
         else
@@ -105,8 +104,7 @@ jobs:
         
         echo "追加行数: $ADDITIONS"
         echo "削除行数: $DELETIONS"
-        
-        # 大きなPRの警告
+
         if [ "$ADDITIONS" -gt 500 ]; then
           echo "⚠️ 大きなPRです（500行以上の追加）。分割を検討してください。"
         fi
@@ -137,14 +135,8 @@ jobs:
       run: |
         if git diff --name-only origin/${{ github.base_ref }}..HEAD | grep -q "pubspec.yaml"; then
           echo "pubspec.yamlの変更を検出"
-          
-          # 依存関係を取得
           flutter pub get
-          
-          # アウトデートされた依存関係をチェック
           flutter pub outdated || echo "依存関係チェック完了"
-          
-          # 新しい依存関係の確認
           echo "現在の依存関係:"
           flutter pub deps --no-dev
         else
