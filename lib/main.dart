@@ -11,19 +11,30 @@ import 'presentation/providers/store_provider.dart';
 import 'domain/services/location_service.dart';
 
 Future<void> main() async {
-  // Ensure Flutter binding is initialized for async operations
+  // アプリ起動時の非同期処理のためFlutterバインディングを初期化
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Create and configure DI container
+  // DIコンテナーを作成・設定
   final DIContainerInterface container = AppDIContainer();
   container.configure();
 
-  // Pre-initialize StoreProvider with essential data
-  final storeProvider = container.getStoreProvider();
-  await storeProvider.loadStores();
+  // StoreProviderを取得し、必要なデータで事前初期化
+  final StoreProvider storeProvider = container.getStoreProvider();
 
-  // Get LocationService
-  final locationService = container.getLocationService();
+  try {
+    // アプリ起動時の店舗データ初期化を実行
+    await storeProvider.loadStores();
+    debugPrint('店舗データの事前初期化が完了しました');
+  } catch (e) {
+    // 初期化エラー時のフォールバック処理
+    debugPrint('初期化エラー: $e');
+    debugPrint('アプリは空の状態で起動します。ユーザーは後で手動でデータを読み込みできます。');
+    // エラー状態をクリアしてアプリを続行可能にする
+    storeProvider.clearError();
+  }
+
+  // LocationServiceを取得
+  final LocationService locationService = container.getLocationService();
 
   runApp(MyApp(
     storeProvider: storeProvider,
@@ -32,7 +43,7 @@ Future<void> main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final StoreProvider storeProvider;
   final LocationService locationService;
   final DIContainerInterface container;
@@ -45,18 +56,30 @@ class MyApp extends StatelessWidget {
   });
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void dispose() {
+    // アプリ終了時のリソース解放処理
+    widget.container.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         // Provide the DI container itself for testing and debugging
-        Provider<DIContainerInterface>.value(value: container),
+        Provider<DIContainerInterface>.value(value: widget.container),
 
         // Provide pre-initialized services
         ChangeNotifierProvider<StoreProvider>.value(
-          value: storeProvider,
+          value: widget.storeProvider,
         ),
         Provider<LocationService>.value(
-          value: locationService,
+          value: widget.locationService,
         ),
       ],
       child: MaterialApp(

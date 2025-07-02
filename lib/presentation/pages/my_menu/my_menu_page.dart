@@ -22,8 +22,8 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
 
     // 店舗データは事前初期化済みのため、利用可能な店舗リストを更新
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // キャッシュをクリアして最新状態を反映
-      Provider.of<StoreProvider>(context, listen: false).notifyListeners();
+      // キャッシュをリフレッシュして最新状態を反映
+      Provider.of<StoreProvider>(context, listen: false).refreshCache();
     });
   }
 
@@ -103,8 +103,8 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                   ElevatedButton(
                     onPressed: () {
                       storeProvider.clearError();
-                      // エラークリア後にキャッシュを更新
-                      storeProvider.notifyListeners();
+                      // エラークリア後にキャッシュをリフレッシュ
+                      storeProvider.refreshCache();
                     },
                     child: const Text('再試行'),
                   ),
