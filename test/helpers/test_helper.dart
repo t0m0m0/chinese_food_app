@@ -33,16 +33,17 @@ class MockStoreRepository implements StoreRepository {
     int range = 3,
     int count = 20,
     int start = 1,
-  }) async => [];
+  }) async =>
+      [];
 }
 
 class MockStoreProvider extends ChangeNotifier {
-  bool _isLoading = false;
+  final bool _isLoading = false;
   String? _error;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
-  List<Store> get stores => [];  
+  List<Store> get stores => [];
   List<Store> get wantToGoStores => [];
   List<Store> get visitedStores => [];
   List<Store> get badStores => [];

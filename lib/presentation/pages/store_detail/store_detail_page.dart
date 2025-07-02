@@ -36,7 +36,8 @@ class StoreDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStoreHeader(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildStoreHeader(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24.0),
@@ -58,7 +59,8 @@ class StoreDetailPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(store.status, colorScheme).withValues(alpha: 0.1),
+                  color: _getStatusColor(store.status, colorScheme)
+                      .withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -97,7 +99,8 @@ class StoreDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStoreInfo(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildStoreInfo(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
@@ -205,7 +208,8 @@ class StoreDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusSection(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildStatusSection(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Card(
@@ -279,7 +283,7 @@ class StoreDetailPage extends StatelessWidget {
     ColorScheme colorScheme,
   ) {
     final isSelected = store.status == status;
-    
+
     return InkWell(
       onTap: () => _updateStoreStatus(context, status),
       borderRadius: BorderRadius.circular(8),
@@ -315,7 +319,8 @@ class StoreDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildActionButtons(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -358,7 +363,8 @@ class StoreDetailPage extends StatelessWidget {
     );
   }
 
-  Future<void> _updateStoreStatus(BuildContext context, StoreStatus newStatus) async {
+  Future<void> _updateStoreStatus(
+      BuildContext context, StoreStatus newStatus) async {
     if (store.status == newStatus) return;
 
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
@@ -371,7 +377,8 @@ class StoreDetailPage extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('ステータスを「$statusText」に更新しました'),
-            backgroundColor: _getStatusColor(newStatus, Theme.of(context).colorScheme),
+            backgroundColor:
+                _getStatusColor(newStatus, Theme.of(context).colorScheme),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -380,7 +387,8 @@ class StoreDetailPage extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(ErrorMessageHelper.getStoreRelatedMessage('update_status')),
+            content: Text(
+                ErrorMessageHelper.getStoreRelatedMessage('update_status')),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),

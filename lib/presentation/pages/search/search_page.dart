@@ -7,6 +7,7 @@ import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../widgets/cached_store_image.dart';
+import '../store_detail/store_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -355,9 +356,11 @@ class _SearchPageState extends State<SearchPage> {
           },
         ),
         onTap: () {
-          // TODO: 店舗詳細画面への遷移
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${store.name}の詳細画面は実装予定です')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StoreDetailPage(store: store),
+            ),
           );
         },
       ),
