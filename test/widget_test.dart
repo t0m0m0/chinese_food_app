@@ -7,13 +7,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:chinese_food_app/main.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
+import 'package:chinese_food_app/core/di/di_container_interface.dart';
 
 void main() {
   testWidgets('町中華アプリの基本構造テスト', (WidgetTester tester) async {
@@ -21,15 +21,17 @@ void main() {
     final mockLocationService = MockLocationService();
     final fakeRepository = FakeStoreRepository();
     final storeProvider = StoreProvider(repository: fakeRepository);
+    final mockContainer = MockDIContainer(
+      storeProvider: storeProvider,
+      locationService: mockLocationService,
+    );
 
     // テスト用のアプリをビルド
     await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
-          Provider<LocationService>.value(value: mockLocationService),
-        ],
-        child: const MyApp(),
+      MyApp(
+        storeProvider: storeProvider,
+        locationService: mockLocationService,
+        container: mockContainer,
       ),
     );
 
@@ -116,5 +118,46 @@ class FakeStoreRepository implements StoreRepository {
     int start = 1,
   }) async {
     return [];
+  }
+}
+
+/// テスト用のMockDIContainer
+class MockDIContainer implements DIContainerInterface {
+  final StoreProvider storeProvider;
+  final LocationService locationService;
+  bool _isConfigured = false;
+
+  MockDIContainer({
+    required this.storeProvider,
+    required this.locationService,
+  });
+
+  @override
+  void configure() {
+    _isConfigured = true;
+  }
+
+  @override
+  void configureForEnvironment(Environment environment) {
+    _isConfigured = true;
+  }
+
+  @override
+  StoreProvider getStoreProvider() => storeProvider;
+
+  @override
+  LocationService getLocationService() => locationService;
+
+  @override
+  void registerTestProvider(StoreProvider provider) {
+    // テスト用のため空実装
+  }
+
+  @override
+  bool get isConfigured => _isConfigured;
+
+  @override
+  void dispose() {
+    _isConfigured = false;
   }
 }

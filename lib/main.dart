@@ -7,31 +7,56 @@ import 'core/di/di_container_interface.dart';
 import 'presentation/pages/my_menu/my_menu_page.dart';
 import 'presentation/pages/search/search_page.dart';
 import 'presentation/pages/swipe/swipe_page.dart';
+import 'presentation/providers/store_provider.dart';
+import 'domain/services/location_service.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  // Ensure Flutter binding is initialized for async operations
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Create and configure DI container
+  final DIContainerInterface container = AppDIContainer();
+  container.configure();
+
+  // Pre-initialize StoreProvider with essential data
+  final storeProvider = container.getStoreProvider();
+  await storeProvider.loadStores();
+
+  // Get LocationService
+  final locationService = container.getLocationService();
+
+  runApp(MyApp(
+    storeProvider: storeProvider,
+    locationService: locationService,
+    container: container,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final StoreProvider storeProvider;
+  final LocationService locationService;
+  final DIContainerInterface container;
+
+  const MyApp({
+    super.key,
+    required this.storeProvider,
+    required this.locationService,
+    required this.container,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Create and configure DI container
-    final DIContainerInterface container = AppDIContainer();
-    container.configure();
-
     return MultiProvider(
       providers: [
         // Provide the DI container itself for testing and debugging
         Provider<DIContainerInterface>.value(value: container),
 
-        // Provide services from DI container
-        ChangeNotifierProvider(
-          create: (_) => container.getStoreProvider(),
+        // Provide pre-initialized services
+        ChangeNotifierProvider<StoreProvider>.value(
+          value: storeProvider,
         ),
-        Provider(
-          create: (_) => container.getLocationService(),
+        Provider<LocationService>.value(
+          value: locationService,
         ),
       ],
       child: MaterialApp(

@@ -33,12 +33,7 @@ class _SwipePageState extends State<SwipePage> {
 
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
   void _loadStoresFromProvider() async {
-    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
-
-    // 既存の店舗データを読み込み
-    await storeProvider.loadStores();
-
-    // 位置情報を取得してAPIから新しい店舗データも取得
+    // 既存の店舗データは事前初期化済みのため、APIから新しい店舗データのみ取得
     await _loadStoresWithLocation();
   }
 
