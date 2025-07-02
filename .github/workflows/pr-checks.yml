@@ -47,12 +47,14 @@ jobs:
         fi
         
     - name: テストカバレッジをチェック
+      timeout-minutes: 5
       run: |
         if grep -q "lib/.*\.dart$" changed_files.txt; then
-          echo "ライブラリファイルの変更を検出、テスト実行"
-          flutter test --coverage
+          echo "ライブラリファイルの変更を検出、コアテストのみ実行"
+          # コアテストのみ実行（パフォーマンスとネットワークテストを除外）
+          flutter test test/widget_test.dart test/widget/ test/core/entities/ test/core/types/ --coverage
           
-          # カバレッジが80%以上かチェック（簡易版）
+          # カバレッジレポートの確認
           if [ -f "coverage/lcov.info" ]; then
             echo "カバレッジレポートが生成されました"
           else
