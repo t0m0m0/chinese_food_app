@@ -1,8 +1,15 @@
+// Flutter imports
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// Package imports
 import 'package:provider/provider.dart';
+
+// Local imports
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+
+// Test imports
 import 'fakes.dart';
 
 /// 統一されたテストヘルパークラス

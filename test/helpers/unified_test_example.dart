@@ -1,15 +1,16 @@
+// Flutter imports
 import 'package:flutter_test/flutter_test.dart';
+
+// Package imports
 import 'package:mockito/mockito.dart';
+
+// Local imports
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 
-// 統一されたMockitoモック
+// Test imports
 import 'mocks.mocks.dart';
-
-// 統一されたFakeクラス
 import 'fakes.dart';
-
-// 統一されたテストヘルパー
 import 'test_helpers.dart';
 
 /// 統一されたテストダブルの使用例

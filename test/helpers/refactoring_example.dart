@@ -5,13 +5,16 @@
 //
 // 元ファイル: test/data/repositories/location_repository_impl_test.dart
 
+// Flutter imports
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/domain/repositories/location_repository.dart';
-import 'package:chinese_food_app/domain/entities/location.dart';
-import 'package:chinese_food_app/core/types/result.dart';
-import 'package:chinese_food_app/core/exceptions/app_exception.dart';
 
-// 🎯 統一されたテストダブルをインポート
+// Local imports
+import 'package:chinese_food_app/core/exceptions/app_exception.dart';
+import 'package:chinese_food_app/core/types/result.dart';
+import 'package:chinese_food_app/domain/entities/location.dart';
+import 'package:chinese_food_app/domain/repositories/location_repository.dart';
+
+// Test imports
 import '../helpers/fakes.dart';
 import '../helpers/test_helpers.dart';
 

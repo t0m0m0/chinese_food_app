@@ -1,10 +1,11 @@
-import 'package:chinese_food_app/domain/services/location_service.dart';
-import 'package:chinese_food_app/domain/repositories/store_repository.dart';
-import 'package:chinese_food_app/domain/repositories/location_repository.dart';
+// Local imports
+import 'package:chinese_food_app/core/exceptions/app_exception.dart';
+import 'package:chinese_food_app/core/types/result.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
-import 'package:chinese_food_app/core/types/result.dart';
-import 'package:chinese_food_app/core/exceptions/app_exception.dart';
+import 'package:chinese_food_app/domain/repositories/location_repository.dart';
+import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/domain/services/location_service.dart';
 
 /// 設定可能なLocationServiceのFake実装
 ///

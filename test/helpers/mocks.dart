@@ -1,12 +1,15 @@
+// Package imports
 import 'package:mockito/annotations.dart';
-import 'package:chinese_food_app/domain/services/location_service.dart';
-import 'package:chinese_food_app/domain/repositories/store_repository.dart';
-import 'package:chinese_food_app/domain/repositories/location_repository.dart';
-import 'package:chinese_food_app/domain/repositories/visit_record_repository.dart';
-import 'package:chinese_food_app/domain/repositories/photo_repository.dart';
+import 'package:http/http.dart' as http;
+
+// Local imports
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
 import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
-import 'package:http/http.dart' as http;
+import 'package:chinese_food_app/domain/repositories/location_repository.dart';
+import 'package:chinese_food_app/domain/repositories/photo_repository.dart';
+import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/domain/repositories/visit_record_repository.dart';
+import 'package:chinese_food_app/domain/services/location_service.dart';
 
 /// 統一されたMockito生成用のアノテーション
 ///
@@ -56,4 +59,8 @@ import 'package:http/http.dart' as http;
   // External Dependencies
   http.Client,
 ])
+
+/// Empty main function required for build_runner mock generation
+/// This file should not be executed directly - it only serves as
+/// annotation source for generating mocks via build_runner
 void main() {}
