@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
+import '../store_detail/store_detail_page.dart';
 
 class MyMenuPage extends StatefulWidget {
   const MyMenuPage({super.key});
@@ -203,9 +204,11 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // TODO: 店舗詳細画面への遷移
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${store.name}の詳細画面は実装予定です')),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StoreDetailPage(store: store),
+            ),
           );
         },
         child: Padding(
