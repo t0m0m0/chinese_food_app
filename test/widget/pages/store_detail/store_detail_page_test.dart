@@ -42,8 +42,9 @@ void main() {
         ),
       );
 
-      // Assert
-      expect(find.text('行きたい'), findsOneWidget);
+      // Assert - ステータス変更セクションの存在を確認
+      expect(find.text('ステータス変更'), findsOneWidget);
+      expect(find.text('行きたい'), findsWidgets);
       expect(find.text('行った'), findsOneWidget);
       expect(find.text('興味なし'), findsOneWidget);
     });
