@@ -20,9 +20,10 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    // 初回ロード
+    // 店舗データは事前初期化済みのため、利用可能な店舗リストを更新
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<StoreProvider>(context, listen: false).loadStores();
+      // キャッシュをリフレッシュして最新状態を反映
+      Provider.of<StoreProvider>(context, listen: false).refreshCache();
     });
   }
 
@@ -102,7 +103,8 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                   ElevatedButton(
                     onPressed: () {
                       storeProvider.clearError();
-                      storeProvider.loadStores();
+                      // エラークリア後にキャッシュをリフレッシュ
+                      storeProvider.refreshCache();
                     },
                     child: const Text('再試行'),
                   ),

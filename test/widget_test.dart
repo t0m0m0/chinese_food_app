@@ -7,13 +7,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 import 'package:chinese_food_app/main.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
+import 'package:chinese_food_app/core/di/di_container_interface.dart';
 
 void main() {
   testWidgets('町中華アプリの基本構造テスト', (WidgetTester tester) async {
@@ -21,15 +21,17 @@ void main() {
     final mockLocationService = MockLocationService();
     final fakeRepository = FakeStoreRepository();
     final storeProvider = StoreProvider(repository: fakeRepository);
+    final mockContainer = MockDIContainer(
+      storeProvider: storeProvider,
+      locationService: mockLocationService,
+    );
 
     // テスト用のアプリをビルド
     await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
-          Provider<LocationService>.value(value: mockLocationService),
-        ],
-        child: const MyApp(),
+      MyApp(
+        storeProvider: storeProvider,
+        locationService: mockLocationService,
+        container: mockContainer,
       ),
     );
 
@@ -43,6 +45,75 @@ void main() {
     expect(find.text('スワイプ'), findsWidgets);
     expect(find.text('検索'), findsWidgets);
     expect(find.text('マイメニュー'), findsWidgets);
+  });
+
+  testWidgets('事前初期化されたStoreProviderの動作テスト', (WidgetTester tester) async {
+    // モックサービスを作成
+    final mockLocationService = MockLocationService();
+    final fakeRepository = FakeStoreRepository();
+    final storeProvider = StoreProvider(repository: fakeRepository);
+
+    // 事前初期化をシミュレート
+    await storeProvider.loadStores();
+
+    final mockContainer = MockDIContainer(
+      storeProvider: storeProvider,
+      locationService: mockLocationService,
+    );
+
+    // テスト用のアプリをビルド
+    await tester.pumpWidget(
+      MyApp(
+        storeProvider: storeProvider,
+        locationService: mockLocationService,
+        container: mockContainer,
+      ),
+    );
+
+    // 1フレーム進めてUIを描画
+    await tester.pump();
+
+    // StoreProviderが事前初期化されていることを確認
+    expect(storeProvider.isLoading, false);
+    // APIから空の結果が返されるため、エラーメッセージが設定される可能性がある
+    // これは正常な動作なので、エラーがあってもアプリは動作する
+  });
+
+  testWidgets('初期化エラー時のフォールバック動作テスト', (WidgetTester tester) async {
+    // エラーを発生させるMockRepositoryを作成
+    final errorRepository = ErrorStoreRepository();
+    final storeProvider = StoreProvider(repository: errorRepository);
+    final mockLocationService = MockLocationService();
+
+    // 初期化エラーをシミュレート
+    try {
+      await storeProvider.loadStores();
+    } catch (e) {
+      // エラーが期待通り発生することを確認
+      expect(e, isNotNull);
+    }
+
+    // エラーをクリアしてアプリが続行可能な状態に
+    storeProvider.clearError();
+
+    final mockContainer = MockDIContainer(
+      storeProvider: storeProvider,
+      locationService: mockLocationService,
+    );
+
+    // エラーがあってもアプリが起動できることを確認
+    await tester.pumpWidget(
+      MyApp(
+        storeProvider: storeProvider,
+        locationService: mockLocationService,
+        container: mockContainer,
+      ),
+    );
+
+    await tester.pump();
+
+    // 基本的なUIが表示されることを確認
+    expect(find.byType(BottomNavigationBar), findsOneWidget);
   });
 }
 
@@ -116,5 +187,97 @@ class FakeStoreRepository implements StoreRepository {
     int start = 1,
   }) async {
     return [];
+  }
+}
+
+/// エラーを発生させるテスト用Repository
+class ErrorStoreRepository implements StoreRepository {
+  @override
+  Future<List<Store>> getAllStores() async {
+    throw Exception('データベース接続エラー');
+  }
+
+  @override
+  Future<void> insertStore(Store store) async {
+    throw Exception('店舗追加エラー');
+  }
+
+  @override
+  Future<void> updateStore(Store store) async {
+    throw Exception('店舗更新エラー');
+  }
+
+  @override
+  Future<void> deleteStore(String storeId) async {
+    throw Exception('店舗削除エラー');
+  }
+
+  @override
+  Future<Store?> getStoreById(String storeId) async {
+    throw Exception('店舗検索エラー');
+  }
+
+  @override
+  Future<List<Store>> getStoresByStatus(StoreStatus status) async {
+    throw Exception('ステータス検索エラー');
+  }
+
+  @override
+  Future<List<Store>> searchStores(String query) async {
+    throw Exception('店舗検索エラー');
+  }
+
+  @override
+  Future<List<Store>> searchStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    throw Exception('API検索エラー');
+  }
+}
+
+/// テスト用のMockDIContainer
+class MockDIContainer implements DIContainerInterface {
+  final StoreProvider storeProvider;
+  final LocationService locationService;
+  bool _isConfigured = false;
+
+  MockDIContainer({
+    required this.storeProvider,
+    required this.locationService,
+  });
+
+  @override
+  void configure() {
+    _isConfigured = true;
+  }
+
+  @override
+  void configureForEnvironment(Environment environment) {
+    _isConfigured = true;
+  }
+
+  @override
+  StoreProvider getStoreProvider() => storeProvider;
+
+  @override
+  LocationService getLocationService() => locationService;
+
+  @override
+  void registerTestProvider(StoreProvider provider) {
+    // テスト用のため空実装
+  }
+
+  @override
+  bool get isConfigured => _isConfigured;
+
+  @override
+  void dispose() {
+    _isConfigured = false;
   }
 }

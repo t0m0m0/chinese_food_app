@@ -133,6 +133,15 @@ class StoreProvider extends ChangeNotifier {
     _clearError();
   }
 
+  /// キャッシュをリフレッシュして最新状態を反映
+  ///
+  /// UIの更新が必要な場合に呼び出す専用メソッド
+  /// 直接notifyListeners()を呼ぶよりも意図が明確
+  void refreshCache() {
+    _clearCache();
+    notifyListeners();
+  }
+
   /// HotPepper APIから新しい店舗データを検索して追加
   Future<void> loadNewStoresFromApi({
     double? lat,
