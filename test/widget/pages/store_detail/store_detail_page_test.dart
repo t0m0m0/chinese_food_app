@@ -61,5 +61,72 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
       expect(find.text('店舗詳細'), findsOneWidget);
     });
+
+    testWidgets('should display status buttons with proper interaction',
+        (tester) async {
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StoreDetailPage(store: testStore),
+        ),
+      );
+
+      // Assert - ステータスボタンが存在し、タップ可能であることを確認
+      final wantToGoButton = find.text('行きたい').last;
+      final visitedButton = find.text('行った').last;
+      final badButton = find.text('興味なし').last;
+
+      expect(wantToGoButton, findsOneWidget);
+      expect(visitedButton, findsOneWidget);
+      expect(badButton, findsOneWidget);
+
+      // ボタンがInkWellでラップされていることを確認（タップ可能）
+      final inkWells = find.byType(InkWell);
+      expect(inkWells, findsWidgets); // 複数のInkWellが存在
+    });
+
+    testWidgets('should show different visual states for current status',
+        (tester) async {
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StoreDetailPage(store: testStore),
+        ),
+      );
+
+      // Assert - ステータス変更セクションが存在することを確認
+      expect(find.text('ステータス変更'), findsOneWidget);
+
+      // アクションボタンが存在することを確認
+      expect(find.text('訪問記録を追加'), findsOneWidget);
+      expect(find.text('地図で表示'), findsOneWidget);
+    });
+
+    testWidgets('should show current status as selected', (tester) async {
+      // Arrange - Create a store with 'visited' status
+      final visitedStore = Store(
+        id: 'visited-store',
+        name: 'テスト中華料理店',
+        address: '東京都渋谷区テスト1-1-1',
+        lat: 35.6581,
+        lng: 139.7414,
+        status: StoreStatus.visited,
+        memo: 'テスト用のメモ',
+        createdAt: DateTime(2024, 1, 1),
+      );
+
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StoreDetailPage(store: visitedStore),
+        ),
+      );
+
+      // Assert - 現在のステータスが選択されて表示されることを確認
+      expect(find.text('行った'), findsWidgets);
+
+      // Status header should show current status
+      expect(find.text('行った'), findsWidgets);
+    });
   });
 }

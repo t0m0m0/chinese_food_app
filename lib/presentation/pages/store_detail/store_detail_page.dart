@@ -210,63 +210,66 @@ class StoreDetailPage extends StatelessWidget {
 
   Widget _buildStatusSection(
       BuildContext context, ThemeData theme, ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'ステータス変更',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+    return RepaintBoundary(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Card(
+          elevation: 2,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ステータス変更',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatusButton(
-                      context,
-                      '行きたい',
-                      Icons.favorite,
-                      StoreStatus.wantToGo,
-                      colorScheme.primary,
-                      theme,
-                      colorScheme,
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatusButton(
+                        context,
+                        '行きたい',
+                        Icons.favorite,
+                        StoreStatus.wantToGo,
+                        colorScheme.primary,
+                        theme,
+                        colorScheme,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildStatusButton(
-                      context,
-                      '行った',
-                      Icons.check_circle,
-                      StoreStatus.visited,
-                      Colors.green,
-                      theme,
-                      colorScheme,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildStatusButton(
+                        context,
+                        '行った',
+                        Icons.check_circle,
+                        StoreStatus.visited,
+                        Colors.green,
+                        theme,
+                        colorScheme,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildStatusButton(
-                      context,
-                      '興味なし',
-                      Icons.block,
-                      StoreStatus.bad,
-                      Colors.orange,
-                      theme,
-                      colorScheme,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildStatusButton(
+                        context,
+                        '興味なし',
+                        Icons.block,
+                        StoreStatus.bad,
+                        Colors.orange,
+                        theme,
+                        colorScheme,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -283,37 +286,43 @@ class StoreDetailPage extends StatelessWidget {
     ColorScheme colorScheme,
   ) {
     final isSelected = store.status == status;
+    final semanticsLabel = isSelected ? '$labelが選択されています' : 'ステータスを$labelに変更';
 
-    return InkWell(
-      onTap: () => _updateStoreStatus(context, status),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : null,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? color : colorScheme.outline,
-            width: isSelected ? 2 : 1,
+    return Semantics(
+      label: semanticsLabel,
+      button: true,
+      selected: isSelected,
+      child: InkWell(
+        onTap: () => _updateStoreStatus(context, status),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withValues(alpha: 0.1) : null,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? color : colorScheme.outline,
+              width: isSelected ? 2 : 1,
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? color : colorScheme.onSurfaceVariant,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
+          child: Column(
+            children: [
+              Icon(
+                icon,
                 color: isSelected ? color : colorScheme.onSurfaceVariant,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                size: 24,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isSelected ? color : colorScheme.onSurfaceVariant,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -327,34 +336,42 @@ class StoreDetailPage extends StatelessWidget {
         children: [
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () {
-                // TODO: 訪問記録追加機能
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('訪問記録機能は実装予定です')),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('訪問記録を追加'),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Semantics(
+              label: '${store.name}の訪問記録を追加',
+              button: true,
+              child: FilledButton.icon(
+                onPressed: () {
+                  // TODO: 訪問記録追加機能
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('訪問記録機能は実装予定です')),
+                  );
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('訪問記録を追加'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
               ),
             ),
           ),
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: 地図表示機能
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('地図表示機能は実装予定です')),
-                );
-              },
-              icon: const Icon(Icons.map),
-              label: const Text('地図で表示'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Semantics(
+              label: '${store.name}の場所を地図で表示',
+              button: true,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  // TODO: 地図表示機能
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('地図表示機能は実装予定です')),
+                  );
+                },
+                icon: const Icon(Icons.map),
+                label: const Text('地図で表示'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
               ),
             ),
           ),

@@ -41,6 +41,10 @@ class MockStoreProvider extends ChangeNotifier {
   final bool _isLoading = false;
   String? _error;
 
+  // Callback for testing status updates
+  Future<void> Function(String storeId, StoreStatus status)?
+      updateStoreStatusCallback;
+
   bool get isLoading => _isLoading;
   String? get error => _error;
   List<Store> get stores => [];
@@ -53,6 +57,10 @@ class MockStoreProvider extends ChangeNotifier {
   }
 
   Future<void> updateStoreStatus(String storeId, StoreStatus status) async {
+    // Call the callback if set
+    if (updateStoreStatusCallback != null) {
+      await updateStoreStatusCallback!(storeId, status);
+    }
     // Mock implementation
   }
 
