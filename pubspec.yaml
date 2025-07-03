@@ -62,6 +62,9 @@ dependencies:
   
   # ユーティリティ
   uuid: ^4.5.1
+  drift: ^2.27.0
+  drift_flutter: ^0.2.4
+  path_provider: ^2.1.5
   # intl: ^0.19.0
 
 dev_dependencies:
@@ -78,7 +81,8 @@ dev_dependencies:
   # テスト関連
   sqflite_common_ffi: ^2.3.0  # SQLite testing support
   mockito: ^5.4.4             # Mocking framework
-  build_runner: ^2.4.13       # Code generation
+  build_runner: ^2.5.4       # Code generation
+  drift_dev: ^2.27.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
