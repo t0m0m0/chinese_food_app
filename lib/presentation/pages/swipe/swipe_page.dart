@@ -340,11 +340,8 @@ class _SwipePageState extends State<SwipePage> {
             ),
           ),
           Expanded(
-            child: Consumer<StoreProvider>(
-              builder: (context, storeProvider, child) {
-                // 位置情報取得中の表示
-                if (_isGettingLocation) {
-                  return const Center(
+            child: _isGettingLocation
+                ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -353,106 +350,118 @@ class _SwipePageState extends State<SwipePage> {
                         Text('現在地を取得中...'),
                       ],
                     ),
-                  );
-                }
-
-                if (storeProvider.isLoading) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('新しい店舗を読み込み中...'),
-                      ],
+                  )
+                : Selector<StoreProvider,
+                    ({bool isLoading, String? error, List<Store> stores})>(
+                    selector: (context, provider) => (
+                      isLoading: provider.isLoading,
+                      error: provider.error,
+                      stores: provider.stores,
                     ),
-                  );
-                }
-
-                if (storeProvider.error != null || _locationError != null) {
-                  final errorMessage = storeProvider.error ?? _locationError!;
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: colorScheme.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'エラーが発生しました',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: colorScheme.error,
+                    builder: (context, state, child) {
+                      // API読み込み中の表示
+                      if (state.isLoading) {
+                        return const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 16),
+                              Text('新しい店舗を読み込み中...'),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          errorMessage,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            storeProvider.clearError();
-                            setState(() {
-                              _locationError = null;
-                            });
-                            _loadStoresFromProvider();
-                          },
-                          child: const Text('再試行'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                        );
+                      }
 
-                return _availableStores.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.sentiment_satisfied,
-                              size: 64,
-                              color: colorScheme.primary,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'すべての店舗を確認済みです！',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: colorScheme.primary,
+                      // エラー表示
+                      final errorMessage = state.error ?? _locationError;
+                      if (errorMessage != null) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                size: 64,
+                                color: colorScheme.error,
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '検索画面で新しい店舗を探してみましょう',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
+                              const SizedBox(height: 16),
+                              Text(
+                                'エラーが発生しました',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: colorScheme.error,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _refreshStores,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: CardSwiper(
-                            controller: controller,
-                            cardsCount: _availableStores.length,
-                            onSwipe: _onSwipe,
-                            cardBuilder: (context, index, percentThresholdX,
-                                percentThresholdY) {
-                              return _buildStoreCard(_availableStores[index]);
-                            },
+                              const SizedBox(height: 8),
+                              Text(
+                                errorMessage,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Provider.of<StoreProvider>(context,
+                                          listen: false)
+                                      .clearError();
+                                  setState(() {
+                                    _locationError = null;
+                                  });
+                                  _loadStoresFromProvider();
+                                },
+                                child: const Text('再試行'),
+                              ),
+                            ],
                           ),
-                        ),
-                      );
-              },
-            ),
+                        );
+                      }
+
+                      // カードスワイプ表示
+                      return _availableStores.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.sentiment_satisfied,
+                                    size: 64,
+                                    color: colorScheme.primary,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'すべての店舗を確認済みです！',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      color: colorScheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '検索画面で新しい店舗を探してみましょう',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: _refreshStores,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: CardSwiper(
+                                  controller: controller,
+                                  cardsCount: _availableStores.length,
+                                  onSwipe: _onSwipe,
+                                  cardBuilder: (context, index,
+                                      percentThresholdX, percentThresholdY) {
+                                    return _buildStoreCard(
+                                        _availableStores[index]);
+                                  },
+                                ),
+                              ),
+                            );
+                    },
+                  ),
           ),
           const Text('AppCardSwiper'), // テスト用テキスト
         ],

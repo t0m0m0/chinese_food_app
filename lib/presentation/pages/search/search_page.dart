@@ -130,8 +130,14 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildSearchForm() {
-    return Consumer<SearchProvider>(
-      builder: (context, searchProvider, child) {
+    return Selector<SearchProvider,
+        ({bool useCurrentLocation, bool isLoading, bool isGettingLocation})>(
+      selector: (context, provider) => (
+        useCurrentLocation: provider.useCurrentLocation,
+        isLoading: provider.isLoading,
+        isGettingLocation: provider.isGettingLocation,
+      ),
+      builder: (context, state, child) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -143,9 +149,9 @@ class _SearchPageState extends State<SearchPage> {
                     child: RadioListTile<bool>(
                       title: const Text('現在地で検索'),
                       value: true,
-                      groupValue: searchProvider.useCurrentLocation,
+                      groupValue: state.useCurrentLocation,
                       onChanged: (value) {
-                        searchProvider.setUseCurrentLocation(value ?? true);
+                        _searchProvider.setUseCurrentLocation(value ?? true);
                       },
                     ),
                   ),
@@ -153,16 +159,17 @@ class _SearchPageState extends State<SearchPage> {
                     child: RadioListTile<bool>(
                       title: const Text('住所で検索'),
                       value: false,
-                      groupValue: searchProvider.useCurrentLocation,
+                      groupValue: state.useCurrentLocation,
                       onChanged: (value) {
-                        searchProvider.setUseCurrentLocation(!(value ?? false));
+                        _searchProvider
+                            .setUseCurrentLocation(!(value ?? false));
                       },
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              if (!searchProvider.useCurrentLocation)
+              if (!state.useCurrentLocation)
                 TextField(
                   controller: _searchController,
                   decoration: const InputDecoration(
@@ -176,23 +183,18 @@ class _SearchPageState extends State<SearchPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: (searchProvider.isLoading ||
-                          searchProvider.isGettingLocation)
+                  onPressed: (state.isLoading || state.isGettingLocation)
                       ? null
                       : _performSearch,
-                  icon: (searchProvider.isLoading ||
-                          searchProvider.isGettingLocation)
+                  icon: (state.isLoading || state.isGettingLocation)
                       ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.search),
-                  label: Text((searchProvider.isGettingLocation ||
-                          searchProvider.isLoading)
-                      ? (searchProvider.isGettingLocation
-                          ? '現在地取得中...'
-                          : '検索中...')
+                  label: Text((state.isGettingLocation || state.isLoading)
+                      ? (state.isGettingLocation ? '現在地取得中...' : '検索中...')
                       : '中華料理店を検索'),
                 ),
               ),
@@ -204,9 +206,24 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildSearchResults() {
-    return Consumer<SearchProvider>(
-      builder: (context, searchProvider, child) {
-        if (searchProvider.isGettingLocation) {
+    return Selector<
+        SearchProvider,
+        ({
+          bool isGettingLocation,
+          bool isLoading,
+          String? errorMessage,
+          List<Store> searchResults,
+          bool hasSearched
+        })>(
+      selector: (context, provider) => (
+        isGettingLocation: provider.isGettingLocation,
+        isLoading: provider.isLoading,
+        errorMessage: provider.errorMessage,
+        searchResults: provider.searchResults,
+        hasSearched: provider.hasSearched,
+      ),
+      builder: (context, state, child) {
+        if (state.isGettingLocation) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -219,7 +236,7 @@ class _SearchPageState extends State<SearchPage> {
           );
         }
 
-        if (searchProvider.isLoading) {
+        if (state.isLoading) {
           return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -232,11 +249,11 @@ class _SearchPageState extends State<SearchPage> {
           );
         }
 
-        if (searchProvider.errorMessage != null) {
+        if (state.errorMessage != null) {
           // 位置情報エラーの場合はダイアログを表示
-          if (searchProvider.errorMessage!.contains('位置情報')) {
+          if (state.errorMessage!.contains('位置情報')) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showLocationErrorDialog(searchProvider.errorMessage!);
+              _showLocationErrorDialog(state.errorMessage!);
             });
           }
 
@@ -251,7 +268,7 @@ class _SearchPageState extends State<SearchPage> {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                Text(searchProvider.errorMessage!),
+                Text(state.errorMessage!),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _performSearch,
@@ -262,7 +279,7 @@ class _SearchPageState extends State<SearchPage> {
           );
         }
 
-        if (searchProvider.searchResults.isEmpty) {
+        if (state.searchResults.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -270,13 +287,11 @@ class _SearchPageState extends State<SearchPage> {
                 Icon(Icons.search, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
                 Text(
-                  searchProvider.hasSearched
-                      ? '検索結果が見つかりません'
-                      : '検索ボタンを押して中華料理店を探しましょう',
+                  state.hasSearched ? '検索結果が見つかりません' : '検索ボタンを押して中華料理店を探しましょう',
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                if (searchProvider.hasSearched) ...[
+                if (state.hasSearched) ...[
                   const SizedBox(height: 8),
                   const Text(
                     '別の住所で検索するか、\n検索範囲を広げてみてください',
@@ -290,9 +305,9 @@ class _SearchPageState extends State<SearchPage> {
         }
 
         return ListView.builder(
-          itemCount: searchProvider.searchResults.length,
+          itemCount: state.searchResults.length,
           itemBuilder: (context, index) {
-            final store = searchProvider.searchResults[index];
+            final store = state.searchResults[index];
             return _buildStoreCard(store);
           },
         );
@@ -335,9 +350,10 @@ class _SearchPageState extends State<SearchPage> {
             ],
           ],
         ),
-        trailing: Consumer<StoreProvider>(
-          builder: (context, storeProvider, child) {
-            final existingStore = storeProvider.stores
+        trailing: Selector<StoreProvider, List<Store>>(
+          selector: (context, provider) => provider.stores,
+          builder: (context, stores, child) {
+            final existingStore = stores
                 .where(
                     (s) => s.name == store.name && s.address == store.address)
                 .firstOrNull;
