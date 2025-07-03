@@ -1,12 +1,15 @@
 import '../config/app_config.dart';
-import '../database/database_helper.dart';
+import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
-import '../../data/datasources/store_local_datasource.dart';
+import '../../data/datasources/store_local_datasource_drift.dart';
 import '../../data/repositories/store_repository_impl.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../domain/services/location_service.dart';
 import '../../presentation/providers/store_provider.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
+import 'dart:io';
 
 /// 依存性注入コンテナ
 ///
@@ -22,7 +25,7 @@ class DIContainer {
     final HotpepperApiDatasource apiDatasource = _createApiDatasource();
 
     // ローカルデータソースの作成
-    final StoreLocalDatasource localDatasource = _createLocalDatasource();
+    final StoreLocalDatasourceDrift localDatasource = _createLocalDatasource();
 
     // リポジトリの作成
     final StoreRepositoryImpl repository = StoreRepositoryImpl(
@@ -46,8 +49,12 @@ class DIContainer {
   }
 
   /// ローカルデータソースを作成
-  static StoreLocalDatasource _createLocalDatasource() {
-    return StoreLocalDatasourceImpl(dbHelper: DatabaseHelper());
+  static StoreLocalDatasourceDrift _createLocalDatasource() {
+    final database =
+        AppDatabase(DatabaseConnection(NativeDatabase.createInBackground(
+      File('app_db.sqlite'),
+    )));
+    return StoreLocalDatasourceDrift(database);
   }
 
   /// LocationServiceを作成

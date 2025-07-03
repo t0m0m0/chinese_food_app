@@ -1,79 +1,22 @@
-import 'package:sqflite/sqflite.dart';
+import '../../domain/entities/visit_record.dart';
 
-import '../../core/database/database_helper.dart';
-import '../models/visit_record_model.dart';
+/// 訪問記録データのローカルデータソースインターフェース
+abstract class VisitRecordLocalDatasource {
+  /// 訪問記録を挿入
+  Future<void> insertVisitRecord(VisitRecord visitRecord);
 
-class VisitRecordLocalDatasource {
-  final DatabaseHelper _databaseHelper;
+  /// IDで訪問記録を取得
+  Future<VisitRecord?> getVisitRecordById(String id);
 
-  VisitRecordLocalDatasource(this._databaseHelper);
+  /// 全訪問記録を取得
+  Future<List<VisitRecord>> getAllVisitRecords();
 
-  Future<List<VisitRecordModel>> getAllVisitRecords() async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'visit_records',
-      orderBy: 'visited_at DESC',
-    );
+  /// 店舗IDで訪問記録を取得
+  Future<List<VisitRecord>> getVisitRecordsByStoreId(String storeId);
 
-    return List.generate(maps.length, (i) {
-      return VisitRecordModel.fromMap(maps[i]);
-    });
-  }
+  /// 訪問記録を更新
+  Future<void> updateVisitRecord(VisitRecord visitRecord);
 
-  Future<List<VisitRecordModel>> getVisitRecordsByStoreId(
-      String storeId) async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'visit_records',
-      where: 'store_id = ?',
-      whereArgs: [storeId],
-      orderBy: 'visited_at DESC',
-    );
-
-    return List.generate(maps.length, (i) {
-      return VisitRecordModel.fromMap(maps[i]);
-    });
-  }
-
-  Future<VisitRecordModel?> getVisitRecordById(String id) async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'visit_records',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isNotEmpty) {
-      return VisitRecordModel.fromMap(maps.first);
-    }
-    return null;
-  }
-
-  Future<void> insertVisitRecord(VisitRecordModel visitRecord) async {
-    final db = await _databaseHelper.database;
-    await db.insert(
-      'visit_records',
-      visitRecord.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<void> updateVisitRecord(VisitRecordModel visitRecord) async {
-    final db = await _databaseHelper.database;
-    await db.update(
-      'visit_records',
-      visitRecord.toMap(),
-      where: 'id = ?',
-      whereArgs: [visitRecord.id],
-    );
-  }
-
-  Future<void> deleteVisitRecord(String id) async {
-    final db = await _databaseHelper.database;
-    await db.delete(
-      'visit_records',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
+  /// 訪問記録を削除
+  Future<void> deleteVisitRecord(String id);
 }

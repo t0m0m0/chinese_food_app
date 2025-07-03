@@ -36,7 +36,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   
   # データベース関連
-  sqflite: ^2.4.1
   path: ^1.8.3
   
   # HTTP通信・API関連
