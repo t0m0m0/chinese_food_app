@@ -73,3 +73,6 @@ commandlinetools-*.zip
 # Archive files
 *.tar.gz
 *.zip
+
+
+.claude/
