@@ -1,5 +1,7 @@
+import 'dart:developer' as developer;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../errors/security_exceptions.dart';
 
 /// アプリケーション設定管理クラス
 ///
@@ -37,9 +39,34 @@ class AppConfig {
     // 本番環境では secure_storage を使用
     if (isProduction) {
       try {
-        return await _storage.read(key: 'HOTPEPPER_API_KEY');
+        final key = await _storage.read(key: 'HOTPEPPER_API_KEY');
+        if (key == null || key.isEmpty) {
+          throw APIKeyNotFoundException(
+            'HotPepper API',
+            context: 'セキュアストレージにAPIキーが設定されていません',
+          );
+        }
+        return key;
       } catch (e) {
-        return null;
+        // 開発時にはログ出力
+        if (isDevelopment) {
+          developer.log(
+            'HotPepper APIキー取得エラー: ${e.toString()}',
+            name: 'AppConfig',
+            level: 1000,
+          );
+        }
+
+        if (e is SecurityException) {
+          rethrow;
+        }
+
+        throw APIKeyAccessException(
+          'HotPepper API',
+          'セキュアストレージからの読み込みに失敗しました',
+          context: '本番環境でのAPIキー取得',
+          originalException: e is Exception ? e : Exception(e.toString()),
+        );
       }
     }
 
@@ -53,7 +80,17 @@ class AppConfig {
     }
 
     // 環境変数から取得（フォールバック）
-    return const String.fromEnvironment('HOTPEPPER_API_KEY');
+    final environmentKey = const String.fromEnvironment('HOTPEPPER_API_KEY');
+
+    // 開発者への設定ガイダンス
+    if (isDevelopment && environmentKey.isEmpty) {
+      developer.log(
+        '推奨: .envファイルにHOTPEPPER_API_KEY=your_key_here を設定してください',
+        name: 'AppConfig',
+      );
+    }
+
+    return environmentKey;
   }
 
   /// 同期版ホットペッパーAPIキー（テスト用のみ）
@@ -110,9 +147,34 @@ class AppConfig {
     // 本番環境では secure_storage を使用
     if (isProduction) {
       try {
-        return await _storage.read(key: 'GOOGLE_MAPS_API_KEY');
+        final key = await _storage.read(key: 'GOOGLE_MAPS_API_KEY');
+        if (key == null || key.isEmpty) {
+          throw APIKeyNotFoundException(
+            'Google Maps API',
+            context: 'セキュアストレージにAPIキーが設定されていません',
+          );
+        }
+        return key;
       } catch (e) {
-        return null;
+        // 開発時にはログ出力
+        if (isDevelopment) {
+          developer.log(
+            'Google Maps APIキー取得エラー: ${e.toString()}',
+            name: 'AppConfig',
+            level: 1000,
+          );
+        }
+
+        if (e is SecurityException) {
+          rethrow;
+        }
+
+        throw APIKeyAccessException(
+          'Google Maps API',
+          'セキュアストレージからの読み込みに失敗しました',
+          context: '本番環境でのAPIキー取得',
+          originalException: e is Exception ? e : Exception(e.toString()),
+        );
       }
     }
 
@@ -126,7 +188,17 @@ class AppConfig {
     }
 
     // 環境変数から取得（フォールバック）
-    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+    final environmentKey = const String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+
+    // 開発者への設定ガイダンス
+    if (isDevelopment && environmentKey.isEmpty) {
+      developer.log(
+        '推奨: .envファイルにGOOGLE_MAPS_API_KEY=your_key_here を設定してください',
+        name: 'AppConfig',
+      );
+    }
+
+    return environmentKey;
   }
 
   /// Google Maps APIキー（同期版・テスト用のみ）
