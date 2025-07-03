@@ -60,7 +60,13 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
               'CREATE INDEX idx_stores_lat_lng ON stores (lat, lng);');
           await customStatement(
+              'CREATE INDEX idx_stores_status ON stores (status);');
+          await customStatement(
+              'CREATE INDEX idx_stores_created_at ON stores (created_at);');
+          await customStatement(
               'CREATE INDEX idx_visit_records_store_id ON visit_records (store_id);');
+          await customStatement(
+              'CREATE INDEX idx_visit_records_visited_at ON visit_records (visited_at);');
           await customStatement(
               'CREATE INDEX idx_photos_store_id ON photos (store_id);');
 

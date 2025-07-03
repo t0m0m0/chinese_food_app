@@ -84,7 +84,10 @@ void main() {
       final indexNames =
           result.map((row) => row.data['name'] as String).toList();
       expect(indexNames, contains('idx_stores_lat_lng'));
+      expect(indexNames, contains('idx_stores_status'));
+      expect(indexNames, contains('idx_stores_created_at'));
       expect(indexNames, contains('idx_visit_records_store_id'));
+      expect(indexNames, contains('idx_visit_records_visited_at'));
       expect(indexNames, contains('idx_photos_store_id'));
     });
   });
