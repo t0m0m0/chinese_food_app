@@ -1,25 +1,45 @@
 import 'package:flutter/foundation.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
 class MockStoreRepository implements StoreRepository {
-  @override
-  Future<List<Store>> getAllStores() async => [];
+  final List<Store> _stores = [];
 
   @override
-  Future<void> insertStore(Store store) async {}
+  Future<List<Store>> getAllStores() async => List.from(_stores);
 
   @override
-  Future<void> updateStore(Store store) async {}
+  Future<void> insertStore(Store store) async {
+    _stores.add(store);
+  }
 
   @override
-  Future<void> deleteStore(String id) async {}
+  Future<void> updateStore(Store store) async {
+    final index = _stores.indexWhere((s) => s.id == store.id);
+    if (index != -1) {
+      _stores[index] = store;
+    }
+  }
 
   @override
-  Future<Store?> getStoreById(String id) async => null;
+  Future<void> deleteStore(String id) async {
+    _stores.removeWhere((store) => store.id == id);
+  }
 
   @override
-  Future<List<Store>> getStoresByStatus(StoreStatus status) async => [];
+  Future<Store?> getStoreById(String id) async {
+    try {
+      return _stores.firstWhere((store) => store.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<List<Store>> getStoresByStatus(StoreStatus status) async {
+    return _stores.where((store) => store.status == status).toList();
+  }
 
   @override
   Future<List<Store>> searchStores(String query) async => [];
@@ -67,5 +87,34 @@ class MockStoreProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+}
+
+class TestsHelper {
+  /// StoreProviderのインスタンスを作成（テスト用）
+  static StoreProvider createStoreProvider() {
+    return StoreProvider(repository: MockStoreRepository());
+  }
+
+  /// テスト用のStoreを作成
+  static Store createTestStore({
+    String? id,
+    String? name,
+    String? address,
+    double lat = 35.6812,
+    double lng = 139.7671,
+    StoreStatus? status,
+    String? memo,
+  }) {
+    return Store(
+      id: id ?? 'test-store-${DateTime.now().millisecondsSinceEpoch}',
+      name: name ?? 'Test Store',
+      address: address ?? 'Test Address',
+      lat: lat,
+      lng: lng,
+      status: status,
+      memo: memo,
+      createdAt: DateTime.now(),
+    );
   }
 }
