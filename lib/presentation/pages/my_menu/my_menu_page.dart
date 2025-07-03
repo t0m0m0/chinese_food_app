@@ -61,9 +61,24 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      body: Consumer<StoreProvider>(
-        builder: (context, storeProvider, child) {
-          if (storeProvider.isLoading) {
+      body: Selector<
+          StoreProvider,
+          ({
+            bool isLoading,
+            String? error,
+            List<Store> wantToGoStores,
+            List<Store> visitedStores,
+            List<Store> badStores
+          })>(
+        selector: (context, provider) => (
+          isLoading: provider.isLoading,
+          error: provider.error,
+          wantToGoStores: provider.wantToGoStores,
+          visitedStores: provider.visitedStores,
+          badStores: provider.badStores,
+        ),
+        builder: (context, state, child) {
+          if (state.isLoading) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -76,7 +91,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
             );
           }
 
-          if (storeProvider.error != null) {
+          if (state.error != null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -95,16 +110,18 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    storeProvider.error!,
+                    state.error!,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      storeProvider.clearError();
+                      Provider.of<StoreProvider>(context, listen: false)
+                          .clearError();
                       // エラークリア後にキャッシュをリフレッシュ
-                      storeProvider.refreshCache();
+                      Provider.of<StoreProvider>(context, listen: false)
+                          .refreshCache();
                     },
                     child: const Text('再試行'),
                   ),
@@ -117,7 +134,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
             controller: _tabController,
             children: [
               _buildStoreList(
-                stores: storeProvider.wantToGoStores,
+                stores: state.wantToGoStores,
                 emptyMessage: 'まだ「行きたい」店舗がありません',
                 emptySubMessage: 'スワイプ画面で気になる店舗を右スワイプしてみましょう',
                 emptyIcon: Icons.favorite_border,
@@ -125,7 +142,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                 colorScheme: colorScheme,
               ),
               _buildStoreList(
-                stores: storeProvider.visitedStores,
+                stores: state.visitedStores,
                 emptyMessage: 'まだ訪問した店舗がありません',
                 emptySubMessage: '店舗を訪問したらステータスを更新しましょう',
                 emptyIcon: Icons.check_circle_outline,
@@ -133,7 +150,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                 colorScheme: colorScheme,
               ),
               _buildStoreList(
-                stores: storeProvider.badStores,
+                stores: state.badStores,
                 emptyMessage: '「興味なし」の店舗はありません',
                 emptySubMessage: '興味のない店舗はここに表示されます',
                 emptyIcon: Icons.block_outlined,
