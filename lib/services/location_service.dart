@@ -1,6 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'dart:io' show Platform;
+import 'dart:developer' as developer;
 
 // TDD GREEN段階: 最小限のエラー型定義
 abstract class LocationError extends Error {
@@ -132,8 +133,10 @@ class LocationService {
 
       return PermissionResult.granted();
     } catch (e) {
+      // ログに詳細を記録、ユーザーには一般的なメッセージを返す
+      developer.log('Permission check failed: $e', name: 'LocationService');
       return PermissionResult.denied(
-        '権限チェック中にエラーが発生しました: $e',
+        '権限チェック中にエラーが発生しました。再試行してください。',
         errorType: LocationPermissionDeniedError('権限チェックエラー'),
       );
     }
@@ -157,6 +160,20 @@ class LocationService {
           final position = await Geolocator.getCurrentPosition(
             locationSettings: _locationSettings,
           );
+
+          // 座標の妥当性チェック
+          if (position.latitude.isNaN ||
+              position.longitude.isNaN ||
+              position.latitude.isInfinite ||
+              position.longitude.isInfinite ||
+              position.latitude.abs() > 90 ||
+              position.longitude.abs() > 180) {
+            developer.log(
+                'Invalid GPS coordinates received: lat=${position.latitude}, lng=${position.longitude}',
+                name: 'LocationService');
+            return LocationServiceResult.failure('無効な座標データを受信しました');
+          }
+
           return LocationServiceResult.success(
             lat: position.latitude,
             lng: position.longitude,
