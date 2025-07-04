@@ -1,7 +1,9 @@
 import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
+import 'package:drift/web.dart';
 import 'package:drift/native.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import '../config/app_config.dart';
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
@@ -193,9 +195,15 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Create Drift database connection
   DatabaseConnection _openDatabaseConnection() {
-    return DatabaseConnection(NativeDatabase.createInBackground(
-      File('app_db.sqlite'),
-    ));
+    if (kIsWeb) {
+      // Web環境では WebDatabase を使用
+      return DatabaseConnection(WebDatabase('app_db'));
+    } else {
+      // ネイティブ環境では NativeDatabase を使用
+      return DatabaseConnection(NativeDatabase.createInBackground(
+        File('app_db.sqlite'),
+      ));
+    }
   }
 
   /// Determine current environment based on configuration

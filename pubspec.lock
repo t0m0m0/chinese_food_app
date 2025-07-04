@@ -1038,7 +1038,7 @@ packages:
     source: hosted
     version: "2.7.6"
   sqlite3_flutter_libs:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
       sha256: e07232b998755fe795655c56d1f5426e0190c9c435e1752d39e7b1cd33699c71
