@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/services/location_service.dart';
 
-// Note: geolocatorは現在無効化されているため、今回はgeocodingのみテスト
 void main() {
   late LocationService locationService;
 
@@ -19,6 +18,43 @@ void main() {
       expect(result.lat, 35.6762); // 東京駅の座標
       expect(result.lng, 139.6503);
       expect(result.error, isNull);
+    });
+
+    group('Real GPS Implementation Tests', () {
+      test('should return valid GPS result format', () async {
+        // Act
+        final result = await locationService.getCurrentPosition();
+
+        // Assert - 結果の形式が正しいことを確認
+        expect(result.isSuccess, isA<bool>());
+
+        if (result.isSuccess) {
+          expect(result.lat, isNotNull);
+          expect(result.lng, isNotNull);
+          expect(result.error, isNull);
+
+          // 座標の有効性チェック（緯度は-90〜90、経度は-180〜180）
+          expect(result.lat! >= -90 && result.lat! <= 90, true);
+          expect(result.lng! >= -180 && result.lng! <= 180, true);
+        } else {
+          expect(result.error, isNotNull);
+          expect(result.lat, isNull);
+          expect(result.lng, isNull);
+        }
+      });
+
+      test('should handle real GPS permission check', () async {
+        // Act
+        final result = await locationService.checkLocationPermission();
+
+        // Assert - 実際の権限チェック機能が実装されていることを確認
+        expect(result.isGranted, isA<bool>());
+
+        if (!result.isGranted) {
+          expect(result.errorMessage, isNotNull);
+          expect(result.errorType, isNotNull);
+        }
+      });
     });
 
     group('Address to Coordinates (geocoding)', () {

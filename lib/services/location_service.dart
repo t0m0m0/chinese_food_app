@@ -1,4 +1,4 @@
-// import 'package:geolocator/geolocator.dart';  // 一時的に無効化
+import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'dart:io' show Platform;
 
@@ -72,10 +72,10 @@ class PermissionResult {
 }
 
 class LocationService {
-  // static const LocationSettings _locationSettings = LocationSettings(
-  //   accuracy: LocationAccuracy.high,
-  //   distanceFilter: 100,
-  // );
+  static const LocationSettings _locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 100,
+  );
 
   // TDD REFACTOR段階: 環境変数による権限チェック制御
   Future<PermissionResult> checkLocationPermission() async {
@@ -99,11 +99,44 @@ class LocationService {
       );
     }
 
-    // TODO(#42): [HIGH] 本番環境では実際のGeolocator.checkPermission()を使用 - Sprint 2.1で対応予定
-    // 実装内容: Geolocatorパッケージの有効化、実際の権限チェック機能
-    // final permission = await Geolocator.checkPermission();
-    // 現時点では権限許可として扱う（実GPS実装時に修正）
-    return PermissionResult.granted();
+    // 実際のGeolocator権限チェック実装
+    try {
+      // 位置情報サービスの有効性確認
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return PermissionResult.denied(
+          '位置情報サービスが無効です',
+          errorType: LocationServiceDisabledError('サービス無効'),
+        );
+      }
+
+      // 現在の権限状態を確認
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        // 権限が拒否されている場合、リクエストを試行
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return PermissionResult.denied(
+            '位置情報の権限が拒否されました',
+            errorType: LocationPermissionDeniedError('権限拒否'),
+          );
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return PermissionResult.denied(
+          '位置情報の権限が永続的に拒否されています。設定から許可してください',
+          errorType: LocationPermissionDeniedError('永続拒否'),
+        );
+      }
+
+      return PermissionResult.granted();
+    } catch (e) {
+      return PermissionResult.denied(
+        '権限チェック中にエラーが発生しました: $e',
+        errorType: LocationPermissionDeniedError('権限チェックエラー'),
+      );
+    }
   }
 
   Future<LocationServiceResult> getCurrentPosition() async {
@@ -119,16 +152,26 @@ class LocationService {
               permission.errorMessage ?? 'Permission denied');
         }
 
-        // TODO(#42): [HIGH] 実際のGPS実装 - Sprint 2.1で対応予定
-        // 実装内容: Geolocatorパッケージ有効化、LocationSettings設定、実座標取得
-        // final position = await Geolocator.getCurrentPosition(locationSettings: _locationSettings);
-        // return LocationServiceResult.success(lat: position.latitude, lng: position.longitude);
-
-        // 暫定的にダミーデータを返す（権限チェック後）
-        return LocationServiceResult.success(
-          lat: 35.6762, // 東京駅
-          lng: 139.6503,
-        );
+        // 実際のGPS実装
+        try {
+          final position = await Geolocator.getCurrentPosition(
+            locationSettings: _locationSettings,
+          );
+          return LocationServiceResult.success(
+            lat: position.latitude,
+            lng: position.longitude,
+          );
+        } catch (e) {
+          // GPS取得エラーの場合は適切なエラーメッセージを返す
+          if (e.toString().contains('timeout') ||
+              e.toString().contains('time')) {
+            return LocationServiceResult.failure('GPS取得がタイムアウトしました');
+          } else if (e.toString().contains('permission')) {
+            return LocationServiceResult.failure('位置情報の権限が不足しています');
+          } else {
+            return LocationServiceResult.failure('GPS取得エラー: $e');
+          }
+        }
       } else {
         // テスト環境：環境変数でエラーシミュレーション可能
         final errorMode = Platform.environment['LOCATION_ERROR_MODE'];
