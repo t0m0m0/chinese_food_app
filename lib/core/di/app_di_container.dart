@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
+// ignore: deprecated_member_use
 import 'package:drift/web.dart';
 import 'package:drift/native.dart';
 import 'dart:io';
