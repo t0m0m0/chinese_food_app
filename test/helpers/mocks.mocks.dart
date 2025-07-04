@@ -503,32 +503,23 @@ class MockStoreLocalDatasource extends _i1.Mock
       ) as _i6.Future<void>);
 
   @override
-  _i6.Future<void> deleteStore(String? storeId) => (super.noSuchMethod(
+  _i6.Future<void> deleteStore(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteStore,
-          [storeId],
+          [id],
         ),
         returnValue: _i6.Future<void>.value(),
         returnValueForMissingStub: _i6.Future<void>.value(),
       ) as _i6.Future<void>);
 
   @override
-  _i6.Future<_i8.Store?> getStoreById(String? storeId) => (super.noSuchMethod(
+  _i6.Future<_i8.Store?> getStoreById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getStoreById,
-          [storeId],
+          [id],
         ),
         returnValue: _i6.Future<_i8.Store?>.value(),
       ) as _i6.Future<_i8.Store?>);
-
-  @override
-  _i6.Future<List<_i8.Store>> getAllStores() => (super.noSuchMethod(
-        Invocation.method(
-          #getAllStores,
-          [],
-        ),
-        returnValue: _i6.Future<List<_i8.Store>>.value(<_i8.Store>[]),
-      ) as _i6.Future<List<_i8.Store>>);
 
   @override
   _i6.Future<List<_i8.Store>> getStoresByStatus(_i8.StoreStatus? status) =>
@@ -546,6 +537,15 @@ class MockStoreLocalDatasource extends _i1.Mock
         Invocation.method(
           #searchStores,
           [query],
+        ),
+        returnValue: _i6.Future<List<_i8.Store>>.value(<_i8.Store>[]),
+      ) as _i6.Future<List<_i8.Store>>);
+
+  @override
+  _i6.Future<List<_i8.Store>> getAllStores() => (super.noSuchMethod(
+        Invocation.method(
+          #getAllStores,
+          [],
         ),
         returnValue: _i6.Future<List<_i8.Store>>.value(<_i8.Store>[]),
       ) as _i6.Future<List<_i8.Store>>);

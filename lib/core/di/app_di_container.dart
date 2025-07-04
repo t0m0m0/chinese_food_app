@@ -1,9 +1,14 @@
 import 'dart:developer' as developer;
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
+import 'dart:io';
 import '../config/app_config.dart';
-import '../database/database_helper.dart';
+import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
-import '../../data/datasources/store_local_datasource.dart';
+import '../../data/datasources/store_local_datasource_drift.dart';
+import '../../data/datasources/visit_record_local_datasource_drift.dart';
+import '../../data/datasources/photo_local_datasource_drift.dart';
 import '../../data/repositories/store_repository_impl.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../domain/services/location_service.dart';
@@ -134,16 +139,32 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Register services common to all environments
   void _registerCommonServices() {
-    // Register local datasource
-    _serviceContainer.register<StoreLocalDatasource>(
-      () => StoreLocalDatasourceImpl(dbHelper: DatabaseHelper()),
+    // Register Drift database (singleton)
+    _serviceContainer.registerSingleton<AppDatabase>(
+      () => AppDatabase(_openDatabaseConnection()),
     );
+
+    // Register Drift datasources
+    _serviceContainer.register<StoreLocalDatasourceDrift>(() {
+      return StoreLocalDatasourceDrift(
+          _serviceContainer.resolve<AppDatabase>());
+    });
+
+    _serviceContainer.register<VisitRecordLocalDatasourceDrift>(() {
+      return VisitRecordLocalDatasourceDrift(
+          _serviceContainer.resolve<AppDatabase>());
+    });
+
+    _serviceContainer.register<PhotoLocalDatasourceDrift>(() {
+      return PhotoLocalDatasourceDrift(
+          _serviceContainer.resolve<AppDatabase>());
+    });
 
     // Register repository
     _serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
         apiDatasource: _serviceContainer.resolve<HotpepperApiDatasource>(),
-        localDatasource: _serviceContainer.resolve<StoreLocalDatasource>(),
+        localDatasource: _serviceContainer.resolve<StoreLocalDatasourceDrift>(),
       );
     });
 
@@ -169,6 +190,15 @@ class AppDIContainer implements DIContainerInterface {
     'development',
     'dev'
   };
+
+  /// Create Drift database connection
+  DatabaseConnection _openDatabaseConnection() {
+    // テスト環境では常にネイティブデータベースを使用
+    // （Web APIはテスト環境で利用できないため）
+    return DatabaseConnection(NativeDatabase.createInBackground(
+      File('app_db.sqlite'),
+    ));
+  }
 
   /// Determine current environment based on configuration
   Environment _determineEnvironment() {

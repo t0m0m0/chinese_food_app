@@ -1,92 +1,25 @@
-import 'package:sqflite/sqflite.dart';
+import '../../domain/entities/photo.dart';
 
-import '../../core/database/database_helper.dart';
-import '../models/photo_model.dart';
+/// 写真データのローカルデータソースインターフェース
+abstract class PhotoLocalDatasource {
+  /// 写真を挿入
+  Future<void> insertPhoto(Photo photo);
 
-class PhotoLocalDatasource {
-  final DatabaseHelper _databaseHelper;
+  /// IDで写真を取得
+  Future<Photo?> getPhotoById(String id);
 
-  PhotoLocalDatasource(this._databaseHelper);
+  /// 全写真を取得
+  Future<List<Photo>> getAllPhotos();
 
-  Future<List<PhotoModel>> getAllPhotos() async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'photos',
-      orderBy: 'created_at DESC',
-    );
+  /// 店舗IDで写真を取得
+  Future<List<Photo>> getPhotosByStoreId(String storeId);
 
-    return List.generate(maps.length, (i) {
-      return PhotoModel.fromMap(maps[i]);
-    });
-  }
+  /// 訪問記録IDで写真を取得
+  Future<List<Photo>> getPhotosByVisitId(String visitId);
 
-  Future<List<PhotoModel>> getPhotosByStoreId(String storeId) async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'photos',
-      where: 'store_id = ?',
-      whereArgs: [storeId],
-      orderBy: 'created_at DESC',
-    );
+  /// 写真を更新
+  Future<void> updatePhoto(Photo photo);
 
-    return List.generate(maps.length, (i) {
-      return PhotoModel.fromMap(maps[i]);
-    });
-  }
-
-  Future<List<PhotoModel>> getPhotosByVisitId(String visitId) async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'photos',
-      where: 'visit_id = ?',
-      whereArgs: [visitId],
-      orderBy: 'created_at DESC',
-    );
-
-    return List.generate(maps.length, (i) {
-      return PhotoModel.fromMap(maps[i]);
-    });
-  }
-
-  Future<PhotoModel?> getPhotoById(String id) async {
-    final db = await _databaseHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'photos',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isNotEmpty) {
-      return PhotoModel.fromMap(maps.first);
-    }
-    return null;
-  }
-
-  Future<void> insertPhoto(PhotoModel photo) async {
-    final db = await _databaseHelper.database;
-    await db.insert(
-      'photos',
-      photo.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<void> updatePhoto(PhotoModel photo) async {
-    final db = await _databaseHelper.database;
-    await db.update(
-      'photos',
-      photo.toMap(),
-      where: 'id = ?',
-      whereArgs: [photo.id],
-    );
-  }
-
-  Future<void> deletePhoto(String id) async {
-    final db = await _databaseHelper.database;
-    await db.delete(
-      'photos',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
+  /// 写真を削除
+  Future<void> deletePhoto(String id);
 }
