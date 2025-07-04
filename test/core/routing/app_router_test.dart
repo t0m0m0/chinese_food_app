@@ -9,7 +9,6 @@ import 'package:chinese_food_app/presentation/pages/swipe/swipe_page.dart';
 import 'package:chinese_food_app/presentation/pages/search/search_page.dart';
 import 'package:chinese_food_app/presentation/pages/my_menu/my_menu_page.dart';
 import 'package:chinese_food_app/presentation/pages/store_detail/store_detail_page.dart';
-import 'package:chinese_food_app/presentation/pages/shell/shell_page.dart';
 import 'package:chinese_food_app/core/di/di_container_interface.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 import '../di/di_test_helpers.dart';
