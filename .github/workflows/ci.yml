@@ -62,11 +62,10 @@ jobs:
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
       
     - name: 単体テストを実行
-      timeout-minutes: 10
-      run: |
-        # 高速なコアテストのみ実行（CI最適化）
-        flutter test test/unit/data/datasources/ test/unit/core/ test/widget_test.dart --coverage --reporter compact
       
+      run: |
+        flutter test --coverage
+        
     - name: テストカバレッジをアップロード
       uses: codecov/codecov-action@v3
       with:

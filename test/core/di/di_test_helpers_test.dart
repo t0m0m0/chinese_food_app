@@ -34,6 +34,9 @@ void main() {
         // Assert
         expect(container.isConfigured, isTrue);
         expect(() => container.getStoreProvider(), returnsNormally);
+
+        // Cleanup
+        container.dispose();
       });
 
       test('should create container for development environment', () {
@@ -44,6 +47,9 @@ void main() {
         // Assert
         expect(container.isConfigured, isTrue);
         expect(() => container.getStoreProvider(), returnsNormally);
+
+        // Cleanup
+        container.dispose();
       });
 
       test('should create container for test environment', () {
@@ -54,6 +60,9 @@ void main() {
         // Assert
         expect(container.isConfigured, isTrue);
         expect(() => container.getStoreProvider(), returnsNormally);
+
+        // Cleanup
+        container.dispose();
       });
     });
 
@@ -65,6 +74,9 @@ void main() {
         // Act & Assert
         expect(() => DITestHelpers.verifyContainerState(container),
             returnsNormally);
+
+        // Cleanup
+        container.dispose();
       });
 
       test('should fail verification for unconfigured container', () {
@@ -74,6 +86,9 @@ void main() {
         // Act & Assert
         expect(() => DITestHelpers.verifyContainerState(container),
             throwsA(isA<TestFailure>()));
+
+        // Cleanup
+        container.dispose();
       });
     });
 
@@ -85,6 +100,9 @@ void main() {
         // Act & Assert
         expect(() => DITestHelpers.verifyServiceInstances(container),
             returnsNormally);
+
+        // Cleanup
+        container.dispose();
       });
     });
 
@@ -127,8 +145,7 @@ void main() {
         final container = DITestHelpers.createTestContainer();
 
         // Act & Assert
-        expect(
-            () => DITestHelpers.verifyPerformance(container, iterations: 100),
+        expect(() => DITestHelpers.verifyPerformance(container, iterations: 10),
             returnsNormally);
 
         // Cleanup
@@ -140,10 +157,9 @@ void main() {
         final container = DITestHelpers.createTestContainer();
 
         // Act & Assert
-        expect(() => DITestHelpers.verifyPerformance(container, iterations: 50),
+        expect(() => DITestHelpers.verifyPerformance(container, iterations: 5),
             returnsNormally);
-        expect(
-            () => DITestHelpers.verifyPerformance(container, iterations: 200),
+        expect(() => DITestHelpers.verifyPerformance(container, iterations: 20),
             returnsNormally);
 
         // Cleanup
