@@ -338,25 +338,112 @@ class SecureFileStorage with SecureLogging {
 
   /// ファイル名をサニタイズ
   String _sanitizeFileName(String fileName) {
-    // 安全でない文字を除去
-    String sanitized = fileName
-        .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
-        .replaceAll(RegExp(r'\s+'), '_');
+    // 入力値検証：空文字・NULL・不正値チェック
+    if (fileName.isEmpty) {
+      throw SecurityException('ファイル名が空です');
+    }
 
-    // 長すぎる場合は切り詰め
+    // セキュリティ対策: パストラバーサル攻撃防止
+    String sanitized = fileName
+        .replaceAll(RegExp(r'\.\.'), '') // ディレクトリトラバーサル防止
+        .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_') // 危険文字の除去
+        .replaceAll(RegExp(r'\s+'), '_') // 空白文字の正規化
+        .replaceAll(RegExp(r'\0'), '') // NULLバイト攻撃防止
+        .replaceAll(RegExp(r'[\x00-\x1f\x7f]'), ''); // 制御文字除去
+
+    // 予約語・危険なファイル名の回避
+    final reservedNames = {
+      'CON',
+      'PRN',
+      'AUX',
+      'NUL',
+      'COM1',
+      'COM2',
+      'COM3',
+      'COM4',
+      'COM5',
+      'COM6',
+      'COM7',
+      'COM8',
+      'COM9',
+      'LPT1',
+      'LPT2',
+      'LPT3',
+      'LPT4',
+      'LPT5',
+      'LPT6',
+      'LPT7',
+      'LPT8',
+      'LPT9'
+    };
+
+    final nameWithoutExt =
+        path.basenameWithoutExtension(sanitized).toUpperCase();
+    if (reservedNames.contains(nameWithoutExt)) {
+      sanitized = 'safe_$sanitized';
+    }
+
+    // 絶対パスや相対パス記号の除去
+    sanitized = sanitized.replaceAll(RegExp(r'^[/\\]+'), '');
+    sanitized = sanitized.replaceAll(RegExp(r'^\.'), 'dot_');
+
+    // 最終検証：空になった場合のフォールバック
+    if (sanitized.isEmpty || sanitized == '.' || sanitized == '..') {
+      sanitized = 'fallback_file';
+    }
+
+    // 長すぎる場合は切り詰め（セキュアに）
     if (sanitized.length > 100) {
       final extension = path.extension(sanitized);
-      final nameWithoutExt = path.basenameWithoutExtension(sanitized);
-      sanitized =
-          '${nameWithoutExt.substring(0, 100 - extension.length)}$extension';
+      final nameWithoutExtension = path.basenameWithoutExtension(sanitized);
+      final maxNameLength = 100 - extension.length - 10; // 余裕を持たせる
+      if (maxNameLength > 0) {
+        sanitized =
+            '${nameWithoutExtension.substring(0, maxNameLength)}$extension';
+      } else {
+        sanitized = 'truncated${extension.isNotEmpty ? extension : '.safe'}';
+      }
     }
 
     // タイムスタンプを追加してユニーク性を確保
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final nameWithoutExt = path.basenameWithoutExtension(sanitized);
+    final nameWithoutExtension = path.basenameWithoutExtension(sanitized);
     final extension = path.extension(sanitized);
 
-    return '${nameWithoutExt}_$timestamp$extension';
+    final finalName = '${nameWithoutExtension}_$timestamp$extension';
+
+    // 最終的なセキュリティ検証
+    if (_isSecureFileName(finalName)) {
+      return finalName;
+    } else {
+      throw SecurityException('ファイル名のサニタイズに失敗しました: 安全でない文字が残存');
+    }
+  }
+
+  /// ファイル名が安全かどうかを検証
+  bool _isSecureFileName(String fileName) {
+    // 危険な文字パターンの最終チェック
+    final dangerousPatterns = [
+      RegExp(r'\.\.'), // ディレクトリトラバーサル
+      RegExp(r'[<>:"/\\|?*]'), // 危険文字
+      RegExp(r'\0'), // NULLバイト
+      RegExp(r'[\x00-\x1f\x7f]'), // 制御文字
+      RegExp(r'^\.'), // 隠しファイル（先頭ドット）
+      RegExp(r'^[/\\]'), // 絶対パス
+    ];
+
+    for (final pattern in dangerousPatterns) {
+      if (pattern.hasMatch(fileName)) {
+        return false;
+      }
+    }
+
+    // 長さチェック
+    if (fileName.isEmpty || fileName.length > 200) {
+      return false;
+    }
+
+    return true;
   }
 
   /// ファイル暗号化キーを生成

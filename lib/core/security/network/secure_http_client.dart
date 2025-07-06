@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 
@@ -215,13 +215,72 @@ class SecureHttpClient extends http.BaseClient {
     }
   }
 
-  /// SSL証明書のハッシュを取得（プレースホルダー実装）
+  /// SSL証明書のハッシュを取得
   ///
-  /// 実際の実装では、dart:ioのSecurityContextやPackage:certificateを使用
+  /// 実際のSSL証明書を取得してSHA256ハッシュを計算
   Future<String> _getCertificateHash(String host) async {
-    // プレースホルダー実装
-    // 実際にはSSL証明書を取得してSHA256ハッシュを計算
-    return sha256.convert(utf8.encode('$host-cert-placeholder')).toString();
+    try {
+      // HttpClientを使用してSSL証明書を取得
+      final client = HttpClient();
+      client.connectionTimeout = const Duration(seconds: 10);
+
+      // 証明書の検証を無効化（証明書を取得するため）
+      client.badCertificateCallback = (cert, host, port) {
+        // 証明書のハッシュを計算するために一時的に許可
+        return true;
+      };
+
+      HttpClientRequest? request;
+      HttpClientResponse? response;
+
+      try {
+        // HTTPSリクエストを送信
+        final uri = Uri.parse('https://$host/');
+        request = await client.getUrl(uri);
+        response = await request.close();
+
+        // 証明書を取得
+        final certificate = response.certificate;
+        if (certificate == null) {
+          throw SecurityException('SSL証明書を取得できませんでした');
+        }
+
+        // 証明書のDERエンコードされたデータを取得
+        final certBytes = certificate.der;
+
+        // SHA256ハッシュを計算
+        final digest = sha256.convert(certBytes);
+
+        developer.log(
+          'SSL certificate hash calculated for $host: ${digest.toString()}',
+          name: 'SecureHTTP',
+        );
+
+        return digest.toString();
+      } finally {
+        // レスポンスを閉じる
+        try {
+          await response?.drain();
+        } catch (e) {
+          // エラーを無視（クリーンアップ目的）
+        }
+
+        // クライアントを閉じる
+        client.close();
+      }
+    } catch (e) {
+      developer.log(
+        'Failed to get SSL certificate hash for $host: $e',
+        name: 'SecureHTTP',
+        level: 1000,
+      );
+
+      throw SecurityException(
+        'SSL証明書ハッシュの取得に失敗しました',
+        context: 'Host: $host',
+        originalException: e is Exception ? e : Exception(e.toString()),
+      );
+    }
   }
 
   /// プライベートIPアドレスかどうかを判定
@@ -267,13 +326,15 @@ class SecureHttpClient extends http.BaseClient {
 
   /// デフォルトの信頼するホストを設定
   void _setupDefaultTrustedHosts() {
-    // HotPepper APIの証明書ハッシュ（例）
-    _trustedHosts['webservice.recruit.co.jp'] =
-        'example_hotpepper_cert_hash_placeholder';
+    // 注意: 実際の証明書ハッシュは動的に取得されるため、
+    // ここでは事前に設定しない。
+    // 実際の運用では、証明書ローテーションに対応するため、
+    // 複数のハッシュ値を設定するか、動的検証を行う。
 
-    // Google Maps APIの証明書ハッシュ（例）
-    _trustedHosts['maps.googleapis.com'] =
-        'example_google_maps_cert_hash_placeholder';
+    developer.log(
+      'Default trusted hosts setup completed (dynamic validation enabled)',
+      name: 'SecureHTTP',
+    );
   }
 
   /// 信頼するホストを追加

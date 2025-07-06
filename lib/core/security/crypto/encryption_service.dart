@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'dart:math';
+import 'package:pointycastle/export.dart';
 
 import '../../errors/security_exceptions.dart';
 
@@ -217,31 +218,51 @@ class AESEncryptionService implements EncryptionService {
     return iv;
   }
 
-  /// AES暗号化の実行（プレースホルダー実装）
+  /// AES-256-GCM暗号化の実行
   ///
-  /// 注意: これは実際のAES実装ではありません。
-  /// 本番環境では、適切なAES暗号化ライブラリを使用してください。
+  /// Pointycastleライブラリを使用した暗号学的に安全な実装
   Future<Uint8List> _performAESEncryption(
       Uint8List data, Uint8List key, Uint8List iv) async {
-    // シンプルなXOR暗号化（デモ用のみ - 本番では使用しないでください）
-    final encrypted = Uint8List(data.length);
-    for (int i = 0; i < data.length; i++) {
-      encrypted[i] = data[i] ^ key[i % key.length] ^ iv[i % iv.length];
+    try {
+      // AES-256-GCM暗号化を実行
+      final cipher = GCMBlockCipher(AESEngine());
+      final keyParam = KeyParameter(key);
+      final params = AEADParameters(keyParam, 128, iv, Uint8List(0));
+
+      cipher.init(true, params); // true = 暗号化モード
+
+      final encryptedData = cipher.process(data);
+      return encryptedData;
+    } catch (e) {
+      throw SecurityException(
+        'AES暗号化処理に失敗しました',
+        context: 'AES-256-GCM encryption',
+        originalException: e is Exception ? e : Exception(e.toString()),
+      );
     }
-    return encrypted;
   }
 
-  /// AES復号化の実行（プレースホルダー実装）
+  /// AES-256-GCM復号化の実行
   ///
-  /// 注意: これは実際のAES実装ではありません。
-  /// 本番環境では、適切なAES復号化ライブラリを使用してください。
+  /// Pointycastleライブラリを使用した暗号学的に安全な実装
   Future<Uint8List> _performAESDecryption(
       Uint8List encryptedData, Uint8List key, Uint8List iv) async {
-    // シンプルなXOR復号化（デモ用のみ - 本番では使用しないでください）
-    final decrypted = Uint8List(encryptedData.length);
-    for (int i = 0; i < encryptedData.length; i++) {
-      decrypted[i] = encryptedData[i] ^ key[i % key.length] ^ iv[i % iv.length];
+    try {
+      // AES-256-GCM復号化を実行
+      final cipher = GCMBlockCipher(AESEngine());
+      final keyParam = KeyParameter(key);
+      final params = AEADParameters(keyParam, 128, iv, Uint8List(0));
+
+      cipher.init(false, params); // false = 復号化モード
+
+      final decryptedData = cipher.process(encryptedData);
+      return decryptedData;
+    } catch (e) {
+      throw SecurityException(
+        'AES復号化処理に失敗しました',
+        context: 'AES-256-GCM decryption',
+        originalException: e is Exception ? e : Exception(e.toString()),
+      );
     }
-    return decrypted;
   }
 }
