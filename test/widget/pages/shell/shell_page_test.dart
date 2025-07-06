@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:chinese_food_app/core/routing/app_router.dart';
 import 'package:chinese_food_app/presentation/pages/shell/shell_page.dart';
 import 'package:chinese_food_app/presentation/pages/swipe/swipe_page.dart';
-import 'package:chinese_food_app/presentation/pages/search/search_page.dart';
 import 'package:chinese_food_app/presentation/pages/my_menu/my_menu_page.dart';
 import 'package:chinese_food_app/core/di/di_container_interface.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
@@ -35,13 +34,6 @@ void main() {
         child: MaterialApp.router(
           routerConfig: router,
         ),
-      );
-    }
-
-    Widget createTestWidget() {
-      return MediaQuery(
-        data: const MediaQueryData(size: Size(800, 1200)), // より大きなサイズ
-        child: createApp(),
       );
     }
 
