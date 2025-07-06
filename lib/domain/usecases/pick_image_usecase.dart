@@ -17,7 +17,7 @@ class PickImageUsecase {
     final file = await _photoService.takePhotoFromCamera();
 
     if (file == null) {
-      throw Exception('画像の撮影がキャンセルされました');
+      throw PhotoServiceException('画像の撮影がキャンセルされました');
     }
 
     return await _savePhoto(file, storeId, visitId);
@@ -28,7 +28,7 @@ class PickImageUsecase {
     final file = await _photoService.pickPhotoFromGallery();
 
     if (file == null) {
-      throw Exception('画像の選択がキャンセルされました');
+      throw PhotoServiceException('画像の選択がキャンセルされました');
     }
 
     return await _savePhoto(file, storeId, visitId);

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:chinese_food_app/domain/usecases/pick_image_usecase.dart';
 import 'package:chinese_food_app/domain/entities/photo.dart';
+import 'package:chinese_food_app/core/services/photo_service.dart';
 import '../../../helpers/mocks.mocks.dart';
 
 void main() {
@@ -96,7 +97,7 @@ void main() {
       // Act & Assert
       expect(
         () => usecase.pickFromCamera(storeId),
-        throwsA(isA<Exception>()),
+        throwsA(isA<PhotoServiceException>()),
       );
     });
   });

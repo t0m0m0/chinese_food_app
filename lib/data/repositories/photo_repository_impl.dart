@@ -10,20 +10,17 @@ class PhotoRepositoryImpl implements PhotoRepository {
 
   @override
   Future<List<Photo>> getAllPhotos() async {
-    final photoModels = await _localDatasource.getAllPhotos();
-    return photoModels.cast<Photo>();
+    return await _localDatasource.getAllPhotos();
   }
 
   @override
   Future<List<Photo>> getPhotosByStoreId(String storeId) async {
-    final photoModels = await _localDatasource.getPhotosByStoreId(storeId);
-    return photoModels.cast<Photo>();
+    return await _localDatasource.getPhotosByStoreId(storeId);
   }
 
   @override
   Future<List<Photo>> getPhotosByVisitId(String visitId) async {
-    final photoModels = await _localDatasource.getPhotosByVisitId(visitId);
-    return photoModels.cast<Photo>();
+    return await _localDatasource.getPhotosByVisitId(visitId);
   }
 
   @override
