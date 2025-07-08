@@ -1,5 +1,5 @@
 import '../../core/constants/app_constants.dart';
-import '../../core/config/app_config.dart';
+import '../../core/config/config_manager.dart';
 import '../../core/network/base_api_service.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../models/hotpepper_store_model.dart';
@@ -109,15 +109,16 @@ class HotpepperApiDatasourceImpl extends BaseApiService
 
   /// APIキーの取得と存在確認
   Future<String> _getApiKey() async {
-    final apiKey = AppConfig.isProduction
-        ? await AppConfig.hotpepperApiKey
-        : AppConfig.hotpepperApiKeySync;
+    if (!ConfigManager.isInitialized) {
+      throw ApiException(
+        'ConfigManager is not initialized. Please call ConfigManager.initialize() first.',
+      );
+    }
 
-    final hasApiKey = AppConfig.isProduction
-        ? await AppConfig.hasHotpepperApiKeyAsync
-        : AppConfig.hasHotpepperApiKey;
+    final apiKey = ConfigManager.hotpepperApiKey;
+    final hasValidApiKeys = ConfigManager.hasValidApiKeys;
 
-    if (!hasApiKey || apiKey == null) {
+    if (!hasValidApiKeys || apiKey.isEmpty) {
       throw ApiException(
         'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.',
       );
