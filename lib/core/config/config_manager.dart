@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'config_exception.dart';
@@ -12,6 +13,14 @@ class ConfigManager {
   static bool _isInitialized = false;
   static late Map<String, dynamic> _runtimeConfig;
 
+  /// 設定変更の通知用StreamController
+  static final StreamController<Map<String, dynamic>> _configChangeController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
+  /// 設定変更の通知Stream
+  static Stream<Map<String, dynamic>> get configChanges =>
+      _configChangeController.stream;
+
   /// 設定管理を初期化
   ///
   /// アプリケーション起動時に一度だけ呼び出される必要があります。
@@ -22,7 +31,7 @@ class ConfigManager {
   }) async {
     try {
       if (enableDebugLogging) {
-        developer.log('Config initialization started', name: 'ConfigManager');
+        developer.log('設定管理の初期化を開始します', name: 'ConfigManager');
       }
 
       // 設定検証を実行
@@ -33,7 +42,7 @@ class ConfigManager {
 
         if (enableDebugLogging) {
           developer.log(
-            'Configuration validation errors: $errorMessage',
+            '設定検証エラー: $errorMessage',
             name: 'ConfigManager',
           );
         }
@@ -50,13 +59,13 @@ class ConfigManager {
 
       if (enableDebugLogging) {
         developer.log(
-          'Config initialization completed: ${EnvironmentConfig.debugInfo}',
+          '設定管理の初期化が完了しました: ${EnvironmentConfig.debugInfo}',
           name: 'ConfigManager',
         );
       }
     } catch (e) {
       developer.log(
-        'Config initialization failed: $e',
+        '設定管理の初期化に失敗しました: $e',
         name: 'ConfigManager',
         error: e,
       );
@@ -70,6 +79,49 @@ class ConfigManager {
   /// 初期化を強制する（テスト用）
   static void forceInitialize() {
     _isInitialized = false;
+  }
+
+  /// 設定の非同期プリロード（重い処理を事前に実行）
+  ///
+  /// アプリ起動時間を短縮するため、設定検証処理を事前に実行します。
+  /// 初期化前に呼び出すことで、initialize()の処理時間を短縮できます。
+  static Future<void> preloadConfiguration({
+    bool enableDebugLogging = false,
+  }) async {
+    try {
+      if (enableDebugLogging) {
+        developer.log('設定のプリロードを開始します', name: 'ConfigManager');
+      }
+
+      // 設定検証を非同期で実行
+      await Future.microtask(() {
+        final validationErrors = ConfigValidator.validateConfiguration();
+
+        if (enableDebugLogging) {
+          if (validationErrors.isEmpty) {
+            developer.log('設定の事前検証が完了しました', name: 'ConfigManager');
+          } else {
+            developer.log(
+              '設定の事前検証で問題を検出しました: ${validationErrors.length}件',
+              name: 'ConfigManager',
+            );
+          }
+        }
+      });
+
+      if (enableDebugLogging) {
+        developer.log('設定のプリロードが完了しました', name: 'ConfigManager');
+      }
+    } catch (e) {
+      if (enableDebugLogging) {
+        developer.log(
+          '設定のプリロードに失敗しました: $e',
+          name: 'ConfigManager',
+          error: e,
+        );
+      }
+      // プリロード失敗は致命的ではないため、例外を再スローしない
+    }
   }
 
   /// 初期化チェック
@@ -197,9 +249,25 @@ ConfigManager 設定情報:
     return _runtimeConfig[key] as T? ?? defaultValue;
   }
 
-  /// 設定値を動的に設定（テスト用）
+  /// 設定値を動的に設定（テスト用・リアクティブ対応）
   static void setValue(String key, dynamic value) {
     _ensureInitialized();
+    final oldValue = _runtimeConfig[key];
     _runtimeConfig[key] = value;
+
+    // 値が変更された場合、通知を送信
+    if (oldValue != value) {
+      _configChangeController.add({
+        'key': key,
+        'oldValue': oldValue,
+        'newValue': value,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+    }
+  }
+
+  /// 設定変更の通知を停止（テスト用）
+  static void dispose() {
+    _configChangeController.close();
   }
 }

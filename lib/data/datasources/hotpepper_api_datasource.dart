@@ -111,7 +111,7 @@ class HotpepperApiDatasourceImpl extends BaseApiService
   Future<String> _getApiKey() async {
     if (!ConfigManager.isInitialized) {
       throw ApiException(
-        'ConfigManager is not initialized. Please call ConfigManager.initialize() first.',
+        'ConfigManagerが初期化されていません。main()でConfigManager.initialize()を呼び出してください。',
       );
     }
 
@@ -120,7 +120,7 @@ class HotpepperApiDatasourceImpl extends BaseApiService
 
     if (!hasValidApiKeys || apiKey.isEmpty) {
       throw ApiException(
-        'HotPepper API key is not configured. Please set HOTPEPPER_API_KEY environment variable.',
+        'HotPepper APIキーが設定されていません。HOTPEPPER_API_KEY環境変数を設定してください。',
       );
     }
 
