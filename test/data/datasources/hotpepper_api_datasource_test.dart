@@ -4,22 +4,28 @@ import 'package:chinese_food_app/core/network/app_http_client.dart';
 import 'package:chinese_food_app/core/network/api_response.dart';
 import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
 import 'package:chinese_food_app/core/constants/app_constants.dart';
-import 'package:chinese_food_app/core/config/app_config.dart';
+import 'package:chinese_food_app/core/config/config_manager.dart';
 
 void main() {
   group('HotpepperApiDatasourceImpl', () {
     late HotpepperApiDatasourceImpl datasource;
     late MockAppHttpClient mockHttpClient;
 
-    setUp(() {
+    setUp(() async {
       mockHttpClient = MockAppHttpClient();
       datasource = HotpepperApiDatasourceImpl(mockHttpClient);
-      // APIキーをテスト用に設定
-      AppConfig.setTestApiKey('test_api_key');
+      // ConfigManagerをテスト用に初期化
+      await ConfigManager.initialize(
+        throwOnValidationError: false,
+        enableDebugLogging: false,
+      );
+      // テスト用APIキーを設定
+      ConfigManager.setValue('hotpepperApiKey', 'test_hotpepper_api_key');
+      ConfigManager.setValue('googleMapsApiKey', 'test_google_maps_api_key');
     });
 
     tearDown(() {
-      AppConfig.clearTestApiKey();
+      ConfigManager.forceInitialize();
     });
 
     group('Parameter Validation', () {
@@ -58,7 +64,7 @@ void main() {
         ''';
 
         mockHttpClient.stubGet(
-          AppConstants.hotpepperApiUrl,
+          'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/',
           response: ApiResponse.success(data: mockResponse),
         );
 
@@ -107,7 +113,7 @@ void main() {
         ''';
 
         mockHttpClient.stubGet(
-          AppConstants.hotpepperApiUrl,
+          'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/',
           response: ApiResponse.success(data: mockResponse),
         );
 
@@ -142,7 +148,7 @@ void main() {
         ''';
 
         mockHttpClient.stubGet(
-          AppConstants.hotpepperApiUrl,
+          'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/',
           response: ApiResponse.success(data: mockResponse),
         );
 
@@ -161,7 +167,7 @@ void main() {
       test('should handle 401 Unauthorized error', () async {
         // Arrange
         mockHttpClient.stubGetError(
-          AppConstants.hotpepperApiUrl,
+          'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/',
           NetworkException('Unauthorized', statusCode: 401),
         );
 
@@ -197,7 +203,7 @@ void main() {
       test('should handle API parsing error', () async {
         // Arrange
         mockHttpClient.stubGet(
-          AppConstants.hotpepperApiUrl,
+          'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/',
           response: ApiResponse.success(data: 'invalid json'),
         );
 
