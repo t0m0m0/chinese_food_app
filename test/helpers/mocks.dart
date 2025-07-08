@@ -5,11 +5,13 @@ import 'package:http/http.dart' as http;
 // Local imports
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
 import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
+import 'package:chinese_food_app/data/datasources/photo_local_datasource.dart';
 import 'package:chinese_food_app/domain/repositories/location_repository.dart';
 import 'package:chinese_food_app/domain/repositories/photo_repository.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/domain/repositories/visit_record_repository.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
+import 'package:chinese_food_app/core/services/photo_service.dart';
 
 /// 統一されたMockito生成用のアノテーション
 ///
@@ -45,6 +47,7 @@ import 'package:chinese_food_app/domain/services/location_service.dart';
 @GenerateMocks([
   // Services
   LocationService,
+  PhotoService,
 
   // Repositories
   StoreRepository,
@@ -55,6 +58,7 @@ import 'package:chinese_food_app/domain/services/location_service.dart';
   // Data Sources
   HotpepperApiDatasource,
   StoreLocalDatasource,
+  PhotoLocalDatasource,
 
   // External Dependencies
   http.Client,
