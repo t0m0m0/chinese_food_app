@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'core/config/config_manager.dart';
 import 'core/constants/app_constants.dart';
 import 'core/di/app_di_container.dart';
 import 'core/di/di_container_interface.dart';
@@ -11,6 +12,18 @@ import 'domain/services/location_service.dart';
 Future<void> main() async {
   // アプリ起動時の非同期処理のためFlutterバインディングを初期化
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 設定管理を初期化
+  try {
+    await ConfigManager.initialize(
+      throwOnValidationError: false, // 開発環境では警告のみ
+      enableDebugLogging: true,
+    );
+    debugPrint('設定管理の初期化が完了しました: ${ConfigManager.debugString}');
+  } catch (e) {
+    debugPrint('設定管理の初期化でエラーが発生しました: $e');
+    debugPrint('アプリは制限付きモードで起動します');
+  }
 
   // DIコンテナーを作成・設定
   final DIContainerInterface container = AppDIContainer();
