@@ -9,20 +9,30 @@ import 'core/routing/app_router.dart';
 import 'presentation/providers/store_provider.dart';
 import 'domain/services/location_service.dart';
 
+/// テスト環境かどうかを判定
+bool _isTestEnvironment() {
+  // テスト環境では FLUTTER_TEST 環境変数が設定される
+  return const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false);
+}
+
 Future<void> main() async {
   // アプリ起動時の非同期処理のためFlutterバインディングを初期化
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 設定管理を初期化
-  try {
-    await ConfigManager.initialize(
-      throwOnValidationError: false, // 開発環境では警告のみ
-      enableDebugLogging: true,
-    );
-    debugPrint('設定管理の初期化が完了しました: ${ConfigManager.debugString}');
-  } catch (e) {
-    debugPrint('設定管理の初期化でエラーが発生しました: $e');
-    debugPrint('アプリは制限付きモードで起動します');
+  // 設定管理を初期化（テスト環境では初期化をスキップ）
+  if (!_isTestEnvironment()) {
+    try {
+      await ConfigManager.initialize(
+        throwOnValidationError: false, // 開発環境では警告のみ
+        enableDebugLogging: true,
+      );
+      debugPrint('設定管理の初期化が完了しました: ${ConfigManager.debugString}');
+    } catch (e) {
+      debugPrint('設定管理の初期化でエラーが発生しました: $e');
+      debugPrint('アプリは制限付きモードで起動します');
+    }
+  } else {
+    debugPrint('テスト環境: 設定管理の初期化をスキップします');
   }
 
   // DIコンテナーを作成・設定
