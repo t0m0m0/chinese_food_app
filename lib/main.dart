@@ -27,6 +27,32 @@ Future<void> main() async {
         enableDebugLogging: true,
       );
       debugPrint('設定管理の初期化が完了しました: ${ConfigManager.debugString}');
+
+      // 統合設定検証を実行
+      final validationResults = ConfigManager.validateAllConfigs();
+      final hasErrors =
+          validationResults.values.any((errors) => errors.isNotEmpty);
+      final hasCriticalErrors = ConfigManager.hasAnyCriticalErrors;
+
+      if (hasErrors) {
+        debugPrint('設定検証でエラーが検出されました:');
+        validationResults.forEach((domain, errors) {
+          if (errors.isNotEmpty) {
+            debugPrint('  $domain: ${errors.join(', ')}');
+          }
+        });
+
+        // Criticalエラーがある場合はアプリ起動を停止
+        if (hasCriticalErrors) {
+          debugPrint('Critical設定エラーが検出されました。アプリを安全に起動できません。');
+          throw Exception(
+              'Critical configuration errors detected. Application cannot start safely.');
+        } else {
+          debugPrint('Non-critical設定エラーのため、アプリは制限付きモードで起動します。');
+        }
+      } else {
+        debugPrint('すべての設定検証が完了しました');
+      }
     } catch (e) {
       debugPrint('設定管理の初期化でエラーが発生しました: $e');
       debugPrint('アプリは制限付きモードで起動します');
