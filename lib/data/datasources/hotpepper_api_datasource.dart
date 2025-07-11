@@ -1,4 +1,4 @@
-import '../../core/constants/app_constants.dart';
+import '../../core/config/api_config.dart';
 import '../../core/config/config_manager.dart';
 import '../../core/network/base_api_service.dart';
 import '../../core/exceptions/domain_exceptions.dart';
@@ -70,13 +70,11 @@ class HotpepperApiDatasourceImpl extends BaseApiService
     try {
       // 新しいHTTPシステムを使用してAPIリクエスト実行
       return await getAndParse<HotpepperSearchResponse>(
-        AppConstants.hotpepperApiUrl,
+        ApiConfig.hotpepperApiUrl,
         (json) =>
             HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
         queryParameters: queryParams,
-        headers: {
-          'User-Agent': 'MachiApp/1.0.0',
-        },
+        headers: ApiConfig.commonHeaders,
       );
     } on NetworkException catch (e) {
       // 特定のHTTPステータスコードに基づいて適切なエラーメッセージを提供

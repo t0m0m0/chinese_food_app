@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:geolocator/geolocator.dart';
+import '../../core/config/location_config.dart';
 import '../../domain/entities/location.dart';
 import '../../domain/services/location_service.dart';
 
@@ -13,8 +14,8 @@ class GeolocatorLocationService implements LocationService {
   final LocationAccuracy accuracy;
 
   const GeolocatorLocationService({
-    this.timeoutSeconds = 10,
-    this.accuracy = LocationAccuracy.high,
+    this.timeoutSeconds = LocationConfig.defaultTimeoutSeconds,
+    this.accuracy = LocationConfig.defaultAccuracy,
   });
   @override
   Future<Location> getCurrentLocation() async {

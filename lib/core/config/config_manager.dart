@@ -1,9 +1,14 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'api_config.dart';
 import 'config_exception.dart';
 import 'config_validator.dart';
+import 'database_config.dart';
 import 'environment_config.dart';
+import 'location_config.dart';
+import 'search_config.dart';
+import 'ui_config.dart';
 
 /// 設定管理クラス
 ///
@@ -269,5 +274,156 @@ ConfigManager 設定情報:
   /// 設定変更の通知を停止（テスト用）
   static void dispose() {
     _configChangeController.close();
+  }
+
+  // === 分野別設定アクセス ===
+
+  /// API設定を取得
+  static Map<String, dynamic> get apiConfig {
+    return ApiConfig.debugInfo;
+  }
+
+  /// 位置情報設定を取得
+  static Map<String, dynamic> get locationConfig {
+    return LocationConfig.debugInfo;
+  }
+
+  /// 検索設定を取得
+  static Map<String, dynamic> get searchConfig {
+    return SearchConfig.debugInfo;
+  }
+
+  /// UI設定を取得
+  static Map<String, dynamic> get uiConfig {
+    return UiConfig.debugInfo;
+  }
+
+  /// データベース設定を取得
+  static Map<String, dynamic> get databaseConfig {
+    return DatabaseConfig.debugInfo;
+  }
+
+  /// 全設定情報を統合して取得
+  static Map<String, dynamic> get allConfigs {
+    _ensureInitialized();
+    return {
+      'runtime': _runtimeConfig,
+      'api': apiConfig,
+      'location': locationConfig,
+      'search': searchConfig,
+      'ui': uiConfig,
+      'database': databaseConfig,
+    };
+  }
+
+  /// 設定の整合性チェック
+  static Map<String, List<String>> validateAllConfigs() {
+    _ensureInitialized();
+    return {
+      'runtime': validateConfiguration(),
+      'api': _validateApiConfig(),
+      'location': _validateLocationConfig(),
+      'search': _validateSearchConfig(),
+      'ui': _validateUiConfig(),
+      'database': _validateDatabaseConfig(),
+    };
+  }
+
+  /// API設定の検証
+  static List<String> _validateApiConfig() {
+    final errors = <String>[];
+
+    if (!ApiConfig.isValidTimeout(ApiConfig.hotpepperApiTimeout)) {
+      errors.add('HotPepper APIタイムアウト値が無効です: ${ApiConfig.hotpepperApiTimeout}');
+    }
+
+    if (!ApiConfig.isValidRetryCount(ApiConfig.hotpepperApiRetryCount)) {
+      errors
+          .add('HotPepper APIリトライ回数が無効です: ${ApiConfig.hotpepperApiRetryCount}');
+    }
+
+    if (!ApiConfig.isValidMaxResults(ApiConfig.hotpepperMaxResults)) {
+      errors.add('HotPepper API最大結果数が無効です: ${ApiConfig.hotpepperMaxResults}');
+    }
+
+    return errors;
+  }
+
+  /// 位置情報設定の検証
+  static List<String> _validateLocationConfig() {
+    final errors = <String>[];
+
+    if (!LocationConfig.isValidTimeout(LocationConfig.defaultTimeoutSeconds)) {
+      errors.add('位置情報タイムアウト値が無効です: ${LocationConfig.defaultTimeoutSeconds}');
+    }
+
+    if (!LocationConfig.isValidRadius(LocationConfig.defaultLocationRadius)) {
+      errors.add('位置情報検索半径が無効です: ${LocationConfig.defaultLocationRadius}');
+    }
+
+    if (!LocationConfig.isValidUpdateInterval(
+        LocationConfig.locationUpdateInterval)) {
+      errors.add('位置情報更新間隔が無効です: ${LocationConfig.locationUpdateInterval}');
+    }
+
+    return errors;
+  }
+
+  /// 検索設定の検証
+  static List<String> _validateSearchConfig() {
+    final errors = <String>[];
+
+    if (!SearchConfig.isValidRange(SearchConfig.defaultRange)) {
+      errors.add('検索範囲が無効です: ${SearchConfig.defaultRange}');
+    }
+
+    if (!SearchConfig.isValidCount(SearchConfig.defaultCount)) {
+      errors.add('検索結果数が無効です: ${SearchConfig.defaultCount}');
+    }
+
+    if (!SearchConfig.isValidKeyword(SearchConfig.defaultKeyword)) {
+      errors.add('検索キーワードが無効です: ${SearchConfig.defaultKeyword}');
+    }
+
+    return errors;
+  }
+
+  /// UI設定の検証
+  static List<String> _validateUiConfig() {
+    final errors = <String>[];
+
+    if (!UiConfig.isValidPadding(UiConfig.defaultPadding)) {
+      errors.add('UIパディング値が無効です: ${UiConfig.defaultPadding}');
+    }
+
+    if (!UiConfig.isValidBorderRadius(UiConfig.cardBorderRadius)) {
+      errors.add('カード角丸値が無効です: ${UiConfig.cardBorderRadius}');
+    }
+
+    if (!UiConfig.isValidMapZoom(UiConfig.defaultMapZoom)) {
+      errors.add('マップズーム値が無効です: ${UiConfig.defaultMapZoom}');
+    }
+
+    return errors;
+  }
+
+  /// データベース設定の検証
+  static List<String> _validateDatabaseConfig() {
+    final errors = <String>[];
+
+    if (!DatabaseConfig.isValidDatabaseVersion(
+        DatabaseConfig.databaseVersion)) {
+      errors.add('データベースバージョンが無効です: ${DatabaseConfig.databaseVersion}');
+    }
+
+    if (!DatabaseConfig.isValidCacheSize(DatabaseConfig.cacheSize)) {
+      errors.add('データベースキャッシュサイズが無効です: ${DatabaseConfig.cacheSize}');
+    }
+
+    if (!DatabaseConfig.isValidPageSize(DatabaseConfig.pageSize)) {
+      errors.add('データベースページサイズが無効です: ${DatabaseConfig.pageSize}');
+    }
+
+    return errors;
   }
 }

@@ -27,6 +27,22 @@ Future<void> main() async {
         enableDebugLogging: true,
       );
       debugPrint('設定管理の初期化が完了しました: ${ConfigManager.debugString}');
+
+      // 統合設定検証を実行
+      final validationResults = ConfigManager.validateAllConfigs();
+      final hasErrors =
+          validationResults.values.any((errors) => errors.isNotEmpty);
+
+      if (hasErrors) {
+        debugPrint('設定検証でエラーが検出されました:');
+        validationResults.forEach((domain, errors) {
+          if (errors.isNotEmpty) {
+            debugPrint('  $domain: ${errors.join(', ')}');
+          }
+        });
+      } else {
+        debugPrint('すべての設定検証が完了しました');
+      }
     } catch (e) {
       debugPrint('設定管理の初期化でエラーが発生しました: $e');
       debugPrint('アプリは制限付きモードで起動します');
