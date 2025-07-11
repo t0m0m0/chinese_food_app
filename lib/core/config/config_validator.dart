@@ -171,6 +171,31 @@ class ConfigValidator {
         error.contains('警告: 本番環境'));
   }
 
+  /// 全設定検証でCriticalエラーがあるかを判定
+  static bool get hasAnyCriticalErrors {
+    final validationResults = validateAllDomainConfigs();
+    final runtimeErrors = validateConfiguration();
+
+    // ランタイム設定のCriticalエラーチェック
+    final hasCriticalRuntimeErrors = runtimeErrors.any((error) =>
+        error.contains('本番環境') ||
+        error.contains('形式が無効') ||
+        error.contains('警告: 本番環境'));
+
+    // 分野別設定のCriticalエラーチェック
+    final hasCriticalDomainErrors = validationResults.values
+        .any((errors) => errors.any((error) => _isCriticalError(error)));
+
+    return hasCriticalRuntimeErrors || hasCriticalDomainErrors;
+  }
+
+  /// エラーがCriticalレベルかどうかを判定
+  static bool _isCriticalError(String error) {
+    return error.contains('データベース設定: バージョンが無効') ||
+        error.contains('API設定: HotPepper APIタイムアウト値が無効') ||
+        error.contains('位置情報設定: タイムアウト値が無効');
+  }
+
   /// 分野別設定の検証
   static void _validateDomainConfigs(List<String> errors) {
     // API設定の検証

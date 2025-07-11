@@ -23,19 +23,27 @@ class ApiConfig {
     'Content-Type': 'application/json',
   };
 
-  /// API設定の妥当性チェック
+  /// 検証用定数
+  static const int minTimeoutSeconds = 1;
+  static const int maxTimeoutSeconds = 60;
+  static const int minRetryCount = 0;
+  static const int maxRetryCount = 5;
+  static const int minMaxResults = 1;
+  static const int maxMaxResults = 100;
+
+  /// タイムアウト値の妥当性チェック（1-60秒）
   static bool isValidTimeout(int timeout) {
-    return timeout > 0 && timeout <= 60;
+    return timeout >= minTimeoutSeconds && timeout <= maxTimeoutSeconds;
   }
 
-  /// API設定の妥当性チェック
+  /// リトライ回数の妥当性チェック（0-5回）
   static bool isValidRetryCount(int retryCount) {
-    return retryCount >= 0 && retryCount <= 5;
+    return retryCount >= minRetryCount && retryCount <= maxRetryCount;
   }
 
-  /// API設定の妥当性チェック
+  /// 最大結果数の妥当性チェック（1-100件）
   static bool isValidMaxResults(int maxResults) {
-    return maxResults > 0 && maxResults <= 100;
+    return maxResults >= minMaxResults && maxResults <= maxMaxResults;
   }
 
   /// デバッグ情報を取得

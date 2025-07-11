@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import '../config/api_config.dart';
 import '../config/config_manager.dart';
 import '../config/database_config.dart';
+import '../config/location_config.dart';
 import '../config/ui_config.dart';
 
 /// アプリケーション定数クラス
@@ -45,8 +46,10 @@ class AppConstants {
 
   // Google Maps 設定 - UiConfigから取得
   static double get defaultMapZoom => UiConfig.defaultMapZoom;
+
+  // 位置情報設定 - LocationConfigから取得
   static double get defaultLocationRadius =>
-      UiConfig.defaultMapZoom * 100; // 概算値
+      LocationConfig.defaultLocationRadius;
 
   // アプリ設定 - 固定値（変更頻度が低いため）
   static const int maxPhotoFileSize = 5 * 1024 * 1024; // 5MB
@@ -64,8 +67,8 @@ class AppConstants {
   @Deprecated(
       'AppConstants の使用は非推奨です。代わりに分野別設定クラス（ApiConfig、UiConfig等）を使用してください。')
   static void showDeprecationWarning() {
-    // 開発環境でのみ警告を表示
-    if (ConfigManager.isDevelopment) {
+    // 開発環境でのみ警告を表示（環境変数から直接取得して循環依存を回避）
+    if (const bool.fromEnvironment('DEVELOPMENT', defaultValue: true)) {
       developer.log(
         'Warning: AppConstants is deprecated. Use domain-specific config classes instead.',
         name: 'AppConstants',

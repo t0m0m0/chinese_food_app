@@ -209,6 +209,12 @@ class ConfigManager {
     return _runtimeConfig['hasCriticalErrors'] as bool;
   }
 
+  /// 全設定検証でCriticalエラーがあるかを判定
+  static bool get hasAnyCriticalErrors {
+    _ensureInitialized();
+    return ConfigValidator.hasAnyCriticalErrors;
+  }
+
   /// APIキーが有効かどうかを判定（既存のAppConstantsとの互換性）
   static bool get hasValidApiKeys {
     _ensureInitialized();
