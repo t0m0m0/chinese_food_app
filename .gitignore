@@ -12,6 +12,10 @@
 .swiftpm/
 migrate_working_dir/
 
+# Prevent accidental creation of variable name files
+_*CacheMaxAge
+_*cacheMaxAge
+
 # IntelliJ related
 *.iml
 *.ipr
