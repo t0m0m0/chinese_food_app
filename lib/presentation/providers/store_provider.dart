@@ -27,7 +27,9 @@ class StoreProvider extends ChangeNotifier {
   List<Store>? _cachedBadStores;
 
   /// キャッシュの最大保持時間（ミリ秒）
-  static const int _cacheMaxAge = 30000; // 30秒
+  /// 設定から取得可能にするための実装（デフォルト30秒）
+  static const int _defaultCacheMaxAge = 30000; // 30秒
+  static int get _cacheMaxAge => _defaultCacheMaxAge; // 将来的に設定ファイルから取得可能
   int? _lastCacheUpdateTime;
 
   StoreProvider({required this.repository});
@@ -171,15 +173,22 @@ class StoreProvider extends ChangeNotifier {
 
       // 並列処理で重複チェックとデータ変換を最適化
       final duplicateCheckFutures = apiStores.map((apiStore) async {
-        // 既存の店舗と重複しているかチェック（名前・住所・座標）
-        final isDuplicate = _stores.any((store) =>
-            store.name == apiStore.name &&
-            store.address == apiStore.address &&
-            (store.lat - apiStore.lat).abs() <
-                ApiConstants.duplicateThreshold &&
-            (store.lng - apiStore.lng).abs() < ApiConstants.duplicateThreshold);
+        try {
+          // 既存の店舗と重複しているかチェック（名前・住所・座標）
+          final isDuplicate = _stores.any((store) =>
+              store.name == apiStore.name &&
+              store.address == apiStore.address &&
+              (store.lat - apiStore.lat).abs() <
+                  ApiConstants.duplicateThreshold &&
+              (store.lng - apiStore.lng).abs() <
+                  ApiConstants.duplicateThreshold);
 
-        return isDuplicate ? null : apiStore.copyWith(resetStatus: true);
+          return isDuplicate ? null : apiStore.copyWith(resetStatus: true);
+        } catch (e) {
+          // 個別の店舗処理でエラーが発生した場合はスキップ
+          debugPrint('Store processing error: $e');
+          return null;
+        }
       }).toList();
 
       // 並列実行して新しい店舗のみを取得

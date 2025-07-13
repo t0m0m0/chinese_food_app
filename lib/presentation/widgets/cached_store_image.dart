@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -47,8 +48,10 @@ class CachedStoreImage extends StatelessWidget {
               fadeOutDuration: const Duration(milliseconds: 100),
               // 無効なURLのリトライ制限
               errorListener: (exception) {
-                // エラーログ出力（デバッグ用）
-                debugPrint('CachedStoreImage error: $exception');
+                // デバッグ環境でのみログ出力（プロダクション環境制御）
+                if (kDebugMode) {
+                  debugPrint('CachedStoreImage error: $exception');
+                }
               },
               placeholder: (context, url) => Container(
                 width: width,
