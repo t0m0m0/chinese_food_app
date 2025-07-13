@@ -32,6 +32,11 @@ class PhotoProvider extends ChangeNotifier {
 
   /// 店舗IDで写真を読み込む
   Future<void> loadPhotosByStoreId(String storeId) async {
+    if (storeId.isEmpty) {
+      _setError('店舗IDが指定されていません');
+      return;
+    }
+
     _setLoading(true);
     _clearError();
 
@@ -39,7 +44,7 @@ class PhotoProvider extends ChangeNotifier {
       _photos = await repository.getPhotosByStoreId(storeId);
       notifyListeners();
     } catch (e) {
-      _setError('写真の読み込みに失敗しました: $e');
+      _setError(_getErrorMessage(e, '写真の読み込みに失敗しました'));
     } finally {
       _setLoading(false);
     }
@@ -47,6 +52,11 @@ class PhotoProvider extends ChangeNotifier {
 
   /// 訪問記録IDで写真を読み込む
   Future<void> loadPhotosByVisitId(String visitId) async {
+    if (visitId.isEmpty) {
+      _setError('訪問記録IDが指定されていません');
+      return;
+    }
+
     _setLoading(true);
     _clearError();
 
@@ -54,7 +64,7 @@ class PhotoProvider extends ChangeNotifier {
       _photos = await repository.getPhotosByVisitId(visitId);
       notifyListeners();
     } catch (e) {
-      _setError('写真の読み込みに失敗しました: $e');
+      _setError(_getErrorMessage(e, '写真の読み込みに失敗しました'));
     } finally {
       _setLoading(false);
     }
@@ -69,7 +79,7 @@ class PhotoProvider extends ChangeNotifier {
       _photos = await repository.getAllPhotos();
       notifyListeners();
     } catch (e) {
-      _setError('写真の読み込みに失敗しました: $e');
+      _setError(_getErrorMessage(e, '写真の読み込みに失敗しました'));
     } finally {
       _setLoading(false);
     }
@@ -77,16 +87,21 @@ class PhotoProvider extends ChangeNotifier {
 
   /// カメラから写真を追加
   Future<void> addPhotoFromCamera(String storeId, {String? visitId}) async {
+    if (storeId.isEmpty) {
+      _setError('店舗IDが指定されていません');
+      return;
+    }
+
     _setLoading(true);
     _clearError();
 
     try {
       final photo =
           await pickImageUsecase.pickFromCamera(storeId, visitId: visitId);
-      _photos.add(photo);
+      _photos = [..._photos, photo]; // 新しいリストを作成
       notifyListeners();
     } catch (e) {
-      _setError('写真の追加に失敗しました: $e');
+      _setError(_getErrorMessage(e, '写真の追加に失敗しました'));
     } finally {
       _setLoading(false);
     }
@@ -94,16 +109,21 @@ class PhotoProvider extends ChangeNotifier {
 
   /// ギャラリーから写真を追加
   Future<void> addPhotoFromGallery(String storeId, {String? visitId}) async {
+    if (storeId.isEmpty) {
+      _setError('店舗IDが指定されていません');
+      return;
+    }
+
     _setLoading(true);
     _clearError();
 
     try {
       final photo =
           await pickImageUsecase.pickFromGallery(storeId, visitId: visitId);
-      _photos.add(photo);
+      _photos = [..._photos, photo]; // 新しいリストを作成
       notifyListeners();
     } catch (e) {
-      _setError('写真の追加に失敗しました: $e');
+      _setError(_getErrorMessage(e, '写真の追加に失敗しました'));
     } finally {
       _setLoading(false);
     }
@@ -111,15 +131,20 @@ class PhotoProvider extends ChangeNotifier {
 
   /// 写真を削除
   Future<void> deletePhoto(String photoId) async {
+    if (photoId.isEmpty) {
+      _setError('写真IDが指定されていません');
+      return;
+    }
+
     _setLoading(true);
     _clearError();
 
     try {
       await repository.deletePhoto(photoId);
-      _photos.removeWhere((photo) => photo.id == photoId);
+      _photos = _photos.where((photo) => photo.id != photoId).toList();
       notifyListeners();
     } catch (e) {
-      _setError('写真の削除に失敗しました: $e');
+      _setError(_getErrorMessage(e, '写真の削除に失敗しました'));
     } finally {
       _setLoading(false);
     }
@@ -148,6 +173,34 @@ class PhotoProvider extends ChangeNotifier {
       _error = null;
       notifyListeners();
     }
+  }
+
+  /// ユーザーフレンドリーなエラーメッセージを生成
+  String _getErrorMessage(dynamic error, String defaultMessage) {
+    final errorString = error.toString().toLowerCase();
+
+    // 接続エラー
+    if (errorString.contains('socket') || errorString.contains('network')) {
+      return 'ネットワーク接続を確認してください';
+    }
+
+    // 権限エラー
+    if (errorString.contains('permission') || errorString.contains('denied')) {
+      return 'アプリの権限設定を確認してください';
+    }
+
+    // ストレージエラー
+    if (errorString.contains('storage') || errorString.contains('space')) {
+      return 'ストレージの空き容量が不足しています';
+    }
+
+    // キャンセルされた場合
+    if (errorString.contains('cancel')) {
+      return '操作がキャンセルされました';
+    }
+
+    // デフォルトメッセージ
+    return defaultMessage;
   }
 
   /// テスト用のエラー設定メソッド

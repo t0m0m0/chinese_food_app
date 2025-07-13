@@ -116,12 +116,16 @@ class _PhotoListViewState extends State<PhotoListView> {
             itemCount: provider.photos.length,
             itemBuilder: (context, index) {
               final photo = provider.photos[index];
-              return Card(
-                clipBehavior: Clip.antiAlias,
-                child: PhotoDisplayWidget(
-                  imagePath: photo.filePath,
-                  onTap: () => _showPhotoDetail(context, photo),
-                  onDelete: () => _deletePhoto(context, photo.id),
+              return RepaintBoundary(
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: PhotoDisplayWidget(
+                    imagePath: photo.filePath,
+                    width: 200, // 固定サイズでメモリ最適化
+                    height: 200,
+                    onTap: () => _showPhotoDetail(context, photo),
+                    onDelete: () => _deletePhoto(context, photo.id),
+                  ),
                 ),
               );
             },

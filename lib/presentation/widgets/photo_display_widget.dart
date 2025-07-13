@@ -124,6 +124,9 @@ class PhotoDisplayWidget extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
+      // メモリ使用量を制限（最大300px）
+      cacheWidth: width?.toInt() ?? 300,
+      cacheHeight: height?.toInt() ?? 300,
       errorBuilder: (context, error, stackTrace) {
         return _buildErrorDisplay(context);
       },
