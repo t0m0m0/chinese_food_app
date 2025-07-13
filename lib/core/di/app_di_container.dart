@@ -196,10 +196,16 @@ class AppDIContainer implements DIContainerInterface {
   DatabaseConnection _openDatabaseConnection() {
     // プラットフォーム別のデータベース接続
     if (kIsWeb) {
-      // Web環境: 制限付きでメモリ内データベース使用
-      // 注意: Webでは永続化されないため、開発・テスト用途のみ
-      developer.log('Web環境: メモリ内データベースを使用（永続化なし）', name: 'Database');
-      return DatabaseConnection(NativeDatabase.memory());
+      // Web環境: テスト専用のインメモリデータベース
+      // 注意: CI環境ではWeb実行時にSQLite制限があるため、テスト環境のみ対応
+      developer.log('Web環境: テスト専用インメモリデータベース使用', name: 'Database');
+
+      // テスト環境でのみWeb対応、本番環境では未対応
+      if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+        return DatabaseConnection(NativeDatabase.memory());
+      } else {
+        throw UnsupportedError('Web環境での本番使用は現在未対応です。Native環境を使用してください。');
+      }
     } else {
       // Native環境: SQLiteファイルを使用
       developer.log('Native環境: SQLiteファイルを使用', name: 'Database');
