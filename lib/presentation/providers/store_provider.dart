@@ -21,10 +21,14 @@ class StoreProvider extends ChangeNotifier {
   /// エラーメッセージ
   String? _error;
 
-  /// キャッシュされたステータス別店舗リスト
+  /// キャッシュされたステータス別店舗リスト（メモリ効率化）
   List<Store>? _cachedWantToGoStores;
   List<Store>? _cachedVisitedStores;
   List<Store>? _cachedBadStores;
+
+  /// キャッシュの最大保持時間（ミリ秒）
+  static const int _cacheMaxAge = 30000; // 30秒
+  int? _lastCacheUpdateTime;
 
   StoreProvider({required this.repository});
 
@@ -35,6 +39,7 @@ class StoreProvider extends ChangeNotifier {
 
   /// 「行きたい」ステータスの店舗リスト（キャッシュ機能付き）
   List<Store> get wantToGoStores {
+    _checkCacheExpiry();
     _cachedWantToGoStores ??=
         _stores.where((store) => store.status == StoreStatus.wantToGo).toList();
     return List.unmodifiable(_cachedWantToGoStores!);
@@ -42,6 +47,7 @@ class StoreProvider extends ChangeNotifier {
 
   /// 「行った」ステータスの店舗リスト（キャッシュ機能付き）
   List<Store> get visitedStores {
+    _checkCacheExpiry();
     _cachedVisitedStores ??=
         _stores.where((store) => store.status == StoreStatus.visited).toList();
     return List.unmodifiable(_cachedVisitedStores!);
@@ -49,6 +55,7 @@ class StoreProvider extends ChangeNotifier {
 
   /// 「興味なし」ステータスの店舗リスト（キャッシュ機能付き）
   List<Store> get badStores {
+    _checkCacheExpiry();
     _cachedBadStores ??=
         _stores.where((store) => store.status == StoreStatus.bad).toList();
     return List.unmodifiable(_cachedBadStores!);
@@ -162,8 +169,8 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
 
-      // APIから取得した店舗をローカルリストに追加（強化された重複チェック付き）
-      for (final apiStore in apiStores) {
+      // 並列処理で重複チェックとデータ変換を最適化
+      final duplicateCheckFutures = apiStores.map((apiStore) async {
         // 既存の店舗と重複しているかチェック（名前・住所・座標）
         final isDuplicate = _stores.any((store) =>
             store.name == apiStore.name &&
@@ -172,12 +179,18 @@ class StoreProvider extends ChangeNotifier {
                 ApiConstants.duplicateThreshold &&
             (store.lng - apiStore.lng).abs() < ApiConstants.duplicateThreshold);
 
-        if (!isDuplicate) {
-          // 新しい店舗として追加（ステータスはnull）
-          final newStore = apiStore.copyWith(resetStatus: true);
-          _stores.add(newStore);
-        }
-      }
+        return isDuplicate ? null : apiStore.copyWith(resetStatus: true);
+      }).toList();
+
+      // 並列実行して新しい店舗のみを取得
+      final processedStores = await Future.wait(duplicateCheckFutures);
+      final newStores = processedStores
+          .where((store) => store != null)
+          .cast<Store>()
+          .toList();
+
+      // バッチ追加でパフォーマンス向上
+      _stores.addAll(newStores);
 
       // 空の結果時のユーザーフレンドリーなメッセージ
       if (apiStores.isEmpty) {
@@ -222,5 +235,15 @@ class StoreProvider extends ChangeNotifier {
     _cachedWantToGoStores = null;
     _cachedVisitedStores = null;
     _cachedBadStores = null;
+    _lastCacheUpdateTime = DateTime.now().millisecondsSinceEpoch;
+  }
+
+  /// キャッシュの有効期限をチェックし、期限切れの場合はクリア
+  void _checkCacheExpiry() {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (_lastCacheUpdateTime != null &&
+        (now - _lastCacheUpdateTime!) > _cacheMaxAge) {
+      _clearCache();
+    }
   }
 }

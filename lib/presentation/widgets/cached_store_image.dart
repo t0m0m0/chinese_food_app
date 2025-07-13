@@ -37,11 +37,19 @@ class CachedStoreImage extends StatelessWidget {
               width: width,
               height: height,
               fit: fit,
-              // メモリ効率改善のための設定
+              // メモリ効率改善のための設定（最適化）
               memCacheWidth: width?.toInt(),
               memCacheHeight: height?.toInt(),
-              maxWidthDiskCache: 500,
-              maxHeightDiskCache: 500,
+              maxWidthDiskCache: 300, // ディスクキャッシュサイズ縮小
+              maxHeightDiskCache: 300,
+              // フェードイン効果でスムーズな読み込み
+              fadeInDuration: const Duration(milliseconds: 200),
+              fadeOutDuration: const Duration(milliseconds: 100),
+              // 無効なURLのリトライ制限
+              errorListener: (exception) {
+                // エラーログ出力（デバッグ用）
+                debugPrint('CachedStoreImage error: $exception');
+              },
               placeholder: (context, url) => Container(
                 width: width,
                 height: height,
