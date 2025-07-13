@@ -1,7 +1,8 @@
 import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show File;
 import '../config/app_config.dart';
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
@@ -193,11 +194,19 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Create Drift database connection
   DatabaseConnection _openDatabaseConnection() {
-    // テスト環境では常にネイティブデータベースを使用
-    // （Web APIはテスト環境で利用できないため）
-    return DatabaseConnection(NativeDatabase.createInBackground(
-      File('app_db.sqlite'),
-    ));
+    // プラットフォーム別のデータベース接続
+    if (kIsWeb) {
+      // Web環境: 制限付きでメモリ内データベース使用
+      // 注意: Webでは永続化されないため、開発・テスト用途のみ
+      developer.log('Web環境: メモリ内データベースを使用（永続化なし）', name: 'Database');
+      return DatabaseConnection(NativeDatabase.memory());
+    } else {
+      // Native環境: SQLiteファイルを使用
+      developer.log('Native環境: SQLiteファイルを使用', name: 'Database');
+      return DatabaseConnection(NativeDatabase.createInBackground(
+        File('app_db.sqlite'),
+      ));
+    }
   }
 
   /// Determine current environment based on configuration
