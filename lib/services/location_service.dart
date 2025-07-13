@@ -190,6 +190,41 @@ class LocationService {
           }
         }
       } else {
+        // TDD GREEN段階: Issue #43の新しい環境変数対応
+        // GPS精度モードシミュレーション
+        final accuracyMode = Platform.environment['GPS_ACCURACY_MODE'];
+        if (accuracyMode == 'low') {
+          return LocationServiceResult.failure('GPS精度が低すぎます');
+        } else if (accuracyMode == 'medium') {
+          return LocationServiceResult.failure('GPS精度が中程度です');
+        }
+
+        // ネットワーク遅延モードシミュレーション
+        final delayMode = Platform.environment['NETWORK_DELAY_MODE'];
+        if (delayMode == '1s') {
+          await Future.delayed(const Duration(seconds: 1));
+        } else if (delayMode == '5s') {
+          await Future.delayed(const Duration(seconds: 5));
+        } else if (delayMode == 'timeout') {
+          return LocationServiceResult.failure('ネットワークタイムアウト');
+        }
+
+        // バッテリー最適化モードシミュレーション
+        final batteryMode = Platform.environment['BATTERY_OPTIMIZATION_MODE'];
+        if (batteryMode == 'enabled') {
+          return LocationServiceResult.failure('バッテリー最適化により位置情報が制限されています');
+        }
+
+        // 10種類のエラーパターンシミュレーション（仮実装）
+        final errorPattern = Platform.environment['ERROR_SIMULATION_PATTERN'];
+        if (errorPattern == 'gps_weak') {
+          return LocationServiceResult.failure('GPS信号が弱すぎます');
+        } else if (errorPattern == 'multipath') {
+          return LocationServiceResult.failure('マルチパス干渉により位置情報が不安定です');
+        } else if (errorPattern == 'indoor') {
+          return LocationServiceResult.failure('屋内環境のためGPS取得できません');
+        }
+
         // テスト環境：環境変数でエラーシミュレーション可能
         final errorMode = Platform.environment['LOCATION_ERROR_MODE'];
 
