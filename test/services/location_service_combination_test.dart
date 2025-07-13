@@ -4,6 +4,13 @@ import 'package:chinese_food_app/services/location_service_mock.dart';
 
 /// Issue #43: 組み合わせテスト・パフォーマンステスト
 /// 複数の環境変数を組み合わせたエラーシミュレーションテスト
+///
+/// 注意: このテストは環境変数設定に依存します
+/// 実行例:
+/// - GPS_ACCURACY_MODE=low NETWORK_DELAY_MODE=5s flutter test
+/// - BATTERY_OPTIMIZATION_MODE=enabled flutter test
+///
+/// QA Review対応: テスト環境依存性の明示化
 void main() {
   group('Combination Tests - Issue #43', () {
     late LocationService locationService;

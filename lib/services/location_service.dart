@@ -191,6 +191,9 @@ class LocationService {
         }
       } else {
         // TDD GREEN段階: Issue #43の新しい環境変数対応
+        // QA Review修正: 環境変数バリデーション強化
+        _validateEnvironmentVariables();
+
         // GPS精度モードシミュレーション
         final accuracyMode = Platform.environment['GPS_ACCURACY_MODE'];
         if (accuracyMode == 'low') {
@@ -326,6 +329,56 @@ class LocationService {
     }
 
     return components.join(' ');
+  }
+
+  /// QA Review修正: 環境変数バリデーション
+  void _validateEnvironmentVariables() {
+    // GPS精度モードの有効性チェック
+    final accuracyMode = Platform.environment['GPS_ACCURACY_MODE'];
+    const validAccuracyModes = ['low', 'medium', 'high'];
+    if (accuracyMode != null && !validAccuracyModes.contains(accuracyMode)) {
+      developer.log(
+          'Invalid GPS_ACCURACY_MODE: $accuracyMode. Valid values: ${validAccuracyModes.join(', ')}',
+          name: 'LocationService');
+    }
+
+    // ネットワーク遅延モードの有効性チェック
+    final delayMode = Platform.environment['NETWORK_DELAY_MODE'];
+    const validDelayModes = ['1s', '5s', 'timeout'];
+    if (delayMode != null && !validDelayModes.contains(delayMode)) {
+      developer.log(
+          'Invalid NETWORK_DELAY_MODE: $delayMode. Valid values: ${validDelayModes.join(', ')}',
+          name: 'LocationService');
+    }
+
+    // バッテリー最適化モードの有効性チェック
+    final batteryMode = Platform.environment['BATTERY_OPTIMIZATION_MODE'];
+    const validBatteryModes = ['enabled', 'disabled'];
+    if (batteryMode != null && !validBatteryModes.contains(batteryMode)) {
+      developer.log(
+          'Invalid BATTERY_OPTIMIZATION_MODE: $batteryMode. Valid values: ${validBatteryModes.join(', ')}',
+          name: 'LocationService');
+    }
+
+    // エラーシミュレーションパターンの有効性チェック
+    final errorPattern = Platform.environment['ERROR_SIMULATION_PATTERN'];
+    const validErrorPatterns = [
+      'gps_weak',
+      'multipath',
+      'indoor',
+      'battery_optimization',
+      'permission_timing',
+      'network_unstable',
+      'high_speed_movement',
+      'app_switching',
+      'os_version_difference',
+      'memory_shortage'
+    ];
+    if (errorPattern != null && !validErrorPatterns.contains(errorPattern)) {
+      developer.log(
+          'Invalid ERROR_SIMULATION_PATTERN: $errorPattern. Valid values: ${validErrorPatterns.join(', ')}',
+          name: 'LocationService');
+    }
   }
 }
 
