@@ -207,11 +207,19 @@ class AppDIContainer implements DIContainerInterface {
         throw UnsupportedError('Web環境での本番使用は現在未対応です。Native環境を使用してください。');
       }
     } else {
-      // Native環境: SQLiteファイルを使用
-      developer.log('Native環境: SQLiteファイルを使用', name: 'Database');
-      return DatabaseConnection(NativeDatabase.createInBackground(
-        File('app_db.sqlite'),
-      ));
+      // Native環境の分岐処理
+      if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+        // テスト環境: 各インスタンス用の一意なインメモリデータベース
+        developer.log('テスト環境: インメモリデータベース使用（race condition回避）',
+            name: 'Database');
+        return DatabaseConnection(NativeDatabase.memory());
+      } else {
+        // 本番・開発環境: SQLiteファイルを使用
+        developer.log('Native環境: SQLiteファイルを使用', name: 'Database');
+        return DatabaseConnection(NativeDatabase.createInBackground(
+          File('app_db.sqlite'),
+        ));
+      }
     }
   }
 

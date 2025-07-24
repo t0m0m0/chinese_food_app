@@ -1,6 +1,16 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 
 part 'app_database.g.dart';
+
+// テスト環境でのDrift警告を無効化（静的初期化）
+final bool _isDriftInitialized = (() {
+  if (const bool.fromEnvironment('flutter.test', defaultValue: false) &&
+      kDebugMode) {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  }
+  return true;
+})();
 
 class Stores extends Table {
   TextColumn get id => text()();
@@ -46,7 +56,10 @@ class Photos extends Table {
 
 @DriftDatabase(tables: [Stores, VisitRecords, Photos])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase(super.connection);
+  AppDatabase(super.connection) {
+    // 静的初期化により自動で設定済み
+    assert(_isDriftInitialized);
+  }
 
   @override
   int get schemaVersion => 2;
