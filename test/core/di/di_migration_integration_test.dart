@@ -1,12 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:chinese_food_app/core/di/di_container_interface.dart';
 import 'package:chinese_food_app/core/di/app_di_container.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 
 void main() {
+  // テスト開始時にDrift警告を無効化
+  setUpAll(() {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  });
   group('DI Migration Integration Tests', () {
     late DIContainerInterface container;
 

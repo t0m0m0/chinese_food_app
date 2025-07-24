@@ -190,6 +190,44 @@ class LocationService {
           }
         }
       } else {
+        // TDD GREEN段階: Issue #43の新しい環境変数対応
+        // QA Review修正: 環境変数バリデーション強化
+        _validateEnvironmentVariables();
+
+        // GPS精度モードシミュレーション
+        final accuracyMode = Platform.environment['GPS_ACCURACY_MODE'];
+        if (accuracyMode == 'low') {
+          return LocationServiceResult.failure('GPS精度が低すぎます');
+        } else if (accuracyMode == 'medium') {
+          return LocationServiceResult.failure('GPS精度が中程度です');
+        }
+
+        // ネットワーク遅延モードシミュレーション
+        final delayMode = Platform.environment['NETWORK_DELAY_MODE'];
+        if (delayMode == '1s') {
+          await Future.delayed(const Duration(seconds: 1));
+        } else if (delayMode == '5s') {
+          await Future.delayed(const Duration(seconds: 5));
+        } else if (delayMode == 'timeout') {
+          return LocationServiceResult.failure('ネットワークタイムアウト');
+        }
+
+        // バッテリー最適化モードシミュレーション
+        final batteryMode = Platform.environment['BATTERY_OPTIMIZATION_MODE'];
+        if (batteryMode == 'enabled') {
+          return LocationServiceResult.failure('バッテリー最適化により位置情報が制限されています');
+        }
+
+        // 10種類のエラーパターンシミュレーション（仮実装）
+        final errorPattern = Platform.environment['ERROR_SIMULATION_PATTERN'];
+        if (errorPattern == 'gps_weak') {
+          return LocationServiceResult.failure('GPS信号が弱すぎます');
+        } else if (errorPattern == 'multipath') {
+          return LocationServiceResult.failure('マルチパス干渉により位置情報が不安定です');
+        } else if (errorPattern == 'indoor') {
+          return LocationServiceResult.failure('屋内環境のためGPS取得できません');
+        }
+
         // テスト環境：環境変数でエラーシミュレーション可能
         final errorMode = Platform.environment['LOCATION_ERROR_MODE'];
 
@@ -291,6 +329,56 @@ class LocationService {
     }
 
     return components.join(' ');
+  }
+
+  /// QA Review修正: 環境変数バリデーション
+  void _validateEnvironmentVariables() {
+    // GPS精度モードの有効性チェック
+    final accuracyMode = Platform.environment['GPS_ACCURACY_MODE'];
+    const validAccuracyModes = ['low', 'medium', 'high'];
+    if (accuracyMode != null && !validAccuracyModes.contains(accuracyMode)) {
+      developer.log(
+          'Invalid GPS_ACCURACY_MODE: $accuracyMode. Valid values: ${validAccuracyModes.join(', ')}',
+          name: 'LocationService');
+    }
+
+    // ネットワーク遅延モードの有効性チェック
+    final delayMode = Platform.environment['NETWORK_DELAY_MODE'];
+    const validDelayModes = ['1s', '5s', 'timeout'];
+    if (delayMode != null && !validDelayModes.contains(delayMode)) {
+      developer.log(
+          'Invalid NETWORK_DELAY_MODE: $delayMode. Valid values: ${validDelayModes.join(', ')}',
+          name: 'LocationService');
+    }
+
+    // バッテリー最適化モードの有効性チェック
+    final batteryMode = Platform.environment['BATTERY_OPTIMIZATION_MODE'];
+    const validBatteryModes = ['enabled', 'disabled'];
+    if (batteryMode != null && !validBatteryModes.contains(batteryMode)) {
+      developer.log(
+          'Invalid BATTERY_OPTIMIZATION_MODE: $batteryMode. Valid values: ${validBatteryModes.join(', ')}',
+          name: 'LocationService');
+    }
+
+    // エラーシミュレーションパターンの有効性チェック
+    final errorPattern = Platform.environment['ERROR_SIMULATION_PATTERN'];
+    const validErrorPatterns = [
+      'gps_weak',
+      'multipath',
+      'indoor',
+      'battery_optimization',
+      'permission_timing',
+      'network_unstable',
+      'high_speed_movement',
+      'app_switching',
+      'os_version_difference',
+      'memory_shortage'
+    ];
+    if (errorPattern != null && !validErrorPatterns.contains(errorPattern)) {
+      developer.log(
+          'Invalid ERROR_SIMULATION_PATTERN: $errorPattern. Valid values: ${validErrorPatterns.join(', ')}',
+          name: 'LocationService');
+    }
   }
 }
 
