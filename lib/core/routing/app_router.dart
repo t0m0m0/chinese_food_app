@@ -3,6 +3,7 @@ import '../../presentation/pages/swipe/swipe_page.dart';
 import '../../presentation/pages/search/search_page.dart';
 import '../../presentation/pages/my_menu/my_menu_page.dart';
 import '../../presentation/pages/store_detail/store_detail_page.dart';
+import '../../presentation/pages/visit_record/visit_record_form_page.dart';
 import '../../presentation/pages/shell/shell_page.dart';
 import '../../presentation/pages/error/error_page.dart';
 import '../../domain/entities/store.dart';
@@ -51,6 +52,20 @@ class AppRouter {
             );
           }
           return StoreDetailPage(store: store);
+        },
+      ),
+      GoRoute(
+        path: '/visit-record-form',
+        name: 'visit-record-form',
+        builder: (context, state) {
+          // 型安全なキャスト処理
+          final Store? store = state.extra as Store?;
+          if (store == null) {
+            return const ErrorPage(
+              message: '店舗情報が見つかりません',
+            );
+          }
+          return VisitRecordFormPage(store: store);
         },
       ),
     ],
