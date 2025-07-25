@@ -97,6 +97,9 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
                   if (value == null || value.trim().isEmpty) {
                     return 'メニューを入力してください';
                   }
+                  if (value.trim().length > 100) {
+                    return 'メニュー名は100文字以内で入力してください';
+                  }
                   return null;
                 },
               ),
@@ -112,6 +115,12 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
                   hintText: '味、雰囲気、感想などを記録できます',
                 ),
                 maxLines: 3,
+                validator: (value) {
+                  if (value != null && value.trim().length > 500) {
+                    return 'メモは500文字以内で入力してください';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 32),
 

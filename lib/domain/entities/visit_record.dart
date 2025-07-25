@@ -44,6 +44,14 @@ class VisitRecord {
     if (menu.isEmpty) {
       throw ArgumentError('Menu cannot be empty');
     }
+    if (menu.length > 100) {
+      throw ArgumentError(
+          'Menu must be 100 characters or less: ${menu.length} characters');
+    }
+    if (memo != null && memo!.length > 500) {
+      throw ArgumentError(
+          'Memo must be 500 characters or less: ${memo!.length} characters');
+    }
 
     // 訪問日時が未来でないことを確認
     final now = DateTime.now();

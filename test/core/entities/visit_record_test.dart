@@ -146,5 +146,63 @@ void main() {
       expect(record.menu, 'ラーメン + 餃子 + ビール');
       expect(record.menu.length, greaterThan(0));
     });
+
+    test('should validate menu length limit (100 characters)', () {
+      // Test exactly 100 characters - should pass
+      final validMenu = 'a' * 100;
+      expect(
+        () => VisitRecord(
+          id: 'test-id',
+          storeId: 'test-store-id',
+          visitedAt: DateTime(2024, 1, 1),
+          menu: validMenu,
+          createdAt: DateTime(2024, 1, 1),
+        ),
+        returnsNormally,
+      );
+
+      // Test 101 characters - should throw
+      final invalidMenu = 'a' * 101;
+      expect(
+        () => VisitRecord(
+          id: 'test-id',
+          storeId: 'test-store-id',
+          visitedAt: DateTime(2024, 1, 1),
+          menu: invalidMenu,
+          createdAt: DateTime(2024, 1, 1),
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('should validate memo length limit (500 characters)', () {
+      // Test exactly 500 characters - should pass
+      final validMemo = 'a' * 500;
+      expect(
+        () => VisitRecord(
+          id: 'test-id',
+          storeId: 'test-store-id',
+          visitedAt: DateTime(2024, 1, 1),
+          menu: 'test menu',
+          memo: validMemo,
+          createdAt: DateTime(2024, 1, 1),
+        ),
+        returnsNormally,
+      );
+
+      // Test 501 characters - should throw
+      final invalidMemo = 'a' * 501;
+      expect(
+        () => VisitRecord(
+          id: 'test-id',
+          storeId: 'test-store-id',
+          visitedAt: DateTime(2024, 1, 1),
+          menu: 'test menu',
+          memo: invalidMemo,
+          createdAt: DateTime(2024, 1, 1),
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 }

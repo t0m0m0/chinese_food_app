@@ -3,9 +3,24 @@ import 'package:uuid/uuid.dart';
 import '../entities/visit_record.dart';
 import '../repositories/visit_record_repository.dart';
 
+/// 訪問記録追加のユースケース
+///
+/// 店舗への訪問記録を作成し、データベースに保存する。
+/// 自動的にUUIDを生成し、作成日時を設定する。
+///
+/// 例:
+/// ```dart
+/// final usecase = AddVisitRecordUsecase(repository);
+/// final record = await usecase.call(
+///   storeId: 'store-123',
+///   visitedAt: DateTime.now(),
+///   menu: 'チャーハン',
+///   memo: '美味しかった',
+/// );
+/// ```
 class AddVisitRecordUsecase {
   final VisitRecordRepository _repository;
-  final Uuid _uuid = const Uuid();
+  static const Uuid _uuid = Uuid();
 
   AddVisitRecordUsecase(this._repository);
 
