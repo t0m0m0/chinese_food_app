@@ -3,36 +3,36 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i7;
 import 'dart:convert' as _i21;
-import 'dart:io' as _i8;
+import 'dart:io' as _i9;
 import 'dart:typed_data' as _i22;
 
-import 'package:chinese_food_app/core/services/photo_service.dart' as _i7;
-import 'package:chinese_food_app/core/types/result.dart' as _i12;
+import 'package:chinese_food_app/core/services/photo_service.dart' as _i8;
+import 'package:chinese_food_app/core/types/result.dart' as _i13;
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart'
     as _i18;
 import 'package:chinese_food_app/data/datasources/photo_local_datasource.dart'
     as _i20;
 import 'package:chinese_food_app/data/datasources/store_local_datasource.dart'
     as _i19;
-import 'package:chinese_food_app/data/models/hotpepper_store_model.dart' as _i3;
+import 'package:chinese_food_app/data/models/hotpepper_store_model.dart' as _i4;
 import 'package:chinese_food_app/domain/entities/location.dart' as _i2;
 import 'package:chinese_food_app/domain/entities/photo.dart' as _i17;
-import 'package:chinese_food_app/domain/entities/store.dart' as _i10;
-import 'package:chinese_food_app/domain/entities/visit_record.dart' as _i15;
+import 'package:chinese_food_app/domain/entities/store.dart' as _i11;
+import 'package:chinese_food_app/domain/entities/visit_record.dart' as _i3;
 import 'package:chinese_food_app/domain/repositories/location_repository.dart'
-    as _i11;
+    as _i12;
 import 'package:chinese_food_app/domain/repositories/photo_repository.dart'
     as _i16;
 import 'package:chinese_food_app/domain/repositories/store_repository.dart'
-    as _i9;
+    as _i10;
 import 'package:chinese_food_app/domain/repositories/visit_record_repository.dart'
-    as _i14;
-import 'package:chinese_food_app/domain/services/location_service.dart' as _i5;
-import 'package:http/http.dart' as _i4;
+    as _i15;
+import 'package:chinese_food_app/domain/services/location_service.dart' as _i6;
+import 'package:http/http.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i13;
+import 'package:mockito/src/dummies.dart' as _i14;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -58,9 +58,8 @@ class _FakeLocation_0 extends _i1.SmartFake implements _i2.Location {
         );
 }
 
-class _FakeHotpepperSearchResponse_1 extends _i1.SmartFake
-    implements _i3.HotpepperSearchResponse {
-  _FakeHotpepperSearchResponse_1(
+class _FakeVisitRecord_1 extends _i1.SmartFake implements _i3.VisitRecord {
+  _FakeVisitRecord_1(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -69,8 +68,9 @@ class _FakeHotpepperSearchResponse_1 extends _i1.SmartFake
         );
 }
 
-class _FakeResponse_2 extends _i1.SmartFake implements _i4.Response {
-  _FakeResponse_2(
+class _FakeHotpepperSearchResponse_2 extends _i1.SmartFake
+    implements _i4.HotpepperSearchResponse {
+  _FakeHotpepperSearchResponse_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -79,9 +79,19 @@ class _FakeResponse_2 extends _i1.SmartFake implements _i4.Response {
         );
 }
 
-class _FakeStreamedResponse_3 extends _i1.SmartFake
-    implements _i4.StreamedResponse {
-  _FakeStreamedResponse_3(
+class _FakeResponse_3 extends _i1.SmartFake implements _i5.Response {
+  _FakeResponse_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeStreamedResponse_4 extends _i1.SmartFake
+    implements _i5.StreamedResponse {
+  _FakeStreamedResponse_4(
     Object parent,
     Invocation parentInvocation,
   ) : super(
@@ -93,82 +103,82 @@ class _FakeStreamedResponse_3 extends _i1.SmartFake
 /// A class which mocks [LocationService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLocationService extends _i1.Mock implements _i5.LocationService {
+class MockLocationService extends _i1.Mock implements _i6.LocationService {
   MockLocationService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<_i2.Location> getCurrentLocation() => (super.noSuchMethod(
+  _i7.Future<_i2.Location> getCurrentLocation() => (super.noSuchMethod(
         Invocation.method(
           #getCurrentLocation,
           [],
         ),
-        returnValue: _i6.Future<_i2.Location>.value(_FakeLocation_0(
+        returnValue: _i7.Future<_i2.Location>.value(_FakeLocation_0(
           this,
           Invocation.method(
             #getCurrentLocation,
             [],
           ),
         )),
-      ) as _i6.Future<_i2.Location>);
+      ) as _i7.Future<_i2.Location>);
 
   @override
-  _i6.Future<bool> isLocationServiceEnabled() => (super.noSuchMethod(
+  _i7.Future<bool> isLocationServiceEnabled() => (super.noSuchMethod(
         Invocation.method(
           #isLocationServiceEnabled,
           [],
         ),
-        returnValue: _i6.Future<bool>.value(false),
-      ) as _i6.Future<bool>);
+        returnValue: _i7.Future<bool>.value(false),
+      ) as _i7.Future<bool>);
 
   @override
-  _i6.Future<bool> hasLocationPermission() => (super.noSuchMethod(
+  _i7.Future<bool> hasLocationPermission() => (super.noSuchMethod(
         Invocation.method(
           #hasLocationPermission,
           [],
         ),
-        returnValue: _i6.Future<bool>.value(false),
-      ) as _i6.Future<bool>);
+        returnValue: _i7.Future<bool>.value(false),
+      ) as _i7.Future<bool>);
 
   @override
-  _i6.Future<bool> requestLocationPermission() => (super.noSuchMethod(
+  _i7.Future<bool> requestLocationPermission() => (super.noSuchMethod(
         Invocation.method(
           #requestLocationPermission,
           [],
         ),
-        returnValue: _i6.Future<bool>.value(false),
-      ) as _i6.Future<bool>);
+        returnValue: _i7.Future<bool>.value(false),
+      ) as _i7.Future<bool>);
 }
 
 /// A class which mocks [PhotoService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPhotoService extends _i1.Mock implements _i7.PhotoService {
+class MockPhotoService extends _i1.Mock implements _i8.PhotoService {
   MockPhotoService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<_i8.File?> takePhotoFromCamera() => (super.noSuchMethod(
+  _i7.Future<_i9.File?> takePhotoFromCamera() => (super.noSuchMethod(
         Invocation.method(
           #takePhotoFromCamera,
           [],
         ),
-        returnValue: _i6.Future<_i8.File?>.value(),
-      ) as _i6.Future<_i8.File?>);
+        returnValue: _i7.Future<_i9.File?>.value(),
+      ) as _i7.Future<_i9.File?>);
 
   @override
-  _i6.Future<_i8.File?> pickPhotoFromGallery() => (super.noSuchMethod(
+  _i7.Future<_i9.File?> pickPhotoFromGallery() => (super.noSuchMethod(
         Invocation.method(
           #pickPhotoFromGallery,
           [],
         ),
-        returnValue: _i6.Future<_i8.File?>.value(),
-      ) as _i6.Future<_i8.File?>);
+        returnValue: _i7.Future<_i9.File?>.value(),
+      ) as _i7.Future<_i9.File?>);
 
   @override
-  _i6.Future<_i8.File?> showPhotoSelectionDialog({
+  _i7.Future<_i9.File?> showPhotoSelectionDialog({
     required bool? allowCamera,
     required bool? allowGallery,
   }) =>
@@ -181,88 +191,88 @@ class MockPhotoService extends _i1.Mock implements _i7.PhotoService {
             #allowGallery: allowGallery,
           },
         ),
-        returnValue: _i6.Future<_i8.File?>.value(),
-      ) as _i6.Future<_i8.File?>);
+        returnValue: _i7.Future<_i9.File?>.value(),
+      ) as _i7.Future<_i9.File?>);
 }
 
 /// A class which mocks [StoreRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockStoreRepository extends _i1.Mock implements _i9.StoreRepository {
+class MockStoreRepository extends _i1.Mock implements _i10.StoreRepository {
   MockStoreRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<List<_i10.Store>> getAllStores() => (super.noSuchMethod(
+  _i7.Future<List<_i11.Store>> getAllStores() => (super.noSuchMethod(
         Invocation.method(
           #getAllStores,
           [],
         ),
-        returnValue: _i6.Future<List<_i10.Store>>.value(<_i10.Store>[]),
-      ) as _i6.Future<List<_i10.Store>>);
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 
   @override
-  _i6.Future<List<_i10.Store>> getStoresByStatus(_i10.StoreStatus? status) =>
+  _i7.Future<List<_i11.Store>> getStoresByStatus(_i11.StoreStatus? status) =>
       (super.noSuchMethod(
         Invocation.method(
           #getStoresByStatus,
           [status],
         ),
-        returnValue: _i6.Future<List<_i10.Store>>.value(<_i10.Store>[]),
-      ) as _i6.Future<List<_i10.Store>>);
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 
   @override
-  _i6.Future<_i10.Store?> getStoreById(String? id) => (super.noSuchMethod(
+  _i7.Future<_i11.Store?> getStoreById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getStoreById,
           [id],
         ),
-        returnValue: _i6.Future<_i10.Store?>.value(),
-      ) as _i6.Future<_i10.Store?>);
+        returnValue: _i7.Future<_i11.Store?>.value(),
+      ) as _i7.Future<_i11.Store?>);
 
   @override
-  _i6.Future<void> insertStore(_i10.Store? store) => (super.noSuchMethod(
+  _i7.Future<void> insertStore(_i11.Store? store) => (super.noSuchMethod(
         Invocation.method(
           #insertStore,
           [store],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> updateStore(_i10.Store? store) => (super.noSuchMethod(
+  _i7.Future<void> updateStore(_i11.Store? store) => (super.noSuchMethod(
         Invocation.method(
           #updateStore,
           [store],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> deleteStore(String? id) => (super.noSuchMethod(
+  _i7.Future<void> deleteStore(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteStore,
           [id],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<List<_i10.Store>> searchStores(String? query) =>
+  _i7.Future<List<_i11.Store>> searchStores(String? query) =>
       (super.noSuchMethod(
         Invocation.method(
           #searchStores,
           [query],
         ),
-        returnValue: _i6.Future<List<_i10.Store>>.value(<_i10.Store>[]),
-      ) as _i6.Future<List<_i10.Store>>);
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 
   @override
-  _i6.Future<List<_i10.Store>> searchStoresFromApi({
+  _i7.Future<List<_i11.Store>> searchStoresFromApi({
     double? lat,
     double? lng,
     String? address,
@@ -285,110 +295,113 @@ class MockStoreRepository extends _i1.Mock implements _i9.StoreRepository {
             #start: start,
           },
         ),
-        returnValue: _i6.Future<List<_i10.Store>>.value(<_i10.Store>[]),
-      ) as _i6.Future<List<_i10.Store>>);
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 }
 
 /// A class which mocks [LocationRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockLocationRepository extends _i1.Mock
-    implements _i11.LocationRepository {
+    implements _i12.LocationRepository {
   MockLocationRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<_i12.Result<_i2.Location>> getCurrentLocation() =>
+  _i7.Future<_i13.Result<_i2.Location>> getCurrentLocation() =>
       (super.noSuchMethod(
         Invocation.method(
           #getCurrentLocation,
           [],
         ),
-        returnValue: _i6.Future<_i12.Result<_i2.Location>>.value(
-            _i13.dummyValue<_i12.Result<_i2.Location>>(
+        returnValue: _i7.Future<_i13.Result<_i2.Location>>.value(
+            _i14.dummyValue<_i13.Result<_i2.Location>>(
           this,
           Invocation.method(
             #getCurrentLocation,
             [],
           ),
         )),
-      ) as _i6.Future<_i12.Result<_i2.Location>>);
+      ) as _i7.Future<_i13.Result<_i2.Location>>);
 }
 
 /// A class which mocks [VisitRecordRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockVisitRecordRepository extends _i1.Mock
-    implements _i14.VisitRecordRepository {
+    implements _i15.VisitRecordRepository {
   MockVisitRecordRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<List<_i15.VisitRecord>> getAllVisitRecords() =>
-      (super.noSuchMethod(
+  _i7.Future<List<_i3.VisitRecord>> getAllVisitRecords() => (super.noSuchMethod(
         Invocation.method(
           #getAllVisitRecords,
           [],
         ),
         returnValue:
-            _i6.Future<List<_i15.VisitRecord>>.value(<_i15.VisitRecord>[]),
-      ) as _i6.Future<List<_i15.VisitRecord>>);
+            _i7.Future<List<_i3.VisitRecord>>.value(<_i3.VisitRecord>[]),
+      ) as _i7.Future<List<_i3.VisitRecord>>);
 
   @override
-  _i6.Future<List<_i15.VisitRecord>> getVisitRecordsByStoreId(
-          String? storeId) =>
+  _i7.Future<List<_i3.VisitRecord>> getVisitRecordsByStoreId(String? storeId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getVisitRecordsByStoreId,
           [storeId],
         ),
         returnValue:
-            _i6.Future<List<_i15.VisitRecord>>.value(<_i15.VisitRecord>[]),
-      ) as _i6.Future<List<_i15.VisitRecord>>);
+            _i7.Future<List<_i3.VisitRecord>>.value(<_i3.VisitRecord>[]),
+      ) as _i7.Future<List<_i3.VisitRecord>>);
 
   @override
-  _i6.Future<_i15.VisitRecord?> getVisitRecordById(String? id) =>
+  _i7.Future<_i3.VisitRecord?> getVisitRecordById(String? id) =>
       (super.noSuchMethod(
         Invocation.method(
           #getVisitRecordById,
           [id],
         ),
-        returnValue: _i6.Future<_i15.VisitRecord?>.value(),
-      ) as _i6.Future<_i15.VisitRecord?>);
+        returnValue: _i7.Future<_i3.VisitRecord?>.value(),
+      ) as _i7.Future<_i3.VisitRecord?>);
 
   @override
-  _i6.Future<void> insertVisitRecord(_i15.VisitRecord? visitRecord) =>
+  _i7.Future<_i3.VisitRecord> insertVisitRecord(_i3.VisitRecord? visitRecord) =>
       (super.noSuchMethod(
         Invocation.method(
           #insertVisitRecord,
           [visitRecord],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<_i3.VisitRecord>.value(_FakeVisitRecord_1(
+          this,
+          Invocation.method(
+            #insertVisitRecord,
+            [visitRecord],
+          ),
+        )),
+      ) as _i7.Future<_i3.VisitRecord>);
 
   @override
-  _i6.Future<void> updateVisitRecord(_i15.VisitRecord? visitRecord) =>
+  _i7.Future<void> updateVisitRecord(_i3.VisitRecord? visitRecord) =>
       (super.noSuchMethod(
         Invocation.method(
           #updateVisitRecord,
           [visitRecord],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> deleteVisitRecord(String? id) => (super.noSuchMethod(
+  _i7.Future<void> deleteVisitRecord(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteVisitRecord,
           [id],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 }
 
 /// A class which mocks [PhotoRepository].
@@ -400,72 +413,72 @@ class MockPhotoRepository extends _i1.Mock implements _i16.PhotoRepository {
   }
 
   @override
-  _i6.Future<List<_i17.Photo>> getAllPhotos() => (super.noSuchMethod(
+  _i7.Future<List<_i17.Photo>> getAllPhotos() => (super.noSuchMethod(
         Invocation.method(
           #getAllPhotos,
           [],
         ),
-        returnValue: _i6.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
-      ) as _i6.Future<List<_i17.Photo>>);
+        returnValue: _i7.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
+      ) as _i7.Future<List<_i17.Photo>>);
 
   @override
-  _i6.Future<List<_i17.Photo>> getPhotosByStoreId(String? storeId) =>
+  _i7.Future<List<_i17.Photo>> getPhotosByStoreId(String? storeId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getPhotosByStoreId,
           [storeId],
         ),
-        returnValue: _i6.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
-      ) as _i6.Future<List<_i17.Photo>>);
+        returnValue: _i7.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
+      ) as _i7.Future<List<_i17.Photo>>);
 
   @override
-  _i6.Future<List<_i17.Photo>> getPhotosByVisitId(String? visitId) =>
+  _i7.Future<List<_i17.Photo>> getPhotosByVisitId(String? visitId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getPhotosByVisitId,
           [visitId],
         ),
-        returnValue: _i6.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
-      ) as _i6.Future<List<_i17.Photo>>);
+        returnValue: _i7.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
+      ) as _i7.Future<List<_i17.Photo>>);
 
   @override
-  _i6.Future<_i17.Photo?> getPhotoById(String? id) => (super.noSuchMethod(
+  _i7.Future<_i17.Photo?> getPhotoById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getPhotoById,
           [id],
         ),
-        returnValue: _i6.Future<_i17.Photo?>.value(),
-      ) as _i6.Future<_i17.Photo?>);
+        returnValue: _i7.Future<_i17.Photo?>.value(),
+      ) as _i7.Future<_i17.Photo?>);
 
   @override
-  _i6.Future<void> insertPhoto(_i17.Photo? photo) => (super.noSuchMethod(
+  _i7.Future<void> insertPhoto(_i17.Photo? photo) => (super.noSuchMethod(
         Invocation.method(
           #insertPhoto,
           [photo],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> updatePhoto(_i17.Photo? photo) => (super.noSuchMethod(
+  _i7.Future<void> updatePhoto(_i17.Photo? photo) => (super.noSuchMethod(
         Invocation.method(
           #updatePhoto,
           [photo],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> deletePhoto(String? id) => (super.noSuchMethod(
+  _i7.Future<void> deletePhoto(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deletePhoto,
           [id],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 }
 
 /// A class which mocks [HotpepperApiDatasource].
@@ -478,7 +491,7 @@ class MockHotpepperApiDatasource extends _i1.Mock
   }
 
   @override
-  _i6.Future<_i3.HotpepperSearchResponse> searchStores({
+  _i7.Future<_i4.HotpepperSearchResponse> searchStores({
     double? lat,
     double? lng,
     String? address,
@@ -501,8 +514,8 @@ class MockHotpepperApiDatasource extends _i1.Mock
             #start: start,
           },
         ),
-        returnValue: _i6.Future<_i3.HotpepperSearchResponse>.value(
-            _FakeHotpepperSearchResponse_1(
+        returnValue: _i7.Future<_i4.HotpepperSearchResponse>.value(
+            _FakeHotpepperSearchResponse_2(
           this,
           Invocation.method(
             #searchStores,
@@ -518,7 +531,7 @@ class MockHotpepperApiDatasource extends _i1.Mock
             },
           ),
         )),
-      ) as _i6.Future<_i3.HotpepperSearchResponse>);
+      ) as _i7.Future<_i4.HotpepperSearchResponse>);
 }
 
 /// A class which mocks [StoreLocalDatasource].
@@ -531,72 +544,72 @@ class MockStoreLocalDatasource extends _i1.Mock
   }
 
   @override
-  _i6.Future<void> insertStore(_i10.Store? store) => (super.noSuchMethod(
+  _i7.Future<void> insertStore(_i11.Store? store) => (super.noSuchMethod(
         Invocation.method(
           #insertStore,
           [store],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> updateStore(_i10.Store? store) => (super.noSuchMethod(
+  _i7.Future<void> updateStore(_i11.Store? store) => (super.noSuchMethod(
         Invocation.method(
           #updateStore,
           [store],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> deleteStore(String? id) => (super.noSuchMethod(
+  _i7.Future<void> deleteStore(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deleteStore,
           [id],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<_i10.Store?> getStoreById(String? id) => (super.noSuchMethod(
+  _i7.Future<_i11.Store?> getStoreById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getStoreById,
           [id],
         ),
-        returnValue: _i6.Future<_i10.Store?>.value(),
-      ) as _i6.Future<_i10.Store?>);
+        returnValue: _i7.Future<_i11.Store?>.value(),
+      ) as _i7.Future<_i11.Store?>);
 
   @override
-  _i6.Future<List<_i10.Store>> getStoresByStatus(_i10.StoreStatus? status) =>
+  _i7.Future<List<_i11.Store>> getStoresByStatus(_i11.StoreStatus? status) =>
       (super.noSuchMethod(
         Invocation.method(
           #getStoresByStatus,
           [status],
         ),
-        returnValue: _i6.Future<List<_i10.Store>>.value(<_i10.Store>[]),
-      ) as _i6.Future<List<_i10.Store>>);
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 
   @override
-  _i6.Future<List<_i10.Store>> searchStores(String? query) =>
+  _i7.Future<List<_i11.Store>> searchStores(String? query) =>
       (super.noSuchMethod(
         Invocation.method(
           #searchStores,
           [query],
         ),
-        returnValue: _i6.Future<List<_i10.Store>>.value(<_i10.Store>[]),
-      ) as _i6.Future<List<_i10.Store>>);
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 
   @override
-  _i6.Future<List<_i10.Store>> getAllStores() => (super.noSuchMethod(
+  _i7.Future<List<_i11.Store>> getAllStores() => (super.noSuchMethod(
         Invocation.method(
           #getAllStores,
           [],
         ),
-        returnValue: _i6.Future<List<_i10.Store>>.value(<_i10.Store>[]),
-      ) as _i6.Future<List<_i10.Store>>);
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 }
 
 /// A class which mocks [PhotoLocalDatasource].
@@ -609,84 +622,84 @@ class MockPhotoLocalDatasource extends _i1.Mock
   }
 
   @override
-  _i6.Future<void> insertPhoto(_i17.Photo? photo) => (super.noSuchMethod(
+  _i7.Future<void> insertPhoto(_i17.Photo? photo) => (super.noSuchMethod(
         Invocation.method(
           #insertPhoto,
           [photo],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<_i17.Photo?> getPhotoById(String? id) => (super.noSuchMethod(
+  _i7.Future<_i17.Photo?> getPhotoById(String? id) => (super.noSuchMethod(
         Invocation.method(
           #getPhotoById,
           [id],
         ),
-        returnValue: _i6.Future<_i17.Photo?>.value(),
-      ) as _i6.Future<_i17.Photo?>);
+        returnValue: _i7.Future<_i17.Photo?>.value(),
+      ) as _i7.Future<_i17.Photo?>);
 
   @override
-  _i6.Future<List<_i17.Photo>> getAllPhotos() => (super.noSuchMethod(
+  _i7.Future<List<_i17.Photo>> getAllPhotos() => (super.noSuchMethod(
         Invocation.method(
           #getAllPhotos,
           [],
         ),
-        returnValue: _i6.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
-      ) as _i6.Future<List<_i17.Photo>>);
+        returnValue: _i7.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
+      ) as _i7.Future<List<_i17.Photo>>);
 
   @override
-  _i6.Future<List<_i17.Photo>> getPhotosByStoreId(String? storeId) =>
+  _i7.Future<List<_i17.Photo>> getPhotosByStoreId(String? storeId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getPhotosByStoreId,
           [storeId],
         ),
-        returnValue: _i6.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
-      ) as _i6.Future<List<_i17.Photo>>);
+        returnValue: _i7.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
+      ) as _i7.Future<List<_i17.Photo>>);
 
   @override
-  _i6.Future<List<_i17.Photo>> getPhotosByVisitId(String? visitId) =>
+  _i7.Future<List<_i17.Photo>> getPhotosByVisitId(String? visitId) =>
       (super.noSuchMethod(
         Invocation.method(
           #getPhotosByVisitId,
           [visitId],
         ),
-        returnValue: _i6.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
-      ) as _i6.Future<List<_i17.Photo>>);
+        returnValue: _i7.Future<List<_i17.Photo>>.value(<_i17.Photo>[]),
+      ) as _i7.Future<List<_i17.Photo>>);
 
   @override
-  _i6.Future<void> updatePhoto(_i17.Photo? photo) => (super.noSuchMethod(
+  _i7.Future<void> updatePhoto(_i17.Photo? photo) => (super.noSuchMethod(
         Invocation.method(
           #updatePhoto,
           [photo],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i6.Future<void> deletePhoto(String? id) => (super.noSuchMethod(
+  _i7.Future<void> deletePhoto(String? id) => (super.noSuchMethod(
         Invocation.method(
           #deletePhoto,
           [id],
         ),
-        returnValue: _i6.Future<void>.value(),
-        returnValueForMissingStub: _i6.Future<void>.value(),
-      ) as _i6.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 }
 
 /// A class which mocks [Client].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockClient extends _i1.Mock implements _i4.Client {
+class MockClient extends _i1.Mock implements _i5.Client {
   MockClient() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<_i4.Response> head(
+  _i7.Future<_i5.Response> head(
     Uri? url, {
     Map<String, String>? headers,
   }) =>
@@ -696,7 +709,7 @@ class MockClient extends _i1.Mock implements _i4.Client {
           [url],
           {#headers: headers},
         ),
-        returnValue: _i6.Future<_i4.Response>.value(_FakeResponse_2(
+        returnValue: _i7.Future<_i5.Response>.value(_FakeResponse_3(
           this,
           Invocation.method(
             #head,
@@ -704,10 +717,10 @@ class MockClient extends _i1.Mock implements _i4.Client {
             {#headers: headers},
           ),
         )),
-      ) as _i6.Future<_i4.Response>);
+      ) as _i7.Future<_i5.Response>);
 
   @override
-  _i6.Future<_i4.Response> get(
+  _i7.Future<_i5.Response> get(
     Uri? url, {
     Map<String, String>? headers,
   }) =>
@@ -717,7 +730,7 @@ class MockClient extends _i1.Mock implements _i4.Client {
           [url],
           {#headers: headers},
         ),
-        returnValue: _i6.Future<_i4.Response>.value(_FakeResponse_2(
+        returnValue: _i7.Future<_i5.Response>.value(_FakeResponse_3(
           this,
           Invocation.method(
             #get,
@@ -725,10 +738,10 @@ class MockClient extends _i1.Mock implements _i4.Client {
             {#headers: headers},
           ),
         )),
-      ) as _i6.Future<_i4.Response>);
+      ) as _i7.Future<_i5.Response>);
 
   @override
-  _i6.Future<_i4.Response> post(
+  _i7.Future<_i5.Response> post(
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
@@ -744,7 +757,7 @@ class MockClient extends _i1.Mock implements _i4.Client {
             #encoding: encoding,
           },
         ),
-        returnValue: _i6.Future<_i4.Response>.value(_FakeResponse_2(
+        returnValue: _i7.Future<_i5.Response>.value(_FakeResponse_3(
           this,
           Invocation.method(
             #post,
@@ -756,10 +769,10 @@ class MockClient extends _i1.Mock implements _i4.Client {
             },
           ),
         )),
-      ) as _i6.Future<_i4.Response>);
+      ) as _i7.Future<_i5.Response>);
 
   @override
-  _i6.Future<_i4.Response> put(
+  _i7.Future<_i5.Response> put(
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
@@ -775,7 +788,7 @@ class MockClient extends _i1.Mock implements _i4.Client {
             #encoding: encoding,
           },
         ),
-        returnValue: _i6.Future<_i4.Response>.value(_FakeResponse_2(
+        returnValue: _i7.Future<_i5.Response>.value(_FakeResponse_3(
           this,
           Invocation.method(
             #put,
@@ -787,10 +800,10 @@ class MockClient extends _i1.Mock implements _i4.Client {
             },
           ),
         )),
-      ) as _i6.Future<_i4.Response>);
+      ) as _i7.Future<_i5.Response>);
 
   @override
-  _i6.Future<_i4.Response> patch(
+  _i7.Future<_i5.Response> patch(
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
@@ -806,7 +819,7 @@ class MockClient extends _i1.Mock implements _i4.Client {
             #encoding: encoding,
           },
         ),
-        returnValue: _i6.Future<_i4.Response>.value(_FakeResponse_2(
+        returnValue: _i7.Future<_i5.Response>.value(_FakeResponse_3(
           this,
           Invocation.method(
             #patch,
@@ -818,10 +831,10 @@ class MockClient extends _i1.Mock implements _i4.Client {
             },
           ),
         )),
-      ) as _i6.Future<_i4.Response>);
+      ) as _i7.Future<_i5.Response>);
 
   @override
-  _i6.Future<_i4.Response> delete(
+  _i7.Future<_i5.Response> delete(
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
@@ -837,7 +850,7 @@ class MockClient extends _i1.Mock implements _i4.Client {
             #encoding: encoding,
           },
         ),
-        returnValue: _i6.Future<_i4.Response>.value(_FakeResponse_2(
+        returnValue: _i7.Future<_i5.Response>.value(_FakeResponse_3(
           this,
           Invocation.method(
             #delete,
@@ -849,10 +862,10 @@ class MockClient extends _i1.Mock implements _i4.Client {
             },
           ),
         )),
-      ) as _i6.Future<_i4.Response>);
+      ) as _i7.Future<_i5.Response>);
 
   @override
-  _i6.Future<String> read(
+  _i7.Future<String> read(
     Uri? url, {
     Map<String, String>? headers,
   }) =>
@@ -862,7 +875,7 @@ class MockClient extends _i1.Mock implements _i4.Client {
           [url],
           {#headers: headers},
         ),
-        returnValue: _i6.Future<String>.value(_i13.dummyValue<String>(
+        returnValue: _i7.Future<String>.value(_i14.dummyValue<String>(
           this,
           Invocation.method(
             #read,
@@ -870,10 +883,10 @@ class MockClient extends _i1.Mock implements _i4.Client {
             {#headers: headers},
           ),
         )),
-      ) as _i6.Future<String>);
+      ) as _i7.Future<String>);
 
   @override
-  _i6.Future<_i22.Uint8List> readBytes(
+  _i7.Future<_i22.Uint8List> readBytes(
     Uri? url, {
     Map<String, String>? headers,
   }) =>
@@ -883,25 +896,25 @@ class MockClient extends _i1.Mock implements _i4.Client {
           [url],
           {#headers: headers},
         ),
-        returnValue: _i6.Future<_i22.Uint8List>.value(_i22.Uint8List(0)),
-      ) as _i6.Future<_i22.Uint8List>);
+        returnValue: _i7.Future<_i22.Uint8List>.value(_i22.Uint8List(0)),
+      ) as _i7.Future<_i22.Uint8List>);
 
   @override
-  _i6.Future<_i4.StreamedResponse> send(_i4.BaseRequest? request) =>
+  _i7.Future<_i5.StreamedResponse> send(_i5.BaseRequest? request) =>
       (super.noSuchMethod(
         Invocation.method(
           #send,
           [request],
         ),
         returnValue:
-            _i6.Future<_i4.StreamedResponse>.value(_FakeStreamedResponse_3(
+            _i7.Future<_i5.StreamedResponse>.value(_FakeStreamedResponse_4(
           this,
           Invocation.method(
             #send,
             [request],
           ),
         )),
-      ) as _i6.Future<_i4.StreamedResponse>);
+      ) as _i7.Future<_i5.StreamedResponse>);
 
   @override
   void close() => super.noSuchMethod(

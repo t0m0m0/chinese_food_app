@@ -28,9 +28,10 @@ class VisitRecordRepositoryImpl implements VisitRecordRepository {
   }
 
   @override
-  Future<void> insertVisitRecord(VisitRecord visitRecord) async {
+  Future<VisitRecord> insertVisitRecord(VisitRecord visitRecord) async {
     final visitRecordModel = VisitRecordModel.fromEntity(visitRecord);
     await _localDatasource.insertVisitRecord(visitRecordModel);
+    return visitRecord;
   }
 
   @override

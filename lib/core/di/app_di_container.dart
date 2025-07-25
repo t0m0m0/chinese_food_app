@@ -11,8 +11,12 @@ import '../../data/datasources/store_local_datasource_drift.dart';
 import '../../data/datasources/visit_record_local_datasource_drift.dart';
 import '../../data/datasources/photo_local_datasource_drift.dart';
 import '../../data/repositories/store_repository_impl.dart';
+import '../../data/repositories/visit_record_repository_impl.dart';
 import '../../data/services/geolocator_location_service.dart';
+import '../../domain/repositories/visit_record_repository.dart';
 import '../../domain/services/location_service.dart';
+import '../../domain/usecases/add_visit_record_usecase.dart';
+import '../../domain/usecases/get_visit_records_by_store_id_usecase.dart';
 import '../../presentation/providers/store_provider.dart';
 import 'di_container_interface.dart';
 import 'service_container.dart';
@@ -161,7 +165,7 @@ class AppDIContainer implements DIContainerInterface {
           _serviceContainer.resolve<AppDatabase>());
     });
 
-    // Register repository
+    // Register repositories
     _serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
         apiDatasource: _serviceContainer.resolve<HotpepperApiDatasource>(),
@@ -169,10 +173,29 @@ class AppDIContainer implements DIContainerInterface {
       );
     });
 
+    _serviceContainer.register<VisitRecordRepository>(() {
+      return VisitRecordRepositoryImpl(
+        _serviceContainer.resolve<VisitRecordLocalDatasourceDrift>(),
+      );
+    });
+
     // Register StoreProvider
     _serviceContainer.register<StoreProvider>(() {
       return StoreProvider(
         repository: _serviceContainer.resolve<StoreRepositoryImpl>(),
+      );
+    });
+
+    // Register Visit Record UseCases
+    _serviceContainer.register<AddVisitRecordUsecase>(() {
+      return AddVisitRecordUsecase(
+        _serviceContainer.resolve<VisitRecordRepository>(),
+      );
+    });
+
+    _serviceContainer.register<GetVisitRecordsByStoreIdUsecase>(() {
+      return GetVisitRecordsByStoreIdUsecase(
+        _serviceContainer.resolve<VisitRecordRepository>(),
       );
     });
 

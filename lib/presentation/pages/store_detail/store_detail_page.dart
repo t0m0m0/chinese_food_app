@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
@@ -341,9 +342,9 @@ class StoreDetailPage extends StatelessWidget {
               button: true,
               child: FilledButton.icon(
                 onPressed: () {
-                  // TODO: 訪問記録追加機能
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('訪問記録機能は実装予定です')),
+                  context.pushNamed(
+                    'visit-record-form',
+                    extra: store,
                   );
                 },
                 icon: const Icon(Icons.add),
