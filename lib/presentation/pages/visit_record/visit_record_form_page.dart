@@ -147,7 +147,7 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
       lastDate: DateTime.now(),
     );
 
-    if (date != null) {
+    if (date != null && mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_selectedDate),
