@@ -59,15 +59,53 @@ class StoreLocalDatasourceDrift implements StoreLocalDatasource {
 
   @override
   Future<List<entities.Store>> searchStores(String query) async {
+    // SQLインジェクション対策：入力値検証とサニタイズ
+    final sanitizedQuery = _sanitizeSearchQuery(query);
+    if (sanitizedQuery.isEmpty) {
+      return [];
+    }
+
+    // LIKE演算子用のパターン作成（ワイルドカードエスケープ済み）
+    final escapedQuery = _escapeForLike(sanitizedQuery);
+    final likePattern = '%$escapedQuery%';
+
     final searchQuery = _database.select(_database.stores)
       ..where((tbl) =>
-          tbl.name.like('%$query%') |
-          tbl.address.like('%$query%') |
-          tbl.memo.like('%$query%'))
+          tbl.name.like(likePattern) |
+          tbl.address.like(likePattern) |
+          tbl.memo.like(likePattern))
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
 
     final results = await searchQuery.get();
     return results.map((store) => _driftStoreToEntity(store)).toList();
+  }
+
+  /// 検索クエリをサニタイズしてSQLインジェクションを防ぐ
+  String _sanitizeSearchQuery(String query) {
+    if (query.isEmpty) return query;
+
+    // SQLインジェクション対策：危険な文字パターンを除去
+    String sanitized = query
+        .replaceAll(RegExp(r"[';]"), '') // クォートとセミコロンを除去
+        .replaceAll(RegExp(r'--.*'), '') // SQLコメントを除去
+        .replaceAll(RegExp(r'/\*.*?\*/'), '') // SQLブロックコメントを除去
+        .trim();
+
+    // 長すぎるクエリを制限（DoS攻撃防止）
+    if (sanitized.length > 100) {
+      sanitized = sanitized.substring(0, 100);
+    }
+
+    return sanitized;
+  }
+
+  /// LIKE演算子用のワイルドカード文字をエスケープ
+  String _escapeForLike(String query) {
+    // SQLiteでは\はエスケープ文字として機能しないため、
+    // 代替文字に置換してマッチングを行う
+    return query
+        .replaceAll('%', '[%]') // %をSQLiteの文字クラスでエスケープ
+        .replaceAll('_', '[_]'); // _をSQLiteの文字クラスでエスケープ
   }
 
   /// Store エンティティを Drift Companion に変換
