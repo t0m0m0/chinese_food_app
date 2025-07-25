@@ -171,32 +171,37 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
 
-      // 並列処理で重複チェックとデータ変換を最適化
-      final duplicateCheckFutures = apiStores.map((apiStore) async {
+      // Issue #84: N+1クエリ問題を回避するため、重複チェックを効率化
+      // 既存店舗を名前と座標でインデックス化（O(n)）
+      final existingStoreIndex = <String, List<Store>>{};
+      for (final store in _stores) {
+        final key = '${store.name}_${store.address}';
+        existingStoreIndex[key] ??= [];
+        existingStoreIndex[key]!.add(store);
+      }
+
+      // APIストアごとに効率的な重複チェック（O(1)検索）
+      final newStores = <Store>[];
+      for (final apiStore in apiStores) {
         try {
-          // 既存の店舗と重複しているかチェック（名前・住所・座標）
-          final isDuplicate = _stores.any((store) =>
-              store.name == apiStore.name &&
-              store.address == apiStore.address &&
+          final key = '${apiStore.name}_${apiStore.address}';
+          final candidateStores = existingStoreIndex[key] ?? [];
+
+          // 座標による精密な重複チェック（候補が限定されているため高速）
+          final isDuplicate = candidateStores.any((store) =>
               (store.lat - apiStore.lat).abs() <
                   ApiConstants.duplicateThreshold &&
               (store.lng - apiStore.lng).abs() <
                   ApiConstants.duplicateThreshold);
 
-          return isDuplicate ? null : apiStore.copyWith(resetStatus: true);
+          if (!isDuplicate) {
+            newStores.add(apiStore.copyWith(resetStatus: true));
+          }
         } catch (e) {
           // 個別の店舗処理でエラーが発生した場合はスキップ
           debugPrint('Store processing error: $e');
-          return null;
         }
-      }).toList();
-
-      // 並列実行して新しい店舗のみを取得
-      final processedStores = await Future.wait(duplicateCheckFutures);
-      final newStores = processedStores
-          .where((store) => store != null)
-          .cast<Store>()
-          .toList();
+      }
 
       // バッチ追加でパフォーマンス向上
       _stores.addAll(newStores);

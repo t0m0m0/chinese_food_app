@@ -108,6 +108,100 @@ class StoreLocalDatasourceDrift implements StoreLocalDatasource {
         .replaceAll('_', '[_]'); // _をSQLiteの文字クラスでエスケープ
   }
 
+  /// Issue #84: バッチ挿入（トランザクション管理）
+  ///
+  /// 複数の店舗を1つのトランザクションで挿入し、
+  /// エラー発生時は全体をロールバックする
+  Future<void> insertStoresBatch(List<entities.Store> stores) async {
+    await _database.transaction(() async {
+      for (final store in stores) {
+        await _database.into(_database.stores).insert(_storeToCompanion(store));
+      }
+    });
+  }
+
+  /// Issue #84: 原子的な店舗更新（トランザクション管理）
+  ///
+  /// 店舗情報の複数フィールドを原子的に更新し、
+  /// データの整合性を保証する
+  Future<void> updateStoreAtomic(entities.Store store) async {
+    await _database.transaction(() async {
+      // 既存データの存在確認
+      final existing = await (_database.select(_database.stores)
+            ..where((tbl) => tbl.id.equals(store.id)))
+          .getSingleOrNull();
+
+      if (existing == null) {
+        throw Exception('店舗が見つかりません: ${store.id}');
+      }
+
+      // 原子的更新実行
+      await (_database.update(_database.stores)
+            ..where((tbl) => tbl.id.equals(store.id)))
+          .write(_storeToCompanion(store));
+    });
+  }
+
+  /// Issue #84: ページネーション対応の店舗取得
+  ///
+  /// 大量データでも効率的な分割取得を提供し、
+  /// メモリ使用量とパフォーマンスを最適化する
+  Future<List<entities.Store>> getStoresPaginated({
+    required int page,
+    required int pageSize,
+    entities.StoreStatus? status,
+  }) async {
+    final offset = (page - 1) * pageSize;
+
+    final query = _database.select(_database.stores);
+
+    // ステータスフィルタ適用
+    if (status != null) {
+      query.where((tbl) => tbl.status.equals(status.value));
+    }
+
+    // ページネーション適用（ORDER BY, LIMIT, OFFSET）
+    query
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
+      ..limit(pageSize, offset: offset);
+
+    final results = await query.get();
+    return results.map((store) => _driftStoreToEntity(store)).toList();
+  }
+
+  /// Issue #84: 検索結果のページネーション対応
+  ///
+  /// 検索クエリとページネーションを組み合わせ、
+  /// 大量の検索結果でも効率的に処理する
+  Future<List<entities.Store>> searchStoresPaginated({
+    required String query,
+    required int page,
+    required int pageSize,
+  }) async {
+    // SQLインジェクション対策：入力値検証とサニタイズ
+    final sanitizedQuery = _sanitizeSearchQuery(query);
+    if (sanitizedQuery.isEmpty) {
+      return [];
+    }
+
+    // LIKE演算子用のパターン作成（ワイルドカードエスケープ済み）
+    final escapedQuery = _escapeForLike(sanitizedQuery);
+    final likePattern = '%$escapedQuery%';
+
+    final offset = (page - 1) * pageSize;
+
+    final searchQuery = _database.select(_database.stores)
+      ..where((tbl) =>
+          tbl.name.like(likePattern) |
+          tbl.address.like(likePattern) |
+          tbl.memo.like(likePattern))
+      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)])
+      ..limit(pageSize, offset: offset);
+
+    final results = await searchQuery.get();
+    return results.map((store) => _driftStoreToEntity(store)).toList();
+  }
+
   /// Store エンティティを Drift Companion に変換
   StoresCompanion _storeToCompanion(entities.Store store) {
     return StoresCompanion(
