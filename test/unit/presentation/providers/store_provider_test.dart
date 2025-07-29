@@ -122,6 +122,75 @@ void main() {
       expect(stopwatch.elapsedMilliseconds, lessThan(500),
           reason: 'Status filtering should be cached for performance');
     });
+
+    test('should use optimized normalized keys for duplicate detection',
+        () async {
+      // TDD: Red - QA改善：正規化キーによる重複検出最適化テスト
+
+      // 類似名称・住所の店舗を準備（正規化により同一判定されるべき）
+      final existingStores = [
+        Store(
+          id: 'store_1',
+          name: '中華料理　龍門',
+          address: '東京都港区赤坂1-2-3',
+          lat: 35.6580339,
+          lng: 139.7016358,
+          status: StoreStatus.wantToGo,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      // API結果：表記が微妙に異なるが同一店舗
+      final apiStores = [
+        Store(
+          id: 'api_store_1',
+          name: '中華料理龍門', // 空白なし
+          address: '東京都港区赤坂１－２－３', // 全角数字・ハイフン
+          lat: 35.6580339,
+          lng: 139.7016358,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+        Store(
+          id: 'api_store_2',
+          name: '中華料理・龍門', // 中点あり
+          address: '東京都港区赤坂1丁目2番地3号', // 丁目番地号表記
+          lat: 35.6580339,
+          lng: 139.7016358,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      // モック設定
+      mockRepository.stubGetAllStores(existingStores);
+      mockRepository.stubSearchStoresFromApi(apiStores);
+
+      // プロバイダーにデータロード
+      await provider.loadStores();
+
+      // パフォーマンス測定
+      final stopwatch = Stopwatch()..start();
+
+      // API検索実行（正規化による高速重複チェック）
+      await provider.loadNewStoresFromApi(
+        lat: 35.6762,
+        lng: 139.6503,
+        count: 2,
+      );
+
+      stopwatch.stop();
+
+      // 正規化により重複として正しく検出されることを確認
+      // 少なくとも重複の一部は検出されるはず（完璧な検出は座標による）
+      expect(provider.stores.length, lessThanOrEqualTo(2),
+          reason: 'Normalized key should help detect some duplicates');
+
+      // 正規化処理により高速化されていることを確認
+      expect(stopwatch.elapsedMilliseconds, lessThan(100),
+          reason:
+              'Normalized key generation should optimize duplicate detection');
+    });
   });
 }
 

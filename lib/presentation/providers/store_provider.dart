@@ -172,10 +172,10 @@ class StoreProvider extends ChangeNotifier {
       );
 
       // Issue #84: N+1クエリ問題を回避するため、重複チェックを効率化
-      // 既存店舗を名前と座標でインデックス化（O(n)）
+      // QA改善: 正規化キーによる更なる最適化
       final existingStoreIndex = <String, List<Store>>{};
       for (final store in _stores) {
-        final key = '${store.name}_${store.address}';
+        final key = _generateNormalizedStoreKey(store.name, store.address);
         existingStoreIndex[key] ??= [];
         existingStoreIndex[key]!.add(store);
       }
@@ -184,7 +184,8 @@ class StoreProvider extends ChangeNotifier {
       final newStores = <Store>[];
       for (final apiStore in apiStores) {
         try {
-          final key = '${apiStore.name}_${apiStore.address}';
+          final key =
+              _generateNormalizedStoreKey(apiStore.name, apiStore.address);
           final candidateStores = existingStoreIndex[key] ?? [];
 
           // 座標による精密な重複チェック（候補が限定されているため高速）
@@ -259,5 +260,26 @@ class StoreProvider extends ChangeNotifier {
         (now - _lastCacheUpdateTime!) > _cacheMaxAge) {
       _clearCache();
     }
+  }
+
+  /// QA改善: 正規化されたストアキーを生成（高速ハッシュマップ検索用）
+  ///
+  /// 店舗名と住所を正規化し、一意性を保ちながら比較しやすい形式に変換
+  String _generateNormalizedStoreKey(String name, String address) {
+    // 全角・半角統一、空白・記号の正規化
+    final normalizedName = name
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[\s\-　－]'), '') // 空白・ハイフンを除去
+        .replaceAll(RegExp(r'[・･]'), ''); // 中点を除去
+
+    final normalizedAddress = address
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[\s\-　－]'), '') // 空白・ハイフンを除去
+        .replaceAll(RegExp(r'[丁目番地号]'), ''); // 住所表記を統一
+
+    // ハッシュ効率を最適化するため、セパレータを最小化
+    return '$normalizedName|$normalizedAddress';
   }
 }

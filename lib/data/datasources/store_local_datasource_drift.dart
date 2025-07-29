@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import '../../core/database/schema/app_database.dart';
 import '../../domain/entities/store.dart' as entities;
+import '../../core/constants/error_messages.dart';
 import 'store_local_datasource.dart';
 
 /// Drift版のローカルデータベースでの店舗データアクセス
@@ -132,7 +133,7 @@ class StoreLocalDatasourceDrift implements StoreLocalDatasource {
           .getSingleOrNull();
 
       if (existing == null) {
-        throw Exception('店舗が見つかりません: ${store.id}');
+        throw Exception(ErrorMessages.getDatabaseMessage('store_not_found'));
       }
 
       // 原子的更新実行
