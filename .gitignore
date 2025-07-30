@@ -78,5 +78,13 @@ commandlinetools-*.zip
 *.tar.gz
 *.zip
 
+Pods/
 
 .claude/
+
+# CocoaPods generated files
+ios/Podfile.lock
+macos/Podfile
+
+# iOS/macOS specific generated files
+ios/Flutter/Profile.xcconfig
