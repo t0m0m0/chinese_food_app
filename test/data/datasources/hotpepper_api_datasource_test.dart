@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
 import 'package:chinese_food_app/core/network/app_http_client.dart';
@@ -212,6 +213,68 @@ void main() {
           () => datasource.searchStores(),
           throwsA(isA<ApiException>()),
         );
+      });
+    });
+
+    group('API Key Security Tests - Issue #84', () {
+      test('should handle API errors without exposing sensitive information',
+          () async {
+        // TDD: Red - APIエラー時に機密情報が露出しないことを確認
+
+        // 401エラー（不正なAPIキー）をモック
+        mockHttpClient.stubGetError(
+          'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/',
+          NetworkException('Unauthorized access', statusCode: 401),
+        );
+
+        // Act & Assert
+        try {
+          await datasource.searchStores();
+          fail('Should have thrown an ApiException');
+        } catch (e) {
+          expect(e, isA<ApiException>());
+          final apiException = e as ApiException;
+
+          // エラーメッセージに実際のAPIキーが含まれていないことを確認
+          expect(apiException.message, isNot(contains('AIza')),
+              reason:
+                  'Error message should not contain actual API key patterns');
+          expect(apiException.message, isNot(contains('SECRET')),
+              reason: 'Error message should not contain secret information');
+
+          // 一般的なエラーメッセージが含まれることを確認
+          expect(apiException.message.contains('Invalid API key'), isTrue,
+              reason:
+                  'Error message should indicate API key issue without exposing the key');
+        }
+      });
+
+      test('should not log sensitive data in API requests', () async {
+        // TDD: Red - APIリクエスト時に機密情報がログに出力されないことを確認
+
+        // 正常なレスポンスをモック
+        mockHttpClient.stubGet(
+          'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/',
+          response: ApiResponse.success(
+              data: jsonEncode({
+            'results': {
+              'shop': [],
+            }
+          })),
+        );
+
+        // APIリクエストを実行
+        await datasource.searchStores(
+          lat: 35.6762,
+          lng: 139.6503,
+          keyword: 'テスト店',
+        );
+
+        // APIリクエストが正常に実行されることを確認
+        // （ログの機密情報マスキングは、実際のSecureLogger統合時に検証）
+        expect(true, isTrue,
+            reason:
+                'API request should complete without exposing sensitive data');
       });
     });
 

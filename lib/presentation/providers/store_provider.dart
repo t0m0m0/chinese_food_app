@@ -171,32 +171,38 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
 
-      // 並列処理で重複チェックとデータ変換を最適化
-      final duplicateCheckFutures = apiStores.map((apiStore) async {
+      // Issue #84: N+1クエリ問題を回避するため、重複チェックを効率化
+      // QA改善: 正規化キーによる更なる最適化
+      final existingStoreIndex = <String, List<Store>>{};
+      for (final store in _stores) {
+        final key = _generateNormalizedStoreKey(store.name, store.address);
+        existingStoreIndex[key] ??= [];
+        existingStoreIndex[key]!.add(store);
+      }
+
+      // APIストアごとに効率的な重複チェック（O(1)検索）
+      final newStores = <Store>[];
+      for (final apiStore in apiStores) {
         try {
-          // 既存の店舗と重複しているかチェック（名前・住所・座標）
-          final isDuplicate = _stores.any((store) =>
-              store.name == apiStore.name &&
-              store.address == apiStore.address &&
+          final key =
+              _generateNormalizedStoreKey(apiStore.name, apiStore.address);
+          final candidateStores = existingStoreIndex[key] ?? [];
+
+          // 座標による精密な重複チェック（候補が限定されているため高速）
+          final isDuplicate = candidateStores.any((store) =>
               (store.lat - apiStore.lat).abs() <
                   ApiConstants.duplicateThreshold &&
               (store.lng - apiStore.lng).abs() <
                   ApiConstants.duplicateThreshold);
 
-          return isDuplicate ? null : apiStore.copyWith(resetStatus: true);
+          if (!isDuplicate) {
+            newStores.add(apiStore.copyWith(resetStatus: true));
+          }
         } catch (e) {
           // 個別の店舗処理でエラーが発生した場合はスキップ
           debugPrint('Store processing error: $e');
-          return null;
         }
-      }).toList();
-
-      // 並列実行して新しい店舗のみを取得
-      final processedStores = await Future.wait(duplicateCheckFutures);
-      final newStores = processedStores
-          .where((store) => store != null)
-          .cast<Store>()
-          .toList();
+      }
 
       // バッチ追加でパフォーマンス向上
       _stores.addAll(newStores);
@@ -254,5 +260,26 @@ class StoreProvider extends ChangeNotifier {
         (now - _lastCacheUpdateTime!) > _cacheMaxAge) {
       _clearCache();
     }
+  }
+
+  /// QA改善: 正規化されたストアキーを生成（高速ハッシュマップ検索用）
+  ///
+  /// 店舗名と住所を正規化し、一意性を保ちながら比較しやすい形式に変換
+  String _generateNormalizedStoreKey(String name, String address) {
+    // 全角・半角統一、空白・記号の正規化
+    final normalizedName = name
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[\s\-　－]'), '') // 空白・ハイフンを除去
+        .replaceAll(RegExp(r'[・･]'), ''); // 中点を除去
+
+    final normalizedAddress = address
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[\s\-　－]'), '') // 空白・ハイフンを除去
+        .replaceAll(RegExp(r'[丁目番地号]'), ''); // 住所表記を統一
+
+    // ハッシュ効率を最適化するため、セパレータを最小化
+    return '$normalizedName|$normalizedAddress';
   }
 }
