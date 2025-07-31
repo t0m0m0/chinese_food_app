@@ -37,80 +37,27 @@ class EnvironmentConfig {
   /// 現在の環境が本番環境かどうか
   static bool get isProduction => current == Environment.production;
 
-  /// HotPepper API キーを環境別に取得
+  /// HotPepper API キーを取得（全環境共通）
   static String get hotpepperApiKey {
-    switch (current) {
-      case Environment.development:
-        return const String.fromEnvironment(
-          'DEV_HOTPEPPER_API_KEY',
-          defaultValue: '',
-        );
-      case Environment.staging:
-        return const String.fromEnvironment(
-          'STAGING_HOTPEPPER_API_KEY',
-          defaultValue: '',
-        );
-      case Environment.production:
-        return const String.fromEnvironment(
-          'PROD_HOTPEPPER_API_KEY',
-          defaultValue: '',
-        );
-    }
+    return const String.fromEnvironment(
+      'HOTPEPPER_API_KEY',
+      defaultValue: '',
+    );
   }
 
-  /// Google Maps API キーを環境別に取得
+  /// Google Maps API キーを取得（全環境共通）
   static String get googleMapsApiKey {
-    switch (current) {
-      case Environment.development:
-        return const String.fromEnvironment(
-          'DEV_GOOGLE_MAPS_API_KEY',
-          defaultValue: '',
-        );
-      case Environment.staging:
-        return const String.fromEnvironment(
-          'STAGING_GOOGLE_MAPS_API_KEY',
-          defaultValue: '',
-        );
-      case Environment.production:
-        return const String.fromEnvironment(
-          'PROD_GOOGLE_MAPS_API_KEY',
-          defaultValue: '',
-        );
-    }
+    return const String.fromEnvironment(
+      'GOOGLE_MAPS_API_KEY',
+      defaultValue: '',
+    );
   }
 
-  /// フォールバック用の単一APIキー（既存の設定と互換性維持）
-  static String get fallbackHotpepperApiKey {
-    return const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '');
-  }
+  /// 実際に使用するHotPepper APIキーを取得
+  static String get effectiveHotpepperApiKey => hotpepperApiKey;
 
-  /// フォールバック用の単一APIキー（既存の設定と互換性維持）
-  static String get fallbackGoogleMapsApiKey {
-    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
-        defaultValue: '');
-  }
-
-  /// 実際に使用するHotPepper APIキーを取得（環境別 > フォールバック）
-  static String get effectiveHotpepperApiKey {
-    final envKey = hotpepperApiKey;
-    if (envKey.isNotEmpty) return envKey;
-
-    final fallbackKey = fallbackHotpepperApiKey;
-    if (fallbackKey.isNotEmpty) return fallbackKey;
-
-    return '';
-  }
-
-  /// 実際に使用するGoogle Maps APIキーを取得（環境別 > フォールバック）
-  static String get effectiveGoogleMapsApiKey {
-    final envKey = googleMapsApiKey;
-    if (envKey.isNotEmpty) return envKey;
-
-    final fallbackKey = fallbackGoogleMapsApiKey;
-    if (fallbackKey.isNotEmpty) return fallbackKey;
-
-    return '';
-  }
+  /// 実際に使用するGoogle Maps APIキーを取得
+  static String get effectiveGoogleMapsApiKey => googleMapsApiKey;
 
   /// HotPepper API のベースURL
   static String get hotpepperApiUrl {

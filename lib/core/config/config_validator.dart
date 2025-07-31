@@ -86,23 +86,14 @@ class ConfigValidator {
     final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
 
     if (hotpepperKey.isEmpty) {
-      errors.add('本番環境: PROD_HOTPEPPER_API_KEY が設定されていません');
+      errors.add('本番環境: HOTPEPPER_API_KEY が設定されていません');
     }
 
     if (googleMapsKey.isEmpty) {
-      errors.add('本番環境: PROD_GOOGLE_MAPS_API_KEY が設定されていません');
+      errors.add('本番環境: GOOGLE_MAPS_API_KEY が設定されていません');
     }
 
-    // 本番環境ではフォールバック使用を警告
-    if (hotpepperKey.isEmpty &&
-        EnvironmentConfig.fallbackHotpepperApiKey.isNotEmpty) {
-      errors.add('警告: 本番環境でフォールバック HotPepper API キーを使用中');
-    }
-
-    if (googleMapsKey.isEmpty &&
-        EnvironmentConfig.fallbackGoogleMapsApiKey.isNotEmpty) {
-      errors.add('警告: 本番環境でフォールバック Google Maps API キーを使用中');
-    }
+    // フォールバック機能は削除されたため、この警告は不要
   }
 
   /// ステージング環境の設定を検証
@@ -111,11 +102,11 @@ class ConfigValidator {
     final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
 
     if (hotpepperKey.isEmpty) {
-      errors.add('ステージング環境: STAGING_HOTPEPPER_API_KEY が設定されていません');
+      errors.add('ステージング環境: HOTPEPPER_API_KEY が設定されていません');
     }
 
     if (googleMapsKey.isEmpty) {
-      errors.add('ステージング環境: STAGING_GOOGLE_MAPS_API_KEY が設定されていません');
+      errors.add('ステージング環境: GOOGLE_MAPS_API_KEY が設定されていません');
     }
   }
 
