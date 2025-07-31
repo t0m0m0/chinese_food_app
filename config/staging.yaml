@@ -1,0 +1,156 @@
+# ステージング環境設定ファイル
+# staging.yaml
+# 
+# テスト環境用設定 - 本番に近い環境でのテスト用
+
+# アプリケーション基本設定
+app:
+  name: "町中華探索アプリ「マチアプ」(Staging)"
+  version: "1.0.0-staging"
+  build_number: 1
+  bundle_id: "com.machiapp.chinese_food_explorer.staging"
+  
+# 環境識別
+environment:
+  name: "staging"
+  debug_mode: true  # ステージングではデバッグ有効
+  test_mode: false
+  
+# API設定
+api:
+  # HotPepper Gourmet API
+  hotpepper:
+    base_url: "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/"
+    timeout_seconds: 45  # ステージングでは少し長めのタイムアウト
+    retry_attempts: 2
+    rate_limit:
+      requests_per_second: 3  # 控えめなレート制限
+      daily_limit: 1000
+    # APIキーは環境変数 STAGING_HOTPEPPER_API_KEY から取得
+    
+  # Google Maps API  
+  google_maps:
+    timeout_seconds: 45
+    retry_attempts: 2
+    # APIキーは環境変数 STAGING_GOOGLE_MAPS_API_KEY から取得
+    
+# データベース設定
+database:
+  schema_version: 2
+  enable_foreign_keys: true
+  enable_wal_mode: true
+  cache_size: 1000  # 本番より少なめ
+  page_size: 4096
+  auto_vacuum: "INCREMENTAL"
+  
+# セキュリティ設定
+security:
+  # セキュアストレージ設定（ステージング用）
+  secure_storage:
+    android:
+      encrypted_shared_preferences: true
+    ios:
+      accessibility: "first_unlock_this_device"
+      
+  # 暗号化設定
+  encryption:
+    algorithm: "AES-256-GCM"
+    key_derivation: "PBKDF2"
+    iterations: 50000  # テスト環境では軽量化
+    
+  # ネットワークセキュリティ
+  network:
+    enforce_https: true
+    certificate_pinning: false  # テスト環境では無効
+    timeout_seconds: 45
+    
+# パフォーマンス設定
+performance:
+  # 画像キャッシュ
+  image_cache:
+    max_cache_size: "50MB"  # ステージングでは小さめ
+    max_cache_age: "3d"
+    
+  # 位置情報取得
+  location:
+    accuracy: "medium"  # テスト用
+    timeout_seconds: 45
+    cache_duration: "2m"
+    
+  # データベース最適化
+  database_optimization:
+    enable_indices: true
+    vacuum_on_startup: false
+    analyze_on_startup: true
+    
+# ログ設定
+logging:
+  level: "DEBUG"  # ステージングでは詳細ログ
+  console_output: true
+  file_output: true
+  max_file_size: "50MB"
+  max_files: 10
+  sensitive_data_logging: true  # テスト用
+  
+# 位置情報設定
+location:
+  default_search_radius: 2000  # 2km（テスト用）
+  max_search_radius: 5000      # 5km
+  position_accuracy: "medium"
+  background_location: false
+  
+# UI設定
+ui:
+  theme: "system"
+  language: "ja"
+  animations_enabled: true
+  haptic_feedback: true
+  
+# 通知設定
+notifications:
+  push_notifications: false
+  local_notifications: true
+  
+# 分析・監視設定
+analytics:
+  crash_reporting: true
+  performance_monitoring: true
+  user_analytics: true  # テスト用分析有効
+  
+# エラーハンドリング
+error_handling:
+  show_error_details: true  # ステージングでは詳細表示
+  auto_retry: true
+  max_retry_attempts: 2
+  fallback_enabled: true
+  
+# App Store設定
+app_store:
+  ios:
+    app_id: "com.machiapp.chinese_food_explorer.staging"
+    team_id: "YOUR_TEAM_ID"
+    
+  android:
+    package_name: "com.machiapp.chinese_food_explorer.staging"
+    
+# バックアップ・復元
+backup:
+  auto_backup: false  # テスト環境では無効
+  backup_frequency: "never"
+  max_backups: 0
+  include_photos: false
+  
+# 機能フラグ
+features:
+  photo_upload: true
+  offline_mode: true
+  map_clustering: true
+  share_functionality: true   # ステージングでテスト
+  premium_features: true      # 全機能テスト可能
+  
+# テスト用設定
+testing:
+  mock_api_responses: false
+  test_data_enabled: true
+  performance_testing: true
+  ui_testing: true
