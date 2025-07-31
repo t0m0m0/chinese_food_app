@@ -39,11 +39,14 @@ class DIContainer {
 
   /// 環境に応じたAPIデータソースを作成
   static HotpepperApiDatasource _createApiDatasource() {
-    if (AppConfig.hasHotpepperApiKey && AppConfig.isProduction) {
-      // 本番環境ではAPIキーが設定されている場合のみ実API使用
+    if (AppConfig.isProduction) {
+      // 本番環境では常に実APIを使用
+      return HotpepperApiDatasourceImpl(AppHttpClient());
+    } else if (AppConfig.hasHotpepperApiKey) {
+      // 開発環境でAPIキーが設定されている場合は実API使用
       return HotpepperApiDatasourceImpl(AppHttpClient());
     } else {
-      // 開発環境またはAPIキー未設定時はモック使用
+      // APIキー未設定時はモック使用
       return MockHotpepperApiDatasource();
     }
   }
