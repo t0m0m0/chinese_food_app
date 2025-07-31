@@ -202,13 +202,13 @@ fi
 echo -e "\n${BLUE}🔑 9. APIキー設定チェック${NC}"
 
 # 環境変数チェック
-if [ -n "$PROD_HOTPEPPER_API_KEY" ] || [ -n "$HOTPEPPER_API_KEY" ]; then
+if [ -n "$HOTPEPPER_API_KEY" ]; then
     check_pass "HotPepper APIキー: 環境変数に設定済み"
 else
     check_warn "HotPepper APIキー: 環境変数未設定（本番では Secure Storage から取得）"
 fi
 
-if [ -n "$PROD_GOOGLE_MAPS_API_KEY" ] || [ -n "$GOOGLE_MAPS_API_KEY" ]; then
+if [ -n "$GOOGLE_MAPS_API_KEY" ]; then
     check_pass "Google Maps APIキー: 環境変数に設定済み"
 else
     check_warn "Google Maps APIキー: 環境変数未設定（本番では Secure Storage から取得）"

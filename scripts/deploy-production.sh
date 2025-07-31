@@ -49,15 +49,15 @@ if ! command -v flutter &> /dev/null; then
 fi
 
 # APIキー環境変数チェック
-if [ -z "$PROD_HOTPEPPER_API_KEY" ] && [ -z "$HOTPEPPER_API_KEY" ]; then
+if [ -z "$HOTPEPPER_API_KEY" ]; then
     echo -e "${RED}❌ HotPepper APIキーが設定されていません${NC}"
-    echo "環境変数 PROD_HOTPEPPER_API_KEY または HOTPEPPER_API_KEY を設定してください"
+    echo "環境変数 HOTPEPPER_API_KEY を設定してください"
     exit 1
 fi
 
-if [ -z "$PROD_GOOGLE_MAPS_API_KEY" ] && [ -z "$GOOGLE_MAPS_API_KEY" ]; then
+if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
     echo -e "${RED}❌ Google Maps APIキーが設定されていません${NC}"
-    echo "環境変数 PROD_GOOGLE_MAPS_API_KEY または GOOGLE_MAPS_API_KEY を設定してください"
+    echo "環境変数 GOOGLE_MAPS_API_KEY を設定してください"
     exit 1
 fi
 
@@ -108,8 +108,8 @@ case $PLATFORM in
             --release \
             --dart-define=FLUTTER_ENV=production \
             --dart-define=PRODUCTION=true \
-            --dart-define=PROD_HOTPEPPER_API_KEY="$PROD_HOTPEPPER_API_KEY" \
-            --dart-define=PROD_GOOGLE_MAPS_API_KEY="$PROD_GOOGLE_MAPS_API_KEY" \
+            --dart-define=HOTPEPPER_API_KEY="$HOTPEPPER_API_KEY" \
+            --dart-define=GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" \
             --build-name=1.0.0 \
             --build-number="$(date +%Y%m%d%H%M)"
             
@@ -152,8 +152,8 @@ case $PLATFORM in
             --release \
             --dart-define=FLUTTER_ENV=production \
             --dart-define=PRODUCTION=true \
-            --dart-define=PROD_HOTPEPPER_API_KEY="$PROD_HOTPEPPER_API_KEY" \
-            --dart-define=PROD_GOOGLE_MAPS_API_KEY="$PROD_GOOGLE_MAPS_API_KEY" \
+            --dart-define=HOTPEPPER_API_KEY="$HOTPEPPER_API_KEY" \
+            --dart-define=GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" \
             --build-name=1.0.0 \
             --build-number="$(date +%Y%m%d%H%M)" \
             --obfuscate \
@@ -178,8 +178,8 @@ case $PLATFORM in
             --release \
             --dart-define=FLUTTER_ENV=production \
             --dart-define=PRODUCTION=true \
-            --dart-define=PROD_HOTPEPPER_API_KEY="$PROD_HOTPEPPER_API_KEY" \
-            --dart-define=PROD_GOOGLE_MAPS_API_KEY="$PROD_GOOGLE_MAPS_API_KEY" \
+            --dart-define=HOTPEPPER_API_KEY="$HOTPEPPER_API_KEY" \
+            --dart-define=GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" \
             --web-renderer=html \
             --base-href="/"
             
