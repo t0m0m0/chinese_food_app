@@ -11,6 +11,13 @@ class ConfigValidator {
   static List<String> validateConfiguration() {
     final errors = <String>[];
 
+    // 初期化を確実に行う（同期的処理のみ）
+    if (!EnvironmentConfig.isInitialized) {
+      errors.add(
+          'EnvironmentConfigが初期化されていません。main()でEnvironmentConfig.initialize()を呼び出してください。');
+      return errors;
+    }
+
     // APIキーの存在確認
     _validateApiKeys(errors);
 
