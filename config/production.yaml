@@ -1,0 +1,150 @@
+# 本番環境設定ファイル
+# production.yaml
+# 
+# ⚠️ 警告: このファイルには機密情報は含めないでください
+# APIキーなどの機密情報は環境変数またはSecure Storageから取得します
+
+# アプリケーション基本設定
+app:
+  name: "町中華探索アプリ「マチアプ」"
+  version: "1.0.0"
+  build_number: 1
+  bundle_id: "com.machiapp.chinese_food_explorer"
+  
+# 環境識別
+environment:
+  name: "production"
+  debug_mode: false
+  test_mode: false
+  
+# API設定
+api:
+  # HotPepper Gourmet API
+  hotpepper:
+    base_url: "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/"
+    timeout_seconds: 30
+    retry_attempts: 3
+    rate_limit:
+      requests_per_second: 5
+      daily_limit: 3000
+    # APIキーは環境変数 HOTPEPPER_API_KEY から取得
+    
+  # Google Maps API  
+  google_maps:
+    timeout_seconds: 30
+    retry_attempts: 3
+    # APIキーは環境変数 GOOGLE_MAPS_API_KEY から取得
+    
+# データベース設定
+database:
+  schema_version: 2
+  enable_foreign_keys: true
+  enable_wal_mode: true
+  cache_size: 2000
+  page_size: 4096
+  auto_vacuum: "INCREMENTAL"
+  
+# セキュリティ設定
+security:
+  # セキュアストレージ設定
+  secure_storage:
+    android:
+      encrypted_shared_preferences: true
+    ios:
+      accessibility: "first_unlock_this_device"
+      
+  # 暗号化設定
+  encryption:
+    algorithm: "AES-256-GCM"
+    key_derivation: "PBKDF2"
+    iterations: 100000
+    
+  # ネットワークセキュリティ
+  network:
+    enforce_https: true
+    certificate_pinning: true
+    timeout_seconds: 30
+    
+# パフォーマンス設定
+performance:
+  # 画像キャッシュ
+  image_cache:
+    max_cache_size: "100MB"
+    max_cache_age: "7d"
+    
+  # 位置情報取得
+  location:
+    accuracy: "high"
+    timeout_seconds: 30
+    cache_duration: "5m"
+    
+  # データベース最適化
+  database_optimization:
+    enable_indices: true
+    vacuum_on_startup: false
+    analyze_on_startup: true
+    
+# ログ設定
+logging:
+  level: "INFO"  # DEBUG, INFO, WARN, ERROR
+  console_output: false
+  file_output: true
+  max_file_size: "10MB"
+  max_files: 5
+  sensitive_data_logging: false
+  
+# 位置情報設定
+location:
+  default_search_radius: 3000  # 3km
+  max_search_radius: 10000     # 10km
+  position_accuracy: "high"
+  background_location: false
+  
+# UI設定
+ui:
+  theme: "system"  # light, dark, system
+  language: "ja"
+  animations_enabled: true
+  haptic_feedback: true
+  
+# 通知設定
+notifications:
+  push_notifications: false
+  local_notifications: true
+  
+# 分析・監視設定
+analytics:
+  crash_reporting: true
+  performance_monitoring: true
+  user_analytics: false  # プライバシー重視のため無効
+  
+# エラーハンドリング
+error_handling:
+  show_error_details: false
+  auto_retry: true
+  max_retry_attempts: 3
+  fallback_enabled: true
+  
+# App Store設定
+app_store:
+  ios:
+    app_id: "com.machiapp.chinese_food_explorer"
+    team_id: "YOUR_TEAM_ID"
+    
+  android:
+    package_name: "com.machiapp.chinese_food_explorer"
+    
+# バックアップ・復元
+backup:
+  auto_backup: true
+  backup_frequency: "daily"
+  max_backups: 7
+  include_photos: false  # ストレージ節約のため
+  
+# 機能フラグ
+features:
+  photo_upload: true
+  offline_mode: true
+  map_clustering: true
+  share_functionality: false  # MVP では無効
+  premium_features: false

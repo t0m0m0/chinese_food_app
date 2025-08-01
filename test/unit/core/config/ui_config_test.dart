@@ -8,7 +8,7 @@ void main() {
       expect(UiConfig.appName, 'マチアプ');
       expect(UiConfig.appVersion, '1.0.0');
       expect(UiConfig.appDescription, '町中華探索アプリ');
-      expect(UiConfig.cardBorderRadius, 12.0);
+      expect(UiConfig.cardBorderRadius, 14.0);
       expect(UiConfig.defaultPadding, 16.0);
       expect(UiConfig.smallPadding, 8.0);
       expect(UiConfig.largePadding, 24.0);
@@ -128,7 +128,7 @@ void main() {
       expect(UiConfig.titleFontSize, 24.0);
       expect(UiConfig.subtitleFontSize, 18.0);
       expect(UiConfig.bodyFontSize, 16.0);
-      expect(UiConfig.captionFontSize, 12.0);
+      expect(UiConfig.captionFontSize, 14.0);
       expect(UiConfig.defaultIconSize, 24.0);
       expect(UiConfig.smallIconSize, 16.0);
       expect(UiConfig.largeIconSize, 32.0);

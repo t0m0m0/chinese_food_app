@@ -94,9 +94,11 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Register services for production environment
   void _registerProductionServices() {
-    // Register API datasource with fallback strategy
+    // Register API datasource - always use real API in production
     _serviceContainer.register<HotpepperApiDatasource>(() {
-      return _createApiDatasource(forceReal: true);
+      developer.log('Using real HotPepper API datasource (production)',
+          name: 'DI');
+      return HotpepperApiDatasourceImpl(AppHttpClient());
     });
 
     _registerCommonServices();
@@ -104,9 +106,9 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Register services for development environment
   void _registerDevelopmentServices() {
-    // Register API datasource with intelligent selection
+    // Register API datasource - use real API if key is available (lazy check)
     _serviceContainer.register<HotpepperApiDatasource>(() {
-      return _createApiDatasource(forceReal: false);
+      return _createApiDatasourceForDevelopment();
     });
 
     _registerCommonServices();
@@ -122,24 +124,20 @@ class AppDIContainer implements DIContainerInterface {
     _registerCommonServices();
   }
 
-  /// Create API datasource with environment-aware selection
-  HotpepperApiDatasource _createApiDatasource({bool forceReal = false}) {
-    // Force real API in production or when explicitly requested
-    if (forceReal) {
-      // Check if API key is available, fallback to mock if not
-      if (AppConfig.hasHotpepperApiKey) {
-        developer.log('Using real HotPepper API datasource', name: 'DI');
-        return HotpepperApiDatasourceImpl(AppHttpClient());
-      } else {
-        developer.log('API key not available, falling back to mock datasource',
-            name: 'DI', level: 900); // WARNING level
-        return MockHotpepperApiDatasource();
-      }
+  /// Create API datasource for development environment
+  HotpepperApiDatasource _createApiDatasourceForDevelopment() {
+    // In development, always try to use real API if key is available
+    if (AppConfig.hasHotpepperApiKey) {
+      developer.log('Using real HotPepper API datasource (development)',
+          name: 'DI');
+      return HotpepperApiDatasourceImpl(AppHttpClient());
+    } else {
+      developer.log(
+          'API key not available, using mock datasource (development)',
+          name: 'DI',
+          level: 900); // WARNING level
+      return MockHotpepperApiDatasource();
     }
-
-    // In development, use mock by default for faster development
-    developer.log('Using mock API datasource for development', name: 'DI');
-    return MockHotpepperApiDatasource();
   }
 
   /// Register services common to all environments

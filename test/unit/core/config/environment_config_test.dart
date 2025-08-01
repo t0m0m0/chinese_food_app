@@ -30,12 +30,10 @@ void main() {
           () {
         expect(EnvironmentConfig.hotpepperApiKey, isEmpty);
         expect(EnvironmentConfig.googleMapsApiKey, isEmpty);
-        expect(EnvironmentConfig.fallbackHotpepperApiKey, isEmpty);
-        expect(EnvironmentConfig.fallbackGoogleMapsApiKey, isEmpty);
       });
 
-      test('should use effective API keys with fallback logic', () {
-        // When both environment-specific and fallback keys are empty
+      test('should use effective API keys', () {
+        // When environment variables are empty
         expect(EnvironmentConfig.effectiveHotpepperApiKey, isEmpty);
         expect(EnvironmentConfig.effectiveGoogleMapsApiKey, isEmpty);
       });

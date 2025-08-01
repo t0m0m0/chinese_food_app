@@ -8,7 +8,7 @@ class UiConfig {
   static const String appDescription = '町中華探索アプリ';
 
   /// レイアウト設定
-  static const double cardBorderRadius = 12.0;
+  static const double cardBorderRadius = 14.0;
   static const double defaultPadding = 16.0;
   static const double smallPadding = 8.0;
   static const double largePadding = 24.0;
@@ -33,7 +33,7 @@ class UiConfig {
   static const double titleFontSize = 24.0;
   static const double subtitleFontSize = 18.0;
   static const double bodyFontSize = 16.0;
-  static const double captionFontSize = 12.0;
+  static const double captionFontSize = 14.0;
 
   /// アイコン設定
   static const double defaultIconSize = 24.0;
