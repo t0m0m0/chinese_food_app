@@ -87,4 +87,4 @@ ios/Podfile.lock
 macos/Podfile
 
 # iOS/macOS specific generated files
-ios/Flutter/Profile.xcconfig
+ios/Flutter/Profile.xcconfigapp_db.sqlite
