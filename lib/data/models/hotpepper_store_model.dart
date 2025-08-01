@@ -173,9 +173,17 @@ class HotpepperSearchResponse {
               HotpepperStoreModel.fromJson(shop as Map<String, dynamic>))
           .toList(),
       resultsAvailable: results['results_available'] as int? ?? 0,
-      resultsReturned: results['results_returned'] as int? ?? 0,
+      resultsReturned: _parseIntSafely(results['results_returned']) ?? 0,
       resultsStart: results['results_start'] as int? ?? 1,
     );
+  }
+
+  /// 文字列または数値を安全にintに変換
+  static int? _parseIntSafely(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   /// JSON文字列からレスポンスモデルを作成
