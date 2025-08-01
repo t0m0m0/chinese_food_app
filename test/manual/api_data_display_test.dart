@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/config_manager.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';

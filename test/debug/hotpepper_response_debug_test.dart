@@ -1,7 +1,8 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/config_manager.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
-import 'package:chinese_food_app/core/network/app_http_client.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -76,7 +77,7 @@ void _printJsonStructure(dynamic data, {String indent = ''}) {
   if (data is Map) {
     print('${indent}Map (${data.length} keys):');
     data.forEach((key, value) {
-      print('${indent}  "$key": ${_getValueType(value)}');
+      print('$indent  "$key": ${_getValueType(value)}');
       if (value is Map || value is List) {
         _printJsonStructure(value, indent: '$indent    ');
       }
@@ -84,7 +85,7 @@ void _printJsonStructure(dynamic data, {String indent = ''}) {
   } else if (data is List) {
     print('${indent}List (${data.length} items):');
     if (data.isNotEmpty) {
-      print('${indent}  [0]: ${_getValueType(data[0])}');
+      print('$indent  [0]: ${_getValueType(data[0])}');
       if (data[0] is Map || data[0] is List) {
         _printJsonStructure(data[0], indent: '$indent    ');
       }
@@ -94,8 +95,9 @@ void _printJsonStructure(dynamic data, {String indent = ''}) {
 
 String _getValueType(dynamic value) {
   if (value == null) return 'null';
-  if (value is String)
+  if (value is String) {
     return 'String("${value.length > 50 ? "${value.substring(0, 50)}..." : value}")';
+  }
   if (value is int) return 'int($value)';
   if (value is double) return 'double($value)';
   if (value is bool) return 'bool($value)';

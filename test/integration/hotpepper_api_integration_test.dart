@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/config_manager.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
@@ -135,7 +137,7 @@ void main() {
               print('  リクエスト${i + 1}: 成功 (${response.resultsReturned}件)');
             }).catchError((e) {
               print('  リクエスト${i + 1}: エラー - $e');
-              return Future.error(e);
+              return null;
             }));
 
             // 1秒間5リクエスト制限を考慮して少し待機

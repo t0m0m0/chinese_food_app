@@ -3,7 +3,6 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show File;
-import '../config/app_config.dart';
 import '../config/environment_config.dart' as env_config;
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
