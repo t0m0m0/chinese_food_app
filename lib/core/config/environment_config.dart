@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// アプリケーション環境の定義
 enum Environment {
   /// 開発環境
@@ -15,6 +17,9 @@ enum Environment {
 
 /// 環境別設定管理クラス
 class EnvironmentConfig {
+  // 初期化フラグ
+  static bool _initialized = false;
+
   /// 現在の環境を取得
   static Environment get current {
     const env =
@@ -37,20 +42,42 @@ class EnvironmentConfig {
   /// 現在の環境が本番環境かどうか
   static bool get isProduction => current == Environment.production;
 
+  /// 初期化（.envファイル読み込み）
+  static Future<void> initialize() async {
+    if (_initialized) return;
+
+    try {
+      await dotenv.load();
+    } catch (e) {
+      // .envファイルが存在しない場合は無視
+    }
+
+    _initialized = true;
+  }
+
   /// HotPepper API キーを取得（全環境共通）
   static String get hotpepperApiKey {
-    return const String.fromEnvironment(
-      'HOTPEPPER_API_KEY',
-      defaultValue: '',
-    );
+    // .envファイルから取得を試行
+    final envKey = dotenv.env['HOTPEPPER_API_KEY'];
+    if (envKey != null && envKey.isNotEmpty) {
+      return envKey;
+    }
+
+    // 環境変数から取得（フォールバック）
+    return const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '');
   }
 
   /// Google Maps API キーを取得（全環境共通）
   static String get googleMapsApiKey {
-    return const String.fromEnvironment(
-      'GOOGLE_MAPS_API_KEY',
-      defaultValue: '',
-    );
+    // .envファイルから取得を試行
+    final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
+    if (envKey != null && envKey.isNotEmpty) {
+      return envKey;
+    }
+
+    // 環境変数から取得（フォールバック）
+    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
+        defaultValue: '');
   }
 
   /// 実際に使用するHotPepper APIキーを取得
@@ -58,6 +85,9 @@ class EnvironmentConfig {
 
   /// 実際に使用するGoogle Maps APIキーを取得
   static String get effectiveGoogleMapsApiKey => googleMapsApiKey;
+
+  /// 初期化されているかどうかを確認
+  static bool get isInitialized => _initialized;
 
   /// HotPepper API のベースURL
   static String get hotpepperApiUrl {
