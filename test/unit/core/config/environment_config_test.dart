@@ -6,7 +6,7 @@ void main() {
   setUpAll(() async {
     await TestEnvSetup.initializeTestEnvironment(
       throwOnValidationError: false,
-      enableDebugLogging: false,
+      enableDebugLogging: true, // CI環境でのデバッグ情報を有効化
     );
   });
 

@@ -71,7 +71,12 @@ jobs:
         echo "BATTERY_OPTIMIZATION_MODE=disabled" >> .env.test
         echo "LOCATION_MODE=mock" >> .env.test
         echo "TEST_ENV_SOURCE=ci" >> .env.test
+        echo "=== .env.testファイル内容 ==="
         cat .env.test
+        echo "=== ファイル存在確認 ==="
+        ls -la .env*
+        echo "=== 現在のディレクトリ ==="
+        pwd
       
     - name: 単体テストを実行
       
