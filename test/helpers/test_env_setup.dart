@@ -32,8 +32,10 @@ FLUTTER_ENV=development
     );
 
     // テスト用APIキーを設定
-    ConfigManager.setValue('hotpepperApiKey', 'test_hotpepper_api_key_for_testing');
-    ConfigManager.setValue('googleMapsApiKey', 'test_google_maps_api_key_for_testing');
+    ConfigManager.setValue(
+        'hotpepperApiKey', 'test_hotpepper_api_key_for_testing');
+    ConfigManager.setValue(
+        'googleMapsApiKey', 'test_google_maps_api_key_for_testing');
   }
 
   /// テスト環境をクリーンアップ
