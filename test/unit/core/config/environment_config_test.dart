@@ -1,9 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
-import '../../../helpers/global_test_setup.dart';
+import '../../../helpers/test_env_setup.dart';
 
 void main() {
-  setupGlobalTestEnvironment();
+  setUpAll(() async {
+    await TestEnvSetup.initializeTestEnvironment(
+      throwOnValidationError: false,
+      enableDebugLogging: false,
+    );
+  });
+
+  tearDownAll(() {
+    TestEnvSetup.cleanupTestEnvironment();
+  });
 
   group('EnvironmentConfig', () {
     group('Environment enum', () {
@@ -30,15 +39,26 @@ void main() {
 
     group('API keys', () {
       test('should return API keys from .env.test file when available', () {
-        // .env.testファイルからAPIキーが読み込まれることを確認
-        expect(EnvironmentConfig.hotpepperApiKey, isNotEmpty);
-        expect(EnvironmentConfig.googleMapsApiKey, isNotEmpty);
+        // .env.testファイルまたはTestEnvSetupからAPIキーが読み込まれることを確認
+        final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
+        final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
+        
+        // CI環境では.env.testまたはフォールバック値が設定される
+        expect(hotpepperKey, isNotEmpty, 
+               reason: 'HotPepper APIキーが設定されていません。実際の値: "$hotpepperKey"');
+        expect(googleMapsKey, isNotEmpty,
+               reason: 'Google Maps APIキーが設定されていません。実際の値: "$googleMapsKey"');
       });
 
       test('should use effective API keys', () {
-        // .env.testファイルから有効なAPIキーが取得されることを確認
-        expect(EnvironmentConfig.effectiveHotpepperApiKey, isNotEmpty);
-        expect(EnvironmentConfig.effectiveGoogleMapsApiKey, isNotEmpty);
+        // .env.testファイルまたはTestEnvSetupから有効なAPIキーが取得されることを確認
+        final effectiveHotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
+        final effectiveGoogleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
+        
+        expect(effectiveHotpepperKey, isNotEmpty,
+               reason: 'Effective HotPepper APIキーが空です。実際の値: "$effectiveHotpepperKey"');
+        expect(effectiveGoogleMapsKey, isNotEmpty,
+               reason: 'Effective Google Maps APIキーが空です。実際の値: "$effectiveGoogleMapsKey"');
       });
     });
 

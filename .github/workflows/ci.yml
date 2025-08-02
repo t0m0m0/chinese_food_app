@@ -63,13 +63,15 @@ jobs:
     
     - name: テスト用環境変数を設定
       run: |
-        echo "FLUTTER_ENV=test" >> .env.test
+        echo "FLUTTER_ENV=test" > .env.test
         echo "HOTPEPPER_API_KEY=test_dummy_key_for_ci" >> .env.test
         echo "GOOGLE_MAPS_API_KEY=test_maps_key_for_ci" >> .env.test
         echo "GPS_ACCURACY_MODE=high" >> .env.test
         echo "NETWORK_DELAY_MODE=fast" >> .env.test
         echo "BATTERY_OPTIMIZATION_MODE=disabled" >> .env.test
         echo "LOCATION_MODE=mock" >> .env.test
+        echo "TEST_ENV_SOURCE=ci" >> .env.test
+        cat .env.test
       
     - name: 単体テストを実行
       
