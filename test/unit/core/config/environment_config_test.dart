@@ -42,23 +42,27 @@ void main() {
         // .env.testファイルまたはTestEnvSetupからAPIキーが読み込まれることを確認
         final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
         final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
-        
+
         // CI環境では.env.testまたはフォールバック値が設定される
-        expect(hotpepperKey, isNotEmpty, 
-               reason: 'HotPepper APIキーが設定されていません。実際の値: "$hotpepperKey"');
+        expect(hotpepperKey, isNotEmpty,
+            reason: 'HotPepper APIキーが設定されていません。実際の値: "$hotpepperKey"');
         expect(googleMapsKey, isNotEmpty,
-               reason: 'Google Maps APIキーが設定されていません。実際の値: "$googleMapsKey"');
+            reason: 'Google Maps APIキーが設定されていません。実際の値: "$googleMapsKey"');
       });
 
       test('should use effective API keys', () {
         // .env.testファイルまたはTestEnvSetupから有効なAPIキーが取得されることを確認
-        final effectiveHotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-        final effectiveGoogleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
-        
+        final effectiveHotpepperKey =
+            EnvironmentConfig.effectiveHotpepperApiKey;
+        final effectiveGoogleMapsKey =
+            EnvironmentConfig.effectiveGoogleMapsApiKey;
+
         expect(effectiveHotpepperKey, isNotEmpty,
-               reason: 'Effective HotPepper APIキーが空です。実際の値: "$effectiveHotpepperKey"');
+            reason:
+                'Effective HotPepper APIキーが空です。実際の値: "$effectiveHotpepperKey"');
         expect(effectiveGoogleMapsKey, isNotEmpty,
-               reason: 'Effective Google Maps APIキーが空です。実際の値: "$effectiveGoogleMapsKey"');
+            reason:
+                'Effective Google Maps APIキーが空です。実際の値: "$effectiveGoogleMapsKey"');
       });
     });
 
