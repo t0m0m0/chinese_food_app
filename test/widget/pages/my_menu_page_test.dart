@@ -56,6 +56,15 @@ void main() {
       testWidgets('should display empty state when no stores',
           (WidgetTester tester) async {
         when(mockRepository.getAllStores()).thenAnswer((_) async => []);
+        when(mockRepository.searchStoresFromApi(
+          lat: anyNamed('lat'),
+          lng: anyNamed('lng'),
+          address: anyNamed('address'),
+          keyword: anyNamed('keyword'),
+          range: anyNamed('range'),
+          count: anyNamed('count'),
+          start: anyNamed('start'),
+        )).thenAnswer((_) async => []);
 
         await tester.pumpWidget(createTestWidget());
         await tester.pumpAndSettle();
@@ -65,19 +74,29 @@ void main() {
 
       testWidgets('should display stores list when stores exist',
           (WidgetTester tester) async {
-        final testStores = [
-          Store(
-            id: '1',
-            name: '中華料理店A',
-            address: '東京都渋谷区',
-            lat: 35.6581,
-            lng: 139.7414,
-            status: StoreStatus.wantToGo,
-            createdAt: DateTime.now(),
-          ),
-        ];
+        // 十分なデータ（10件以上）を設定してAPI呼び出しを防ぐ
+        final manyStores = List.generate(
+            15,
+            (index) => Store(
+                  id: 'store_$index',
+                  name: index == 0 ? '中華料理店A' : '中華料理店$index',
+                  address: index == 0 ? '東京都渋谷区' : '東京都渋谷区$index',
+                  lat: 35.6581 + index * 0.001,
+                  lng: 139.7414 + index * 0.001,
+                  status: StoreStatus.wantToGo,
+                  createdAt: DateTime.now(),
+                ));
 
-        when(mockRepository.getAllStores()).thenAnswer((_) async => testStores);
+        when(mockRepository.getAllStores()).thenAnswer((_) async => manyStores);
+        when(mockRepository.searchStoresFromApi(
+          lat: anyNamed('lat'),
+          lng: anyNamed('lng'),
+          address: anyNamed('address'),
+          keyword: anyNamed('keyword'),
+          range: anyNamed('range'),
+          count: anyNamed('count'),
+          start: anyNamed('start'),
+        )).thenAnswer((_) async => []);
 
         await tester.pumpWidget(createTestWidget());
 
@@ -93,6 +112,15 @@ void main() {
           (WidgetTester tester) async {
         when(mockRepository.getAllStores())
             .thenThrow(Exception('Network Error'));
+        when(mockRepository.searchStoresFromApi(
+          lat: anyNamed('lat'),
+          lng: anyNamed('lng'),
+          address: anyNamed('address'),
+          keyword: anyNamed('keyword'),
+          range: anyNamed('range'),
+          count: anyNamed('count'),
+          start: anyNamed('start'),
+        )).thenAnswer((_) async => []);
 
         await tester.pumpWidget(createTestWidget());
 
@@ -107,7 +135,8 @@ void main() {
 
     group('インタラクション', () {
       testWidgets('should switch tabs correctly', (WidgetTester tester) async {
-        final allStores = [
+        // 十分なデータ（10件以上）を設定してAPI呼び出しを防ぐ
+        final baseStores = [
           Store(
             id: '1',
             name: '行きたい店A',
@@ -128,7 +157,34 @@ void main() {
           ),
         ];
 
+        // ダミーデータを追加して10件以上にする
+        final allStores = [
+          ...baseStores,
+          ...List.generate(
+              10,
+              (index) => Store(
+                    id: 'dummy_$index',
+                    name: 'ダミー店$index',
+                    address: '東京都港区$index',
+                    lat: 35.6762 + index * 0.001,
+                    lng: 139.6503 + index * 0.001,
+                    status: index % 2 == 0
+                        ? StoreStatus.wantToGo
+                        : StoreStatus.visited,
+                    createdAt: DateTime.now(),
+                  )),
+        ];
+
         when(mockRepository.getAllStores()).thenAnswer((_) async => allStores);
+        when(mockRepository.searchStoresFromApi(
+          lat: anyNamed('lat'),
+          lng: anyNamed('lng'),
+          address: anyNamed('address'),
+          keyword: anyNamed('keyword'),
+          range: anyNamed('range'),
+          count: anyNamed('count'),
+          start: anyNamed('start'),
+        )).thenAnswer((_) async => []);
 
         await tester.pumpWidget(createTestWidget());
 

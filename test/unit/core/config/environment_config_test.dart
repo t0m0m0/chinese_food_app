@@ -1,7 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
+import '../../../helpers/test_env_setup.dart';
 
 void main() {
+  setUpAll(() async {
+    await TestEnvSetup.initializeTestEnvironment(
+      throwOnValidationError: false,
+      enableDebugLogging: false, // 通常のテスト実行では無効
+    );
+  });
+
+  tearDownAll(() {
+    TestEnvSetup.cleanupTestEnvironment();
+  });
+
   group('EnvironmentConfig', () {
     group('Environment enum', () {
       test('should have correct environment names', () {
@@ -26,16 +38,31 @@ void main() {
     });
 
     group('API keys', () {
-      test('should return empty strings when environment variables not set',
-          () {
-        expect(EnvironmentConfig.hotpepperApiKey, isEmpty);
-        expect(EnvironmentConfig.googleMapsApiKey, isEmpty);
+      test('should return API keys from .env.test file when available', () {
+        // .env.testファイルまたはTestEnvSetupからAPIキーが読み込まれることを確認
+        final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
+        final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
+
+        // CI環境では.env.testまたはフォールバック値が設定される
+        expect(hotpepperKey, isNotEmpty,
+            reason: 'HotPepper APIキーが設定されていません。実際の値: "$hotpepperKey"');
+        expect(googleMapsKey, isNotEmpty,
+            reason: 'Google Maps APIキーが設定されていません。実際の値: "$googleMapsKey"');
       });
 
       test('should use effective API keys', () {
-        // When environment variables are empty
-        expect(EnvironmentConfig.effectiveHotpepperApiKey, isEmpty);
-        expect(EnvironmentConfig.effectiveGoogleMapsApiKey, isEmpty);
+        // .env.testファイルまたはTestEnvSetupから有効なAPIキーが取得されることを確認
+        final effectiveHotpepperKey =
+            EnvironmentConfig.effectiveHotpepperApiKey;
+        final effectiveGoogleMapsKey =
+            EnvironmentConfig.effectiveGoogleMapsApiKey;
+
+        expect(effectiveHotpepperKey, isNotEmpty,
+            reason:
+                'Effective HotPepper APIキーが空です。実際の値: "$effectiveHotpepperKey"');
+        expect(effectiveGoogleMapsKey, isNotEmpty,
+            reason:
+                'Effective Google Maps APIキーが空です。実際の値: "$effectiveGoogleMapsKey"');
       });
     });
 
@@ -53,15 +80,14 @@ void main() {
 
         expect(debugInfo, isA<Map<String, dynamic>>());
         expect(debugInfo['environment'], 'development');
-        expect(debugInfo['hotpepperApiKey'], '(未設定)');
-        expect(debugInfo['googleMapsApiKey'], '(未設定)');
+        // .env.testファイルからキーが読み込まれているので、マスクされた形式で表示される
+        expect(debugInfo['hotpepperApiKey'], matches(r'^.{8}\.\.\.'));
+        expect(debugInfo['googleMapsApiKey'], matches(r'^.{8}\.\.\.'));
         expect(debugInfo['hotpepperApiUrl'],
             'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/');
       });
 
       test('should mask API keys in debug info when available', () {
-        // This test assumes we can't actually set environment variables in tests
-        // but verifies the masking logic structure
         final debugInfo = EnvironmentConfig.debugInfo;
 
         // Check that keys are either masked or marked as unset

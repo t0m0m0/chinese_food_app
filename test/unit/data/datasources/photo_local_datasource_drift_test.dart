@@ -1,17 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
-import 'package:drift/native.dart';
 import 'package:chinese_food_app/core/database/schema/app_database.dart'
     hide Photo;
 import 'package:chinese_food_app/data/datasources/photo_local_datasource_drift.dart';
 import 'package:chinese_food_app/domain/entities/photo.dart';
+import '../../../helpers/test_database_factory.dart';
 
 void main() {
   late AppDatabase database;
   late PhotoLocalDatasourceDrift datasource;
 
   setUp(() async {
-    database = AppDatabase(DatabaseConnection(NativeDatabase.memory()));
+    database = TestDatabaseFactory.createTestDatabase();
     datasource = PhotoLocalDatasourceDrift(database);
 
     // 外部キー制約のためにテスト用のstoreとvisit_recordレコードを作成
@@ -39,7 +39,7 @@ void main() {
   });
 
   tearDown(() async {
-    await database.close();
+    await TestDatabaseFactory.disposeTestDatabase(database);
   });
 
   group('PhotoLocalDatasourceDrift Tests', () {

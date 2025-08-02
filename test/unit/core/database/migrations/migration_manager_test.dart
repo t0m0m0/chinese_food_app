@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:chinese_food_app/core/database/migrations/migration_manager.dart';
 import 'package:chinese_food_app/core/database/schema/app_database.dart';
+import '../../../../helpers/test_database_factory.dart';
 
 void main() {
   late AppDatabase database;
@@ -10,13 +9,12 @@ void main() {
 
   setUp(() {
     // マイグレーションテスト用に空のデータベースを作成
-    final connection = DatabaseConnection(NativeDatabase.memory());
-    database = AppDatabase(connection);
+    database = TestDatabaseFactory.createTestDatabase();
     migrationManager = MigrationManager(database);
   });
 
   tearDown(() async {
-    await database.close();
+    await TestDatabaseFactory.disposeTestDatabase(database);
   });
 
   group('MigrationManager Tests', () {

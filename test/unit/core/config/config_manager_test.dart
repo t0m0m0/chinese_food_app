@@ -1,12 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:chinese_food_app/core/config/config_manager.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
 
 void main() {
   group('ConfigManager', () {
-    setUp(() {
+    setUp(() async {
+      // CI環境では.env.testファイルを優先使用
+      try {
+        await dotenv.load(fileName: '.env.test');
+      } catch (e) {
+        // フォールバック：.env.testが存在しない場合
+        dotenv.testLoad(fileInput: '''
+HOTPEPPER_API_KEY=test_hotpepper_api_key_for_testing
+GOOGLE_MAPS_API_KEY=test_google_maps_api_key_for_testing
+FLUTTER_ENV=development
+''');
+      }
+
       // Reset ConfigManager state before each test
       ConfigManager.forceInitialize();
+      // Initialize EnvironmentConfig for tests
+      await EnvironmentConfig.initialize();
     });
 
     group('initialization', () {
@@ -38,6 +53,7 @@ void main() {
 
     group('after initialization', () {
       setUp(() async {
+        // EnvironmentConfig is already initialized in parent setUp
         await ConfigManager.initialize(
           throwOnValidationError: false,
           enableDebugLogging: false,

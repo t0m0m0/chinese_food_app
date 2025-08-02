@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 
 part 'app_database.g.dart';
 
-// テスト環境でのDrift警告を無効化（静的初期化）
+// Drift警告を無効化（テスト環境および開発環境）
 final bool _isDriftInitialized = (() {
-  if (const bool.fromEnvironment('flutter.test', defaultValue: false) &&
+  // テスト環境またはデバッグモードでは警告を無効化
+  if (const bool.fromEnvironment('flutter.test', defaultValue: false) ||
+      const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false) ||
       kDebugMode) {
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   }
