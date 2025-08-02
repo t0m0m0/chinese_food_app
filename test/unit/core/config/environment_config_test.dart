@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
+import '../../../helpers/global_test_setup.dart';
 
 void main() {
+  setupGlobalTestEnvironment();
+
   group('EnvironmentConfig', () {
     group('Environment enum', () {
       test('should have correct environment names', () {
@@ -26,16 +29,14 @@ void main() {
     });
 
     group('API keys', () {
-      test('should return API keys from .env file when available', () async {
-        await EnvironmentConfig.initialize();
-        // .envファイルからAPIキーが読み込まれることを確認
+      test('should return API keys from .env.test file when available', () {
+        // .env.testファイルからAPIキーが読み込まれることを確認
         expect(EnvironmentConfig.hotpepperApiKey, isNotEmpty);
         expect(EnvironmentConfig.googleMapsApiKey, isNotEmpty);
       });
 
-      test('should use effective API keys', () async {
-        // .envファイルから有効なAPIキーが取得されることを確認
-        await EnvironmentConfig.initialize();
+      test('should use effective API keys', () {
+        // .env.testファイルから有効なAPIキーが取得されることを確認
         expect(EnvironmentConfig.effectiveHotpepperApiKey, isNotEmpty);
         expect(EnvironmentConfig.effectiveGoogleMapsApiKey, isNotEmpty);
       });
@@ -50,23 +51,19 @@ void main() {
     });
 
     group('debug info', () {
-      test('should provide debug information', () async {
-        await EnvironmentConfig.initialize();
+      test('should provide debug information', () {
         final debugInfo = EnvironmentConfig.debugInfo;
 
         expect(debugInfo, isA<Map<String, dynamic>>());
         expect(debugInfo['environment'], 'development');
-        // .envファイルからキーが読み込まれているので、マスクされた形式で表示される
+        // .env.testファイルからキーが読み込まれているので、マスクされた形式で表示される
         expect(debugInfo['hotpepperApiKey'], matches(r'^.{8}\.\.\.'));
         expect(debugInfo['googleMapsApiKey'], matches(r'^.{8}\.\.\.'));
         expect(debugInfo['hotpepperApiUrl'],
             'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/');
       });
 
-      test('should mask API keys in debug info when available', () async {
-        // This test assumes we can't actually set environment variables in tests
-        // but verifies the masking logic structure
-        await EnvironmentConfig.initialize();
+      test('should mask API keys in debug info when available', () {
         final debugInfo = EnvironmentConfig.debugInfo;
 
         // Check that keys are either masked or marked as unset
