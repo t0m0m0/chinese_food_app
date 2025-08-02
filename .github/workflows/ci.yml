@@ -60,6 +60,16 @@ jobs:
       
     - name: コード生成（テスト用）
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
+    
+    - name: テスト用環境変数を設定
+      run: |
+        echo "FLUTTER_ENV=test" >> .env.test
+        echo "HOTPEPPER_API_KEY=test_dummy_key_for_ci" >> .env.test
+        echo "GOOGLE_MAPS_API_KEY=test_maps_key_for_ci" >> .env.test
+        echo "GPS_ACCURACY_MODE=high" >> .env.test
+        echo "NETWORK_DELAY_MODE=fast" >> .env.test
+        echo "BATTERY_OPTIMIZATION_MODE=disabled" >> .env.test
+        echo "LOCATION_MODE=mock" >> .env.test
       
     - name: 単体テストを実行
       
@@ -100,7 +110,13 @@ jobs:
         
     - name: 依存関係をインストール
       run: flutter pub get
-      
+
+    - name: ビルド用環境変数を設定
+      run: |
+        echo "FLUTTER_ENV=production" > .env
+        echo "HOTPEPPER_API_KEY=${{ secrets.HOTPEPPER_API_KEY_PROD || 'dummy_hotpepper_key' }}" >> .env
+        echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY_PROD || 'dummy_maps_key' }}" >> .env
+    
     - name: Android APKをビルド
       run: flutter build apk --debug
       
