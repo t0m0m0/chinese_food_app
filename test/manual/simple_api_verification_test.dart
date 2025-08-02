@@ -1,10 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/config/config_manager.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
 import 'package:chinese_food_app/core/di/app_di_container.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
+import '../helpers/test_env_setup.dart';
 
 /// 実際のアプリフローでAPIが正常に動作することを確認する簡単な検証テスト
 void main() {
@@ -15,9 +15,8 @@ void main() {
     setUpAll(() async {
       print('=== API動作検証テスト開始 ===');
 
-      // 環境設定を初期化
-      await EnvironmentConfig.initialize();
-      await ConfigManager.initialize(
+      // テスト環境を初期化（.env.testファイル読み込み含む）
+      await TestEnvSetup.initializeTestEnvironment(
         throwOnValidationError: false,
         enableDebugLogging: true,
       );
@@ -86,12 +85,10 @@ void main() {
           '  - HotPepper APIキー: ${hotpepperKey.isNotEmpty ? "設定済み (${hotpepperKey.substring(0, 8)}...)" : "未設定"}');
       print(
           '  - Google Maps APIキー: ${googleMapsKey.isNotEmpty ? "設定済み (${googleMapsKey.substring(0, 8)}...)" : "未設定"}');
-      print('  - ConfigManager初期化済み: ${ConfigManager.isInitialized}');
       print('  - DI Container設定済み: ${container.isConfigured}');
 
       expect(hotpepperKey.isNotEmpty, isTrue,
           reason: 'HotPepper APIキーが設定されていません');
-      expect(ConfigManager.isInitialized, isTrue);
       expect(container.isConfigured, isTrue);
 
       print('✅ 全ての設定が正常です');
@@ -99,6 +96,7 @@ void main() {
 
     tearDownAll(() {
       print('=== テスト終了 ===');
+      TestEnvSetup.cleanupTestEnvironment();
       container.dispose();
     });
   });

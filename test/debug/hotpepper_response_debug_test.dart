@@ -1,21 +1,24 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/config/config_manager.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../helpers/test_env_setup.dart';
 
 /// HotPepper APIの実際のレスポンス構造を確認するためのデバッグテスト
 void main() {
   group('HotPepper API Response Debug', () {
     setUpAll(() async {
-      // 環境設定を初期化
-      await EnvironmentConfig.initialize();
-      await ConfigManager.initialize(
+      // テスト環境を初期化（.env.testファイル読み込み含む）
+      await TestEnvSetup.initializeTestEnvironment(
         throwOnValidationError: false,
         enableDebugLogging: true,
       );
+    });
+
+    tearDownAll(() {
+      TestEnvSetup.cleanupTestEnvironment();
     });
 
     test('実際のAPIレスポンス構造を確認', () async {

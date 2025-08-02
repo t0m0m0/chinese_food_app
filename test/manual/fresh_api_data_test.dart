@@ -1,11 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/config/config_manager.dart';
-import 'package:chinese_food_app/core/config/environment_config.dart';
 import 'package:chinese_food_app/core/di/app_di_container.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import '../helpers/test_env_setup.dart';
 
 /// 新しいデータベースでAPIデータのみを表示するテスト
 void main() {
@@ -17,16 +16,14 @@ void main() {
     setUpAll(() async {
       print('=== 新しいAPIデータテスト開始 ===');
 
-      // 環境設定を初期化
-      await EnvironmentConfig.initialize();
-      await ConfigManager.initialize(
+      // テスト環境を初期化
+      await TestEnvSetup.initializeTestEnvironment(
         throwOnValidationError: false,
         enableDebugLogging: true,
       );
 
       print('環境設定:');
-      print('  - APIキー設定済み: ${EnvironmentConfig.hotpepperApiKey.isNotEmpty}');
-      print('  - 環境: ${EnvironmentConfig.current.name}');
+      print('  - テスト環境初期化完了');
 
       // DIコンテナーを作成・設定
       container = AppDIContainer();
@@ -181,6 +178,7 @@ void main() {
     tearDownAll(() {
       print('=== テスト終了 ===');
       container.dispose();
+      TestEnvSetup.cleanupTestEnvironment();
     });
   });
 }
