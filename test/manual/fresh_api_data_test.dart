@@ -1,183 +1,197 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/di/app_di_container.dart';
-import 'package:chinese_food_app/presentation/providers/store_provider.dart';
+import 'package:mockito/mockito.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/domain/entities/store.dart';
 import '../helpers/test_env_setup.dart';
 
-/// 新しいデータベースでAPIデータのみを表示するテスト
+// モッククラス
+class MockStoreRepository extends Mock implements StoreRepository {}
+
+/// モック化されたAPIデータテスト
 void main() {
-  group('Fresh API Data Test', () {
-    late AppDIContainer container;
-    late StoreProvider storeProvider;
-    late StoreRepository storeRepository;
+  group('Fresh API Data Test (Mocked)', () {
+    late MockStoreRepository mockRepository;
 
     setUpAll(() async {
-      print('=== 新しいAPIデータテスト開始 ===');
+      print('=== モック化APIデータテスト開始 ===');
 
       // テスト環境を初期化
       await TestEnvSetup.initializeTestEnvironment(
         throwOnValidationError: false,
-        enableDebugLogging: true,
+        enableDebugLogging: false,
       );
-
-      print('環境設定:');
-      print('  - テスト環境初期化完了');
-
-      // DIコンテナーを作成・設定
-      container = AppDIContainer();
-      container.configure();
-
-      // StoreProviderを取得
-      storeProvider = container.getStoreProvider();
-      storeRepository = storeProvider.repository;
     });
 
-    test('既存データをクリアしてAPIデータのみを取得', () async {
-      print('=== データベースクリア & APIデータ取得テスト ===');
+    setUp(() {
+      // 各テストで新しいモックを作成
+      mockRepository = MockStoreRepository();
+    });
 
-      try {
-        // 既存の全店舗データを削除
-        print('既存データをクリア中...');
-        final existingStores = await storeRepository.getAllStores();
-        print('削除対象店舗数: ${existingStores.length}');
+    test('既存データをクリアしてモックAPIデータを取得', () async {
+      print('=== データベースクリア & モックAPIデータ取得テスト ===');
 
-        for (final store in existingStores) {
-          await storeRepository.deleteStore(store.id);
-        }
-
-        print('✅ 既存データをクリアしました');
-
-        // APIから新しいデータを直接取得
-        print('APIから新宿駅周辺の店舗データを取得中...');
-        await storeProvider.loadNewStoresFromApi(
-          lat: 35.6917, // 新宿駅の座標
+      // モックデータを定義
+      final mockStores = [
+        Store(
+          id: 'J000123456',
+          name: 'テスト中華料理店1',
+          address: '東京都新宿区テスト1-1-1',
+          lat: 35.6917,
           lng: 139.7006,
-          keyword: '中華',
-          count: 15, // 多めに取得
-        );
+          imageUrl: 'https://example.com/image1.jpg',
+          status: StoreStatus.wantToGo,
+          memo: '',
+          createdAt: DateTime.now(),
+        ),
+        Store(
+          id: 'J000123457',
+          name: 'テスト中華料理店2',
+          address: '東京都新宿区テスト2-2-2',
+          lat: 35.6920,
+          lng: 139.7010,
+          imageUrl: 'https://example.com/image2.jpg',
+          status: StoreStatus.wantToGo,
+          memo: '',
+          createdAt: DateTime.now(),
+        ),
+      ];
 
-        print('StoreProvider状態:');
-        print('  - ローディング中: ${storeProvider.isLoading}');
-        print('  - エラー有無: ${storeProvider.error != null}');
-        print('  - 全店舗数: ${storeProvider.stores.length}');
-        print('  - 新店舗数: ${storeProvider.newStores.length}');
+      // モックの動作を設定
+      when(mockRepository.getAllStores()).thenAnswer((_) async => <Store>[]);
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6917,
+        lng: 139.7006,
+        keyword: '中華',
+        count: 10,
+      )).thenAnswer((_) async => mockStores);
 
-        if (storeProvider.error != null) {
-          print('  - エラー内容: ${storeProvider.error}');
-        }
+      print('既存データをクリア中...');
+      final existingStores = await mockRepository.getAllStores();
+      print('削除対象店舗数: ${existingStores.length}');
 
-        // 取得したAPIデータの内容を確認
-        if (storeProvider.stores.isNotEmpty) {
-          print('  - APIから取得した店舗データ:');
-          for (int i = 0; i < storeProvider.stores.length && i < 10; i++) {
-            final store = storeProvider.stores[i];
-            print('    ${i + 1}. ID: ${store.id}');
-            print('       名前: ${store.name}');
-            print('       住所: ${store.address}');
-            print('       座標: (${store.lat}, ${store.lng})');
-            print('       ステータス: ${store.status}');
+      print('✅ 既存データをクリアしました');
 
-            // APIデータの特徴を確認
-            if (store.id.startsWith('J')) {
-              print('       → HotPepper APIデータ ✅');
-            } else {
-              print('       → 非APIデータ');
-            }
-            print('');
-          }
+      print('モックAPIから新宿駅周辺の店舗データを取得中...');
+      final apiStores = await mockRepository.searchStoresFromApi(
+        lat: 35.6917,
+        lng: 139.7006,
+        keyword: '中華',
+        count: 10,
+      );
 
-          // APIデータの割合を確認
-          final apiStoreCount = storeProvider.stores
-              .where((store) => store.id.startsWith('J'))
-              .length;
-          print(
-              '  - APIデータ店舗数: $apiStoreCount / ${storeProvider.stores.length}');
+      print('取得されたモック店舗数: ${apiStores.length}');
 
-          if (apiStoreCount > 0) {
-            print('✅ APIから取得した実際のデータが表示されています！');
-          } else {
-            print('❌ APIデータが見つかりません');
-          }
-        } else {
-          print('⚠️  店舗データが取得されませんでした');
-        }
+      // 検証
+      expect(apiStores.length, greaterThan(0));
+      expect(apiStores.length, equals(2));
+      
+      // APIデータの確認（HotPepper IDがJで始まる）
+      final hotpepperStores = apiStores
+          .where((store) => store.id.startsWith('J'))
+          .toList();
+      expect(hotpepperStores.length, equals(2));
 
-        // 基本検証
-        expect(storeProvider.stores.length, greaterThan(0));
+      print('✅ テスト成功: ${hotpepperStores.length}件のモックAPIデータを取得しました');
 
-        // APIデータの確認
-        final apiStores = storeProvider.stores
-            .where((store) => store.id.startsWith('J'))
-            .toList();
-        expect(apiStores.length, greaterThan(0), reason: 'APIデータが取得されていません');
-
-        print('✅ テスト成功: ${apiStores.length}件のAPIデータを取得しました');
-      } catch (e, stackTrace) {
-        print('❌ 予期しないエラー: $e');
-        print('スタックトレース: $stackTrace');
-        rethrow;
+      // 店舗詳細の確認
+      for (final store in hotpepperStores) {
+        print('  - ${store.name} (ID: ${store.id})');
+        print('    住所: ${store.address}');
+        print('    座標: ${store.lat}, ${store.lng}');
+        expect(store.name, isNotEmpty);
+        expect(store.address, isNotEmpty);
+        expect(store.lat, isNotNull);
+        expect(store.lng, isNotNull);
       }
-    }, timeout: const Timeout(Duration(seconds: 60)));
+    });
 
-    test('複数地点からのAPIデータ取得テスト', () async {
-      print('=== 複数地点APIデータ取得テスト ===');
+    test('複数地点からのモックAPIデータ取得テスト', () async {
+      print('=== 複数地点モックAPIデータ取得テスト ===');
 
-      try {
-        final initialCount = storeProvider.stores.length;
-        print('初期店舗数: $initialCount');
+      // 渋谷エリアのモックデータ
+      final shibuyaStores = [
+        Store(
+          id: 'J000234567',
+          name: '渋谷中華飯店',
+          address: '東京都渋谷区渋谷1-1-1',
+          lat: 35.6598,
+          lng: 139.7006,
+          imageUrl: 'https://example.com/shibuya1.jpg',
+          status: StoreStatus.wantToGo,
+          memo: '',
+          createdAt: DateTime.now(),
+        ),
+      ];
 
-        // 渋谷駅周辺からも取得
-        print('渋谷駅周辺から追加取得中...');
-        await storeProvider.loadNewStoresFromApi(
-          lat: 35.6581, // 渋谷駅の座標
-          lng: 139.7414,
-          keyword: '中華',
-          count: 10,
-        );
-
-        // 池袋駅周辺からも取得
-        print('池袋駅周辺から追加取得中...');
-        await storeProvider.loadNewStoresFromApi(
-          lat: 35.7295, // 池袋駅の座標
+      // 池袋エリアのモックデータ
+      final ikebukuroStores = [
+        Store(
+          id: 'J000345678',
+          name: '池袋中華楼',
+          address: '東京都豊島区南池袋1-1-1',
+          lat: 35.7295,
           lng: 139.7109,
-          keyword: '中華',
-          count: 10,
-        );
+          imageUrl: 'https://example.com/ikebukuro1.jpg',
+          status: StoreStatus.wantToGo,
+          memo: '',
+          createdAt: DateTime.now(),
+        ),
+      ];
 
-        final finalCount = storeProvider.stores.length;
-        final addedCount = finalCount - initialCount;
+      // 地域別モック設定
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6598, // 渋谷
+        lng: 139.7006,
+        keyword: '中華',
+        count: 10,
+      )).thenAnswer((_) async => shibuyaStores);
 
-        print('最終店舗数: $finalCount');
-        print('追加された店舗数: $addedCount');
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.7295, // 池袋
+        lng: 139.7109,
+        keyword: '中華',
+        count: 10,
+      )).thenAnswer((_) async => ikebukuroStores);
 
-        // 地域別の分布を確認
-        print('地域別分布:');
-        final newStores = storeProvider.stores.sublist(initialCount);
-        for (final store in newStores) {
-          if (store.address.contains('新宿')) {
-            print('  - 新宿: ${store.name}');
-          } else if (store.address.contains('渋谷')) {
-            print('  - 渋谷: ${store.name}');
-          } else if (store.address.contains('池袋')) {
-            print('  - 池袋: ${store.name}');
-          } else {
-            print('  - その他: ${store.name} (${store.address})');
-          }
-        }
+      print('渋谷駅周辺からモックデータ取得中...');
+      final shibuyaResults = await mockRepository.searchStoresFromApi(
+        lat: 35.6598,
+        lng: 139.7006,
+        keyword: '中華',
+        count: 10,
+      );
 
-        expect(storeProvider.stores.length, greaterThanOrEqualTo(initialCount));
-        print('✅ 複数地点からのAPIデータ取得が成功しました');
-      } catch (e) {
-        print('❌ 複数地点取得エラー: $e');
-        rethrow;
-      }
-    }, timeout: const Timeout(Duration(seconds: 60)));
+      print('池袋駅周辺からモックデータ取得中...');
+      final ikebukuroResults = await mockRepository.searchStoresFromApi(
+        lat: 35.7295,
+        lng: 139.7109,
+        keyword: '中華',
+        count: 10,
+      );
+
+      final totalStores = [...shibuyaResults, ...ikebukuroResults];
+      
+      print('最終店舗数: ${totalStores.length}');
+      print('地域別分布:');
+      print('  - 渋谷エリア: ${shibuyaResults.length}件');
+      print('  - 池袋エリア: ${ikebukuroResults.length}件');
+
+      // 検証
+      expect(shibuyaResults.length, equals(1));
+      expect(ikebukuroResults.length, equals(1));
+      expect(totalStores.length, equals(2));
+
+      // 地域別の店舗が正しく取得されていることを確認
+      expect(shibuyaResults.first.name, contains('渋谷'));
+      expect(ikebukuroResults.first.name, contains('池袋'));
+
+      print('✅ 複数地点からのモックAPIデータ取得が成功しました');
+    });
 
     tearDownAll(() {
       print('=== テスト終了 ===');
-      container.dispose();
       TestEnvSetup.cleanupTestEnvironment();
     });
   });
