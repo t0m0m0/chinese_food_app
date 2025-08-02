@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
 import 'package:chinese_food_app/core/network/app_http_client.dart';
 import 'package:chinese_food_app/core/network/api_response.dart';
 import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
 import 'package:chinese_food_app/core/constants/app_constants.dart';
-import 'package:chinese_food_app/core/config/config_manager.dart';
-import 'package:chinese_food_app/core/config/environment_config.dart';
+import '../../../test/helpers/test_env_setup.dart';
 
 void main() {
   group('HotpepperApiDatasourceImpl', () {
@@ -15,30 +13,18 @@ void main() {
     late MockAppHttpClient mockHttpClient;
 
     setUp(() async {
-      // dotenvをテスト環境用に初期化
-      dotenv.testLoad(fileInput: '''
-HOTPEPPER_API_KEY=test_hotpepper_api_key
-GOOGLE_MAPS_API_KEY=test_google_maps_api_key
-''');
-
-      // EnvironmentConfigを初期化
-      await EnvironmentConfig.initialize();
-
-      mockHttpClient = MockAppHttpClient();
-      datasource = HotpepperApiDatasourceImpl(mockHttpClient);
-
-      // ConfigManagerをテスト用に初期化
-      await ConfigManager.initialize(
+      // テスト環境を初期化
+      await TestEnvSetup.initializeTestEnvironment(
         throwOnValidationError: false,
         enableDebugLogging: false,
       );
-      // テスト用APIキーを設定
-      ConfigManager.setValue('hotpepperApiKey', 'test_hotpepper_api_key');
-      ConfigManager.setValue('googleMapsApiKey', 'test_google_maps_api_key');
+
+      mockHttpClient = MockAppHttpClient();
+      datasource = HotpepperApiDatasourceImpl(mockHttpClient);
     });
 
     tearDown(() {
-      ConfigManager.forceInitialize();
+      TestEnvSetup.cleanupTestEnvironment();
     });
 
     group('Parameter Validation', () {
