@@ -4,9 +4,11 @@ import 'package:chinese_food_app/core/config/environment_config.dart';
 
 void main() {
   group('ConfigManager', () {
-    setUp(() {
+    setUp(() async {
       // Reset ConfigManager state before each test
       ConfigManager.forceInitialize();
+      // Initialize EnvironmentConfig for tests
+      await EnvironmentConfig.initialize();
     });
 
     group('initialization', () {
@@ -38,6 +40,7 @@ void main() {
 
     group('after initialization', () {
       setUp(() async {
+        // EnvironmentConfig is already initialized in parent setUp
         await ConfigManager.initialize(
           throwOnValidationError: false,
           enableDebugLogging: false,
