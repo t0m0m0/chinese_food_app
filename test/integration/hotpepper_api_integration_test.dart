@@ -27,7 +27,7 @@ GOOGLE_MAPS_API_KEY=test_google_maps_api_key_for_testing
 FLUTTER_ENV=development
 ''');
       }
-      
+
       // 環境設定を初期化
       await EnvironmentConfig.initialize();
       await ConfigManager.initialize(

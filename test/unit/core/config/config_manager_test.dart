@@ -17,7 +17,7 @@ GOOGLE_MAPS_API_KEY=test_google_maps_api_key_for_testing
 FLUTTER_ENV=development
 ''');
       }
-      
+
       // Reset ConfigManager state before each test
       ConfigManager.forceInitialize();
       // Initialize EnvironmentConfig for tests

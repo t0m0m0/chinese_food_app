@@ -88,3 +88,4 @@ macos/Podfile
 
 # iOS/macOS specific generated files
 ios/Flutter/Profile.xcconfigapp_db.sqlite
+app_db.sqlite
