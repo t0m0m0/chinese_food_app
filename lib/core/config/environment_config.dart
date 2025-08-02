@@ -47,7 +47,21 @@ class EnvironmentConfig {
     if (_initialized) return;
 
     try {
-      await dotenv.load();
+      // テスト環境では.env.testファイルを優先
+      if (const bool.fromEnvironment('flutter.test', defaultValue: false) ||
+          const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
+        // テスト環境では既にTestEnvSetupで.env.testが読み込まれているため、
+        // 再読み込みを避けてDotEnvの状態を保持
+        if (dotenv.env.isNotEmpty) {
+          _initialized = true;
+          return;
+        }
+        // .env.testが読み込まれていない場合のみ読み込み
+        await dotenv.load(fileName: '.env.test');
+      } else {
+        // 本番環境では.envファイルを読み込み
+        await dotenv.load();
+      }
     } catch (e) {
       // .envファイルが存在しない場合は無視
     }
