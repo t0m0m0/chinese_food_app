@@ -9,23 +9,34 @@ class TestEnvSetup {
     bool throwOnValidationError = false,
     bool enableDebugLogging = false,
   }) async {
-    // dotenvをテスト環境用に初期化
+    // CI環境では.env.testファイルを優先使用、フォールバックでtestLoad
     try {
-      // まず.env.testファイルの読み込みを試行
+      // プロジェクトルートから.env.testを読み込み
       await dotenv.load(fileName: '.env.test');
     } catch (e) {
-      // .env.testが存在しない場合は、テストデータを直接設定
+      // .env.testが存在しないかアクセスできない場合はフォールバック
       dotenv.testLoad(fileInput: '''
-HOTPEPPER_API_KEY=test_hotpepper_api_key_for_testing
-GOOGLE_MAPS_API_KEY=test_google_maps_api_key_for_testing
+HOTPEPPER_API_KEY=test_hotpepper_api_key_for_testing_from_fallback
+GOOGLE_MAPS_API_KEY=test_google_maps_api_key_for_testing_from_fallback
 FLUTTER_ENV=development
+TEST_DATABASE_PATH=:memory:
+ENABLE_DEBUG_LOGGING=false
+ENABLE_PERFORMANCE_MONITORING=false
+TEST_TIMEOUT_SECONDS=30
+TEST_MAX_RETRY_COUNT=3
+TEST_ENV_SOURCE=fallback
 ''');
     }
 
-    // EnvironmentConfigを初期化
-    await EnvironmentConfig.initialize();
+    // EnvironmentConfigを初期化（既に初期化済みの場合はスキップ）
+    try {
+      await EnvironmentConfig.initialize();
+    } catch (e) {
+      // 既に初期化済みの場合は無視
+    }
 
-    // ConfigManagerをテスト用に初期化
+    // ConfigManagerを強制的にリセットしてから初期化
+    ConfigManager.forceInitialize();
     await ConfigManager.initialize(
       throwOnValidationError: throwOnValidationError,
       enableDebugLogging: enableDebugLogging,
