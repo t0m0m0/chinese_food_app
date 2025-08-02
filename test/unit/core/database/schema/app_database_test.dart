@@ -1,17 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:chinese_food_app/core/database/schema/app_database.dart';
+import '../../../../helpers/test_database_factory.dart';
 
 void main() {
   late AppDatabase database;
 
   setUp(() {
-    database = AppDatabase(DatabaseConnection(NativeDatabase.memory()));
+    database = TestDatabaseFactory.createTestDatabase();
   });
 
   tearDown(() async {
-    await database.close();
+    await TestDatabaseFactory.disposeTestDatabase(database);
   });
 
   group('AppDatabase Schema Tests', () {

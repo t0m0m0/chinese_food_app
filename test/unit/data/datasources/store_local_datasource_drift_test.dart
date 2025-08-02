@@ -1,22 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
-import 'package:drift/native.dart';
 import 'package:chinese_food_app/core/database/schema/app_database.dart'
     hide Store;
 import 'package:chinese_food_app/data/datasources/store_local_datasource_drift.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import '../../../helpers/test_database_factory.dart';
 
 void main() {
   late AppDatabase database;
   late StoreLocalDatasourceDrift datasource;
 
   setUp(() {
-    database = AppDatabase(DatabaseConnection(NativeDatabase.memory()));
+    database = TestDatabaseFactory.createTestDatabase();
     datasource = StoreLocalDatasourceDrift(database);
   });
 
   tearDown(() async {
-    await database.close();
+    await TestDatabaseFactory.disposeTestDatabase(database);
   });
 
   group('StoreLocalDatasourceDrift Tests', () {
