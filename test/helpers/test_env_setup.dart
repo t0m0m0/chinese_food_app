@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
 import 'package:chinese_food_app/core/config/config_manager.dart';
