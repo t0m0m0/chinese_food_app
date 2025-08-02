@@ -20,13 +20,13 @@ void main() {
 HOTPEPPER_API_KEY=test_hotpepper_api_key
 GOOGLE_MAPS_API_KEY=test_google_maps_api_key
 ''');
-      
+
       // EnvironmentConfigを初期化
       await EnvironmentConfig.initialize();
-      
+
       mockHttpClient = MockAppHttpClient();
       datasource = HotpepperApiDatasourceImpl(mockHttpClient);
-      
+
       // ConfigManagerをテスト用に初期化
       await ConfigManager.initialize(
         throwOnValidationError: false,

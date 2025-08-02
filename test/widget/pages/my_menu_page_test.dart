@@ -75,15 +75,17 @@ void main() {
       testWidgets('should display stores list when stores exist',
           (WidgetTester tester) async {
         // 十分なデータ（10件以上）を設定してAPI呼び出しを防ぐ
-        final manyStores = List.generate(15, (index) => Store(
-          id: 'store_$index',
-          name: index == 0 ? '中華料理店A' : '中華料理店$index',
-          address: index == 0 ? '東京都渋谷区' : '東京都渋谷区$index',
-          lat: 35.6581 + index * 0.001,
-          lng: 139.7414 + index * 0.001,
-          status: StoreStatus.wantToGo,
-          createdAt: DateTime.now(),
-        ));
+        final manyStores = List.generate(
+            15,
+            (index) => Store(
+                  id: 'store_$index',
+                  name: index == 0 ? '中華料理店A' : '中華料理店$index',
+                  address: index == 0 ? '東京都渋谷区' : '東京都渋谷区$index',
+                  lat: 35.6581 + index * 0.001,
+                  lng: 139.7414 + index * 0.001,
+                  status: StoreStatus.wantToGo,
+                  createdAt: DateTime.now(),
+                ));
 
         when(mockRepository.getAllStores()).thenAnswer((_) async => manyStores);
         when(mockRepository.searchStoresFromApi(
@@ -158,15 +160,19 @@ void main() {
         // ダミーデータを追加して10件以上にする
         final allStores = [
           ...baseStores,
-          ...List.generate(10, (index) => Store(
-            id: 'dummy_$index',
-            name: 'ダミー店$index',
-            address: '東京都港区$index',
-            lat: 35.6762 + index * 0.001,
-            lng: 139.6503 + index * 0.001,
-            status: index % 2 == 0 ? StoreStatus.wantToGo : StoreStatus.visited,
-            createdAt: DateTime.now(),
-          )),
+          ...List.generate(
+              10,
+              (index) => Store(
+                    id: 'dummy_$index',
+                    name: 'ダミー店$index',
+                    address: '東京都港区$index',
+                    lat: 35.6762 + index * 0.001,
+                    lng: 139.6503 + index * 0.001,
+                    status: index % 2 == 0
+                        ? StoreStatus.wantToGo
+                        : StoreStatus.visited,
+                    createdAt: DateTime.now(),
+                  )),
         ];
 
         when(mockRepository.getAllStores()).thenAnswer((_) async => allStores);

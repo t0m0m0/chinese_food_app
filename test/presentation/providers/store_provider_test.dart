@@ -145,7 +145,7 @@ void main() {
 
       await storeProvider.loadStores();
       final store = testStores.first;
-      
+
       // エラーをクリアしてからテスト
       storeProvider.clearError();
       await storeProvider.updateStoreStatus(store.id, StoreStatus.visited);
@@ -161,7 +161,7 @@ void main() {
 
       await storeProvider.loadStores();
       final store = testStores.first;
-      
+
       // エラーをクリアしてからテスト
       storeProvider.clearError();
       await storeProvider.updateStoreStatus(store.id, StoreStatus.visited);
@@ -176,7 +176,7 @@ void main() {
       await storeProvider.loadStores();
       final originalStores = List<Store>.from(storeProvider.stores);
       final originalStatus = storeProvider.stores.first.status;
-      
+
       // エラーをクリアしてからテスト
       storeProvider.clearError();
       await storeProvider.updateStoreStatus('store-1', StoreStatus.visited);
@@ -200,7 +200,7 @@ void main() {
       );
 
       await storeProvider.loadStores();
-      
+
       // エラーをクリアしてからテスト
       storeProvider.clearError();
       await storeProvider.addStore(newStore);
@@ -224,7 +224,7 @@ void main() {
       fakeRepository.setShouldThrowOnInsert(true);
 
       await storeProvider.loadStores();
-      
+
       // エラーをクリアしてからテスト
       storeProvider.clearError();
       await storeProvider.addStore(newStore);
