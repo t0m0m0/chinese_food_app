@@ -17,12 +17,15 @@ class TestEnvSetup {
       // .env.testファイルを読み込み
       await dotenv.load(fileName: ".env.test");
       if (enableDebugLogging) {
-        developer.log('✅ .env.test file loaded successfully', name: 'TestEnvSetup');
+        developer.log('✅ .env.test file loaded successfully',
+            name: 'TestEnvSetup');
       }
     } catch (e) {
       // .env.testファイルが存在しない場合はデフォルト値を設定
       if (enableDebugLogging) {
-        developer.log('Warning: .env.test file not found, using default test values', name: 'TestEnvSetup');
+        developer.log(
+            'Warning: .env.test file not found, using default test values',
+            name: 'TestEnvSetup');
       }
     }
 
@@ -36,7 +39,8 @@ class TestEnvSetup {
       );
     } catch (e) {
       if (enableDebugLogging) {
-        developer.log('ConfigManager initialization failed: $e', name: 'TestEnvSetup');
+        developer.log('ConfigManager initialization failed: $e',
+            name: 'TestEnvSetup');
       }
       // テスト環境では初期化エラーを無視
     }
@@ -83,7 +87,8 @@ class TestEnvSetup {
       dotenv.testLoad(fileInput: TestConstants.defaultTestEnvironmentConfig);
     } catch (e) {
       // 初期化に失敗した場合はエラーをログ出力して続行
-      developer.log('Failed to initialize test environment with defaults: $e', name: 'TestEnvSetup', level: 1000);
+      developer.log('Failed to initialize test environment with defaults: $e',
+          name: 'TestEnvSetup', level: 1000);
     }
   }
 
@@ -100,7 +105,8 @@ class TestEnvSetup {
     try {
       dotenv.env[key] = value;
     } catch (e) {
-      developer.log('Warning: Failed to set test API key $key: $e', name: 'TestEnvSetup', level: 900);
+      developer.log('Warning: Failed to set test API key $key: $e',
+          name: 'TestEnvSetup', level: 900);
     }
   }
 
@@ -109,7 +115,8 @@ class TestEnvSetup {
     try {
       dotenv.env.remove(key);
     } catch (e) {
-      developer.log('Warning: Failed to clear test API key $key: $e', name: 'TestEnvSetup', level: 900);
+      developer.log('Warning: Failed to clear test API key $key: $e',
+          name: 'TestEnvSetup', level: 900);
     }
   }
 }
