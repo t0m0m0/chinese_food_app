@@ -60,10 +60,7 @@ void main() {
       test(
           'should return true for isConfigurationValid when keys are available',
           () {
-        final errors = ConfigValidator.validateConfiguration();
-        print('Validation errors: $errors');
         final isValid = ConfigValidator.isConfigurationValid;
-        print('isConfigurationValid: $isValid');
         expect(isValid, isTrue);
       });
 
