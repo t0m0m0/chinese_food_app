@@ -61,30 +61,11 @@ jobs:
     - name: コード生成（テスト用）
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
     
-    - name: テスト用環境変数を確認
-      run: |
-        echo "=== リポジトリの.env.testファイルを使用 ==="
-        echo "ファイル存在確認:"
-        ls -la .env.test
-        echo "=== .env.testファイル内容確認 ==="
-        cat .env.test
-        echo "=== CI用追加設定を.env.testに追記 ==="
-        echo "TEST_ENV_SOURCE=ci" >> .env.test
-        echo "CI_ENVIRONMENT=github_actions" >> .env.test
-        echo "=== 最終的な.env.testファイル内容 ==="
-        cat .env.test
+    - name: テスト用環境変数を設定
+      run: ./.github/scripts/setup-test-env.sh
       
     - name: 単体テストを実行（環境変数デバッグ付き）
-      run: |
-        echo "=== テスト実行前の環境確認 ==="
-        echo "Current directory: $(pwd)"
-        echo "Files in current directory:"
-        ls -la
-        echo "Content of .env.test:"
-        cat .env.test 2>/dev/null || echo ".env.test file not found"
-        echo "=== Flutter test開始 ==="
-        flutter test --coverage --reporter=expanded
-        echo "=== テスト完了 ==="
+      run: ./.github/scripts/run-tests-with-debug.sh
         
     - name: テストカバレッジをアップロード
       uses: codecov/codecov-action@v3
@@ -122,13 +103,10 @@ jobs:
       run: flutter pub get
 
     - name: ビルド用環境変数を設定
-      run: |
-        echo "FLUTTER_ENV=production" > .env
-        # 本番用APIキーがある場合は使用、なければダミー値
-        echo "HOTPEPPER_API_KEY=${{ secrets.HOTPEPPER_API_KEY_PROD || 'dummy_hotpepper_key_for_build_12345' }}" >> .env
-        echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY_PROD || 'dummy_maps_key_for_build_12345' }}" >> .env
-        echo "=== ビルド用環境ファイル確認（機密情報はマスク） ==="
-        sed 's/API_KEY=.*/API_KEY=***MASKED***/g' .env
+      env:
+        HOTPEPPER_API_KEY_PROD: ${{ secrets.HOTPEPPER_API_KEY_PROD }}
+        GOOGLE_MAPS_API_KEY_PROD: ${{ secrets.GOOGLE_MAPS_API_KEY_PROD }}
+      run: ./.github/scripts/setup-build-env.sh
     
     - name: Android APKをビルド
       run: flutter build apk --debug
@@ -211,11 +189,7 @@ jobs:
       run: flutter pub get
       
     - name: 統合テスト用環境設定
-      run: |
-        echo "FLUTTER_ENV=integration" > .env.integration
-        echo "HOTPEPPER_API_KEY=integration_test_key_12345" >> .env.integration
-        echo "GOOGLE_MAPS_API_KEY=integration_test_maps_key_12345" >> .env.integration
-        echo "LOCATION_MODE=mock" >> .env.integration
+      run: ./.github/scripts/setup-integration-test-env.sh
       
     - name: 統合テストを実行
       run: |
