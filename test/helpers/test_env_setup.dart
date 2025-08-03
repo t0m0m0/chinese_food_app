@@ -14,7 +14,7 @@ class TestEnvSetup {
     if (_isInitialized) return;
 
     try {
-      // .env.testファイルを読み込み
+      // .env.testファイルを読み込み（CI環境では.envも同じ内容）
       await dotenv.load(fileName: ".env.test");
       if (enableDebugLogging) {
         developer.log('✅ .env.test file loaded successfully',
