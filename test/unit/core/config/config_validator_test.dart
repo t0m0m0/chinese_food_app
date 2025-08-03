@@ -1,11 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/config_validator.dart';
 import 'package:chinese_food_app/core/config/environment_config.dart';
+import '../../../helpers/test_env_setup.dart';
 
 void main() {
   group('ConfigValidator', () {
     setUpAll(() async {
-      // 全テストの前に初期化
+      // ConfigValidatorを呼ぶ前にテスト環境を初期化
+      await TestEnvSetup.initializeTestEnvironment();
       await EnvironmentConfig.initialize();
     });
     group('validateConfiguration', () {
