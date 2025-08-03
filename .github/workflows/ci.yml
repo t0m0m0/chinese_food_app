@@ -61,27 +61,30 @@ jobs:
     - name: コード生成（テスト用）
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
     
-    - name: テスト用環境変数を設定
+    - name: テスト用環境変数を確認
       run: |
-        echo "FLUTTER_ENV=test" > .env.test
-        echo "HOTPEPPER_API_KEY=test_dummy_key_for_ci" >> .env.test
-        echo "GOOGLE_MAPS_API_KEY=test_maps_key_for_ci" >> .env.test
-        echo "GPS_ACCURACY_MODE=high" >> .env.test
-        echo "NETWORK_DELAY_MODE=fast" >> .env.test
-        echo "BATTERY_OPTIMIZATION_MODE=disabled" >> .env.test
-        echo "LOCATION_MODE=mock" >> .env.test
-        echo "TEST_ENV_SOURCE=ci" >> .env.test
-        echo "=== .env.testファイル内容 ==="
+        echo "=== リポジトリの.env.testファイルを使用 ==="
+        echo "ファイル存在確認:"
+        ls -la .env.test
+        echo "=== .env.testファイル内容確認 ==="
         cat .env.test
-        echo "=== ファイル存在確認 ==="
-        ls -la .env*
-        echo "=== 現在のディレクトリ ==="
-        pwd
+        echo "=== CI用追加設定を.env.testに追記 ==="
+        echo "TEST_ENV_SOURCE=ci" >> .env.test
+        echo "CI_ENVIRONMENT=github_actions" >> .env.test
+        echo "=== 最終的な.env.testファイル内容 ==="
+        cat .env.test
       
-    - name: 単体テストを実行
-      
+    - name: 単体テストを実行（環境変数デバッグ付き）
       run: |
-        flutter test --coverage
+        echo "=== テスト実行前の環境確認 ==="
+        echo "Current directory: $(pwd)"
+        echo "Files in current directory:"
+        ls -la
+        echo "Content of .env.test:"
+        cat .env.test 2>/dev/null || echo ".env.test file not found"
+        echo "=== Flutter test開始 ==="
+        flutter test --coverage --reporter=expanded
+        echo "=== テスト完了 ==="
         
     - name: テストカバレッジをアップロード
       uses: codecov/codecov-action@v3
@@ -96,7 +99,7 @@ jobs:
     needs: test
     env:
       # CI環境用のダミーGoogleMaps APIキー設定
-      GOOGLE_MAPS_API_KEY: "AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT"
+      GOOGLE_MAPS_API_KEY: "AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT_12345"
     
     steps:
     - name: リポジトリをチェックアウト
@@ -121,8 +124,11 @@ jobs:
     - name: ビルド用環境変数を設定
       run: |
         echo "FLUTTER_ENV=production" > .env
-        echo "HOTPEPPER_API_KEY=${{ secrets.HOTPEPPER_API_KEY_PROD || 'dummy_hotpepper_key' }}" >> .env
-        echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY_PROD || 'dummy_maps_key' }}" >> .env
+        # 本番用APIキーがある場合は使用、なければダミー値
+        echo "HOTPEPPER_API_KEY=${{ secrets.HOTPEPPER_API_KEY_PROD || 'dummy_hotpepper_key_for_build_12345' }}" >> .env
+        echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY_PROD || 'dummy_maps_key_for_build_12345' }}" >> .env
+        echo "=== ビルド用環境ファイル確認（機密情報はマスク） ==="
+        sed 's/API_KEY=.*/API_KEY=***MASKED***/g' .env
     
     - name: Android APKをビルド
       run: flutter build apk --debug
@@ -183,6 +189,43 @@ jobs:
     - name: Dartコードの潜在的問題をチェック
       run: dart analyze --fatal-infos --fatal-warnings
 
+  # 統合テスト（オプション）
+  integration-test:
+    runs-on: ubuntu-latest
+    name: 統合テスト
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: リポジトリをチェックアウト
+      uses: actions/checkout@v4
+      
+    - name: Flutter環境をセットアップ
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.5'
+        channel: 'stable'
+        cache: true
+        
+    - name: 依存関係をインストール
+      run: flutter pub get
+      
+    - name: 統合テスト用環境設定
+      run: |
+        echo "FLUTTER_ENV=integration" > .env.integration
+        echo "HOTPEPPER_API_KEY=integration_test_key_12345" >> .env.integration
+        echo "GOOGLE_MAPS_API_KEY=integration_test_maps_key_12345" >> .env.integration
+        echo "LOCATION_MODE=mock" >> .env.integration
+      
+    - name: 統合テストを実行
+      run: |
+        # 統合テストがある場合のみ実行
+        if [ -d "integration_test" ]; then
+          flutter test integration_test/
+        else
+          echo "統合テストファイルが見つかりません。スキップします。"
+        fi
+
   # 通知とレポート
   notification:
     runs-on: ubuntu-latest
@@ -191,14 +234,46 @@ jobs:
     if: always()
     
     steps:
-    - name: CI結果の通知
+    - name: CI結果の集計
+      id: ci-result
       run: |
+        echo "=== CI/CD結果集計 ==="
+        echo "Code Quality: ${{ needs.code-quality.result }}"
+        echo "Test: ${{ needs.test.result }}"
+        echo "Build Android: ${{ needs.build-android.result }}"
+        echo "Security Scan: ${{ needs.security-scan.result }}"
+        
         if [ "${{ needs.code-quality.result }}" == "success" ] && \
            [ "${{ needs.test.result }}" == "success" ] && \
            [ "${{ needs.build-android.result }}" == "success" ] && \
            [ "${{ needs.security-scan.result }}" == "success" ]; then
-          echo "✅ すべてのCI/CDチェックが成功しました"
+          echo "result=success" >> $GITHUB_OUTPUT
+          echo "message=✅ すべてのCI/CDチェックが成功しました" >> $GITHUB_OUTPUT
         else
-          echo "❌ CI/CDチェックで問題が検出されました"
+          echo "result=failure" >> $GITHUB_OUTPUT
+          echo "message=❌ CI/CDチェックで問題が検出されました" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: CI結果の通知
+      run: |
+        echo "${{ steps.ci-result.outputs.message }}"
+        if [ "${{ steps.ci-result.outputs.result }}" == "failure" ]; then
+          echo "失敗したジョブの詳細:"
+          [ "${{ needs.code-quality.result }}" != "success" ] && echo "- コード品質チェック: ${{ needs.code-quality.result }}"
+          [ "${{ needs.test.result }}" != "success" ] && echo "- テスト実行: ${{ needs.test.result }}"
+          [ "${{ needs.build-android.result }}" != "success" ] && echo "- Androidビルド: ${{ needs.build-android.result }}"
+          [ "${{ needs.security-scan.result }}" != "success" ] && echo "- セキュリティスキャン: ${{ needs.security-scan.result }}"
           exit 1
         fi
+        
+    - name: 成功時のサマリー出力
+      if: steps.ci-result.outputs.result == 'success'
+      run: |
+        echo "## 🎉 CI/CD 成功サマリー" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ コード品質チェック完了" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ 全テスト通過" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Androidビルド成功" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ セキュリティスキャン完了" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "ブランチ: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "コミット: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
