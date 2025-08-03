@@ -18,18 +18,20 @@ void main() {
     group('Environment enum', () {
       test('should have correct environment names', () {
         expect(Environment.development.name, 'development');
+        expect(Environment.test.name, 'test');
         expect(Environment.staging.name, 'staging');
         expect(Environment.production.name, 'production');
       });
     });
 
     group('current environment', () {
-      test('should default to development when FLUTTER_ENV is not set', () {
-        expect(EnvironmentConfig.current, Environment.development);
+      test('should be test environment when initialized with TestEnvSetup', () {
+        expect(EnvironmentConfig.current, Environment.test);
       });
 
       test('should return correct environment flags', () {
-        expect(EnvironmentConfig.isDevelopment, isTrue);
+        expect(EnvironmentConfig.isDevelopment, isFalse);
+        expect(EnvironmentConfig.isTest, isTrue);
         expect(EnvironmentConfig.isStaging, isFalse);
         expect(EnvironmentConfig.isProduction, isFalse);
       });
@@ -79,7 +81,7 @@ void main() {
         final debugInfo = EnvironmentConfig.debugInfo;
 
         expect(debugInfo, isA<Map<String, dynamic>>());
-        expect(debugInfo['environment'], 'development');
+        expect(debugInfo['environment'], 'test');
         expect(debugInfo['hotpepperApiUrl'],
             'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/');
 
