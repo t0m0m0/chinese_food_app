@@ -29,7 +29,7 @@ class EnvironmentConfig {
     if (_isTestEnvironment()) {
       return Environment.test;
     }
-    
+
     // 通常の環境判定ロジック
     String env = 'development';
 
@@ -55,7 +55,7 @@ class EnvironmentConfig {
       return Environment.development;
     }
   }
-  
+
   /// テスト環境かどうかを判定
   static bool _isTestEnvironment() {
     // Flutter test環境の検出
@@ -63,7 +63,7 @@ class EnvironmentConfig {
         const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
       return true;
     }
-    
+
     // DotEnvからのテスト環境検出
     try {
       if (dotenv.env.isNotEmpty && dotenv.env['FLUTTER_ENV'] == 'test') {
@@ -72,7 +72,7 @@ class EnvironmentConfig {
     } catch (e) {
       // DotEnv未初期化の場合は無視
     }
-    
+
     return false;
   }
 
@@ -94,22 +94,32 @@ class EnvironmentConfig {
 
     try {
       // テスト環境では.env.testファイルを優先
-      if (const bool.fromEnvironment('flutter.test', defaultValue: false) ||
+      if (_isTestEnvironment() ||
+          const bool.fromEnvironment('flutter.test', defaultValue: false) ||
           const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
-        // テスト環境では既にTestEnvSetupで.env.testが読み込まれているため、
-        // 再読み込みを避けてDotEnvの状態を保持
-        if (dotenv.env.isNotEmpty) {
-          _initialized = true;
-          return;
+        // テスト環境では.env.testファイルを確実に読み込み
+        if (dotenv.env.isEmpty || dotenv.env['FLUTTER_ENV'] != 'test') {
+          await dotenv.load(fileName: '.env.test');
+          // テスト環境であることを明示的に設定
+          dotenv.env['FLUTTER_ENV'] = 'test';
         }
-        // .env.testが読み込まれていない場合のみ読み込み
-        await dotenv.load(fileName: '.env.test');
       } else {
         // 本番環境では.envファイルを読み込み
         await dotenv.load();
       }
     } catch (e) {
       // .envファイルが存在しない場合は無視
+      // テスト環境の場合は最低限の設定を行う
+      if (_isTestEnvironment() ||
+          const bool.fromEnvironment('flutter.test', defaultValue: false) ||
+          const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
+        try {
+          dotenv.testLoad(fileInput: 'FLUTTER_ENV=test');
+        } catch (testLoadError) {
+          // 最後の手段として環境変数のみ設定
+          dotenv.env['FLUTTER_ENV'] = 'test';
+        }
+      }
     }
 
     _initialized = true;

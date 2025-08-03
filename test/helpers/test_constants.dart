@@ -17,14 +17,15 @@ class TestConstants {
   /// HotPepper API用テストダミーキー
   ///
   /// 実際のAPI呼び出しは行わず、テスト環境での設定値検証のみに使用
-  static const String dummyHotpepperApiKey =
-      'test_dummy_hotpepper_key_for_testing_12345';
+  /// 16文字以上の英数字要件を満たす形式
+  static const String dummyHotpepperApiKey = 'testdummyhotpepperkey123456789';
 
   /// Google Maps API用テストダミーキー
   ///
   /// 実際のAPI呼び出しは行わず、テスト環境での設定値検証のみに使用
+  /// AIzaで始まる39文字要件を満たす形式
   static const String dummyGoogleMapsApiKey =
-      'test_dummy_google_maps_key_for_testing_12345';
+      'AIzaSyTestDummyGoogleMapsKey12345678901';
 
   /// テスト環境用環境変数のデフォルト設定
   ///

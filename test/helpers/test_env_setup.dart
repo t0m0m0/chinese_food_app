@@ -16,10 +16,10 @@ class TestEnvSetup {
     try {
       // .env.testファイルを読み込み（CI環境では.envも同じ内容）
       await dotenv.load(fileName: ".env.test");
-      
+
       // 確実にFLUTTER_ENVがtestに設定されていることを保証
       dotenv.env['FLUTTER_ENV'] = 'test';
-      
+
       if (enableDebugLogging) {
         developer.log('✅ .env.test file loaded successfully',
             name: 'TestEnvSetup');
@@ -33,7 +33,7 @@ class TestEnvSetup {
             'Warning: .env.test file not found, using default test values',
             name: 'TestEnvSetup');
       }
-      
+
       // フォールバックでテスト環境設定でDotEnvを初期化
       try {
         dotenv.testLoad(fileInput: TestConstants.defaultTestEnvironmentConfig);
@@ -44,8 +44,12 @@ class TestEnvSetup {
       }
     }
 
-    // テスト用のダミーAPIキーを設定（.env.testに値がない場合）
-    _setDefaultTestValues();
+    // テスト用のダミーAPIキーを設定（.env.testに値がない場合のみ）
+    final hotpepperKey = dotenv.env['HOTPEPPER_API_KEY'];
+    final googleMapsKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
+    if ((hotpepperKey?.isEmpty ?? true) || (googleMapsKey?.isEmpty ?? true)) {
+      _setDefaultTestValues();
+    }
 
     try {
       // ConfigManagerを初期化
