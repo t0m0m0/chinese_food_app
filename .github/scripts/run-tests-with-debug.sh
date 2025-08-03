@@ -12,6 +12,11 @@ ls -la
 echo "Content of .env.test:"
 cat .env.test 2>/dev/null || echo ".env.test file not found"
 
+echo "=== テスト環境の初期化確認 ==="
+# TestEnvSetupの初期化を確実に実行するため、事前に簡単なテストを実行
+echo "Testing environment setup..."
+flutter test test/helpers/ --reporter=expanded || echo "Environment setup test completed with warnings"
+
 echo "=== Flutter test開始 ==="
 flutter test --coverage --reporter=expanded
 

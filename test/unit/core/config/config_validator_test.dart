@@ -60,8 +60,13 @@ void main() {
       });
 
       test('should detect critical errors', () {
-        // In test environment, there might be format or missing key errors
-        expect(ConfigValidator.hasCriticalErrors, isA<bool>());
+        // DotEnvの初期化確認を含めた総合的なエラー検出テスト
+        // CI環境ではDotEnv初期化エラーまたは設定エラーが発生する可能性がある
+        expect(() => ConfigValidator.hasCriticalErrors, returnsNormally);
+
+        // エラー有無に関係なく、bool値が返されることを確認
+        final hasErrors = ConfigValidator.hasCriticalErrors;
+        expect(hasErrors, isA<bool>());
       });
     });
 

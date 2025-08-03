@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'api_config.dart';
 import 'database_config.dart';
 import 'environment_config.dart';
@@ -10,6 +11,20 @@ class ConfigValidator {
   /// 設定全体の検証を実行し、エラーリストを返す
   static List<String> validateConfiguration() {
     final errors = <String>[];
+
+    // DotEnvの初期化確認を最優先で実行
+    try {
+      // DotEnvにアクセステストを実行
+      final _ = dotenv.env;
+    } catch (e) {
+      if (e is NotInitializedError) {
+        errors.add(
+            'DotEnvが初期化されていません。テスト環境ではTestEnvSetup.initializeTestEnvironment()を呼び出してください。');
+        return errors;
+      }
+      // その他のエラーは警告として扱う
+      errors.add('DotEnv設定の読み込みエラー: $e');
+    }
 
     // 初期化を確実に行う（同期的処理のみ）
     if (!EnvironmentConfig.isInitialized) {
