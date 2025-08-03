@@ -5,7 +5,7 @@ import 'package:chinese_food_app/domain/entities/store.dart';
 import '../helpers/test_env_setup.dart';
 
 /// シンプルなモック化されたAPIデータテスト
-/// 
+///
 /// 実際のAPI呼び出しではなく、モックデータを使用して
 /// データ構造と処理ロジックのテストを行います。
 void main() {
@@ -31,11 +31,10 @@ void main() {
       // 基本検証
       expect(mockStores.length, greaterThan(0));
       expect(mockStores.length, equals(3));
-      
+
       // APIデータの確認（HotPepper IDがJで始まる）
-      final hotpepperStores = mockStores
-          .where((store) => store.id.startsWith('J'))
-          .toList();
+      final hotpepperStores =
+          mockStores.where((store) => store.id.startsWith('J')).toList();
       expect(hotpepperStores.length, equals(3));
 
       print('✅ テスト成功: ${hotpepperStores.length}件のモックAPIデータを検証しました');
@@ -45,7 +44,7 @@ void main() {
         print('  - ${store.name} (ID: ${store.id})');
         print('    住所: ${store.address}');
         print('    座標: ${store.lat}, ${store.lng}');
-        
+
         // データ整合性チェック
         expect(store.name, isNotEmpty);
         expect(store.address, isNotEmpty);
@@ -61,20 +60,20 @@ void main() {
 
       // 新宿エリアのモックデータ
       final shinjukuStores = _createShinjukuMockStores();
-      
-      // 渋谷エリアのモックデータ  
+
+      // 渋谷エリアのモックデータ
       final shibuyaStores = _createShibuyaMockStores();
-      
+
       // 池袋エリアのモックデータ
       final ikebukuroStores = _createIkebukuroMockStores();
 
       // 全エリアのデータを統合
       final allStores = [
         ...shinjukuStores,
-        ...shibuyaStores, 
+        ...shibuyaStores,
         ...ikebukuroStores,
       ];
-      
+
       print('最終店舗数: ${allStores.length}');
       print('地域別分布:');
       print('  - 新宿エリア: ${shinjukuStores.length}件');
@@ -108,8 +107,8 @@ void main() {
 
       // キーワード検索のシミュレーション
       final chineseStores = mockStores
-          .where((store) => 
-              store.name.contains('中華') || 
+          .where((store) =>
+              store.name.contains('中華') ||
               store.name.contains('ラーメン') ||
               store.name.contains('餃子'))
           .toList();
@@ -121,25 +120,23 @@ void main() {
       const shinjukuLng = 139.7006;
       const searchRadius = 0.01; // 約1km
 
-      final nearbyStores = mockStores
-          .where((store) {
-            final latDiff = (store.lat - shinjukuLat).abs();
-            final lngDiff = (store.lng - shinjukuLng).abs();
-            return latDiff <= searchRadius && lngDiff <= searchRadius;
-          })
-          .toList();
+      final nearbyStores = mockStores.where((store) {
+        final latDiff = (store.lat - shinjukuLat).abs();
+        final lngDiff = (store.lng - shinjukuLng).abs();
+        return latDiff <= searchRadius && lngDiff <= searchRadius;
+      }).toList();
 
       print('新宿駅周辺の店舗: ${nearbyStores.length}件');
 
       // 検証
       expect(chineseStores.length, greaterThan(0));
       expect(nearbyStores.length, greaterThan(0));
-      
+
       // フィルタリング結果の妥当性確認
       for (final store in chineseStores) {
-        final hasChinese = store.name.contains('中華') || 
-                          store.name.contains('ラーメン') ||
-                          store.name.contains('餃子');
+        final hasChinese = store.name.contains('中華') ||
+            store.name.contains('ラーメン') ||
+            store.name.contains('餃子');
         expect(hasChinese, isTrue);
       }
 
