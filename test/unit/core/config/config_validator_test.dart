@@ -11,10 +11,10 @@ void main() {
       await EnvironmentConfig.initialize();
     });
     group('validateConfiguration', () {
-      test('should return no errors when API keys are available from .env', () {
+      test('should return no errors when API keys are available from test environment', () {
         final errors = ConfigValidator.validateConfiguration();
 
-        // .envファイルからAPIキーが読み込まれているので、APIキー関連のエラーはないはず
+        // テスト環境（.env.test）からAPIキーが読み込まれているので、APIキー関連のエラーはないはず
         final apiKeyErrors = errors
             .where((error) => error.contains('API キーが設定されていません'))
             .toList();
