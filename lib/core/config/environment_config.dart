@@ -5,6 +5,9 @@ enum Environment {
   /// 開発環境
   development,
 
+  /// テスト環境
+  test,
+
   /// ステージング環境
   staging,
 
@@ -22,8 +25,23 @@ class EnvironmentConfig {
 
   /// 現在の環境を取得
   static Environment get current {
-    const env =
-        String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development');
+    // テスト環境またはDotEnvが利用可能な場合は、DotEnvから環境を取得
+    String env = 'development';
+
+    try {
+      // DotEnvが初期化されている場合は、DotEnvから環境を取得
+      if (dotenv.env.isNotEmpty) {
+        env = dotenv.env['FLUTTER_ENV'] ?? 'development';
+      } else {
+        // DotEnvが利用できない場合は、コンパイル時環境変数から取得
+        env = const String.fromEnvironment('FLUTTER_ENV',
+            defaultValue: 'development');
+      }
+    } catch (e) {
+      // DotEnvが初期化されていない場合は、コンパイル時環境変数から取得
+      env = const String.fromEnvironment('FLUTTER_ENV',
+          defaultValue: 'development');
+    }
 
     try {
       return Environment.values.firstWhere((e) => e.name == env);
@@ -35,6 +53,9 @@ class EnvironmentConfig {
 
   /// 現在の環境が開発環境かどうか
   static bool get isDevelopment => current == Environment.development;
+
+  /// 現在の環境がテスト環境かどうか
+  static bool get isTest => current == Environment.test;
 
   /// 現在の環境がステージング環境かどうか
   static bool get isStaging => current == Environment.staging;

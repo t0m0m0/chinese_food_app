@@ -98,6 +98,9 @@ class ConfigValidator {
       case Environment.development:
         _validateDevelopmentConfig(errors);
         break;
+      case Environment.test:
+        _validateTestConfig(errors);
+        break;
     }
   }
 
@@ -144,6 +147,24 @@ class ConfigValidator {
 
     if (googleMapsKey.isEmpty) {
       errors.add('開発環境: Google Maps API キーが設定されていません（地図機能無効）');
+    }
+  }
+
+  /// テスト環境の設定を検証
+  static void _validateTestConfig(List<String> errors) {
+    // テスト環境では最小限の検証のみ
+    // ダミーAPIキーが設定されていれば問題なし
+    final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
+    final googleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
+
+    // テスト環境ではAPIキーが設定されていればOK（実際の形式は問わない）
+    // ダミーキーでもテストには支障がない
+    if (hotpepperKey.isEmpty) {
+      errors.add('テスト環境: HotPepper API キーが設定されていません（テスト実行に影響なし）');
+    }
+
+    if (googleMapsKey.isEmpty) {
+      errors.add('テスト環境: Google Maps API キーが設定されていません（テスト実行に影響なし）');
     }
   }
 
