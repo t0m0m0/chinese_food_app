@@ -16,16 +16,31 @@ class TestEnvSetup {
     try {
       // .env.testファイルを読み込み（CI環境では.envも同じ内容）
       await dotenv.load(fileName: ".env.test");
+      
+      // 確実にFLUTTER_ENVがtestに設定されていることを保証
+      dotenv.env['FLUTTER_ENV'] = 'test';
+      
       if (enableDebugLogging) {
         developer.log('✅ .env.test file loaded successfully',
             name: 'TestEnvSetup');
+        developer.log('Environment set to: ${dotenv.env['FLUTTER_ENV']}',
+            name: 'TestEnvSetup');
       }
     } catch (e) {
-      // .env.testファイルが存在しない場合はデフォルト値を設定
+      // .env.testファイルが存在しない場合はデフォルト値でDotEnvを初期化
       if (enableDebugLogging) {
         developer.log(
             'Warning: .env.test file not found, using default test values',
             name: 'TestEnvSetup');
+      }
+      
+      // フォールバックでテスト環境設定でDotEnvを初期化
+      try {
+        dotenv.testLoad(fileInput: TestConstants.defaultTestEnvironmentConfig);
+        dotenv.env['FLUTTER_ENV'] = 'test';
+      } catch (initError) {
+        // 最後の手段として空のDotEnvで初期化
+        dotenv.testLoad(fileInput: 'FLUTTER_ENV=test');
       }
     }
 

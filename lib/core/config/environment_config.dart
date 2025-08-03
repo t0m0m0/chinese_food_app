@@ -25,7 +25,12 @@ class EnvironmentConfig {
 
   /// 現在の環境を取得
   static Environment get current {
-    // テスト環境またはDotEnvが利用可能な場合は、DotEnvから環境を取得
+    // テスト環境判定を最優先で実行
+    if (_isTestEnvironment()) {
+      return Environment.test;
+    }
+    
+    // 通常の環境判定ロジック
     String env = 'development';
 
     try {
@@ -49,6 +54,26 @@ class EnvironmentConfig {
       // 無効な環境名の場合はdevelopmentをデフォルトとする
       return Environment.development;
     }
+  }
+  
+  /// テスト環境かどうかを判定
+  static bool _isTestEnvironment() {
+    // Flutter test環境の検出
+    if (const bool.fromEnvironment('flutter.test', defaultValue: false) ||
+        const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
+      return true;
+    }
+    
+    // DotEnvからのテスト環境検出
+    try {
+      if (dotenv.env.isNotEmpty && dotenv.env['FLUTTER_ENV'] == 'test') {
+        return true;
+      }
+    } catch (e) {
+      // DotEnv未初期化の場合は無視
+    }
+    
+    return false;
   }
 
   /// 現在の環境が開発環境かどうか
