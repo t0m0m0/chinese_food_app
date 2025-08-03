@@ -11,7 +11,9 @@ void main() {
       await EnvironmentConfig.initialize();
     });
     group('validateConfiguration', () {
-      test('should return no errors when API keys are available from test environment', () {
+      test(
+          'should return no errors when API keys are available from test environment',
+          () {
         final errors = ConfigValidator.validateConfiguration();
 
         // テスト環境（.env.test）からAPIキーが読み込まれているので、APIキー関連のエラーはないはず
