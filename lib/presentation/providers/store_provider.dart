@@ -3,7 +3,6 @@ import '../../core/constants/api_constants.dart';
 import '../../core/utils/error_message_helper.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
-import '../../domain/usecases/initialize_sample_stores_usecase.dart';
 
 /// 店舗データの状態管理を行うProvider
 ///
@@ -70,23 +69,47 @@ class StoreProvider extends ChangeNotifier {
 
   /// リポジトリから全ての店舗データを取得
   ///
-  /// 初回起動時にはサンプルデータを自動初期化する
+  /// まずローカルデータベースからデータを取得し、データが少ない場合は
+  /// APIから新しいデータを自動取得する
   Future<void> loadStores() async {
     _setLoading(true);
     _clearError();
 
     try {
-      // サンプルデータを初期化（既存データがない場合のみ）
-      final initializeUsecase = InitializeSampleStoresUsecase(repository);
-      await initializeUsecase.execute();
-
-      // 店舗データを取得
+      // まずローカルデータベースから店舗データを取得
       _stores = await repository.getAllStores();
+
+      // データが少ない場合（10件未満）はAPIから追加取得
+      if (_stores.length < 10) {
+        debugPrint('ローカルデータが少ないため、APIから店舗データを取得します（現在: ${_stores.length}件）');
+
+        // デフォルトの検索条件でAPIから店舗データを取得
+        await _loadStoresFromApiWithDefaultLocation();
+      }
+
       notifyListeners();
     } catch (e) {
+      debugPrint('店舗データ読み込みエラー: $e');
       _setError(ErrorMessageHelper.getStoreRelatedMessage('load_stores'));
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// デフォルト位置（新宿駅）からAPIで店舗データを取得
+  Future<void> _loadStoresFromApiWithDefaultLocation() async {
+    try {
+      // 新宿駅周辺の中華料理店を検索
+      await loadNewStoresFromApi(
+        lat: 35.6917, // 新宿駅の座標
+        lng: 139.7006,
+        keyword: '中華',
+        count: 20, // より多くのデータを取得
+      );
+      debugPrint('APIから${_stores.length}件の店舗データを取得しました');
+    } catch (e) {
+      debugPrint('API取得エラー: $e');
+      // APIエラーは致命的ではないので、エラーメッセージは設定しない
     }
   }
 
@@ -201,6 +224,16 @@ class StoreProvider extends ChangeNotifier {
         } catch (e) {
           // 個別の店舗処理でエラーが発生した場合はスキップ
           debugPrint('Store processing error: $e');
+        }
+      }
+
+      // 新しい店舗をローカルデータベースにも保存
+      for (final store in newStores) {
+        try {
+          await repository.insertStore(store);
+        } catch (e) {
+          debugPrint('店舗保存エラー (${store.name}): $e');
+          // 個別のエラーは無視して続行
         }
       }
 

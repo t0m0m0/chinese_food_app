@@ -1,21 +1,26 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/config_validator.dart';
+import 'package:chinese_food_app/core/config/environment_config.dart';
+import '../../../helpers/test_env_setup.dart';
 
 void main() {
   group('ConfigValidator', () {
+    setUpAll(() async {
+      // ConfigValidatorを呼ぶ前にテスト環境を初期化
+      await TestEnvSetup.initializeTestEnvironment();
+      await EnvironmentConfig.initialize();
+    });
     group('validateConfiguration', () {
-      test('should return errors when API keys are missing', () {
+      test(
+          'should return no errors when API keys are available from test environment',
+          () {
         final errors = ConfigValidator.validateConfiguration();
 
-        // In test environment, API keys are not set
-        expect(errors, isNotEmpty);
-        expect(
-            errors.any((error) => error.contains('HotPepper API キーが設定されていません')),
-            isTrue);
-        expect(
-            errors
-                .any((error) => error.contains('Google Maps API キーが設定されていません')),
-            isTrue);
+        // テスト環境（.env.test）からAPIキーが読み込まれているので、APIキー関連のエラーはないはず
+        final apiKeyErrors = errors
+            .where((error) => error.contains('API キーが設定されていません'))
+            .toList();
+        expect(apiKeyErrors, isEmpty);
       });
     });
 
@@ -42,20 +47,31 @@ void main() {
         // Test development environment specific validation
         final errors = ConfigValidator.validateConfiguration();
 
-        // Should contain development-specific messages
-        expect(errors.any((error) => error.contains('開発環境')), isTrue);
+        // APIキーが設定されているので、開発環境のAPIキーエラーはないはず
+        final devApiKeyErrors = errors
+            .where((error) =>
+                error.contains('開発環境') && error.contains('API キーが設定されていません'))
+            .toList();
+        expect(devApiKeyErrors, isEmpty);
       });
     });
 
     group('configuration status', () {
-      test('should return false for isConfigurationValid when keys missing',
+      test(
+          'should return true for isConfigurationValid when keys are available',
           () {
-        expect(ConfigValidator.isConfigurationValid, isFalse);
+        final isValid = ConfigValidator.isConfigurationValid;
+        expect(isValid, isTrue);
       });
 
       test('should detect critical errors', () {
-        // In test environment, there might be format or missing key errors
-        expect(ConfigValidator.hasCriticalErrors, isA<bool>());
+        // DotEnvの初期化確認を含めた総合的なエラー検出テスト
+        // CI環境ではDotEnv初期化エラーまたは設定エラーが発生する可能性がある
+        expect(() => ConfigValidator.hasCriticalErrors, returnsNormally);
+
+        // エラー有無に関係なく、bool値が返されることを確認
+        final hasErrors = ConfigValidator.hasCriticalErrors;
+        expect(hasErrors, isA<bool>());
       });
     });
 
@@ -75,8 +91,11 @@ void main() {
         final details = ConfigValidator.configurationDetails;
         final errors = details['validationErrors'] as List<String>;
 
-        expect(errors, isNotEmpty);
-        expect(errors.any((error) => error.contains('API キー')), isTrue);
+        // APIキーが設定されているので、APIキー関連のエラーは少ない（または無い）はず
+        final apiKeyErrors = errors
+            .where((error) => error.contains('API キーが設定されていません'))
+            .toList();
+        expect(apiKeyErrors, isEmpty);
       });
     });
 

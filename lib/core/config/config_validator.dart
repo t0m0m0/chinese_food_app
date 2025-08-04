@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'api_config.dart';
 import 'database_config.dart';
 import 'environment_config.dart';
@@ -10,6 +11,27 @@ class ConfigValidator {
   /// 設定全体の検証を実行し、エラーリストを返す
   static List<String> validateConfiguration() {
     final errors = <String>[];
+
+    // DotEnvの初期化確認を最優先で実行
+    try {
+      // DotEnvにアクセステストを実行
+      final _ = dotenv.env;
+    } catch (e) {
+      if (e is NotInitializedError) {
+        errors.add(
+            'DotEnvが初期化されていません。テスト環境ではTestEnvSetup.initializeTestEnvironment()を呼び出してください。');
+        return errors;
+      }
+      // その他のエラーは警告として扱う
+      errors.add('DotEnv設定の読み込みエラー: $e');
+    }
+
+    // 初期化を確実に行う（同期的処理のみ）
+    if (!EnvironmentConfig.isInitialized) {
+      errors.add(
+          'EnvironmentConfigが初期化されていません。main()でEnvironmentConfig.initialize()を呼び出してください。');
+      return errors;
+    }
 
     // APIキーの存在確認
     _validateApiKeys(errors);
@@ -76,6 +98,9 @@ class ConfigValidator {
       case Environment.development:
         _validateDevelopmentConfig(errors);
         break;
+      case Environment.test:
+        _validateTestConfig(errors);
+        break;
     }
   }
 
@@ -122,6 +147,24 @@ class ConfigValidator {
 
     if (googleMapsKey.isEmpty) {
       errors.add('開発環境: Google Maps API キーが設定されていません（地図機能無効）');
+    }
+  }
+
+  /// テスト環境の設定を検証
+  static void _validateTestConfig(List<String> errors) {
+    // テスト環境では最小限の検証のみ
+    // ダミーAPIキーが設定されていれば問題なし
+    final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
+    final googleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
+
+    // テスト環境ではAPIキーが設定されていればOK（実際の形式は問わない）
+    // ダミーキーでもテストには支障がない
+    if (hotpepperKey.isEmpty) {
+      errors.add('テスト環境: HotPepper API キーが設定されていません（テスト実行に影響なし）');
+    }
+
+    if (googleMapsKey.isEmpty) {
+      errors.add('テスト環境: Google Maps API キーが設定されていません（テスト実行に影響なし）');
     }
   }
 

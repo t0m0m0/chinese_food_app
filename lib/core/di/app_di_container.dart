@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show File;
-import '../config/app_config.dart';
+import '../config/environment_config.dart' as env_config;
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
@@ -126,14 +126,25 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Create API datasource for development environment
   HotpepperApiDatasource _createApiDatasourceForDevelopment() {
-    // In development, always try to use real API if key is available
-    if (AppConfig.hasHotpepperApiKey) {
-      developer.log('Using real HotPepper API datasource (development)',
-          name: 'DI');
-      return HotpepperApiDatasourceImpl(AppHttpClient());
-    } else {
+    // In development, use EnvironmentConfig which properly reads from .env files
+    try {
+      // Ensure EnvironmentConfig is initialized and check for API key
+      final apiKey = env_config.EnvironmentConfig.hotpepperApiKey;
+      if (apiKey.isNotEmpty) {
+        developer.log(
+            'Using real HotPepper API datasource (development) - API key found',
+            name: 'DI');
+        return HotpepperApiDatasourceImpl(AppHttpClient());
+      } else {
+        developer.log(
+            'API key not available, using mock datasource (development)',
+            name: 'DI',
+            level: 900); // WARNING level
+        return MockHotpepperApiDatasource();
+      }
+    } catch (e) {
       developer.log(
-          'API key not available, using mock datasource (development)',
+          'Error checking API key, using mock datasource (development): $e',
           name: 'DI',
           level: 900); // WARNING level
       return MockHotpepperApiDatasource();
