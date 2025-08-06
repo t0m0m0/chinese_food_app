@@ -1,4 +1,4 @@
-import 'base_exception.dart';
+import '../base_exception.dart';
 
 /// セキュリティ関連の基底例外クラス
 class SecurityException extends BaseException {

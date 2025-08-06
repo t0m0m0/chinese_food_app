@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/exceptions/security_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/infrastructure/security_exception.dart';
 import 'package:chinese_food_app/core/exceptions/base_exception.dart';
 
 void main() {
