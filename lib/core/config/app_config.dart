@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../errors/security_exceptions.dart';
+import '../exceptions/infrastructure/security_exception.dart';
 
 /// アプリケーション設定管理クラス
 ///

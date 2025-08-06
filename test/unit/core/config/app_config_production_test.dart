@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/app_config.dart';
-import 'package:chinese_food_app/core/errors/security_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/infrastructure/security_exception.dart';
 
 void main() {
   group('AppConfig Production Environment Tests', () {

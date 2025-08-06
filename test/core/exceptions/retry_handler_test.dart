@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/exceptions/retry_handler.dart';
+import 'package:chinese_food_app/core/exceptions/handlers/retry_handler.dart';
 import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
-import 'package:chinese_food_app/core/exceptions/exception_handler.dart';
+import 'package:chinese_food_app/core/exceptions/handlers/exception_handler.dart';
 
 void main() {
   group('RetryHandler', () {

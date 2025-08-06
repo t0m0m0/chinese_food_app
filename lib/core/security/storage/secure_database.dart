@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../errors/security_exceptions.dart';
+import '../../exceptions/infrastructure/security_exception.dart';
 import '../crypto/encryption_service.dart';
 import '../logging/secure_logger.dart';
 

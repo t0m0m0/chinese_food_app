@@ -5,7 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 
-import '../../errors/security_exceptions.dart';
+import '../../exceptions/infrastructure/security_exception.dart';
 import '../crypto/encryption_service.dart';
 import '../logging/secure_logger.dart';
 
