@@ -62,7 +62,8 @@ class StoreHeaderWidget extends StatelessWidget {
                     Text(
                       StoreUtils.getStatusText(store.status),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: StoreUtils.getStatusColor(store.status, colorScheme),
+                        color: StoreUtils.getStatusColor(
+                            store.status, colorScheme),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -75,6 +76,4 @@ class StoreHeaderWidget extends StatelessWidget {
       ),
     );
   }
-
-
 }

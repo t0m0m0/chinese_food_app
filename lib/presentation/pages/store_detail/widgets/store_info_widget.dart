@@ -121,6 +121,4 @@ class StoreInfoWidget extends StatelessWidget {
       ],
     );
   }
-
-
 }

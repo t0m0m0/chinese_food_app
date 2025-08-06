@@ -60,8 +60,8 @@ class StoreDetailPage extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('ステータスを「$statusText」に更新しました'),
-            backgroundColor:
-                StoreUtils.getStatusColor(newStatus, Theme.of(context).colorScheme),
+            backgroundColor: StoreUtils.getStatusColor(
+                newStatus, Theme.of(context).colorScheme),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -89,6 +89,4 @@ class StoreDetailPage extends StatelessWidget {
       const SnackBar(content: Text('地図表示機能は実装予定です')),
     );
   }
-
-
 }
