@@ -19,8 +19,9 @@ void main() {
         // 現在はダミーデータ固定だが、本番環境では実GPSを使用することを期待
         expect(result.isSuccess, true);
 
-        // TODO(#42): [HIGH] 環境変数 LOCATION_MODE=production で実GPS使用 - Sprint 2.1対応
-        // TODO(#43): [MEDIUM] 環境変数 LOCATION_MODE=test でダミーデータ使用 - 現在実装済み
+        // 環境変数 LOCATION_MODE による実装切り替えは実装済み
+        // - production: 実GPS使用（権限チェック統合）
+        // - test: ダミーデータ使用（エラーシミュレーション対応）
       });
 
       test('should use dummy data in test environment', () async {
