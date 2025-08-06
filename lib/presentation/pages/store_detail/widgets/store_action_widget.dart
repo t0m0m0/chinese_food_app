@@ -28,13 +28,15 @@ class StoreActionWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusSection(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildStatusSection(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return RepaintBoundary(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -146,7 +148,8 @@ class StoreActionWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildActionButtons(
+      BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

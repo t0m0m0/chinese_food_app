@@ -34,7 +34,8 @@ class StoreDetailPage extends StatelessWidget {
             StoreInfoWidget(store: store),
             StoreActionWidget(
               store: store,
-              onStatusChanged: (newStatus) => _updateStoreStatus(context, newStatus),
+              onStatusChanged: (newStatus) =>
+                  _updateStoreStatus(context, newStatus),
               onAddVisitRecord: () => _navigateToVisitRecordForm(context),
               onShowMap: () => _showMapNotImplemented(context),
             ),
@@ -44,7 +45,8 @@ class StoreDetailPage extends StatelessWidget {
     );
   }
 
-  Future<void> _updateStoreStatus(BuildContext context, StoreStatus newStatus) async {
+  Future<void> _updateStoreStatus(
+      BuildContext context, StoreStatus newStatus) async {
     if (store.status == newStatus) return;
 
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
@@ -57,7 +59,8 @@ class StoreDetailPage extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('ステータスを「$statusText」に更新しました'),
-            backgroundColor: _getStatusColor(newStatus, Theme.of(context).colorScheme),
+            backgroundColor:
+                _getStatusColor(newStatus, Theme.of(context).colorScheme),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -66,7 +69,8 @@ class StoreDetailPage extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(ErrorMessageHelper.getStoreRelatedMessage('update_status')),
+            content: Text(
+                ErrorMessageHelper.getStoreRelatedMessage('update_status')),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
