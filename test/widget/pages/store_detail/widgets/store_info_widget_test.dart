@@ -23,7 +23,8 @@ void main() {
       testStoreWithMemo = testStore.copyWith(memo: '美味しい麻婆豆腐がおすすめ');
     });
 
-    testWidgets('should display store address and created date', (tester) async {
+    testWidgets('should display store address and created date',
+        (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -56,7 +57,8 @@ void main() {
       expect(find.text('美味しい麻婆豆腐がおすすめ'), findsOneWidget);
     });
 
-    testWidgets('should not display memo section when memo is null', (tester) async {
+    testWidgets('should not display memo section when memo is null',
+        (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(

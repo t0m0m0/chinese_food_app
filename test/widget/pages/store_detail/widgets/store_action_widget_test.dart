@@ -107,12 +107,13 @@ void main() {
           matching: find.byType(InkWell),
         ),
       );
-      
+
       // Current status should be visually highlighted
       expect(wantToGoButton.onTap, isNotNull);
     });
 
-    testWidgets('should call onStatusChanged when status button is tapped', (tester) async {
+    testWidgets('should call onStatusChanged when status button is tapped',
+        (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -135,7 +136,9 @@ void main() {
       verify(mockOnStatusChanged.call(StoreStatus.visited)).called(1);
     });
 
-    testWidgets('should call onAddVisitRecord when visit record button is tapped', (tester) async {
+    testWidgets(
+        'should call onAddVisitRecord when visit record button is tapped',
+        (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -158,7 +161,8 @@ void main() {
       verify(mockOnAddVisitRecord.call()).called(1);
     });
 
-    testWidgets('should call onShowMap when map button is tapped', (tester) async {
+    testWidgets('should call onShowMap when map button is tapped',
+        (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(
