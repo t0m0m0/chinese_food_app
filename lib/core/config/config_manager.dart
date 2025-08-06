@@ -215,7 +215,7 @@ class ConfigManager {
     return ConfigValidator.hasAnyCriticalErrors;
   }
 
-  /// APIキーが有効かどうかを判定（既存のAppConstantsとの互換性）
+  /// APIキーが有効かどうかを判定
   static bool get hasValidApiKeys {
     _ensureInitialized();
     return hotpepperApiKey.isNotEmpty && googleMapsApiKey.isNotEmpty;
