@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/store_utils.dart';
 import '../../../../domain/entities/store.dart';
 
 class StoreInfoWidget extends StatelessWidget {
@@ -44,7 +45,7 @@ class StoreInfoWidget extends StatelessWidget {
                 context,
                 Icons.calendar_today,
                 '登録日',
-                _formatDate(store.createdAt),
+                StoreUtils.formatDate(store.createdAt),
                 theme,
                 colorScheme,
               ),
@@ -121,7 +122,5 @@ class StoreInfoWidget extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
-  }
+
 }

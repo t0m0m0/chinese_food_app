@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
+import '../../../core/utils/store_utils.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
 import 'widgets/store_header_widget.dart';
@@ -55,12 +56,12 @@ class StoreDetailPage extends StatelessWidget {
       await storeProvider.updateStoreStatus(store.id, newStatus);
 
       if (context.mounted) {
-        final statusText = _getStatusText(newStatus);
+        final statusText = StoreUtils.getStatusText(newStatus);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('ステータスを「$statusText」に更新しました'),
             backgroundColor:
-                _getStatusColor(newStatus, Theme.of(context).colorScheme),
+                StoreUtils.getStatusColor(newStatus, Theme.of(context).colorScheme),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -89,29 +90,5 @@ class StoreDetailPage extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(StoreStatus? status, ColorScheme colorScheme) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return colorScheme.primary;
-      case StoreStatus.visited:
-        return Colors.green;
-      case StoreStatus.bad:
-        return Colors.orange;
-      default:
-        return colorScheme.onSurfaceVariant;
-    }
-  }
 
-  String _getStatusText(StoreStatus? status) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return '行きたい';
-      case StoreStatus.visited:
-        return '行った';
-      case StoreStatus.bad:
-        return '興味なし';
-      default:
-        return '未設定';
-    }
-  }
 }

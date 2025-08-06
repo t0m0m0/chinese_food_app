@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/utils/store_utils.dart';
 import '../../../../domain/entities/store.dart';
 
 class StoreHeaderWidget extends StatelessWidget {
@@ -35,13 +36,13 @@ class StoreHeaderWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(store.status, colorScheme)
+                  color: StoreUtils.getStatusColor(store.status, colorScheme)
                       .withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  _getStatusIcon(store.status),
-                  color: _getStatusColor(store.status, colorScheme),
+                  StoreUtils.getStatusIcon(store.status),
+                  color: StoreUtils.getStatusColor(store.status, colorScheme),
                   size: 24,
                 ),
               ),
@@ -59,9 +60,9 @@ class StoreHeaderWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _getStatusText(store.status),
+                      StoreUtils.getStatusText(store.status),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: _getStatusColor(store.status, colorScheme),
+                        color: StoreUtils.getStatusColor(store.status, colorScheme),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -75,42 +76,5 @@ class StoreHeaderWidget extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(StoreStatus? status, ColorScheme colorScheme) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return colorScheme.primary;
-      case StoreStatus.visited:
-        return Colors.green;
-      case StoreStatus.bad:
-        return Colors.orange;
-      default:
-        return colorScheme.onSurfaceVariant;
-    }
-  }
 
-  IconData _getStatusIcon(StoreStatus? status) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return Icons.favorite;
-      case StoreStatus.visited:
-        return Icons.check_circle;
-      case StoreStatus.bad:
-        return Icons.block;
-      default:
-        return Icons.restaurant;
-    }
-  }
-
-  String _getStatusText(StoreStatus? status) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return '行きたい';
-      case StoreStatus.visited:
-        return '行った';
-      case StoreStatus.bad:
-        return '興味なし';
-      default:
-        return '未設定';
-    }
-  }
 }
