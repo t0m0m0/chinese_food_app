@@ -16,7 +16,8 @@ class LocationConfigManager {
       errors.add('位置情報検索半径が無効です: ${LocationConfig.defaultLocationRadius}');
     }
 
-    if (!LocationConfig.isValidUpdateInterval(LocationConfig.locationUpdateInterval)) {
+    if (!LocationConfig.isValidUpdateInterval(
+        LocationConfig.locationUpdateInterval)) {
       errors.add('位置情報更新間隔が無効です: ${LocationConfig.locationUpdateInterval}');
     }
 

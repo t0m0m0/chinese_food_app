@@ -334,6 +334,4 @@ ConfigManager 設定情報:
       'database': DatabaseConfigManager.validate(),
     };
   }
-
-
 }

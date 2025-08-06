@@ -13,7 +13,8 @@ class ApiConfigManager {
     }
 
     if (!ApiConfig.isValidRetryCount(ApiConfig.hotpepperApiRetryCount)) {
-      errors.add('HotPepper APIリトライ回数が無効です: ${ApiConfig.hotpepperApiRetryCount}');
+      errors
+          .add('HotPepper APIリトライ回数が無効です: ${ApiConfig.hotpepperApiRetryCount}');
     }
 
     if (!ApiConfig.isValidMaxResults(ApiConfig.hotpepperMaxResults)) {

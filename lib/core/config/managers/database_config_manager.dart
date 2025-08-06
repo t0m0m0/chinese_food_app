@@ -8,7 +8,8 @@ class DatabaseConfigManager {
   static List<String> validate() {
     final errors = <String>[];
 
-    if (!DatabaseConfig.isValidDatabaseVersion(DatabaseConfig.databaseVersion)) {
+    if (!DatabaseConfig.isValidDatabaseVersion(
+        DatabaseConfig.databaseVersion)) {
       errors.add('データベースバージョンが無効です: ${DatabaseConfig.databaseVersion}');
     }
 
