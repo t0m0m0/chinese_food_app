@@ -4,7 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'dart:math';
 import 'package:pointycastle/export.dart';
 
-import '../../errors/security_exceptions.dart';
+import '../../exceptions/infrastructure/security_exception.dart';
 
 /// 暗号化サービス
 ///

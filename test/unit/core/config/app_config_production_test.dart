@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/app_config.dart';
-import 'package:chinese_food_app/core/errors/security_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/infrastructure/security_exception.dart';
 
 void main() {
   group('AppConfig Production Environment Tests', () {
@@ -18,7 +18,7 @@ void main() {
 
     group('セキュリティ例外テスト', () {
       test('APIKeyNotFoundException は適切な情報を含む', () {
-        const exception = APIKeyNotFoundException(
+        final exception = APIKeyNotFoundException(
           'Test API',
           context: 'テストコンテキスト',
         );
@@ -31,8 +31,8 @@ void main() {
       });
 
       test('APIKeyAccessException は適切な情報を含む', () {
-        const originalException = FormatException('テストエラー');
-        const exception = APIKeyAccessException(
+        final originalException = FormatException('テストエラー');
+        final exception = APIKeyAccessException(
           'Google Maps API',
           'アクセスエラーが発生しました',
           context: 'テスト環境',
@@ -49,7 +49,7 @@ void main() {
       });
 
       test('SecureStorageException は適切な情報を含む', () {
-        const exception = SecureStorageException(
+        final exception = SecureStorageException(
           'read',
           'ストレージアクセスに失敗しました',
           context: 'API キー取得中',

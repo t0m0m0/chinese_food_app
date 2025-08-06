@@ -33,8 +33,12 @@ jobs:
       id: changed-files
       run: |
         git diff --name-status origin/${{ github.base_ref }}..HEAD \
-          | awk '$1 != "D" { print $2 }' > changed_files.txt
-        echo "Changed files (excluding deleted):"
+          | awk '
+            $1 == "A" { print $2 }
+            $1 == "M" { print $2 }
+            $1 ~ /^R[0-9]+/ { print $3 }
+          ' > changed_files.txt
+        echo "Changed files (excluding deleted, using new paths for renamed):"
         cat changed_files.txt
         
     - name: Dartファイルの変更をチェック

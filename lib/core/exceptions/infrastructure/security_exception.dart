@@ -1,19 +1,25 @@
-/// セキュリティ関連の基底例外クラス
-class SecurityException implements Exception {
-  /// エラーメッセージ
-  final String message;
+import '../base_exception.dart';
 
+/// セキュリティ関連の基底例外クラス
+class SecurityException extends BaseException {
   /// エラーの追加コンテキスト情報
   final String? context;
 
   /// 元の例外（存在する場合）
   final Exception? originalException;
 
-  const SecurityException(
-    this.message, {
+  /// Creates a security exception
+  ///
+  /// [message] - Description of the security error
+  /// [context] - Additional context information (optional)
+  /// [originalException] - The original exception that caused this (optional)
+  SecurityException(
+    super.message, {
     this.context,
     this.originalException,
-  });
+    super.cause,
+    super.stackTrace,
+  }) : super(severity: ExceptionSeverity.critical);
 
   @override
   String toString() {
@@ -33,7 +39,12 @@ class APIKeyNotFoundException extends SecurityException {
   /// APIキーの種類
   final String keyType;
 
-  const APIKeyNotFoundException(
+  /// Creates an API key not found exception
+  ///
+  /// [keyType] - The type/name of the API key
+  /// [context] - Additional context information (optional)
+  /// [originalException] - The original exception that caused this (optional)
+  APIKeyNotFoundException(
     this.keyType, {
     String? context,
     Exception? originalException,
@@ -49,7 +60,13 @@ class APIKeyAccessException extends SecurityException {
   /// APIキーの種類
   final String keyType;
 
-  const APIKeyAccessException(
+  /// Creates an API key access exception
+  ///
+  /// [keyType] - The type/name of the API key
+  /// [message] - Description of the access error
+  /// [context] - Additional context information (optional)
+  /// [originalException] - The original exception that caused this (optional)
+  APIKeyAccessException(
     this.keyType,
     String message, {
     String? context,
@@ -66,7 +83,13 @@ class SecureStorageException extends SecurityException {
   /// 操作の種類（read, write, delete など）
   final String operation;
 
-  const SecureStorageException(
+  /// Creates a secure storage exception
+  ///
+  /// [operation] - The type of operation (read, write, delete, etc.)
+  /// [message] - Description of the error
+  /// [context] - Additional context information (optional)
+  /// [originalException] - The original exception that caused this (optional)
+  SecureStorageException(
     this.operation,
     String message, {
     String? context,
@@ -80,7 +103,12 @@ class SecureStorageException extends SecurityException {
 
 /// 環境設定関連のエラー
 class EnvironmentConfigException extends SecurityException {
-  const EnvironmentConfigException(
+  /// Creates an environment configuration exception
+  ///
+  /// [message] - Description of the configuration error
+  /// [context] - Additional context information (optional)
+  /// [originalException] - The original exception that caused this (optional)
+  EnvironmentConfigException(
     String message, {
     String? context,
     Exception? originalException,

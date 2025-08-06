@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:app_settings/app_settings.dart';
 
-import '../../errors/security_exceptions.dart';
+import '../../exceptions/infrastructure/security_exception.dart';
 import '../logging/secure_logger.dart';
 
 /// 権限の種類

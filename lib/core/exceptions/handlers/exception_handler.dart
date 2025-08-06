@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
-import 'app_exception.dart';
-import 'domain_exceptions.dart';
+import '../app_exception.dart';
+import '../domain_exceptions.dart';
 
 /// Result wrapper for operations that may throw exceptions
 class ExceptionResult<T> {
@@ -11,7 +11,7 @@ class ExceptionResult<T> {
   final T? data;
 
   /// The exception that occurred (if any)
-  final AppException? exception;
+  final BaseException? exception;
 
   /// User-friendly error message
   final String userMessage;
@@ -36,7 +36,7 @@ class ExceptionResult<T> {
   }
 
   /// Creates a failure result with exception and user message
-  factory ExceptionResult.failure(AppException exception, String userMessage) {
+  factory ExceptionResult.failure(BaseException exception, String userMessage) {
     return ExceptionResult._(
       isSuccess: false,
       exception: exception,
@@ -107,12 +107,12 @@ class ExceptionHandler {
 
   /// Handle any exception and return a formatted result
   ExceptionResult<T> handle<T>(Exception exception, [StackTrace? stackTrace]) {
-    // Convert to AppException if needed
-    final AppException appException;
-    if (exception is AppException) {
-      appException = exception;
+    // Convert to BaseException if needed
+    final BaseException baseException;
+    if (exception is BaseException) {
+      baseException = exception;
     } else {
-      appException = AppException(
+      baseException = AppException(
         exception.toString(),
         severity: ExceptionSeverity.medium,
         cause: exception,
@@ -121,12 +121,12 @@ class ExceptionHandler {
     }
 
     // Log the exception
-    _logger.logException(appException, severity: appException.severity);
+    _logger.logException(baseException, severity: baseException.severity);
 
     // Generate user-friendly message
-    final userMessage = _getUserMessage(appException);
+    final userMessage = _getUserMessage(baseException);
 
-    return ExceptionResult.failure(appException, userMessage);
+    return ExceptionResult.failure(baseException, userMessage);
   }
 
   /// Create a successful result
@@ -164,7 +164,7 @@ class ExceptionHandler {
   }
 
   /// Generate user-friendly error messages based on exception type
-  String _getUserMessage(AppException exception) {
+  String _getUserMessage(BaseException exception) {
     if (exception is NetworkException) {
       return 'ネットワークエラーが発生しました。しばらくしてからお試しください。';
     } else if (exception is ValidationException) {

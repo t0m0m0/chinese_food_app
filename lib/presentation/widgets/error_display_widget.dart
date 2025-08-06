@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../core/exceptions/app_exception.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 
 /// Widget for displaying errors in various formats
 class ErrorDisplayWidget extends StatelessWidget {
-  final AppException exception;
+  final BaseException exception;
   final String message;
   final VoidCallback? onRetry;
 
@@ -21,7 +20,7 @@ class ErrorDisplayWidget extends StatelessWidget {
 
   /// Show error as SnackBar
   static void showError(
-      BuildContext context, AppException exception, String message) {
+      BuildContext context, BaseException exception, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
@@ -30,7 +29,7 @@ class ErrorDisplayWidget extends StatelessWidget {
   /// Show error as AlertDialog
   static void showErrorDialog(
     BuildContext context,
-    AppException exception,
+    BaseException exception,
     String message, {
     VoidCallback? onRetry,
   }) {
@@ -59,7 +58,7 @@ class ErrorDisplayWidget extends StatelessWidget {
 
   /// Create inline error widget
   static Widget inline({
-    required AppException exception,
+    required BaseException exception,
     required String message,
     VoidCallback? onRetry,
   }) {

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 
-import '../../errors/security_exceptions.dart';
+import '../../exceptions/infrastructure/security_exception.dart';
 
 /// セキュアHTTPクライアント
 ///
