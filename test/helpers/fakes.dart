@@ -1,5 +1,5 @@
 // Local imports
-import 'package:chinese_food_app/core/exceptions/app_exception.dart';
+import 'package:chinese_food_app/core/exceptions/base_exception.dart';
 import 'package:chinese_food_app/core/types/result.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
@@ -203,7 +203,7 @@ class FakeStoreRepository implements StoreRepository {
 class FakeLocationRepository implements LocationRepository {
   Location? _currentLocation;
   bool _shouldReturnFailure = false;
-  AppException? _exceptionToReturn;
+  BaseException? _exceptionToReturn;
 
   /// 現在位置を設定
   void setCurrentLocation(Location location) {
@@ -211,7 +211,7 @@ class FakeLocationRepository implements LocationRepository {
   }
 
   /// 失敗結果を返すかどうかを設定
-  void setShouldReturnFailure(bool shouldFail, [AppException? exception]) {
+  void setShouldReturnFailure(bool shouldFail, [BaseException? exception]) {
     _shouldReturnFailure = shouldFail;
     _exceptionToReturn = exception;
   }
@@ -227,7 +227,7 @@ class FakeLocationRepository implements LocationRepository {
   Future<Result<Location>> getCurrentLocation() async {
     if (_shouldReturnFailure) {
       return Failure(
-          _exceptionToReturn ?? AppException('Location repository error'));
+          _exceptionToReturn ?? BaseException('Location repository error'));
     }
 
     final location = _currentLocation ??

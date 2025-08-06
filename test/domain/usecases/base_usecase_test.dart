@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/domain/usecases/base_usecase.dart';
 import 'package:chinese_food_app/core/types/result.dart';
-import 'package:chinese_food_app/core/exceptions/app_exception.dart';
+import 'package:chinese_food_app/core/exceptions/base_exception.dart';
 
 void main() {
   group('BaseUseCase Abstract Interface', () {
@@ -68,7 +68,7 @@ void main() {
 
         // Assert
         expect(result, isA<Failure<String>>());
-        expect((result as Failure<String>).exception, isA<AppException>());
+        expect((result as Failure<String>).exception, isA<BaseException>());
       });
     });
 
@@ -249,7 +249,7 @@ class _SuccessUseCase extends BaseUseCase<String, String> {
 class _FailureUseCase extends BaseUseCase<String, String> {
   @override
   Future<Result<String>> call(String params) async {
-    return Failure(AppException('Use case failed'));
+    return Failure(BaseException('Use case failed'));
   }
 }
 
@@ -276,7 +276,7 @@ class _ExceptionThrowingUseCase extends BaseUseCase<String, String> {
       }
       return Success('Success');
     } catch (e) {
-      return Failure(AppException('Test exception: ${e.toString()}'));
+      return Failure(BaseException('Test exception: ${e.toString()}'));
     }
   }
 }
@@ -286,13 +286,13 @@ class _MultipleExceptionUseCase extends BaseUseCase<String, String> {
   Future<Result<String>> call(String params) async {
     switch (params) {
       case 'validation-error':
-        return Failure(AppException('Validation failed',
+        return Failure(BaseException('Validation failed',
             severity: ExceptionSeverity.medium));
       case 'network-error':
         return Failure(
-            AppException('Network error', severity: ExceptionSeverity.high));
+            BaseException('Network error', severity: ExceptionSeverity.high));
       case 'generic-error':
-        return Failure(AppException('Generic error'));
+        return Failure(BaseException('Generic error'));
       default:
         return const Success('Success');
     }
@@ -302,7 +302,7 @@ class _MultipleExceptionUseCase extends BaseUseCase<String, String> {
 class _DetailedExceptionUseCase extends BaseUseCase<String, String> {
   @override
   Future<Result<String>> call(String params) async {
-    return Failure(AppException(
+    return Failure(BaseException(
       'Detailed error message',
       severity: ExceptionSeverity.high,
     ));

@@ -1,4 +1,4 @@
-import '../exceptions/app_exception.dart';
+import '../exceptions/base_exception.dart';
 
 /// A type-safe Result pattern for handling success and failure cases
 ///
@@ -12,7 +12,7 @@ import '../exceptions/app_exception.dart';
 ///     final data = someOperation();
 ///     return Success(data);
 ///   } catch (e) {
-///     return Failure(AppException('Operation failed: $e'));
+///     return Failure(BaseException('Operation failed: $e'));
 ///   }
 /// }
 ///
@@ -40,7 +40,7 @@ sealed class Result<T> {
       };
 
   /// Returns the exception if this is a Failure, null otherwise
-  AppException? get exceptionOrNull => switch (this) {
+  BaseException? get exceptionOrNull => switch (this) {
         Success<T> _ => null,
         Failure<T> failure => failure.exception,
       };
@@ -71,7 +71,7 @@ final class Success<T> extends Result<T> {
 /// Represents a failed operation with an exception
 final class Failure<T> extends Result<T> {
   /// The exception that caused the failure
-  final AppException exception;
+  final BaseException exception;
 
   /// Creates a Failure result with the given exception
   const Failure(this.exception);

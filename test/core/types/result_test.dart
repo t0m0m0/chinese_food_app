@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/types/result.dart';
-import 'package:chinese_food_app/core/exceptions/app_exception.dart';
 import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
 
 void main() {
@@ -56,7 +55,7 @@ void main() {
     group('Failure Type', () {
       test('should create Failure with exception', () {
         // Arrange
-        final exception = AppException('Test error');
+        final exception = BaseException('Test error');
 
         // Act
         final result = Failure<String>(exception);
@@ -95,8 +94,8 @@ void main() {
         final databaseResult = Failure<String>(databaseException);
 
         // Assert
-        expect(locationResult.exception, isA<AppException>());
-        expect(databaseResult.exception, isA<AppException>());
+        expect(locationResult.exception, isA<BaseException>());
+        expect(databaseResult.exception, isA<BaseException>());
         expect(locationResult.exception, isA<LocationException>());
         expect(databaseResult.exception, isA<DatabaseException>());
       });
@@ -117,7 +116,7 @@ void main() {
 
       test('should maintain type safety for Failure', () {
         // Arrange
-        final exception = AppException('Error');
+        final exception = BaseException('Error');
 
         // Act
         final stringFailure = Failure<String>(exception);
@@ -135,7 +134,7 @@ void main() {
       test('should support switch expressions for pattern matching', () {
         // Arrange
         const successResult = Success<String>('success');
-        final failureResult = Failure<String>(AppException('error'));
+        final failureResult = Failure<String>(BaseException('error'));
 
         // Act & Assert
         String successMessage = switch (successResult) {
@@ -153,7 +152,7 @@ void main() {
       test('should support is-type checking', () {
         // Arrange
         const success = Success<int>(42);
-        final failure = Failure<int>(AppException('error'));
+        final failure = Failure<int>(BaseException('error'));
 
         // Act & Assert
         expect(success, isA<Success<int>>());
@@ -175,9 +174,9 @@ void main() {
 
       test('should implement equality for Failure', () {
         // Arrange
-        final exception1 = AppException('error');
-        final exception2 = AppException('error');
-        final exception3 = AppException('different');
+        final exception1 = BaseException('error');
+        final exception2 = BaseException('error');
+        final exception3 = BaseException('different');
 
         // Act
         final result1 = Failure<String>(exception1);
@@ -193,8 +192,8 @@ void main() {
         // Arrange
         const success1 = Success<String>('test');
         const success2 = Success<String>('test');
-        final failure1 = Failure<String>(AppException('error'));
-        final failure2 = Failure<String>(AppException('error'));
+        final failure1 = Failure<String>(BaseException('error'));
+        final failure2 = Failure<String>(BaseException('error'));
 
         // Assert
         expect(success1.hashCode, equals(success2.hashCode));
@@ -214,7 +213,7 @@ void main() {
 
       test('should provide readable toString for Failure', () {
         // Arrange
-        final exception = AppException('test error');
+        final exception = BaseException('test error');
 
         // Act
         final result = Failure<String>(exception);
@@ -229,7 +228,7 @@ void main() {
       test('should provide isSuccess getter', () {
         // Arrange
         const success = Success<String>('data');
-        final failure = Failure<String>(AppException('error'));
+        final failure = Failure<String>(BaseException('error'));
 
         // Assert
         expect(success.isSuccess, isTrue);
@@ -239,7 +238,7 @@ void main() {
       test('should provide isFailure getter', () {
         // Arrange
         const success = Success<String>('data');
-        final failure = Failure<String>(AppException('error'));
+        final failure = Failure<String>(BaseException('error'));
 
         // Assert
         expect(success.isFailure, isFalse);
@@ -249,7 +248,7 @@ void main() {
       test('should provide safe data access', () {
         // Arrange
         const success = Success<String>('data');
-        final failure = Failure<String>(AppException('error'));
+        final failure = Failure<String>(BaseException('error'));
 
         // Assert
         expect(success.dataOrNull, equals('data'));
@@ -259,7 +258,7 @@ void main() {
       test('should provide safe exception access', () {
         // Arrange
         const success = Success<String>('data');
-        final failure = Failure<String>(AppException('error'));
+        final failure = Failure<String>(BaseException('error'));
 
         // Assert
         expect(success.exceptionOrNull, isNull);

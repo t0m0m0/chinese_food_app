@@ -9,7 +9,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 // Local imports
-import 'package:chinese_food_app/core/exceptions/app_exception.dart';
+import 'package:chinese_food_app/core/exceptions/base_exception.dart';
 import 'package:chinese_food_app/core/types/result.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/repositories/location_repository.dart';
@@ -147,7 +147,7 @@ void main() {
         for (final testCase in errorTestCases) {
           // Given
           fakeRepository.setShouldReturnFailure(
-              true, AppException(testCase['error'].toString()));
+              true, BaseException(testCase['error'].toString()));
 
           // When
           final result = await fakeRepository.getCurrentLocation();
