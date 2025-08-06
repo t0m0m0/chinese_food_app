@@ -1,4 +1,4 @@
-import 'app_exception.dart';
+import 'base_exception.dart';
 
 /// Reasons for location-related exceptions
 enum LocationExceptionReason {
@@ -16,7 +16,7 @@ enum LocationExceptionReason {
 }
 
 /// Exception thrown when input validation fails
-class ValidationException extends AppException {
+class ValidationException extends BaseException {
   /// The name of the field that failed validation (optional)
   final String? fieldName;
 
@@ -34,7 +34,7 @@ class ValidationException extends AppException {
 }
 
 /// Exception thrown when network operations fail
-class NetworkException extends AppException {
+class NetworkException extends BaseException {
   /// HTTP status code (if available)
   final int? statusCode;
 
@@ -52,7 +52,7 @@ class NetworkException extends AppException {
 }
 
 /// Exception thrown when database operations fail
-class DatabaseException extends AppException {
+class DatabaseException extends BaseException {
   /// The database operation that failed (e.g., 'INSERT', 'UPDATE')
   final String? operation;
 
@@ -80,7 +80,7 @@ class DatabaseException extends AppException {
 }
 
 /// Exception thrown when location services encounter errors
-class LocationException extends AppException {
+class LocationException extends BaseException {
   /// The specific reason for the location error
   final LocationExceptionReason reason;
 
@@ -97,7 +97,7 @@ class LocationException extends AppException {
 }
 
 /// Exception thrown when API response processing fails
-class ApiException extends AppException {
+class ApiException extends BaseException {
   /// HTTP status code from the API response
   final int? statusCode;
 
