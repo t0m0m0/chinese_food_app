@@ -46,8 +46,10 @@ void main() {
     group('Equality and HashCode', () {
       test('should be equal when message and severity are same', () {
         // Arrange
-        final exception1 = BaseException('Same message', severity: ExceptionSeverity.high);
-        final exception2 = BaseException('Same message', severity: ExceptionSeverity.high);
+        final exception1 =
+            BaseException('Same message', severity: ExceptionSeverity.high);
+        final exception2 =
+            BaseException('Same message', severity: ExceptionSeverity.high);
 
         // Act & Assert
         expect(exception1, equals(exception2));
@@ -66,8 +68,10 @@ void main() {
 
       test('should not be equal when severity differs', () {
         // Arrange
-        final exception1 = BaseException('Same message', severity: ExceptionSeverity.low);
-        final exception2 = BaseException('Same message', severity: ExceptionSeverity.high);
+        final exception1 =
+            BaseException('Same message', severity: ExceptionSeverity.low);
+        final exception2 =
+            BaseException('Same message', severity: ExceptionSeverity.high);
 
         // Act & Assert
         expect(exception1, isNot(equals(exception2)));
@@ -96,7 +100,10 @@ void main() {
         final result = exception.toString();
 
         // Assert
-        expect(result, equals('BaseException: Test message\nCaused by: Exception: Root cause'));
+        expect(
+            result,
+            equals(
+                'BaseException: Test message\nCaused by: Exception: Root cause'));
       });
     });
 
@@ -125,14 +132,18 @@ void main() {
 
     test('should maintain order from low to critical', () {
       // Act & Assert
-      expect(ExceptionSeverity.low.index, lessThan(ExceptionSeverity.medium.index));
-      expect(ExceptionSeverity.medium.index, lessThan(ExceptionSeverity.high.index));
-      expect(ExceptionSeverity.high.index, lessThan(ExceptionSeverity.critical.index));
+      expect(ExceptionSeverity.low.index,
+          lessThan(ExceptionSeverity.medium.index));
+      expect(ExceptionSeverity.medium.index,
+          lessThan(ExceptionSeverity.high.index));
+      expect(ExceptionSeverity.high.index,
+          lessThan(ExceptionSeverity.critical.index));
     });
   });
 }
 
 // Test helper class to verify inheritance
 class _TestCustomException extends BaseException {
-  _TestCustomException(super.message) : super(severity: ExceptionSeverity.critical);
+  _TestCustomException(super.message)
+      : super(severity: ExceptionSeverity.critical);
 }

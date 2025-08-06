@@ -1,10 +1,10 @@
 import 'base_exception.dart';
 
 /// Application exception class that extends BaseException
-/// 
+///
 /// This class provides compatibility with existing code while
 /// leveraging the new BaseException hierarchy.
-/// 
+///
 /// Example usage:
 /// ```dart
 /// throw AppException('Failed to load data', severity: ExceptionSeverity.high);

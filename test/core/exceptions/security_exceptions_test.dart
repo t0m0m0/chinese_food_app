@@ -18,7 +18,8 @@ void main() {
       expect(exception.originalException, isNull);
     });
 
-    test('should create SecurityException with context and original exception', () {
+    test('should create SecurityException with context and original exception',
+        () {
       // Arrange
       const message = 'Security violation';
       const context = 'Authentication module';
@@ -155,7 +156,7 @@ void main() {
 
       // Act
       final exception = EnvironmentConfigException(
-        errorMessage, 
+        errorMessage,
         context: context,
       );
 
