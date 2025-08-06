@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'core/config/config_manager.dart';
 import 'core/config/environment_config.dart';
-import 'core/constants/app_constants.dart';
+import 'core/config/ui_config.dart';
 import 'core/di/app_di_container.dart';
 import 'core/di/di_container_interface.dart';
 import 'core/routing/app_router.dart';
@@ -134,7 +134,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MaterialApp.router(
-        title: AppConstants.appName,
+        title: UiConfig.appName,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
           useMaterial3: true,

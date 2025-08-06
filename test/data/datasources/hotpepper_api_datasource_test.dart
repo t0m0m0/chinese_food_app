@@ -4,7 +4,7 @@ import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart'
 import 'package:chinese_food_app/core/network/app_http_client.dart';
 import 'package:chinese_food_app/core/network/api_response.dart';
 import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
-import 'package:chinese_food_app/core/constants/app_constants.dart';
+import 'package:chinese_food_app/core/config/api_config.dart';
 import '../../../test/helpers/test_env_setup.dart';
 
 void main() {
@@ -184,7 +184,7 @@ void main() {
       test('should handle 429 Rate Limit error', () async {
         // Arrange
         mockHttpClient.stubGetError(
-          AppConstants.hotpepperApiUrl,
+          ApiConfig.hotpepperApiUrl,
           NetworkException('Rate Limited', statusCode: 429),
         );
 
