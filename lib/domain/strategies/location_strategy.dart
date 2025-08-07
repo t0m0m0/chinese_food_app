@@ -25,9 +25,9 @@ import '../../core/types/result.dart';
 /// final result = await strategy.getCurrentLocation();
 /// switch (result) {
 ///   case Success<Location>():
-///     print('Location: ${result.data}');
+///     SecureLogger.info('位置情報取得成功', data: {'latitude': result.data.latitude, 'longitude': result.data.longitude});
 ///   case Failure<Location>():
-///     print('Error: ${result.exception}');
+///     SecureLogger.error('位置情報取得エラー', error: result.exception);
 /// }
 /// ```
 abstract class LocationStrategy {

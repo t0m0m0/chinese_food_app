@@ -13,7 +13,7 @@ import '../repositories/store_repository.dart';
 /// final result = await usecase.execute(params);
 ///
 /// if (result.isSuccess && result.hasStores) {
-///   print('${result.stores!.length}件の店舗が見つかりました');
+///   SecureLogger.info('店舗検索完了', data: {'storeCount': result.stores!.length});
 /// }
 /// ```
 class SearchStoresUsecase {

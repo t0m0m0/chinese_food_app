@@ -19,9 +19,9 @@ import '../exceptions/base_exception.dart';
 /// final result = fetchData();
 /// switch (result) {
 ///   case Success<String>():
-///     print('Data: ${result.data}');
+///     SecureLogger.info('処理完了', data: {'result': result.data});
 ///   case Failure<String>():
-///     print('Error: ${result.exception.message}');
+///     SecureLogger.error('処理エラー', error: result.exception);
 /// }
 /// ```
 sealed class Result<T> {
