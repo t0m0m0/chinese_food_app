@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:chinese_food_app/core/utils/duplicate_store_checker.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 
@@ -47,8 +48,8 @@ void main() {
       test('should calculate distance between two points correctly', () {
         // Red: 2点間の距離計算テスト
         final distance = DuplicateStoreChecker.calculateDistance(
-          LatLng(store1.lat, store1.lng),
-          LatLng(store2.lat, store2.lng),
+          gmaps.LatLng(store1.lat, store1.lng),
+          gmaps.LatLng(store2.lat, store2.lng),
         );
 
         expect(distance, closeTo(44.0, 10.0)); // 約44m、誤差±10m
@@ -56,11 +57,28 @@ void main() {
 
       test('should return 0 for identical coordinates', () {
         final distance = DuplicateStoreChecker.calculateDistance(
-          LatLng(store1.lat, store1.lng),
-          LatLng(store1.lat, store1.lng),
+          gmaps.LatLng(store1.lat, store1.lng),
+          gmaps.LatLng(store1.lat, store1.lng),
         );
 
         expect(distance, equals(0.0));
+      });
+
+      test('should handle edge cases gracefully', () {
+        // エッジケースでの動作確認（例外は投げないが適切に処理）
+        final distance1 = DuplicateStoreChecker.calculateDistance(
+          gmaps.LatLng(90.0, 180.0), // 極値
+          gmaps.LatLng(-90.0, -180.0),
+        );
+
+        expect(distance1, greaterThan(0)); // 正の値を返す
+
+        // 同一点での距離は0
+        final distance2 = DuplicateStoreChecker.calculateDistance(
+          gmaps.LatLng(35.6917, 139.7006),
+          gmaps.LatLng(35.6917, 139.7006),
+        );
+        expect(distance2, equals(0.0));
       });
     });
 
@@ -142,6 +160,71 @@ void main() {
         );
 
         expect(uniqueStores.length, equals(3)); // 30m閾値では全て非重複
+      });
+    });
+
+    group('パフォーマンステスト', () {
+      test('should perform well with large dataset', () {
+        // 大量データでのパフォーマンステスト
+        final stopwatch = Stopwatch()..start();
+
+        // 1000件のテストデータ生成
+        final largeStoreList = List.generate(
+            1000,
+            (index) => Store(
+                  id: 'store_$index',
+                  name: 'テスト店舗$index',
+                  address: '東京都新宿区$index',
+                  lat: 35.6917 + (index * 0.00001), // 微小な差分
+                  lng: 139.7006 + (index * 0.00001),
+                  memo: '',
+                  createdAt: DateTime.now(),
+                ));
+
+        // 重複除去実行
+        final uniqueStores =
+            DuplicateStoreChecker.removeDuplicates(largeStoreList);
+
+        stopwatch.stop();
+
+        // パフォーマンス基準: 1秒以内
+        expect(stopwatch.elapsedMilliseconds, lessThan(1000));
+        // 段階的フィルタリングにより適切に重複が検出される
+        expect(uniqueStores.length, lessThan(largeStoreList.length));
+      });
+
+      test('should skip expensive calculations with rough distance check', () {
+        // 明らかに遠い店舗での高速フィルタリングテスト
+        final tokyo = Store(
+          id: 'tokyo',
+          name: '東京店',
+          address: '東京都新宿区',
+          lat: 35.6917,
+          lng: 139.7006,
+          memo: '',
+          createdAt: DateTime.now(),
+        );
+
+        final osaka = Store(
+          id: 'osaka',
+          name: '大阪店',
+          address: '大阪府大阪市',
+          lat: 34.6937, // 東京から約400km
+          lng: 135.5023,
+          memo: '',
+          createdAt: DateTime.now(),
+        );
+
+        final stopwatch = Stopwatch()..start();
+
+        // 明らかに遠い店舗同士の重複チェック
+        final isDuplicate = DuplicateStoreChecker.isDuplicate(tokyo, osaka);
+
+        stopwatch.stop();
+
+        expect(isDuplicate, isFalse);
+        // 粗いチェックにより高速処理（1ms以内）
+        expect(stopwatch.elapsedMicroseconds, lessThan(1000));
       });
     });
   });
