@@ -128,5 +128,61 @@ void main() {
       // Status header should show current status
       expect(find.text('行った'), findsWidgets);
     });
+
+    testWidgets('should show map dialog when map button is tapped',
+        (tester) async {
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StoreDetailPage(store: testStore),
+        ),
+      );
+
+      // Scroll to make the map button visible
+      await tester.scrollUntilVisible(
+        find.text('地図で表示'),
+        500.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      // Find and tap the map button
+      final mapButton = find.text('地図で表示');
+      expect(mapButton, findsOneWidget);
+
+      await tester.tap(mapButton);
+      await tester.pumpAndSettle();
+
+      // Assert - Map dialog should be displayed
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.text('テスト中華料理店'), findsWidgets); // Store name in dialog title
+      expect(find.byIcon(Icons.close), findsOneWidget); // Close button
+    });
+
+    testWidgets('should close map dialog when close button is tapped',
+        (tester) async {
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StoreDetailPage(store: testStore),
+        ),
+      );
+
+      // Scroll to make the map button visible and tap it
+      await tester.scrollUntilVisible(
+        find.text('地図で表示'),
+        500.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('地図で表示'));
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsOneWidget);
+
+      // Close dialog
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      // Assert - Dialog should be closed
+      expect(find.byType(Dialog), findsNothing);
+    });
   });
 }

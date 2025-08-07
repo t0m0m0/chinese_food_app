@@ -46,6 +46,7 @@ dependencies:
   geolocator: ^14.0.1
   geocoding: ^4.0.0
   app_settings: ^6.1.1
+  url_launcher: ^6.3.1
   
   # UI・UX関連
   flutter_card_swiper: ^7.0.2
