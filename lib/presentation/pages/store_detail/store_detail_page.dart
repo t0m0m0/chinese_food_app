@@ -90,7 +90,7 @@ class StoreDetailPage extends StatelessWidget {
       context: context,
       builder: (context) => Dialog(
         child: SizedBox(
-          height: 400,
+          height: 400.0, // 明示的にdouble型
           width: double.maxFinite,
           child: Column(
             children: [

@@ -164,5 +164,51 @@ void main() {
       // ナビゲーションボタンにセマンティクス情報が含まれていることを確認
       expect(find.byTooltip('外部地図アプリで開く'), findsOneWidget);
     });
+
+    testWidgets('should have enhanced accessibility with Semantics widget',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // 特定のセマンティクスラベルが設定されていることを確認
+      final semanticsFinder = find.byWidgetPredicate((widget) =>
+          widget is Semantics &&
+          widget.properties.label == '外部地図アプリでナビゲーションを開始');
+      expect(semanticsFinder, findsOneWidget);
+    });
+
+    testWidgets('should have proper Google Maps configuration',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final googleMapFinder = find.byType(GoogleMap);
+      expect(googleMapFinder, findsOneWidget);
+
+      final GoogleMap googleMap = tester.widget(googleMapFinder);
+      expect(googleMap.mapType, MapType.normal);
+      expect(googleMap.myLocationEnabled, false);
+      expect(googleMap.myLocationButtonEnabled, false);
+      expect(googleMap.zoomControlsEnabled, true);
+      expect(googleMap.compassEnabled, true);
+      expect(googleMap.rotateGesturesEnabled, false);
+      expect(googleMap.tiltGesturesEnabled, false);
+      expect(googleMap.scrollGesturesEnabled, true);
+      expect(googleMap.zoomGesturesEnabled, true);
+    });
   });
 }
