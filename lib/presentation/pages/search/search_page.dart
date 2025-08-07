@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_settings/app_settings.dart';
 import '../../../core/utils/error_message_helper.dart';
+import '../../../core/utils/duplicate_store_checker.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
@@ -387,9 +388,9 @@ class _SearchPageState extends State<SearchPage> {
   Future<void> _addToWantToGo(Store store) async {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
-    // 重複チェック
+    // Issue #96: 統一化されたDuplicateStoreCheckerを使用
     final existingStore = storeProvider.stores
-        .where((s) => s.name == store.name && s.address == store.address)
+        .where((s) => DuplicateStoreChecker.isDuplicate(s, store))
         .firstOrNull;
 
     if (existingStore != null) {
