@@ -5,6 +5,7 @@ import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/store_utils.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
+import '../../widgets/store_map_widget.dart';
 import 'widgets/store_header_widget.dart';
 import 'widgets/store_info_widget.dart';
 import 'widgets/store_action_widget.dart';
@@ -38,7 +39,7 @@ class StoreDetailPage extends StatelessWidget {
               onStatusChanged: (newStatus) =>
                   _updateStoreStatus(context, newStatus),
               onAddVisitRecord: () => _navigateToVisitRecordForm(context),
-              onShowMap: () => _showMapNotImplemented(context),
+              onShowMap: () => _showMap(context),
             ),
           ],
         ),
@@ -84,9 +85,32 @@ class StoreDetailPage extends StatelessWidget {
     context.pushNamed('visit-record-form', extra: store);
   }
 
-  void _showMapNotImplemented(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('地図表示機能は実装予定です')),
+  void _showMap(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: SizedBox(
+          height: 400,
+          width: double.maxFinite,
+          child: Column(
+            children: [
+              AppBar(
+                title: Text(store.name),
+                automaticallyImplyLeading: false,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: StoreMapWidget(store: store),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
