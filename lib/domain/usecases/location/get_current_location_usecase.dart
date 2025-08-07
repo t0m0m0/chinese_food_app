@@ -23,9 +23,9 @@ import '../../../core/types/result.dart';
 ///
 /// switch (result) {
 ///   case Success<Location>():
-///     print('Current location: ${result.data}');
+///     SecureLogger.info('現在位置取得成功', data: {'latitude': result.data.latitude, 'longitude': result.data.longitude});
 ///   case Failure<Location>():
-///     print('Failed to get location: ${result.exception.message}');
+///     SecureLogger.error('位置情報取得失敗', error: result.exception);
 /// }
 /// ```
 class GetCurrentLocationUseCase extends BaseUseCase<NoParams, Location> {

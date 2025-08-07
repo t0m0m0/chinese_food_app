@@ -40,7 +40,7 @@
 ///
 /// // Consuming
 /// EventBus.instance.on<LocationUpdatedEvent>().listen((event) {
-///   print('Location updated: ${event.location}');
+///   SecureLogger.info('イベント受信', data: {'event': event.runtimeType.toString(), 'location': event.location.toString()});
 /// });
 /// ```
 abstract class BaseEvent {

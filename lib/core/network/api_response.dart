@@ -10,7 +10,7 @@
 /// if (response.isSuccess) {
 ///   final users = jsonDecode(response.data);
 /// } else {
-///   print('Error: ${response.statusCode}');
+///   SecureLogger.error('APIエラー', data: {'statusCode': response.statusCode});
 /// }
 /// ```
 class ApiResponse {
