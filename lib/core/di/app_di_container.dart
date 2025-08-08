@@ -283,7 +283,7 @@ class AppDIContainer implements DIContainerInterface {
         level: 900, // WARNING
       );
       return DatabaseConnection(NativeDatabase.memory());
-      
+
       // TODO: 適切なファイルパスが動作するまで無効化
       // return DatabaseConnection(NativeDatabase.createInBackground(
       //   _getDatabaseFile(),
