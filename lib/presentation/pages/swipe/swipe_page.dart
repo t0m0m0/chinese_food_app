@@ -162,11 +162,25 @@ class _SwipePageState extends State<SwipePage> {
       debugPrint('店舗ステータス更新エラー: $e');
 
       if (mounted) {
+        // Issue #111 修正: より詳細なエラー情報とリカバリー機能を提供
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(ErrorMessageHelper.getUserFriendlyMessage(e)),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: '再試行',
+              textColor: Colors.white,
+              onPressed: () async {
+                // データベースリカバリーを試行
+                final success =
+                    await storeProvider.tryRecoverFromDatabaseError();
+                if (success && mounted) {
+                  // リカバリー成功後、再度ステータス更新を試行
+                  await _updateStoreStatus(store, status);
+                }
+              },
+            ),
           ),
         );
       }

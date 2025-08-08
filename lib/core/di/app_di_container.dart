@@ -2,7 +2,8 @@ import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' show File;
+import 'dart:io' show File, Platform, Directory;
+import 'package:path/path.dart' as path;
 import '../config/environment_config.dart' as env_config;
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
@@ -228,30 +229,126 @@ class AppDIContainer implements DIContainerInterface {
   DatabaseConnection _openDatabaseConnection() {
     // プラットフォーム別のデータベース接続
     if (kIsWeb) {
-      // Web環境: テスト専用のインメモリデータベース
-      // 注意: CI環境ではWeb実行時にSQLite制限があるため、テスト環境のみ対応
-      developer.log('Web環境: テスト専用インメモリデータベース使用', name: 'Database');
-
-      // テスト環境でのみWeb対応、本番環境では未対応
-      if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
-        return DatabaseConnection(NativeDatabase.memory());
-      } else {
-        throw UnsupportedError('Web環境での本番使用は現在未対応です。Native環境を使用してください。');
-      }
+      return _createWebDatabaseConnection();
     } else {
-      // Native環境の分岐処理
-      if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
-        // テスト環境: 各インスタンス用の一意なインメモリデータベース
-        developer.log('テスト環境: インメモリデータベース使用（race condition回避）',
-            name: 'Database');
+      return _createNativeDatabaseConnection();
+    }
+  }
+
+  /// Create Web platform database connection
+  DatabaseConnection _createWebDatabaseConnection() {
+    // Web環境: Drift Web APIまたはインメモリデータベース
+    developer.log('Web環境: データベース接続を作成', name: 'Database');
+
+    // テスト環境でのみインメモリデータベースを使用
+    if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+      developer.log('Web環境: テスト用インメモリデータベース使用', name: 'Database');
+      return DatabaseConnection(NativeDatabase.memory());
+    } else {
+      // Issue #111 修正: Web環境での本番使用をサポート
+      // ただし、データはセッション限りとなることをユーザーに警告
+      developer.log(
+        'Web環境: インメモリデータベース使用（永続化なし）',
+        name: 'Database',
+        level: 900, // WARNING
+      );
+
+      try {
+        // Web環境では永続化されないインメモリデータベースを使用
+        // 将来的には IndexedDB ベースの実装に移行予定
         return DatabaseConnection(NativeDatabase.memory());
-      } else {
-        // 本番・開発環境: SQLiteファイルを使用
-        developer.log('Native環境: SQLiteファイルを使用', name: 'Database');
-        return DatabaseConnection(NativeDatabase.createInBackground(
-          File('app_db.sqlite'),
-        ));
+      } catch (e) {
+        developer.log(
+          'Web環境でのデータベース初期化に失敗: $e',
+          name: 'Database',
+          level: 1000, // ERROR
+        );
+        rethrow;
       }
+    }
+  }
+
+  /// Create Native platform database connection
+  DatabaseConnection _createNativeDatabaseConnection() {
+    if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+      // テスト環境: インメモリデータベース使用
+      developer.log('テスト環境: インメモリデータベース使用（race condition回避）', name: 'Database');
+      return DatabaseConnection(NativeDatabase.memory());
+    } else {
+      // 本番・開発環境: 適切なディレクトリにSQLiteファイルを作成
+      return DatabaseConnection(NativeDatabase.createInBackground(
+        _getDatabaseFile(),
+      ));
+    }
+  }
+
+  /// Get database file with proper path for each platform
+  File _getDatabaseFile() {
+    // Issue #111 修正: プラットフォームごとに適切なデータベースファイルパスを使用
+    try {
+      String dbPath;
+
+      if (Platform.isIOS || Platform.isAndroid) {
+        // モバイル環境: アプリケーションサポートディレクトリを使用
+        // iOS: ~/Library/Application Support/
+        // Android: /data/data/<package>/files/
+        final appSupportDir = _getApplicationSupportDirectory();
+        dbPath = path.join(appSupportDir.path, 'app_db.sqlite');
+
+        developer.log('iOS/Android データベースパス: $dbPath', name: 'Database');
+      } else if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+        // Desktop環境: 現在のディレクトリに作成
+        dbPath = path.join(Directory.current.path, 'app_db.sqlite');
+
+        developer.log('Desktop データベースパス: $dbPath', name: 'Database');
+      } else {
+        // 未知のプラットフォーム: フォールバック
+        dbPath = 'app_db.sqlite';
+        developer.log(
+          'Unknown platform, using fallback path: $dbPath',
+          name: 'Database',
+          level: 900, // WARNING
+        );
+      }
+
+      final dbFile = File(dbPath);
+
+      // ディレクトリが存在しない場合は作成
+      final parentDir = dbFile.parent;
+      if (!parentDir.existsSync()) {
+        parentDir.createSync(recursive: true);
+        developer.log('Database directory created: ${parentDir.path}',
+            name: 'Database');
+      }
+
+      return dbFile;
+    } catch (e) {
+      developer.log(
+        'Database file path creation failed: $e. Using fallback.',
+        name: 'Database',
+        level: 1000, // ERROR
+      );
+      // 最後の手段: 現在ディレクトリに作成
+      return File('app_db_fallback.sqlite');
+    }
+  }
+
+  /// Get application support directory synchronously
+  ///
+  /// Note: This is a simplified approach for platforms where
+  /// we can determine the path without async operations
+  Directory _getApplicationSupportDirectory() {
+    if (Platform.isIOS) {
+      // iOS: ~/Library/Application Support/ (simplified)
+      final home = Platform.environment['HOME'] ?? '.';
+      return Directory(path.join(home, 'Library', 'Application Support'));
+    } else if (Platform.isAndroid) {
+      // Android: Use app's private files directory
+      // Note: This might need adjustment based on actual Android paths
+      return Directory('/data/data/com.example.chinese_food_app/files');
+    } else {
+      // Desktop fallback
+      return Directory.current;
     }
   }
 

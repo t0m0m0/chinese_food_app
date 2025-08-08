@@ -135,11 +135,29 @@ class StoreProvider extends ChangeNotifier {
 
       // 成功後にローカル状態を更新
       _stores[storeIndex] = updatedStore;
+      _clearCache(); // ステータス別キャッシュもクリア
       notifyListeners();
       _clearError();
     } catch (e) {
-      _setError(ErrorMessageHelper.getStoreRelatedMessage('update_status'));
+      // Issue #111 修正: より詳細なエラーハンドリング
+      String errorMessage;
+
+      if (e.toString().contains('SqliteException(14)') ||
+          e.toString().contains('unable to open database file')) {
+        errorMessage = 'データベースファイルにアクセスできません。アプリを再起動してください。';
+      } else if (e.toString().contains('dart:ffi') ||
+          e.toString().contains('NotInitializedError')) {
+        errorMessage = 'データベースが初期化されていません。しばらくお待ちください。';
+      } else {
+        errorMessage =
+            ErrorMessageHelper.getStoreRelatedMessage('update_status');
+      }
+
+      _setError(errorMessage);
       // ローカル状態はデータベースと整合性を保つため、変更しない
+
+      // デバッグ用の詳細ログ
+      debugPrint('店舗ステータス更新エラー: $e');
     }
   }
 
@@ -261,6 +279,27 @@ class StoreProvider extends ChangeNotifier {
     if (_error != null) {
       _error = null;
       notifyListeners();
+    }
+  }
+
+  /// データベースエラーからのリカバリーを試行
+  /// Issue #111対応: データベース接続問題の自動復旧機能
+  Future<bool> tryRecoverFromDatabaseError() async {
+    try {
+      _clearError();
+      _isLoading = true;
+      notifyListeners();
+
+      // データベース接続の再確認
+      await repository.getAllStores();
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _setError('データベース復旧に失敗しました: ${e.toString()}');
+      return false;
     }
   }
 
