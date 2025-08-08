@@ -84,7 +84,8 @@ void main() {
       expect(find.text('Environment: Production'), findsOneWidget);
     });
 
-    test('should maintain correct instance behavior across widget rebuilds', () {
+    test('should maintain correct instance behavior across widget rebuilds',
+        () {
       // Arrange
       container.configure();
 
@@ -97,7 +98,7 @@ void main() {
       // Assert
       // StoreProviders should be different instances (transient)
       expect(identical(provider1, provider2), isFalse);
-      
+
       // LocationServices should be same instance (const constructor)
       expect(identical(service1, service2), isTrue);
 
