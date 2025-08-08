@@ -84,7 +84,7 @@ void main() {
       expect(find.text('Environment: Production'), findsOneWidget);
     });
 
-    test('should maintain singleton behavior across widget rebuilds', () {
+    test('should maintain correct instance behavior across widget rebuilds', () {
       // Arrange
       container.configure();
 
@@ -95,11 +95,13 @@ void main() {
       final service2 = container.getLocationService();
 
       // Assert
-      // Services should be different instances (transient)
+      // StoreProviders should be different instances (transient)
       expect(identical(provider1, provider2), isFalse);
-      expect(identical(service1, service2), isFalse);
+      
+      // LocationServices should be same instance (const constructor)
+      expect(identical(service1, service2), isTrue);
 
-      // But they should be of the same type
+      // Both should be of the correct types
       expect(provider1.runtimeType, equals(provider2.runtimeType));
       expect(service1.runtimeType, equals(service2.runtimeType));
     });
