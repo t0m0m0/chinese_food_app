@@ -67,16 +67,16 @@ void main() {
       test('should handle edge cases gracefully', () {
         // エッジケースでの動作確認（例外は投げないが適切に処理）
         final distance1 = DuplicateStoreChecker.calculateDistance(
-          gmaps.LatLng(90.0, 180.0), // 極値
-          gmaps.LatLng(-90.0, -180.0),
+          const gmaps.LatLng(90.0, 180.0), // 極値
+          const gmaps.LatLng(-90.0, -180.0),
         );
 
         expect(distance1, greaterThan(0)); // 正の値を返す
 
         // 同一点での距離は0
         final distance2 = DuplicateStoreChecker.calculateDistance(
-          gmaps.LatLng(35.6917, 139.7006),
-          gmaps.LatLng(35.6917, 139.7006),
+          const gmaps.LatLng(35.6917, 139.7006),
+          const gmaps.LatLng(35.6917, 139.7006),
         );
         expect(distance2, equals(0.0));
       });

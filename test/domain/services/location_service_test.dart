@@ -91,14 +91,14 @@ class MockLocationService implements LocationService {
   @override
   Future<Location> getCurrentLocation() async {
     if (!_isLocationServiceEnabled) {
-      throw LocationException(
+      throw const LocationException(
         'Location services are disabled',
         LocationExceptionType.serviceDisabled,
       );
     }
 
     if (_shouldThrowPermissionDenied || !_hasLocationPermission) {
-      throw LocationException(
+      throw const LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
       );

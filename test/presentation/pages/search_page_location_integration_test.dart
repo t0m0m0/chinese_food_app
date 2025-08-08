@@ -30,7 +30,7 @@ void main() {
           ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
           Provider<LocationService>.value(value: mockLocationService),
         ],
-        child: MaterialApp(
+        child: const MaterialApp(
           home: SearchPage(),
         ),
       );
@@ -120,7 +120,7 @@ void main() {
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 位置情報権限エラーダイアログが実装されていません
 
-      mockLocationService.setLocationError(LocationException(
+      mockLocationService.setLocationError(const LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
       ));
@@ -143,7 +143,7 @@ void main() {
         (WidgetTester tester) async {
       // 🔴 このテストは失敗するはずです - 位置情報取得中のローディング状態が実装されていません
 
-      mockLocationService.setLocationDelay(Duration(seconds: 2));
+      mockLocationService.setLocationDelay(const Duration(seconds: 2));
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();

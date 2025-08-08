@@ -17,7 +17,7 @@ void main() {
 
     setUp(() {
       // 軽量化：遅延初期化を使用
-      locationService = GeolocatorLocationService();
+      locationService = const GeolocatorLocationService();
     });
 
     group('convertPositionToLocation', () {
@@ -48,13 +48,13 @@ void main() {
 
     group('Constructor Configuration Tests', () {
       test('should use default timeout and accuracy', () {
-        final service = GeolocatorLocationService();
+        final service = const GeolocatorLocationService();
         expect(service.timeoutSeconds, equals(10));
         expect(service.accuracy, equals(LocationAccuracy.high));
       });
 
       test('should accept custom timeout and accuracy', () {
-        final service = GeolocatorLocationService(
+        final service = const GeolocatorLocationService(
           timeoutSeconds: 15,
           accuracy: LocationAccuracy.medium,
         );
@@ -192,7 +192,7 @@ void main() {
       });
 
       test('should use custom timeout setting', () async {
-        final customService = MockableGeolocatorLocationServiceWithTimeout(
+        final customService = const MockableGeolocatorLocationServiceWithTimeout(
           timeoutSeconds: 5,
         );
 
@@ -201,7 +201,7 @@ void main() {
       });
 
       test('should use custom accuracy setting', () async {
-        final customService = MockableGeolocatorLocationServiceWithTimeout(
+        final customService = const MockableGeolocatorLocationServiceWithTimeout(
           accuracy: LocationAccuracy.low,
         );
 
@@ -249,28 +249,28 @@ class MockableGeolocatorLocationService extends GeolocatorLocationService {
     }
 
     if (!_isLocationServiceEnabled) {
-      throw LocationException(
+      throw const LocationException(
         'Location services are disabled',
         LocationExceptionType.serviceDisabled,
       );
     }
 
     if (_locationPermission == LocationPermission.denied) {
-      throw LocationException(
+      throw const LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
       );
     }
 
     if (_locationPermission == LocationPermission.deniedForever) {
-      throw LocationException(
+      throw const LocationException(
         'Location permission denied forever',
         LocationExceptionType.permissionDeniedForever,
       );
     }
 
     if (_shouldTimeoutError) {
-      throw LocationException(
+      throw const LocationException(
         'Location request timed out',
         LocationExceptionType.timeout,
       );

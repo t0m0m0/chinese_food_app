@@ -312,7 +312,7 @@ void main() {
     group('searchStoresFromApi', () {
       test('should return stores from API with valid coordinates', () async {
         // Arrange
-        final mockApiResponse = HotpepperSearchResponse(
+        final mockApiResponse = const HotpepperSearchResponse(
           shops: [
             HotpepperStoreModel(
               id: 'api-store-1',

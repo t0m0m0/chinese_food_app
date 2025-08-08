@@ -48,7 +48,7 @@ void main() {
     group('Event Publishing', () {
       test('should emit event to subscribers', () async {
         // Arrange
-        final testEvent = _TestEvent('test message');
+        final testEvent = const _TestEvent('test message');
         final stream = eventBus.on<_TestEvent>();
 
         // Act & Assert
@@ -58,9 +58,9 @@ void main() {
 
       test('should emit multiple events in order', () async {
         // Arrange
-        final event1 = _TestEvent('first');
-        final event2 = _TestEvent('second');
-        final event3 = _TestEvent('third');
+        final event1 = const _TestEvent('first');
+        final event2 = const _TestEvent('second');
+        final event3 = const _TestEvent('third');
         final stream = eventBus.on<_TestEvent>();
 
         // Act & Assert
@@ -76,8 +76,8 @@ void main() {
 
       test('should handle different event types separately', () async {
         // Arrange
-        final testEvent = _TestEvent('test');
-        final otherEvent = _OtherTestEvent(42);
+        final testEvent = const _TestEvent('test');
+        final otherEvent = const _OtherTestEvent(42);
         final testStream = eventBus.on<_TestEvent>();
         final otherStream = eventBus.on<_OtherTestEvent>();
 
@@ -91,7 +91,7 @@ void main() {
 
       test('should not emit to wrong event type subscribers', () async {
         // Arrange
-        final testEvent = _TestEvent('test');
+        final testEvent = const _TestEvent('test');
         final otherEvents = <_OtherTestEvent>[];
 
         // Subscribe to different event type
@@ -113,7 +113,7 @@ void main() {
     group('Multiple Subscribers', () {
       test('should emit to multiple subscribers of same event type', () async {
         // Arrange
-        final testEvent = _TestEvent('broadcast');
+        final testEvent = const _TestEvent('broadcast');
         final stream1 = eventBus.on<_TestEvent>();
         final stream2 = eventBus.on<_TestEvent>();
         final stream3 = eventBus.on<_TestEvent>();
@@ -128,7 +128,7 @@ void main() {
 
       test('should handle subscription after event emission', () async {
         // Arrange
-        final testEvent = _TestEvent('late subscriber');
+        final testEvent = const _TestEvent('late subscriber');
         final lateEvents = <_TestEvent>[];
 
         // Act - Emit before subscription
@@ -154,8 +154,8 @@ void main() {
     group('Event Filtering and Listening', () {
       test('should support listening with specific conditions', () async {
         // Arrange
-        final event1 = _TestEvent('include');
-        final event2 = _TestEvent('exclude');
+        final event1 = const _TestEvent('include');
+        final event2 = const _TestEvent('exclude');
         final filteredEvents = <_TestEvent>[];
 
         final stream = eventBus
@@ -179,7 +179,7 @@ void main() {
 
       test('should support stream transformations', () async {
         // Arrange
-        final testEvent = _TestEvent('transform me');
+        final testEvent = const _TestEvent('transform me');
         final transformedStream = eventBus
             .on<_TestEvent>()
             .map((event) => event.message.toUpperCase());
@@ -191,9 +191,9 @@ void main() {
 
       test('should support taking limited number of events', () async {
         // Arrange
-        final event1 = _TestEvent('first');
-        final event2 = _TestEvent('second');
-        final event3 = _TestEvent('third');
+        final event1 = const _TestEvent('first');
+        final event2 = const _TestEvent('second');
+        final event3 = const _TestEvent('third');
         final limitedStream = eventBus.on<_TestEvent>().take(2);
 
         // Act & Assert
@@ -211,13 +211,13 @@ void main() {
     group('Error Handling', () {
       test('should handle invalid events gracefully', () {
         // Act & Assert - Test with a valid event type instead of null
-        expect(() => eventBus.emit(_TestEvent('test')), returnsNormally);
+        expect(() => eventBus.emit(const _TestEvent('test')), returnsNormally);
       });
 
       test('should continue working after error in subscriber', () async {
         // Arrange
-        final testEvent1 = _TestEvent('test1');
-        final testEvent2 = _TestEvent('test2');
+        final testEvent1 = const _TestEvent('test1');
+        final testEvent2 = const _TestEvent('test2');
 
         // Subscribe with working listener
         final receivedEvents = <_TestEvent>[];
@@ -243,7 +243,7 @@ void main() {
 
         // Act & Assert
         expect(
-            () => eventBus.emit(_TestEvent('after dispose')), returnsNormally);
+            () => eventBus.emit(const _TestEvent('after dispose')), returnsNormally);
         expect(() => eventBus.on<_TestEvent>(), returnsNormally);
       });
     });
@@ -321,7 +321,7 @@ void main() {
       test('should handle many subscribers efficiently', () async {
         // Arrange
         const subscriberCount = 100;
-        final testEvent = _TestEvent('broadcast');
+        final testEvent = const _TestEvent('broadcast');
         final receivedCounts = <int>[];
 
         // Create many subscribers
@@ -372,7 +372,7 @@ void main() {
       test('should handle concurrent subscriptions safely', () async {
         // Arrange
         const subscriberCount = 50;
-        final testEvent = _TestEvent('test');
+        final testEvent = const _TestEvent('test');
         final streams = <Stream<_TestEvent>>[];
 
         // Act - Create subscriptions concurrently

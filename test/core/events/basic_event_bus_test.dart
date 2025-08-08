@@ -16,7 +16,7 @@ void main() {
 
     test('should emit and receive events', () async {
       // Arrange
-      final testEvent = _SimpleTestEvent('test message');
+      final testEvent = const _SimpleTestEvent('test message');
       final stream = eventBus.on<_SimpleTestEvent>();
       _SimpleTestEvent? receivedEvent;
 
@@ -36,8 +36,8 @@ void main() {
 
     test('should handle multiple event types', () async {
       // Arrange
-      final testEvent = _SimpleTestEvent('test');
-      final otherEvent = _OtherSimpleEvent(42);
+      final testEvent = const _SimpleTestEvent('test');
+      final otherEvent = const _OtherSimpleEvent(42);
       final testStream = eventBus.on<_SimpleTestEvent>();
       final otherStream = eventBus.on<_OtherSimpleEvent>();
 
@@ -74,13 +74,13 @@ void main() {
 
       // Assert
       expect(eventBus.isDisposed, isTrue);
-      expect(() => eventBus.emit(_SimpleTestEvent('test')), returnsNormally);
+      expect(() => eventBus.emit(const _SimpleTestEvent('test')), returnsNormally);
     });
 
     test('should handle stream filtering', () async {
       // Arrange
-      final event1 = _SimpleTestEvent('include');
-      final event2 = _SimpleTestEvent('exclude');
+      final event1 = const _SimpleTestEvent('include');
+      final event2 = const _SimpleTestEvent('exclude');
       final filteredStream = eventBus
           .on<_SimpleTestEvent>()
           .where((event) => event.message.contains('include'));

@@ -16,7 +16,7 @@ class MockLocationService implements LocationService {
   Location? _mockedLocation;
   bool _serviceEnabled = true;
   bool _hasPermission = true;
-  Duration _responseDelay = Duration(milliseconds: 100);
+  Duration _responseDelay = const Duration(milliseconds: 100);
 
   void setMockedLocation(Location location) {
     _mockedLocation = location;
@@ -38,19 +38,19 @@ class MockLocationService implements LocationService {
   Future<Location> getCurrentLocation() async {
     await Future.delayed(_responseDelay);
     if (!_serviceEnabled) {
-      throw LocationException(
+      throw const LocationException(
         'Location services are disabled',
         LocationExceptionType.serviceDisabled,
       );
     }
     if (!_hasPermission) {
-      throw LocationException(
+      throw const LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
       );
     }
     if (_mockedLocation == null) {
-      throw LocationException(
+      throw const LocationException(
         'Location unavailable',
         LocationExceptionType.locationUnavailable,
       );
@@ -119,7 +119,7 @@ void main() {
           timestamp: DateTime.now(),
         );
         mockLocationService.setMockedLocation(testLocation);
-        mockLocationService.setResponseDelay(Duration(milliseconds: 500));
+        mockLocationService.setResponseDelay(const Duration(milliseconds: 500));
 
         // Act - 1回目
         final stopwatch1 = Stopwatch()..start();
@@ -163,11 +163,11 @@ void main() {
         // キャッシュ有効期限を短く設定したサービスを作成
         final shortCacheService = OptimizedLocationService(
           locationService: mockLocationService,
-          cacheExpirationDuration: Duration(milliseconds: 100),
+          cacheExpirationDuration: const Duration(milliseconds: 100),
         );
 
         // 少し待機
-        await Future.delayed(Duration(milliseconds: 150));
+        await Future.delayed(const Duration(milliseconds: 150));
 
         // 新しい位置情報を設定
         mockLocationService.setMockedLocation(newLocation);
@@ -289,7 +289,7 @@ void main() {
           timestamp: DateTime.now(),
         );
         mockLocationService.setMockedLocation(testLocation);
-        mockLocationService.setResponseDelay(Duration(milliseconds: 200));
+        mockLocationService.setResponseDelay(const Duration(milliseconds: 200));
 
         // Act
         final stopwatch = Stopwatch()..start();
@@ -338,13 +338,13 @@ void main() {
           timestamp: DateTime.now(),
         );
         mockLocationService.setMockedLocation(testLocation);
-        mockLocationService.setResponseDelay(Duration(milliseconds: 100));
+        mockLocationService.setResponseDelay(const Duration(milliseconds: 100));
 
         // Act - 複数回取得
         await optimizedLocationService.getCurrentLocation();
 
         // キャッシュをクリアして再度取得
-        await Future.delayed(Duration(milliseconds: 50));
+        await Future.delayed(const Duration(milliseconds: 50));
         await optimizedLocationService.clearCache();
         await optimizedLocationService.getCurrentLocation();
 
@@ -378,7 +378,7 @@ void main() {
         await optimizedLocationService.getCurrentLocation();
 
         // ストリームが値を受信するまで待機
-        await Future.delayed(Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 500));
 
         // Assert
         expect(streamResults.length, greaterThan(0));
@@ -417,7 +417,7 @@ void main() {
         }
 
         // エラーがストリームに伝播するまで待機
-        await Future.delayed(Duration(milliseconds: 200));
+        await Future.delayed(const Duration(milliseconds: 200));
 
         // Assert
         expect(streamErrors.length, greaterThan(0));
@@ -444,7 +444,7 @@ void main() {
         );
 
         mockLocationService.setMockedLocation(location1);
-        mockLocationService.setResponseDelay(Duration(milliseconds: 150));
+        mockLocationService.setResponseDelay(const Duration(milliseconds: 150));
 
         // Act & Assert
         // 1. 初回取得

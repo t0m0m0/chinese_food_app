@@ -212,7 +212,7 @@ class MockHotpepperApiDatasource implements HotpepperApiDatasource {
     await Future.delayed(const Duration(milliseconds: 500));
 
     final mockStores = [
-      HotpepperStoreModel(
+      const HotpepperStoreModel(
         id: 'mock_001',
         name: '町中華 龍華楼',
         address: '東京都新宿区西新宿1-1-1',
@@ -224,7 +224,7 @@ class MockHotpepperApiDatasource implements HotpepperApiDatasource {
         catch_: '昔ながらの町中華！',
         photo: null,
       ),
-      HotpepperStoreModel(
+      const HotpepperStoreModel(
         id: 'mock_002',
         name: '中華料理 福来',
         address: '東京都新宿区西新宿2-2-2',

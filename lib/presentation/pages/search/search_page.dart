@@ -69,7 +69,7 @@ class _SearchPageState extends State<SearchPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('位置情報の権限を確認してください'),
+              const Text('位置情報の権限を確認してください'),
               const SizedBox(height: 8),
               Text('エラー: $errorMessage'),
             ],
@@ -285,7 +285,7 @@ class _SearchPageState extends State<SearchPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.search, size: 64, color: Colors.grey),
+                const Icon(Icons.search, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
                 Text(
                   state.hasSearched ? '検索結果が見つかりません' : '検索ボタンを押して中華料理店を探しましょう',

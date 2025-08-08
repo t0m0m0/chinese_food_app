@@ -31,7 +31,7 @@ void main() {
 
     test('should handle generic Exception and wrap in AppException', () {
       // Arrange
-      final exception = FormatException('Invalid format');
+      final exception = const FormatException('Invalid format');
 
       // Act
       final result = handler.handle(exception);
@@ -115,7 +115,7 @@ void main() {
       test('executeAsync should handle async exceptions', () async {
         // Act
         final result = await handler.executeAsync<String>(() async {
-          await Future.delayed(Duration(milliseconds: 10));
+          await Future.delayed(const Duration(milliseconds: 10));
           throw NetworkException('Async network error', statusCode: 500);
         });
 
@@ -129,7 +129,7 @@ void main() {
           () async {
         // Act
         final result = await handler.executeAsync<int>(() async {
-          await Future.delayed(Duration(milliseconds: 10));
+          await Future.delayed(const Duration(milliseconds: 10));
           return 42;
         });
 
@@ -166,7 +166,7 @@ void main() {
       test('should preserve stack trace in execute', () {
         // Act
         final result = handler.execute<String>(() {
-          throw FormatException('Format error');
+          throw const FormatException('Format error');
         });
 
         // Assert
@@ -179,7 +179,7 @@ void main() {
       test('should preserve stack trace in executeAsync', () async {
         // Act
         final result = await handler.executeAsync<String>(() async {
-          throw TimeoutException('Timeout error', Duration(seconds: 1));
+          throw TimeoutException('Timeout error', const Duration(seconds: 1));
         });
 
         // Assert
@@ -266,7 +266,7 @@ void main() {
 
       test('should handle multiple levels of exception chaining', () {
         // Arrange
-        final rootCause = FormatException('Root cause');
+        final rootCause = const FormatException('Root cause');
         final middleException =
             AppException('Middle exception', cause: rootCause);
         final topException =

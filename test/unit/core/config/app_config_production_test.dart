@@ -31,7 +31,7 @@ void main() {
       });
 
       test('APIKeyAccessException は適切な情報を含む', () {
-        final originalException = FormatException('テストエラー');
+        final originalException = const FormatException('テストエラー');
         final exception = APIKeyAccessException(
           'Google Maps API',
           'アクセスエラーが発生しました',

@@ -73,10 +73,10 @@ void main() {
       test('未最適化サービス vs 最適化サービス: 初回取得時間比較', () async {
         // Arrange
         final slowService = MockSlowLocationService(
-          simulatedDelay: Duration(milliseconds: 3000), // 3秒
+          simulatedDelay: const Duration(milliseconds: 3000), // 3秒
         );
         final fastService = MockFastLocationService(
-          simulatedDelay: Duration(milliseconds: 100), // 100ms
+          simulatedDelay: const Duration(milliseconds: 100), // 100ms
         );
         final optimizedService = OptimizedLocationService(
           locationService: fastService,
@@ -111,7 +111,7 @@ void main() {
       test('キャッシュ効果による応答時間の短縮', () async {
         // Arrange
         final mockService = MockFastLocationService(
-          simulatedDelay: Duration(milliseconds: 500), // 500ms
+          simulatedDelay: const Duration(milliseconds: 500), // 500ms
         );
         final optimizedService = OptimizedLocationService(
           locationService: mockService,
@@ -182,7 +182,7 @@ void main() {
       test('CPU使用率の最適化', () async {
         // Arrange
         final mockService = MockFastLocationService(
-          simulatedDelay: Duration(milliseconds: 100),
+          simulatedDelay: const Duration(milliseconds: 100),
         );
         final optimizedService = OptimizedLocationService(
           locationService: mockService,
@@ -276,7 +276,7 @@ void main() {
       test('大量リクエストでのパフォーマンス維持', () async {
         // Arrange
         final mockService = MockFastLocationService(
-          simulatedDelay: Duration(milliseconds: 50),
+          simulatedDelay: const Duration(milliseconds: 50),
         );
         final optimizedService = OptimizedLocationService(
           locationService: mockService,
@@ -295,7 +295,7 @@ void main() {
           responseTimes.add(stopwatch.elapsedMilliseconds);
 
           // 少し間隔を空ける
-          await Future.delayed(Duration(milliseconds: 10));
+          await Future.delayed(const Duration(milliseconds: 10));
         }
 
         totalStopwatch.stop();
@@ -340,7 +340,7 @@ void main() {
       test('実際のアプリ使用パターンでのパフォーマンス', () async {
         // Arrange
         final mockService = MockFastLocationService(
-          simulatedDelay: Duration(milliseconds: 200),
+          simulatedDelay: const Duration(milliseconds: 200),
         );
         final optimizedService = OptimizedLocationService(
           locationService: mockService,
@@ -358,7 +358,7 @@ void main() {
         stopwatch = Stopwatch()..start();
         for (int i = 0; i < 5; i++) {
           await optimizedService.getCurrentLocation();
-          await Future.delayed(Duration(milliseconds: 100));
+          await Future.delayed(const Duration(milliseconds: 100));
         }
         stopwatch.stop();
         scenarioResults['連続検索'] = stopwatch.elapsedMilliseconds;

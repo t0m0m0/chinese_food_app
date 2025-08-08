@@ -179,8 +179,8 @@ class TestConsumerWidget extends StatelessWidget {
         children: [
           Text(
               'DI Container: ${container.isConfigured ? 'Configured' : 'Not Configured'}'),
-          Text('StoreProvider: Available'),
-          Text('LocationService: Available'),
+          const Text('StoreProvider: Available'),
+          const Text('LocationService: Available'),
         ],
       ),
     );

@@ -31,7 +31,7 @@ void main() {
             ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
             Provider<LocationService>.value(value: mockLocationService),
           ],
-          child: SwipePage(),
+          child: const SwipePage(),
         ),
       );
     }
@@ -236,7 +236,7 @@ void main() {
         if (hasRefreshIndicator) {
           // プルトゥリフレッシュのトリガー（RefreshIndicator自体にフリングを実行）
           await tester.fling(
-              find.byType(RefreshIndicator), Offset(0, 300), 1000);
+              find.byType(RefreshIndicator), const Offset(0, 300), 1000);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
@@ -309,7 +309,7 @@ class FakeStoreRepository implements StoreRepository {
     int start = 1,
   }) async {
     if (_shouldDelayApiResponse) {
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
     }
 
     if (_shouldThrowOnApiSearch) {
@@ -336,7 +336,7 @@ class MockLocationService implements LocationService {
   @override
   Future<Location> getCurrentLocation() async {
     if (_shouldThrowException) {
-      throw LocationException(
+      throw const LocationException(
         'Mock location error',
         LocationExceptionType.locationUnavailable,
       );

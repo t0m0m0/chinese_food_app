@@ -27,7 +27,7 @@ void main() {
       final result = await retryHandler.executeWithRetry(
         operation,
         maxAttempts: 3,
-        retryDelay: Duration(milliseconds: 10),
+        retryDelay: const Duration(milliseconds: 10),
       );
 
       // Assert
@@ -48,7 +48,7 @@ void main() {
       final result = await retryHandler.executeWithRetry(
         operation,
         maxAttempts: 2,
-        retryDelay: Duration(milliseconds: 10),
+        retryDelay: const Duration(milliseconds: 10),
       );
 
       // Assert
@@ -69,7 +69,7 @@ void main() {
       final result = await retryHandler.executeWithRetry(
         operation,
         maxAttempts: 3,
-        retryDelay: Duration(milliseconds: 10),
+        retryDelay: const Duration(milliseconds: 10),
       );
 
       // Assert
@@ -95,7 +95,7 @@ void main() {
       final result = await retryHandler.executeWithRetry(
         operation,
         maxAttempts: 3,
-        retryDelay: Duration(milliseconds: 100),
+        retryDelay: const Duration(milliseconds: 100),
         useExponentialBackoff: true,
       );
 
@@ -120,7 +120,7 @@ void main() {
       final result = await retryHandler.executeWithRetry(
         operation,
         maxAttempts: 0,
-        retryDelay: Duration(milliseconds: 10),
+        retryDelay: const Duration(milliseconds: 10),
       );
 
       // Assert
@@ -140,7 +140,7 @@ void main() {
       final result = await retryHandler.executeWithRetry(
         operation,
         maxAttempts: -1,
-        retryDelay: Duration(milliseconds: 10),
+        retryDelay: const Duration(milliseconds: 10),
       );
 
       // Assert
@@ -163,7 +163,7 @@ void main() {
       final result = await retryHandler.executeWithRetry(
         operation,
         maxAttempts: 2,
-        retryDelay: Duration(milliseconds: 100),
+        retryDelay: const Duration(milliseconds: 100),
         useExponentialBackoff: true,
       );
 
@@ -190,7 +190,7 @@ void main() {
         futures.add(retryHandler.executeWithRetry(
           operation,
           maxAttempts: 3,
-          retryDelay: Duration(milliseconds: 10),
+          retryDelay: const Duration(milliseconds: 10),
         ));
       }
 

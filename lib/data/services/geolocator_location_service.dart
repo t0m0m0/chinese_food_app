@@ -31,7 +31,7 @@ class GeolocatorLocationService implements LocationService {
       if (!serviceEnabled) {
         developer.log('Location service disabled, throwing exception',
             name: 'LocationService');
-        throw LocationException(
+        throw const LocationException(
           'Location services are disabled',
           LocationExceptionType.serviceDisabled,
         );
@@ -42,7 +42,7 @@ class GeolocatorLocationService implements LocationService {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          throw LocationException(
+          throw const LocationException(
             'Location permission denied',
             LocationExceptionType.permissionDenied,
           );
@@ -50,7 +50,7 @@ class GeolocatorLocationService implements LocationService {
       }
 
       if (permission == LocationPermission.deniedForever) {
-        throw LocationException(
+        throw const LocationException(
           'Location permission denied forever',
           LocationExceptionType.permissionDeniedForever,
         );
@@ -75,35 +75,35 @@ class GeolocatorLocationService implements LocationService {
     } on TimeoutException {
       developer.log('Location request timed out after ${timeoutSeconds}s',
           name: 'LocationService');
-      throw LocationException(
+      throw const LocationException(
         'Location request timed out',
         LocationExceptionType.timeout,
       );
     } on LocationServiceDisabledException {
       developer.log('Location service disabled exception',
           name: 'LocationService');
-      throw LocationException(
+      throw const LocationException(
         'Location services are disabled',
         LocationExceptionType.serviceDisabled,
       );
     } on PermissionDeniedException {
       developer.log('Location permission denied exception',
           name: 'LocationService');
-      throw LocationException(
+      throw const LocationException(
         'Location permission denied',
         LocationExceptionType.permissionDenied,
       );
     } on PermissionRequestInProgressException {
       developer.log('Permission request already in progress',
           name: 'LocationService');
-      throw LocationException(
+      throw const LocationException(
         'Location permission request is already in progress',
         LocationExceptionType.permissionDenied,
       );
     } on PermissionDefinitionsNotFoundException {
       developer.log('Location permission definitions not found',
           name: 'LocationService');
-      throw LocationException(
+      throw const LocationException(
         'Location permission settings are not configured properly',
         LocationExceptionType.permissionDenied,
       );
