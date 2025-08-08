@@ -33,7 +33,8 @@ linter:
     # Common rules that often require ignore directives
     prefer_const_constructors: true
     prefer_const_literals_to_create_immutables: true
-    lines_longer_than_80_chars: true
+    # lines_longer_than_80_chars disabled - 80文字は現代的な開発環境では厳しすぎる
+    # 代わりにエディタでの警告表示（120文字程度）を推奨
     prefer_single_quotes: true
     avoid_print: true
     file_names: true

@@ -50,7 +50,8 @@ Future<void> main() async {
         if (hasCriticalErrors) {
           debugPrint('Critical設定エラーが検出されました。アプリを安全に起動できません。');
           throw Exception(
-              'Critical configuration errors detected. Application cannot start safely.');
+              'Critical configuration errors detected. '
+              'Application cannot start safely.');
         } else {
           debugPrint('Non-critical設定エラーのため、アプリは制限付きモードで起動します。');
         }
