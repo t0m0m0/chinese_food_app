@@ -61,7 +61,7 @@ void main() {
           ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
           Provider<LocationService>.value(value: mockLocationService),
         ],
-        child: SearchPage(),
+        child: const SearchPage(),
       ),
     );
   }

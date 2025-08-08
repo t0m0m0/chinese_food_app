@@ -85,7 +85,7 @@ void main() {
       test('should support custom parameter types', () {
         // Arrange
         final useCase = _ParameterizedUseCase();
-        final params = _TestParams('test', 42);
+        final params = const _TestParams('test', 42);
 
         // Act & Assert
         expect(() => useCase.call(params), returnsNormally);
@@ -274,7 +274,7 @@ class _ExceptionThrowingUseCase extends BaseUseCase<String, String> {
       if (params == 'trigger-error') {
         throw Exception('Test exception');
       }
-      return Success('Success');
+      return const Success('Success');
     } catch (e) {
       return Failure(BaseException('Test exception: ${e.toString()}'));
     }

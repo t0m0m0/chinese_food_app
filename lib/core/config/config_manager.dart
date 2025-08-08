@@ -133,7 +133,8 @@ class ConfigManager {
   static void _ensureInitialized() {
     if (!_isInitialized) {
       throw StateError(
-        'ConfigManager が初期化されていません。main() で ConfigManager.initialize() を呼び出してください。',
+        'ConfigManager が初期化されていません。main() で '
+        'ConfigManager.initialize() を呼び出してください。',
       );
     }
   }

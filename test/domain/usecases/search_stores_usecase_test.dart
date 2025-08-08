@@ -42,7 +42,7 @@ void main() {
     test('should return success result when stores are found by location',
         () async {
       // Red: This test should fail - we need to implement the functionality
-      final params = SearchStoresParams(
+      final params = const SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
         range: 3,
@@ -69,7 +69,7 @@ void main() {
 
     test('should return success result when stores are found by address',
         () async {
-      final params = SearchStoresParams(
+      final params = const SearchStoresParams(
         address: '東京都渋谷区',
         keyword: '中華',
         range: 3,
@@ -95,7 +95,7 @@ void main() {
 
     test('should return success result with empty list when no stores found',
         () async {
-      final params = SearchStoresParams(
+      final params = const SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
         range: 1,
@@ -122,7 +122,7 @@ void main() {
 
     test('should return failure result when repository throws exception',
         () async {
-      final params = SearchStoresParams(
+      final params = const SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
         range: 3,
@@ -147,7 +147,7 @@ void main() {
     });
 
     test('should call repository with correct parameters', () async {
-      final params = SearchStoresParams(
+      final params = const SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
         address: '東京都渋谷区',
@@ -181,7 +181,7 @@ void main() {
     });
 
     test('should return failure when search criteria is invalid', () async {
-      final params = SearchStoresParams(); // No lat/lng or address
+      final params = const SearchStoresParams(); // No lat/lng or address
 
       final result = await usecase.execute(params);
 
@@ -204,12 +204,12 @@ void main() {
 
   group('SearchStoresParams Tests', () {
     test('should identify location search correctly', () {
-      final paramsWithLocation = SearchStoresParams(
+      final paramsWithLocation = const SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
       );
 
-      final paramsWithoutLocation = SearchStoresParams(
+      final paramsWithoutLocation = const SearchStoresParams(
         address: '東京都渋谷区',
       );
 
@@ -218,15 +218,15 @@ void main() {
     });
 
     test('should identify address search correctly', () {
-      final paramsWithAddress = SearchStoresParams(
+      final paramsWithAddress = const SearchStoresParams(
         address: '東京都渋谷区',
       );
 
-      final paramsWithEmptyAddress = SearchStoresParams(
+      final paramsWithEmptyAddress = const SearchStoresParams(
         address: '',
       );
 
-      final paramsWithoutAddress = SearchStoresParams(
+      final paramsWithoutAddress = const SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
       );
@@ -237,16 +237,16 @@ void main() {
     });
 
     test('should validate search criteria correctly', () {
-      final validLocationParams = SearchStoresParams(
+      final validLocationParams = const SearchStoresParams(
         lat: 35.6762,
         lng: 139.6503,
       );
 
-      final validAddressParams = SearchStoresParams(
+      final validAddressParams = const SearchStoresParams(
         address: '東京都渋谷区',
       );
 
-      final invalidParams = SearchStoresParams();
+      final invalidParams = const SearchStoresParams();
 
       expect(validLocationParams.hasValidSearchCriteria, true);
       expect(validAddressParams.hasValidSearchCriteria, true);
@@ -254,7 +254,7 @@ void main() {
     });
 
     test('should have correct default values', () {
-      final params = SearchStoresParams();
+      final params = const SearchStoresParams();
 
       expect(params.range, 3);
       expect(params.count, 20);
@@ -267,9 +267,11 @@ void main() {
 
     test('should validate latitude range', () {
       // Valid latitude
-      expect(() => SearchStoresParams(lat: -90.0, lng: 0.0), returnsNormally);
-      expect(() => SearchStoresParams(lat: 90.0, lng: 0.0), returnsNormally);
-      expect(() => SearchStoresParams(lat: 35.6762, lng: 139.6503),
+      expect(() => const SearchStoresParams(lat: -90.0, lng: 0.0),
+          returnsNormally);
+      expect(
+          () => const SearchStoresParams(lat: 90.0, lng: 0.0), returnsNormally);
+      expect(() => const SearchStoresParams(lat: 35.6762, lng: 139.6503),
           returnsNormally);
 
       // Invalid latitude
@@ -281,9 +283,11 @@ void main() {
 
     test('should validate longitude range', () {
       // Valid longitude
-      expect(() => SearchStoresParams(lat: 0.0, lng: -180.0), returnsNormally);
-      expect(() => SearchStoresParams(lat: 0.0, lng: 180.0), returnsNormally);
-      expect(() => SearchStoresParams(lat: 35.6762, lng: 139.6503),
+      expect(() => const SearchStoresParams(lat: 0.0, lng: -180.0),
+          returnsNormally);
+      expect(() => const SearchStoresParams(lat: 0.0, lng: 180.0),
+          returnsNormally);
+      expect(() => const SearchStoresParams(lat: 35.6762, lng: 139.6503),
           returnsNormally);
 
       // Invalid longitude
@@ -295,10 +299,10 @@ void main() {
 
     test('should validate range parameter', () {
       // Valid range
-      expect(
-          () => SearchStoresParams(range: 1, address: 'test'), returnsNormally);
-      expect(
-          () => SearchStoresParams(range: 5, address: 'test'), returnsNormally);
+      expect(() => const SearchStoresParams(range: 1, address: 'test'),
+          returnsNormally);
+      expect(() => const SearchStoresParams(range: 5, address: 'test'),
+          returnsNormally);
 
       // Invalid range
       expect(() => SearchStoresParams(range: 0, address: 'test'),
@@ -309,9 +313,9 @@ void main() {
 
     test('should validate count parameter', () {
       // Valid count
-      expect(
-          () => SearchStoresParams(count: 1, address: 'test'), returnsNormally);
-      expect(() => SearchStoresParams(count: 100, address: 'test'),
+      expect(() => const SearchStoresParams(count: 1, address: 'test'),
+          returnsNormally);
+      expect(() => const SearchStoresParams(count: 100, address: 'test'),
           returnsNormally);
 
       // Invalid count
@@ -323,9 +327,9 @@ void main() {
 
     test('should validate start parameter', () {
       // Valid start
-      expect(
-          () => SearchStoresParams(start: 1, address: 'test'), returnsNormally);
-      expect(() => SearchStoresParams(start: 100, address: 'test'),
+      expect(() => const SearchStoresParams(start: 1, address: 'test'),
+          returnsNormally);
+      expect(() => const SearchStoresParams(start: 100, address: 'test'),
           returnsNormally);
 
       // Invalid start

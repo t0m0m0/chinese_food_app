@@ -60,14 +60,19 @@ void main() {
 
     test('should validate animation duration values correctly', () {
       expect(
-          UiConfig.isValidAnimationDuration(Duration(milliseconds: 50)), true);
-      expect(UiConfig.isValidAnimationDuration(Duration(milliseconds: 2500)),
-          true);
-      expect(UiConfig.isValidAnimationDuration(Duration(milliseconds: 5000)),
+          UiConfig.isValidAnimationDuration(const Duration(milliseconds: 50)),
           true);
       expect(
-          UiConfig.isValidAnimationDuration(Duration(milliseconds: 49)), false);
-      expect(UiConfig.isValidAnimationDuration(Duration(milliseconds: 5001)),
+          UiConfig.isValidAnimationDuration(const Duration(milliseconds: 2500)),
+          true);
+      expect(
+          UiConfig.isValidAnimationDuration(const Duration(milliseconds: 5000)),
+          true);
+      expect(
+          UiConfig.isValidAnimationDuration(const Duration(milliseconds: 49)),
+          false);
+      expect(
+          UiConfig.isValidAnimationDuration(const Duration(milliseconds: 5001)),
           false);
     });
 
@@ -119,9 +124,11 @@ void main() {
     });
 
     test('should have correct animation durations', () {
-      expect(UiConfig.defaultAnimationDuration, Duration(milliseconds: 300));
-      expect(UiConfig.quickAnimationDuration, Duration(milliseconds: 150));
-      expect(UiConfig.slowAnimationDuration, Duration(milliseconds: 500));
+      expect(
+          UiConfig.defaultAnimationDuration, const Duration(milliseconds: 300));
+      expect(
+          UiConfig.quickAnimationDuration, const Duration(milliseconds: 150));
+      expect(UiConfig.slowAnimationDuration, const Duration(milliseconds: 500));
     });
 
     test('should have correct size values', () {

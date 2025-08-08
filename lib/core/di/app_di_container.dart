@@ -210,7 +210,7 @@ class AppDIContainer implements DIContainerInterface {
 
     // Register LocationService
     _serviceContainer.register<LocationService>(
-      () => GeolocatorLocationService(),
+      () => const GeolocatorLocationService(),
     );
   }
 

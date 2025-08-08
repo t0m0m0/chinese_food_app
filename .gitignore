@@ -90,3 +90,7 @@ macos/Podfile
 ios/Flutter/Profile.xcconfigapp_db.sqlite
 app_db.sqlite
 .serena/
+
+# Node.js関連（Flutter/Dartプロジェクトでは不要）
+package-lock.json
+node_modules/

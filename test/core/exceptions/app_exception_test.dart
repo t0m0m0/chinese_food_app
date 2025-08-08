@@ -52,17 +52,18 @@ void main() {
       // Assert
       expect(
           exception.timestamp
-              .isAfter(beforeCreation.subtract(Duration(seconds: 1))),
+              .isAfter(beforeCreation.subtract(const Duration(seconds: 1))),
           isTrue);
       expect(
-          exception.timestamp.isBefore(afterCreation.add(Duration(seconds: 1))),
+          exception.timestamp
+              .isBefore(afterCreation.add(const Duration(seconds: 1))),
           isTrue);
     });
 
     test('should support exception chaining with cause', () {
       // Arrange
       const message = 'Wrapper exception';
-      final causeException = FormatException('Original cause');
+      final causeException = const FormatException('Original cause');
 
       // Act
       final exception = AppException(message, cause: causeException);
@@ -88,7 +89,7 @@ void main() {
     test('should format toString with cause information', () {
       // Arrange
       const message = 'Main exception';
-      final causeException = FormatException('Invalid argument');
+      final causeException = const FormatException('Invalid argument');
 
       // Act
       final exception = AppException(message, cause: causeException);

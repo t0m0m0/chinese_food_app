@@ -32,11 +32,12 @@ class PhotoService {
       return null;
     } on PlatformException catch (e) {
       if (e.code == 'camera_access_denied') {
-        throw PhotoServiceException('カメラへのアクセスが拒否されました');
+        throw const PhotoServiceException('カメラへのアクセスが拒否されました');
       } else if (e.code == 'permission_denied') {
-        throw PhotoServiceException('カメラの権限が許可されていません');
+        throw const PhotoServiceException('カメラの権限が許可されていません');
       } else if (e.code == 'permission_permanently_denied') {
-        throw PhotoServiceException('カメラの権限が永続的に拒否されています。設定画面から権限を有効にしてください');
+        throw const PhotoServiceException(
+            'カメラの権限が永続的に拒否されています。設定画面から権限を有効にしてください');
       }
       throw PhotoServiceException('カメラでの撮影に失敗しました: ${e.message}');
     } catch (e) {
@@ -58,9 +59,9 @@ class PhotoService {
       return null;
     } on PlatformException catch (e) {
       if (e.code == 'photo_access_denied') {
-        throw PhotoServiceException('フォトライブラリへのアクセスが拒否されました');
+        throw const PhotoServiceException('フォトライブラリへのアクセスが拒否されました');
       } else if (e.code == 'permission_denied') {
-        throw PhotoServiceException('フォトライブラリの権限が許可されていません');
+        throw const PhotoServiceException('フォトライブラリの権限が許可されていません');
       }
       throw PhotoServiceException('ギャラリーからの選択に失敗しました: ${e.message}');
     } catch (e) {
@@ -74,7 +75,7 @@ class PhotoService {
     required bool allowGallery,
   }) async {
     if (!allowCamera && !allowGallery) {
-      throw PhotoServiceException('カメラとギャラリーの両方が無効です');
+      throw const PhotoServiceException('カメラとギャラリーの両方が無効です');
     }
 
     if (allowCamera && !allowGallery) {
@@ -86,7 +87,7 @@ class PhotoService {
     }
 
     // 両方が有効な場合は、呼び出し側でダイアログを表示する必要がある
-    throw PhotoServiceException('写真選択方法を指定してください');
+    throw const PhotoServiceException('写真選択方法を指定してください');
   }
 
   /// 画像ファイルの検証と処理
@@ -97,14 +98,14 @@ class PhotoService {
     final fileSize = await file.length();
     const maxFileSize = 5 * 1024 * 1024; // 5MB
     if (fileSize > maxFileSize) {
-      throw PhotoServiceException('ファイルサイズが大きすぎます（5MB以下にしてください）');
+      throw const PhotoServiceException('ファイルサイズが大きすぎます（5MB以下にしてください）');
     }
 
     // 許可される拡張子チェック
     final allowedExtensions = ['.jpg', '.jpeg', '.png'];
     final fileName = image.path.toLowerCase();
     if (!allowedExtensions.any((ext) => fileName.endsWith(ext))) {
-      throw PhotoServiceException('サポートされていないファイル形式です（JPEG, PNG のみ対応）');
+      throw const PhotoServiceException('サポートされていないファイル形式です（JPEG, PNG のみ対応）');
     }
 
     return file;

@@ -8,7 +8,7 @@ void main() {
       const testImagePath = 'test_assets/test_image.jpg';
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: PhotoDisplayWidget(
               imagePath: testImagePath,
@@ -75,7 +75,7 @@ void main() {
 
     testWidgets('ローディング状態が表示される', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: PhotoDisplayWidget(
               imagePath: null,
@@ -92,7 +92,7 @@ void main() {
       const errorMessage = 'Failed to load image';
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: PhotoDisplayWidget(
               imagePath: null,
@@ -108,7 +108,7 @@ void main() {
 
     testWidgets('写真がない場合はプレースホルダーが表示される', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: PhotoDisplayWidget(
               imagePath: null,

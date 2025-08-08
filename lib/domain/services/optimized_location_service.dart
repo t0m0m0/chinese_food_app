@@ -214,7 +214,7 @@ class OptimizedLocationService implements LocationService {
       if (e is LocationException) {
         rethrow;
       } else if (e is TimeoutException) {
-        throw LocationException(
+        throw const LocationException(
           'Location request timed out',
           LocationExceptionType.timeout,
         );

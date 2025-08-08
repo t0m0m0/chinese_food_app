@@ -107,7 +107,7 @@ void main() {
               ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
               Provider<LocationService>.value(value: mockLocationService),
             ],
-            child: MaterialApp(
+            child: const MaterialApp(
               home: SwipePage(),
             ),
           );
@@ -198,7 +198,7 @@ void main() {
         ),
       ]);
 
-      mockLocationService.setLocationDelay(Duration(seconds: 1));
+      mockLocationService.setLocationDelay(const Duration(seconds: 1));
 
       await tester.pumpWidget(createTestWidget());
       await tester.pump(); // 1フレーム進める
@@ -209,7 +209,7 @@ void main() {
       // expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
 
       // 位置情報取得完了を待つ
-      await tester.pumpAndSettle(Duration(seconds: 3));
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
       // 現在の状態確認：最低限ページが表示されることを確認
       expect(find.byType(SwipePage), findsOneWidget);

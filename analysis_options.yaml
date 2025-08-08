@@ -30,6 +30,15 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
+    # コード品質向上ルール（ignoreディレクティブ削減済み）
+    prefer_const_constructors: true
+    prefer_const_literals_to_create_immutables: true
+    prefer_single_quotes: true
+    avoid_print: true
+    file_names: true
+    
+    # 行長制限は120文字をエディタレベルで管理
+    # lines_longer_than_80_chars: false # 80文字制限は現代開発環境では非現実的
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 

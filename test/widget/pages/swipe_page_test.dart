@@ -47,7 +47,7 @@ void main() {
         providers: [
           ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
         ],
-        child: SwipePage(),
+        child: const SwipePage(),
       ),
     );
   }

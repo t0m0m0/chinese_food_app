@@ -62,7 +62,7 @@ class DIContainer {
 
   /// LocationServiceを作成
   static LocationService createLocationService() {
-    return GeolocatorLocationService();
+    return const GeolocatorLocationService();
   }
 
   // 将来の拡張用メソッド

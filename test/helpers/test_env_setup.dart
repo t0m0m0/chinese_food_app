@@ -15,7 +15,7 @@ class TestEnvSetup {
 
     try {
       // .env.testファイルを読み込み（CI環境では.envも同じ内容）
-      await dotenv.load(fileName: ".env.test");
+      await dotenv.load(fileName: '.env.test');
 
       // 確実にFLUTTER_ENVがtestに設定されていることを保証
       dotenv.env['FLUTTER_ENV'] = 'test';
