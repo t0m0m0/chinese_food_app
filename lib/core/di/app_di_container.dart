@@ -275,10 +275,19 @@ class AppDIContainer implements DIContainerInterface {
       developer.log('テスト環境: インメモリデータベース使用（race condition回避）', name: 'Database');
       return DatabaseConnection(NativeDatabase.memory());
     } else {
-      // 本番・開発環境: 適切なディレクトリにSQLiteファイルを作成
-      return DatabaseConnection(NativeDatabase.createInBackground(
-        _getDatabaseFile(),
-      ));
+      // Issue #111 緊急修正: ファイルアクセス問題を回避するためインメモリDBを使用
+      // 注意: これは一時的な修正で、データは永続化されません
+      developer.log(
+        '緊急修正: ファイルアクセス問題のためインメモリデータベースを使用',
+        name: 'Database',
+        level: 900, // WARNING
+      );
+      return DatabaseConnection(NativeDatabase.memory());
+      
+      // TODO: 適切なファイルパスが動作するまで無効化
+      // return DatabaseConnection(NativeDatabase.createInBackground(
+      //   _getDatabaseFile(),
+      // ));
     }
   }
 
