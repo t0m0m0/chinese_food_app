@@ -2,8 +2,6 @@ import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' show File, Platform, Directory;
-import 'package:path/path.dart' as path;
 import '../config/environment_config.dart' as env_config;
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
@@ -291,75 +289,10 @@ class AppDIContainer implements DIContainerInterface {
     }
   }
 
-  /// Get database file with proper path for each platform
-  File _getDatabaseFile() {
-    // Issue #111 修正: プラットフォームごとに適切なデータベースファイルパスを使用
-    try {
-      String dbPath;
-
-      if (Platform.isIOS || Platform.isAndroid) {
-        // モバイル環境: アプリケーションサポートディレクトリを使用
-        // iOS: ~/Library/Application Support/
-        // Android: /data/data/<package>/files/
-        final appSupportDir = _getApplicationSupportDirectory();
-        dbPath = path.join(appSupportDir.path, 'app_db.sqlite');
-
-        developer.log('iOS/Android データベースパス: $dbPath', name: 'Database');
-      } else if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-        // Desktop環境: 現在のディレクトリに作成
-        dbPath = path.join(Directory.current.path, 'app_db.sqlite');
-
-        developer.log('Desktop データベースパス: $dbPath', name: 'Database');
-      } else {
-        // 未知のプラットフォーム: フォールバック
-        dbPath = 'app_db.sqlite';
-        developer.log(
-          'Unknown platform, using fallback path: $dbPath',
-          name: 'Database',
-          level: 900, // WARNING
-        );
-      }
-
-      final dbFile = File(dbPath);
-
-      // ディレクトリが存在しない場合は作成
-      final parentDir = dbFile.parent;
-      if (!parentDir.existsSync()) {
-        parentDir.createSync(recursive: true);
-        developer.log('Database directory created: ${parentDir.path}',
-            name: 'Database');
-      }
-
-      return dbFile;
-    } catch (e) {
-      developer.log(
-        'Database file path creation failed: $e. Using fallback.',
-        name: 'Database',
-        level: 1000, // ERROR
-      );
-      // 最後の手段: 現在ディレクトリに作成
-      return File('app_db_fallback.sqlite');
-    }
-  }
-
-  /// Get application support directory synchronously
-  ///
-  /// Note: This is a simplified approach for platforms where
-  /// we can determine the path without async operations
-  Directory _getApplicationSupportDirectory() {
-    if (Platform.isIOS) {
-      // iOS: ~/Library/Application Support/ (simplified)
-      final home = Platform.environment['HOME'] ?? '.';
-      return Directory(path.join(home, 'Library', 'Application Support'));
-    } else if (Platform.isAndroid) {
-      // Android: Use app's private files directory
-      // Note: This might need adjustment based on actual Android paths
-      return Directory('/data/data/com.example.chinese_food_app/files');
-    } else {
-      // Desktop fallback
-      return Directory.current;
-    }
-  }
+  // NOTE: _getDatabaseFile and _getApplicationSupportDirectory methods
+  // have been temporarily removed to fix CI warning about unused code.
+  // These methods will be restored in Issue #113 for persistent database implementation.
+  // The code is preserved in git history (commit 54cf1f3) for future reference.
 
   /// Determine current environment based on configuration
   Environment _determineEnvironment() {
