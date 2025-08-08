@@ -267,8 +267,10 @@ void main() {
 
     test('should validate latitude range', () {
       // Valid latitude
-      expect(() => const SearchStoresParams(lat: -90.0, lng: 0.0), returnsNormally);
-      expect(() => const SearchStoresParams(lat: 90.0, lng: 0.0), returnsNormally);
+      expect(() => const SearchStoresParams(lat: -90.0, lng: 0.0),
+          returnsNormally);
+      expect(
+          () => const SearchStoresParams(lat: 90.0, lng: 0.0), returnsNormally);
       expect(() => const SearchStoresParams(lat: 35.6762, lng: 139.6503),
           returnsNormally);
 
@@ -281,8 +283,10 @@ void main() {
 
     test('should validate longitude range', () {
       // Valid longitude
-      expect(() => const SearchStoresParams(lat: 0.0, lng: -180.0), returnsNormally);
-      expect(() => const SearchStoresParams(lat: 0.0, lng: 180.0), returnsNormally);
+      expect(() => const SearchStoresParams(lat: 0.0, lng: -180.0),
+          returnsNormally);
+      expect(() => const SearchStoresParams(lat: 0.0, lng: 180.0),
+          returnsNormally);
       expect(() => const SearchStoresParams(lat: 35.6762, lng: 139.6503),
           returnsNormally);
 
@@ -295,10 +299,10 @@ void main() {
 
     test('should validate range parameter', () {
       // Valid range
-      expect(
-          () => const SearchStoresParams(range: 1, address: 'test'), returnsNormally);
-      expect(
-          () => const SearchStoresParams(range: 5, address: 'test'), returnsNormally);
+      expect(() => const SearchStoresParams(range: 1, address: 'test'),
+          returnsNormally);
+      expect(() => const SearchStoresParams(range: 5, address: 'test'),
+          returnsNormally);
 
       // Invalid range
       expect(() => SearchStoresParams(range: 0, address: 'test'),
@@ -309,8 +313,8 @@ void main() {
 
     test('should validate count parameter', () {
       // Valid count
-      expect(
-          () => const SearchStoresParams(count: 1, address: 'test'), returnsNormally);
+      expect(() => const SearchStoresParams(count: 1, address: 'test'),
+          returnsNormally);
       expect(() => const SearchStoresParams(count: 100, address: 'test'),
           returnsNormally);
 
@@ -323,8 +327,8 @@ void main() {
 
     test('should validate start parameter', () {
       // Valid start
-      expect(
-          () => const SearchStoresParams(start: 1, address: 'test'), returnsNormally);
+      expect(() => const SearchStoresParams(start: 1, address: 'test'),
+          returnsNormally);
       expect(() => const SearchStoresParams(start: 100, address: 'test'),
           returnsNormally);
 

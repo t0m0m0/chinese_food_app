@@ -36,7 +36,8 @@ class PhotoService {
       } else if (e.code == 'permission_denied') {
         throw const PhotoServiceException('カメラの権限が許可されていません');
       } else if (e.code == 'permission_permanently_denied') {
-        throw const PhotoServiceException('カメラの権限が永続的に拒否されています。設定画面から権限を有効にしてください');
+        throw const PhotoServiceException(
+            'カメラの権限が永続的に拒否されています。設定画面から権限を有効にしてください');
       }
       throw PhotoServiceException('カメラでの撮影に失敗しました: ${e.message}');
     } catch (e) {

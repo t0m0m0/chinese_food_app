@@ -242,8 +242,8 @@ void main() {
         eventBus.dispose();
 
         // Act & Assert
-        expect(
-            () => eventBus.emit(const _TestEvent('after dispose')), returnsNormally);
+        expect(() => eventBus.emit(const _TestEvent('after dispose')),
+            returnsNormally);
         expect(() => eventBus.on<_TestEvent>(), returnsNormally);
       });
     });

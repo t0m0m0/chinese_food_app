@@ -192,7 +192,8 @@ void main() {
       });
 
       test('should use custom timeout setting', () async {
-        final customService = const MockableGeolocatorLocationServiceWithTimeout(
+        final customService =
+            const MockableGeolocatorLocationServiceWithTimeout(
           timeoutSeconds: 5,
         );
 
@@ -201,7 +202,8 @@ void main() {
       });
 
       test('should use custom accuracy setting', () async {
-        final customService = const MockableGeolocatorLocationServiceWithTimeout(
+        final customService =
+            const MockableGeolocatorLocationServiceWithTimeout(
           accuracy: LocationAccuracy.low,
         );
 

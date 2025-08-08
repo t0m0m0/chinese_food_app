@@ -18,8 +18,7 @@ class ConfigValidator {
       final _ = dotenv.env;
     } catch (e) {
       if (e is NotInitializedError) {
-        errors.add(
-            'DotEnvが初期化されていません。テスト環境では'
+        errors.add('DotEnvが初期化されていません。テスト環境では'
             'TestEnvSetup.initializeTestEnvironment()を呼び出してください。');
         return errors;
       }
@@ -29,8 +28,7 @@ class ConfigValidator {
 
     // 初期化を確実に行う（同期的処理のみ）
     if (!EnvironmentConfig.isInitialized) {
-      errors.add(
-          'EnvironmentConfigが初期化されていません。main()で'
+      errors.add('EnvironmentConfigが初期化されていません。main()で'
           'EnvironmentConfig.initialize()を呼び出してください。');
       return errors;
     }
@@ -253,14 +251,12 @@ class ConfigValidator {
   /// API設定の検証
   static void _validateApiConfigSettings(List<String> errors) {
     if (!ApiConfig.isValidTimeout(ApiConfig.hotpepperApiTimeout)) {
-      errors.add(
-          'API設定: HotPepper APIタイムアウト値が無効です '
+      errors.add('API設定: HotPepper APIタイムアウト値が無効です '
           '(${ApiConfig.hotpepperApiTimeout}秒)');
     }
 
     if (!ApiConfig.isValidRetryCount(ApiConfig.hotpepperApiRetryCount)) {
-      errors.add(
-          'API設定: HotPepper APIリトライ回数が無効です '
+      errors.add('API設定: HotPepper APIリトライ回数が無効です '
           '(${ApiConfig.hotpepperApiRetryCount}回)');
     }
 

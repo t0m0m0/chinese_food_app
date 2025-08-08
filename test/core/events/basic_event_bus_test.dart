@@ -74,7 +74,8 @@ void main() {
 
       // Assert
       expect(eventBus.isDisposed, isTrue);
-      expect(() => eventBus.emit(const _SimpleTestEvent('test')), returnsNormally);
+      expect(
+          () => eventBus.emit(const _SimpleTestEvent('test')), returnsNormally);
     });
 
     test('should handle stream filtering', () async {

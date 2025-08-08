@@ -55,7 +55,8 @@ void main() {
               .isAfter(beforeCreation.subtract(const Duration(seconds: 1))),
           isTrue);
       expect(
-          exception.timestamp.isBefore(afterCreation.add(const Duration(seconds: 1))),
+          exception.timestamp
+              .isBefore(afterCreation.add(const Duration(seconds: 1))),
           isTrue);
     });
 
