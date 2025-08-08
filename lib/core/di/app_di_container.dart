@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' show File;
 import '../config/environment_config.dart' as env_config;
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
@@ -228,32 +227,72 @@ class AppDIContainer implements DIContainerInterface {
   DatabaseConnection _openDatabaseConnection() {
     // プラットフォーム別のデータベース接続
     if (kIsWeb) {
-      // Web環境: テスト専用のインメモリデータベース
-      // 注意: CI環境ではWeb実行時にSQLite制限があるため、テスト環境のみ対応
-      developer.log('Web環境: テスト専用インメモリデータベース使用', name: 'Database');
-
-      // テスト環境でのみWeb対応、本番環境では未対応
-      if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
-        return DatabaseConnection(NativeDatabase.memory());
-      } else {
-        throw UnsupportedError('Web環境での本番使用は現在未対応です。Native環境を使用してください。');
-      }
+      return _createWebDatabaseConnection();
     } else {
-      // Native環境の分岐処理
-      if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
-        // テスト環境: 各インスタンス用の一意なインメモリデータベース
-        developer.log('テスト環境: インメモリデータベース使用（race condition回避）',
-            name: 'Database');
+      return _createNativeDatabaseConnection();
+    }
+  }
+
+  /// Create Web platform database connection
+  DatabaseConnection _createWebDatabaseConnection() {
+    // Web環境: Drift Web APIまたはインメモリデータベース
+    developer.log('Web環境: データベース接続を作成', name: 'Database');
+
+    // テスト環境でのみインメモリデータベースを使用
+    if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+      developer.log('Web環境: テスト用インメモリデータベース使用', name: 'Database');
+      return DatabaseConnection(NativeDatabase.memory());
+    } else {
+      // Issue #111 修正: Web環境での本番使用をサポート
+      // ただし、データはセッション限りとなることをユーザーに警告
+      developer.log(
+        'Web環境: インメモリデータベース使用（永続化なし）',
+        name: 'Database',
+        level: 900, // WARNING
+      );
+
+      try {
+        // Web環境では永続化されないインメモリデータベースを使用
+        // 将来的には IndexedDB ベースの実装に移行予定
         return DatabaseConnection(NativeDatabase.memory());
-      } else {
-        // 本番・開発環境: SQLiteファイルを使用
-        developer.log('Native環境: SQLiteファイルを使用', name: 'Database');
-        return DatabaseConnection(NativeDatabase.createInBackground(
-          File('app_db.sqlite'),
-        ));
+      } catch (e) {
+        developer.log(
+          'Web環境でのデータベース初期化に失敗: $e',
+          name: 'Database',
+          level: 1000, // ERROR
+        );
+        rethrow;
       }
     }
   }
+
+  /// Create Native platform database connection
+  DatabaseConnection _createNativeDatabaseConnection() {
+    if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+      // テスト環境: インメモリデータベース使用
+      developer.log('テスト環境: インメモリデータベース使用（race condition回避）', name: 'Database');
+      return DatabaseConnection(NativeDatabase.memory());
+    } else {
+      // Issue #111 緊急修正: ファイルアクセス問題を回避するためインメモリDBを使用
+      // 注意: これは一時的な修正で、データは永続化されません
+      developer.log(
+        '緊急修正: ファイルアクセス問題のためインメモリデータベースを使用',
+        name: 'Database',
+        level: 900, // WARNING
+      );
+      return DatabaseConnection(NativeDatabase.memory());
+
+      // TODO: 適切なファイルパスが動作するまで無効化
+      // return DatabaseConnection(NativeDatabase.createInBackground(
+      //   _getDatabaseFile(),
+      // ));
+    }
+  }
+
+  // NOTE: _getDatabaseFile and _getApplicationSupportDirectory methods
+  // have been temporarily removed to fix CI warning about unused code.
+  // These methods will be restored in Issue #113 for persistent database implementation.
+  // The code is preserved in git history (commit 54cf1f3) for future reference.
 
   /// Determine current environment based on configuration
   Environment _determineEnvironment() {
