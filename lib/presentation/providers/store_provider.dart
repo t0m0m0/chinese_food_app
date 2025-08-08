@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../core/utils/error_message_helper.dart';
 import '../../core/utils/duplicate_store_checker.dart';
+import '../../core/utils/database_error_handler.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 
@@ -139,16 +140,22 @@ class StoreProvider extends ChangeNotifier {
       notifyListeners();
       _clearError();
     } catch (e) {
-      // Issue #111 修正: より詳細なエラーハンドリング
+      // Issue #113 Phase 2: 型安全なエラーハンドリングに改善
       String errorMessage;
 
-      if (e.toString().contains('SqliteException(14)') ||
-          e.toString().contains('unable to open database file')) {
-        errorMessage = 'データベースファイルにアクセスできません。アプリを再起動してください。';
-      } else if (e.toString().contains('dart:ffi') ||
-          e.toString().contains('NotInitializedError')) {
-        errorMessage = 'データベースが初期化されていません。しばらくお待ちください。';
+      if (e is Exception) {
+        if (DatabaseErrorHandler.isDatabaseFileAccessError(e)) {
+          errorMessage = 'データベースファイルにアクセスできません。アプリを再起動してください。';
+        } else if (DatabaseErrorHandler.isFFIError(e)) {
+          errorMessage = 'Web環境でのデータベース制限です。機能は制限付きで動作します。';
+        } else if (DatabaseErrorHandler.isInitializationError(e)) {
+          errorMessage = 'データベースが初期化されていません。しばらくお待ちください。';
+        } else {
+          errorMessage =
+              ErrorMessageHelper.getStoreRelatedMessage('update_status');
+        }
       } else {
+        // Exception以外の場合（通常起こらない）
         errorMessage =
             ErrorMessageHelper.getStoreRelatedMessage('update_status');
       }
@@ -156,8 +163,10 @@ class StoreProvider extends ChangeNotifier {
       _setError(errorMessage);
       // ローカル状態はデータベースと整合性を保つため、変更しない
 
-      // デバッグ用の詳細ログ
-      debugPrint('店舗ステータス更新エラー: $e');
+      // デバッグ用の詳細ログ（エラーレベル付き）
+      final severity =
+          e is Exception ? DatabaseErrorHandler.getErrorSeverity(e) : 2;
+      debugPrint('店舗ステータス更新エラー (severity: $severity): $e');
     }
   }
 

@@ -34,6 +34,10 @@ class AppDIContainer implements DIContainerInterface {
   final ServiceContainer _serviceContainer = ServiceContainer();
   bool _isConfigured = false;
 
+  // Issue #113 Phase 1: ログレベル定数の定義
+  static const int logLevelWarning = 900;
+  static const int logLevelError = 1000;
+
   @override
   bool get isConfigured => _isConfigured;
 
@@ -248,7 +252,7 @@ class AppDIContainer implements DIContainerInterface {
       developer.log(
         'Web環境: インメモリデータベース使用（永続化なし）',
         name: 'Database',
-        level: 900, // WARNING
+        level: logLevelWarning,
       );
 
       try {
@@ -259,7 +263,7 @@ class AppDIContainer implements DIContainerInterface {
         developer.log(
           'Web環境でのデータベース初期化に失敗: $e',
           name: 'Database',
-          level: 1000, // ERROR
+          level: logLevelError,
         );
         rethrow;
       }
@@ -278,21 +282,33 @@ class AppDIContainer implements DIContainerInterface {
       developer.log(
         '緊急修正: ファイルアクセス問題のためインメモリデータベースを使用',
         name: 'Database',
-        level: 900, // WARNING
+        level: logLevelWarning,
       );
       return DatabaseConnection(NativeDatabase.memory());
 
-      // TODO: 適切なファイルパスが動作するまで無効化
+      // TODO(Issue #113 Phase 3 by 2025-09-01): 永続化機能の復活
+      // path_providerを使用した適切なファイルパス取得と永続化の実装
       // return DatabaseConnection(NativeDatabase.createInBackground(
-      //   _getDatabaseFile(),
+      //   await _getDatabaseFileWithPathProvider(),
       // ));
     }
   }
 
-  // NOTE: _getDatabaseFile and _getApplicationSupportDirectory methods
-  // have been temporarily removed to fix CI warning about unused code.
-  // These methods will be restored in Issue #113 for persistent database implementation.
-  // The code is preserved in git history (commit 54cf1f3) for future reference.
+  /// NOTE: Persistent Database Implementation Plan
+  ///
+  /// The following methods were temporarily removed to fix CI warnings:
+  /// - `_getDatabaseFile()`: Platform-specific database file path creation
+  /// - `_getApplicationSupportDirectory()`: Application support directory access
+  ///
+  /// **Current Status**: Emergency fix using in-memory database (Issue #111)
+  /// - **Limitation**: Data is lost on app restart
+  /// - **Affected Users**: All platforms (temporary)
+  /// - **Code Preservation**: Available in git history (commit 54cf1f3)
+  ///
+  /// **Recovery Plan** (Issue #113):
+  /// - Phase 3: Implement path_provider for proper file access
+  /// - Target: 2025-09-01
+  /// - Impact: Full data persistence restoration
 
   /// Determine current environment based on configuration
   Environment _determineEnvironment() {
