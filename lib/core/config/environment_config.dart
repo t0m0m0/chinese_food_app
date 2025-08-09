@@ -110,8 +110,10 @@ class EnvironmentConfig {
         print('✅ .envファイルの読み込み完了');
         print('📋 読み込まれた環境変数:');
         print('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
-        print('  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
-        print('  GOOGLE_MAPS_API_KEY: ${dotenv.env['GOOGLE_MAPS_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['GOOGLE_MAPS_API_KEY']?.length}文字)' : '未設定'}');
+        print(
+            '  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
+        print(
+            '  GOOGLE_MAPS_API_KEY: ${dotenv.env['GOOGLE_MAPS_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['GOOGLE_MAPS_API_KEY']?.length}文字)' : '未設定'}');
       }
     } catch (e) {
       print('❌ .envファイルの読み込みエラー: $e');
@@ -137,7 +139,8 @@ class EnvironmentConfig {
     // 初期化チェック
     if (!_initialized) {
       // 初期化されていない場合は環境変数からのみ取得
-      return const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '');
+      return const String.fromEnvironment('HOTPEPPER_API_KEY',
+          defaultValue: '');
     }
 
     try {
@@ -159,7 +162,8 @@ class EnvironmentConfig {
     // 初期化チェック
     if (!_initialized) {
       // 初期化されていない場合は環境変数からのみ取得
-      return const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '');
+      return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
+          defaultValue: '');
     }
 
     try {
@@ -173,7 +177,8 @@ class EnvironmentConfig {
     }
 
     // 環境変数から取得（フォールバック）
-    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '');
+    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
+        defaultValue: '');
   }
 
   /// 実際に使用するHotPepper APIキーを取得

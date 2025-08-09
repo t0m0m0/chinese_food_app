@@ -107,16 +107,19 @@ class _SwipePageState extends State<SwipePage> {
   void _updateAvailableStores() {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
     final allStores = storeProvider.stores;
-    final availableStores = allStores.where((store) => store.status == null).toList();
-    
+    final availableStores =
+        allStores.where((store) => store.status == null).toList();
+
     debugPrint('📋 _updateAvailableStores() 実行:');
     debugPrint('  📊 全店舗数: ${allStores.length}件');
     debugPrint('  🎯 利用可能店舗(status==null): ${availableStores.length}件');
-    
+
     if (allStores.isNotEmpty) {
       debugPrint('  📋 全店舗のステータス分布:');
-      final wantToGo = allStores.where((s) => s.status == StoreStatus.wantToGo).length;
-      final visited = allStores.where((s) => s.status == StoreStatus.visited).length;
+      final wantToGo =
+          allStores.where((s) => s.status == StoreStatus.wantToGo).length;
+      final visited =
+          allStores.where((s) => s.status == StoreStatus.visited).length;
       final bad = allStores.where((s) => s.status == StoreStatus.bad).length;
       final nullStatus = allStores.where((s) => s.status == null).length;
       debugPrint('    - wantToGo: ${wantToGo}件');
@@ -124,11 +127,11 @@ class _SwipePageState extends State<SwipePage> {
       debugPrint('    - bad: ${bad}件');
       debugPrint('    - null(未選択): ${nullStatus}件');
     }
-    
+
     setState(() {
       _availableStores = availableStores;
     });
-    
+
     debugPrint('  ✅ _availableStoresに設定完了: ${_availableStores.length}件');
   }
 
@@ -153,18 +156,20 @@ class _SwipePageState extends State<SwipePage> {
         // 左スワイプ → 「興味なし」
         _updateStoreStatus(store, StoreStatus.bad);
       }
-      
+
       // カード残り枚数チェック - API呼び出しを制限
       final remainingCards = _availableStores.length - (previousIndex + 1);
-      debugPrint('🃏 カード残り枚数: $remainingCards件 (previousIndex: $previousIndex)');
-      
+      debugPrint(
+          '🃏 カード残り枚数: $remainingCards件 (previousIndex: $previousIndex)');
+
       // 残り2枚以下でかつ既に十分な店舗データがある場合は新規API呼び出しを行わない
       if (remainingCards <= 2) {
-        final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+        final storeProvider =
+            Provider.of<StoreProvider>(context, listen: false);
         final totalStores = storeProvider.stores.length;
-        
+
         debugPrint('⚠️ カード残り少数警告: 残り${remainingCards}枚, 総店舗数: ${totalStores}件');
-        
+
         // 総店舗数が20件以上ある場合は追加API呼び出しを抑制
         if (totalStores >= 20) {
           debugPrint('🚫 API呼び出し抑制: 十分な店舗データが存在');

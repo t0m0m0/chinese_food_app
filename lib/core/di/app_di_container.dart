@@ -130,8 +130,10 @@ class AppDIContainer implements DIContainerInterface {
       // Ensure EnvironmentConfig is initialized and check for API key
       final apiKey = env_config.EnvironmentConfig.hotpepperApiKey;
       developer.log('🔑 Development環境でのAPIキー確認:', name: 'DI');
-      developer.log('  APIキー: ${apiKey.isNotEmpty ? "設定済み(${apiKey.length}文字)" : "未設定"}', name: 'DI');
-      
+      developer.log(
+          '  APIキー: ${apiKey.isNotEmpty ? "設定済み(${apiKey.length}文字)" : "未設定"}',
+          name: 'DI');
+
       if (apiKey.isNotEmpty) {
         developer.log(
             'Using real HotPepper API datasource (development) - API key found',
@@ -143,7 +145,8 @@ class AppDIContainer implements DIContainerInterface {
             'API key not available, using mock datasource (development)',
             name: 'DI',
             level: 900); // WARNING level
-        developer.log('⚠️ APIキー未設定のためMockHotpepperApiDatasourceを使用', name: 'DI');
+        developer.log('⚠️ APIキー未設定のためMockHotpepperApiDatasourceを使用',
+            name: 'DI');
         return MockHotpepperApiDatasource();
       }
     } catch (e) {
@@ -151,7 +154,8 @@ class AppDIContainer implements DIContainerInterface {
           'Error checking API key, using mock datasource (development): $e',
           name: 'DI',
           level: 900); // WARNING level
-      developer.log('❌ APIキー確認エラー、MockHotpepperApiDatasourceを使用: $e', name: 'DI');
+      developer.log('❌ APIキー確認エラー、MockHotpepperApiDatasourceを使用: $e',
+          name: 'DI');
       return MockHotpepperApiDatasource();
     }
   }
