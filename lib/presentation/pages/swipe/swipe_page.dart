@@ -524,8 +524,25 @@ class _SwipePageState extends State<SwipePage> {
                                   onSwipe: _onSwipe,
                                   cardBuilder: (context, index,
                                       percentThresholdX, percentThresholdY) {
-                                    return _buildStoreCard(
-                                        _availableStores[index]);
+                                    // IndexOutOfRangeエラーを防ぐための安全チェック
+                                    if (index < 0 || index >= _availableStores.length) {
+                                      debugPrint('⚠️ CardSwiper index out of range: $index, available: ${_availableStores.length}');
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.errorContainer,
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'カードの読み込みエラー',
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: colorScheme.onErrorContainer,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return _buildStoreCard(_availableStores[index]);
                                   },
                                 ),
                               ),
