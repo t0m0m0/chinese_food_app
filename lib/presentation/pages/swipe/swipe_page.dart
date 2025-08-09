@@ -122,10 +122,10 @@ class _SwipePageState extends State<SwipePage> {
           allStores.where((s) => s.status == StoreStatus.visited).length;
       final bad = allStores.where((s) => s.status == StoreStatus.bad).length;
       final nullStatus = allStores.where((s) => s.status == null).length;
-      debugPrint('    - wantToGo: ${wantToGo}件');
-      debugPrint('    - visited: ${visited}件');
-      debugPrint('    - bad: ${bad}件');
-      debugPrint('    - null(未選択): ${nullStatus}件');
+      debugPrint('    - wantToGo: $wantToGo件');
+      debugPrint('    - visited: $visited件');
+      debugPrint('    - bad: $bad件');
+      debugPrint('    - null(未選択): $nullStatus件');
     }
 
     setState(() {
@@ -168,7 +168,7 @@ class _SwipePageState extends State<SwipePage> {
             Provider.of<StoreProvider>(context, listen: false);
         final totalStores = storeProvider.stores.length;
 
-        debugPrint('⚠️ カード残り少数警告: 残り${remainingCards}枚, 総店舗数: ${totalStores}件');
+        debugPrint('⚠️ カード残り少数警告: 残り$remainingCards枚, 総店舗数: $totalStores件');
 
         // 総店舗数が20件以上ある場合は追加API呼び出しを抑制
         if (totalStores >= 20) {

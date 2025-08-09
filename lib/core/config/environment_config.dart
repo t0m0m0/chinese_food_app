@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// アプリケーション環境の定義
@@ -105,18 +106,18 @@ class EnvironmentConfig {
         }
       } else {
         // 本番環境では.envファイルを読み込み
-        print('🔧 .envファイルの読み込みを開始');
+        debugPrint('🔧 .envファイルの読み込みを開始');
         await dotenv.load();
-        print('✅ .envファイルの読み込み完了');
-        print('📋 読み込まれた環境変数:');
-        print('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
-        print(
+        debugPrint('✅ .envファイルの読み込み完了');
+        debugPrint('📋 読み込まれた環境変数:');
+        debugPrint('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
+        debugPrint(
             '  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
-        print(
+        debugPrint(
             '  GOOGLE_MAPS_API_KEY: ${dotenv.env['GOOGLE_MAPS_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['GOOGLE_MAPS_API_KEY']?.length}文字)' : '未設定'}');
       }
     } catch (e) {
-      print('❌ .envファイルの読み込みエラー: $e');
+      debugPrint('❌ .envファイルの読み込みエラー: $e');
       // .envファイルが存在しない場合は無視
       // テスト環境の場合は最低限の設定を行う
       if (_isTestEnvironment() ||
