@@ -139,6 +139,11 @@ class EnvironmentConfig {
   static String get hotpepperApiKey {
     // 初期化チェック
     if (!_initialized) {
+      // テスト環境では環境変数から取得を試行
+      if (_isTestEnvironment()) {
+        return const String.fromEnvironment('HOTPEPPER_API_KEY',
+            defaultValue: 'testdummyhotpepperkey123456789');
+      }
       // 初期化されていない場合は環境変数からのみ取得
       return const String.fromEnvironment('HOTPEPPER_API_KEY',
           defaultValue: '');
@@ -162,6 +167,11 @@ class EnvironmentConfig {
   static String get googleMapsApiKey {
     // 初期化チェック
     if (!_initialized) {
+      // テスト環境では環境変数から取得を試行
+      if (_isTestEnvironment()) {
+        return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
+            defaultValue: 'AIzaSyTestDummyGoogleMapsKey12345678901');
+      }
       // 初期化されていない場合は環境変数からのみ取得
       return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
           defaultValue: '');
