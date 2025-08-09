@@ -200,10 +200,13 @@ class StoreProvider extends ChangeNotifier {
     String? keyword = '中華',
     int count = 10,
   }) async {
+    debugPrint(
+        '🔍 API呼び出し開始: lat=$lat, lng=$lng, keyword=$keyword, count=$count');
     _setLoading(true);
     _clearError();
 
     try {
+      debugPrint('🌐 repository.searchStoresFromApi() 呼び出し中...');
       final apiStores = await repository.searchStoresFromApi(
         lat: lat,
         lng: lng,
@@ -211,6 +214,8 @@ class StoreProvider extends ChangeNotifier {
         keyword: keyword,
         count: count,
       );
+      debugPrint('$apiStores');
+      debugPrint('✅ API応答受信: ${apiStores.length}件の店舗データ');
 
       // Issue #96: 統一化されたDuplicateStoreCheckerを使用
       // 既存店舗と新規店舗を比較して重複を除去
@@ -231,6 +236,8 @@ class StoreProvider extends ChangeNotifier {
         }
       }
 
+      debugPrint('🏪 重複除去後: ${newStores.length}件の新店舗');
+
       // 新しい店舗をローカルデータベースにも保存
       for (final store in newStores) {
         try {
@@ -244,17 +251,22 @@ class StoreProvider extends ChangeNotifier {
       // バッチ追加でパフォーマンス向上
       _stores.addAll(newStores);
 
+      debugPrint('📊 最終結果: 総店舗数=${_stores.length}件, 新規追加=${newStores.length}件');
+
       // 空の結果時のユーザーフレンドリーなメッセージ
       if (apiStores.isEmpty) {
+        debugPrint('⚠️ API応答が空でした');
         _setError('近くに新しい中華料理店が見つかりませんでした。検索範囲を広げてみてください。');
         return;
       }
 
       notifyListeners();
     } catch (e) {
+      debugPrint('❌ API呼び出しエラー: $e');
       _setError('新しい店舗の取得に失敗しました');
     } finally {
       _setLoading(false);
+      debugPrint('🏁 loadNewStoresFromApi() 完了');
     }
   }
 

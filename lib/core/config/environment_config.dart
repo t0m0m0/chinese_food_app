@@ -105,9 +105,16 @@ class EnvironmentConfig {
         }
       } else {
         // 本番環境では.envファイルを読み込み
+        print('🔧 .envファイルの読み込みを開始');
         await dotenv.load();
+        print('✅ .envファイルの読み込み完了');
+        print('📋 読み込まれた環境変数:');
+        print('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
+        print('  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
+        print('  GOOGLE_MAPS_API_KEY: ${dotenv.env['GOOGLE_MAPS_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['GOOGLE_MAPS_API_KEY']?.length}文字)' : '未設定'}');
       }
     } catch (e) {
+      print('❌ .envファイルの読み込みエラー: $e');
       // .envファイルが存在しない場合は無視
       // テスト環境の場合は最低限の設定を行う
       if (_isTestEnvironment() ||
@@ -127,10 +134,20 @@ class EnvironmentConfig {
 
   /// HotPepper API キーを取得（全環境共通）
   static String get hotpepperApiKey {
-    // .envファイルから取得を試行
-    final envKey = dotenv.env['HOTPEPPER_API_KEY'];
-    if (envKey != null && envKey.isNotEmpty) {
-      return envKey;
+    // 初期化チェック
+    if (!_initialized) {
+      // 初期化されていない場合は環境変数からのみ取得
+      return const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '');
+    }
+
+    try {
+      // .envファイルから取得を試行
+      final envKey = dotenv.env['HOTPEPPER_API_KEY'];
+      if (envKey != null && envKey.isNotEmpty) {
+        return envKey;
+      }
+    } catch (e) {
+      // dotenvエラーの場合は環境変数にフォールバック
     }
 
     // 環境変数から取得（フォールバック）
@@ -139,15 +156,24 @@ class EnvironmentConfig {
 
   /// Google Maps API キーを取得（全環境共通）
   static String get googleMapsApiKey {
-    // .envファイルから取得を試行
-    final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-    if (envKey != null && envKey.isNotEmpty) {
-      return envKey;
+    // 初期化チェック
+    if (!_initialized) {
+      // 初期化されていない場合は環境変数からのみ取得
+      return const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '');
+    }
+
+    try {
+      // .envファイルから取得を試行
+      final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
+      if (envKey != null && envKey.isNotEmpty) {
+        return envKey;
+      }
+    } catch (e) {
+      // dotenvエラーの場合は環境変数にフォールバック
     }
 
     // 環境変数から取得（フォールバック）
-    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
-        defaultValue: '');
+    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '');
   }
 
   /// 実際に使用するHotPepper APIキーを取得
