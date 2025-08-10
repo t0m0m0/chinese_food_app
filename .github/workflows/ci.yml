@@ -29,6 +29,16 @@ jobs:
     - name: コード生成（必要に応じて）
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
       
+    - name: CI環境用.envファイル作成（静的解析用）
+      run: |
+        echo "CI環境用の.envファイルを作成（静的解析対応）"
+        cat > .env << EOF
+        FLUTTER_ENV=ci
+        HOTPEPPER_API_KEY=ci_dummy_key_for_analysis_12345
+        GOOGLE_MAPS_API_KEY=ci_dummy_maps_key_for_analysis_12345
+        EOF
+        echo "✅ CI環境用.envファイル作成完了"
+      
     - name: 静的解析を実行
       run: flutter analyze
       
