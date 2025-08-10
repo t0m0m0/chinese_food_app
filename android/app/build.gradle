@@ -77,16 +77,27 @@ android {
                 : signingConfigs.debug
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            
-            // 本番リリース時の署名チェック
-            doFirst {
-                if (signingConfig == signingConfigs.debug) {
-                    logger.warn("⚠️  リリースビルドですがデバッグ証明書を使用しています")
-                    logger.warn("   本番リリースには環境変数でリリース証明書を設定してください:")
-                    logger.warn("   RELEASE_STORE_FILE, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD, RELEASE_KEY_PASSWORD")
-                }
-            }
         }
+    }
+}
+
+// 署名設定チェックタスク
+task checkSigningConfig {
+    doLast {
+        if (System.getenv("RELEASE_STORE_FILE") != null) {
+            println("🔒 リリース証明書が設定されています")
+        } else {
+            println("⚠️  リリース証明書が未設定のため、デバッグ証明書を使用します")
+            println("   本番リリースには環境変数でリリース証明書を設定してください:")
+            println("   RELEASE_STORE_FILE, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD, RELEASE_KEY_PASSWORD")
+        }
+    }
+}
+
+// リリースビルド前に署名チェックを実行
+tasks.whenTaskAdded { task ->
+    if (task.name == "assembleRelease" || task.name == "bundleRelease") {
+        task.dependsOn checkSigningConfig
     }
 }
 
