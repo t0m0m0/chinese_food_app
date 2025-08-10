@@ -29,6 +29,16 @@ jobs:
     - name: コード生成（必要に応じて）
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
       
+    - name: CI環境用.envファイル作成（静的解析用）
+      run: |
+        echo "CI環境用の.envファイルを作成（静的解析対応）"
+        cat > .env << EOF
+        FLUTTER_ENV=ci
+        HOTPEPPER_API_KEY=ci_dummy_key_for_analysis_12345
+        GOOGLE_MAPS_API_KEY=ci_dummy_maps_key_for_analysis_12345
+        EOF
+        echo "✅ CI環境用.envファイル作成完了"
+      
     - name: 静的解析を実行
       run: flutter analyze
       
@@ -43,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     name: テスト実行
     needs: code-quality
+    timeout-minutes: 15
     
     steps:
     - name: リポジトリをチェックアウト
@@ -59,12 +70,14 @@ jobs:
       run: flutter pub get
       
     - name: コード生成（テスト用）
+      timeout-minutes: 8
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
     
     - name: テスト用環境変数を設定
       run: ./.github/scripts/setup-test-env.sh
       
     - name: 単体テストを実行（環境変数デバッグ付き）
+      timeout-minutes: 12
       run: ./.github/scripts/run-tests-with-debug.sh
         
     - name: テストカバレッジをアップロード
@@ -160,6 +173,16 @@ jobs:
         
     - name: 依存関係をインストール
       run: flutter pub get
+      
+    - name: CI環境用.envファイル作成（セキュリティスキャン用）
+      run: |
+        echo "CI環境用の.envファイルを作成（セキュリティスキャン対応）"
+        cat > .env << EOF
+        FLUTTER_ENV=ci
+        HOTPEPPER_API_KEY=ci_dummy_key_for_security_12345
+        GOOGLE_MAPS_API_KEY=ci_dummy_maps_key_for_security_12345
+        EOF
+        echo "✅ CI環境用.envファイル作成完了"
       
     - name: 依存関係の脆弱性をスキャン
       run: flutter pub deps --json | grep -E "(dependencies|dev_dependencies)" || echo "セキュリティスキャン完了"

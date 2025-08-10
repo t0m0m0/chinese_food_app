@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// アプリケーション環境の定義
@@ -88,7 +90,17 @@ class EnvironmentConfig {
   /// 現在の環境が本番環境かどうか
   static bool get isProduction => current == Environment.production;
 
-  /// 初期化（.envファイル読み込み）
+  /// .envファイルがassetsに存在するかチェック
+  static Future<bool> _envFileExists(String fileName) async {
+    try {
+      await rootBundle.loadString(fileName);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 初期化（.envファイル読み込み - 動的チェック対応）
   static Future<void> initialize() async {
     if (_initialized) return;
 
@@ -97,40 +109,109 @@ class EnvironmentConfig {
       if (_isTestEnvironment() ||
           const bool.fromEnvironment('flutter.test', defaultValue: false) ||
           const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
-        // テスト環境では.env.testファイルを確実に読み込み
-        if (dotenv.env.isEmpty || dotenv.env['FLUTTER_ENV'] != 'test') {
+        debugPrint('🧪 テスト環境での初期化を開始');
+
+        // .env.testファイルの存在確認
+        if (await _envFileExists('.env.test')) {
+          debugPrint('🔧 .env.testファイルの読み込みを開始');
           await dotenv.load(fileName: '.env.test');
-          // テスト環境であることを明示的に設定
-          dotenv.env['FLUTTER_ENV'] = 'test';
+          debugPrint('✅ .env.testファイルの読み込み完了');
+        } else {
+          debugPrint('⚠️ .env.testファイルが存在しないため、テスト用設定で初期化');
+          dotenv.testLoad(fileInput: '''
+FLUTTER_ENV=test
+HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
+GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
+''');
         }
+
+        // テスト環境であることを明示的に設定
+        dotenv.env['FLUTTER_ENV'] = 'test';
       } else {
-        // 本番環境では.envファイルを読み込み
-        await dotenv.load();
+        // 開発/本番環境では.envファイルをチェック
+        debugPrint('🔧 .envファイルの存在確認中...');
+
+        if (await _envFileExists('.env')) {
+          debugPrint('✅ .envファイルが見つかりました。読み込み開始');
+          await dotenv.load(fileName: '.env');
+          debugPrint('✅ .envファイルの読み込み完了');
+
+          debugPrint('📋 読み込まれた環境変数:');
+          debugPrint('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
+          debugPrint(
+              '  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
+          debugPrint(
+              '  GOOGLE_MAPS_API_KEY: ${dotenv.env['GOOGLE_MAPS_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['GOOGLE_MAPS_API_KEY']?.length}文字)' : '未設定'}');
+        } else {
+          debugPrint('⚠️ .envファイルが存在しません。環境変数から直接取得します');
+          // 環境変数から直接設定を行う
+          dotenv.testLoad(fileInput: '''
+FLUTTER_ENV=${const String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development')}
+HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
+GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '')}
+''');
+          debugPrint('✅ 環境変数からの設定完了');
+        }
       }
     } catch (e) {
-      // .envファイルが存在しない場合は無視
-      // テスト環境の場合は最低限の設定を行う
+      debugPrint('❌ 初期化エラー: $e');
+
+      // エラー時のフォールバック処理
       if (_isTestEnvironment() ||
           const bool.fromEnvironment('flutter.test', defaultValue: false) ||
           const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
+        // テスト環境用フォールバック
         try {
-          dotenv.testLoad(fileInput: 'FLUTTER_ENV=test');
-        } catch (testLoadError) {
-          // 最後の手段として環境変数のみ設定
+          dotenv.testLoad(fileInput: '''
+FLUTTER_ENV=test
+HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
+GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
+''');
+          debugPrint('🔄 テスト環境フォールバック初期化完了');
+        } catch (fallbackError) {
+          debugPrint('❌ フォールバック初期化も失敗: $fallbackError');
           dotenv.env['FLUTTER_ENV'] = 'test';
+          dotenv.env['HOTPEPPER_API_KEY'] = 'testdummyhotpepperkey123456789';
+          dotenv.env['GOOGLE_MAPS_API_KEY'] =
+              'AIzaSyTestDummyGoogleMapsKey12345678901';
         }
+      } else {
+        // 開発環境用フォールバック
+        debugPrint('🔄 開発環境フォールバックで初期化します');
+        dotenv.testLoad(fileInput: '''
+FLUTTER_ENV=development
+HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
+GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '')}
+''');
       }
     }
 
     _initialized = true;
+    debugPrint('🎯 EnvironmentConfig初期化完了: ${current.name}環境');
   }
 
   /// HotPepper API キーを取得（全環境共通）
   static String get hotpepperApiKey {
-    // .envファイルから取得を試行
-    final envKey = dotenv.env['HOTPEPPER_API_KEY'];
-    if (envKey != null && envKey.isNotEmpty) {
-      return envKey;
+    // 初期化チェック
+    if (!_initialized) {
+      // テスト環境では環境変数から取得を試行
+      if (_isTestEnvironment()) {
+        return const String.fromEnvironment('HOTPEPPER_API_KEY',
+            defaultValue: 'testdummyhotpepperkey123456789');
+      }
+      // 初期化されていない場合は環境変数からのみ取得
+      return const String.fromEnvironment('HOTPEPPER_API_KEY',
+          defaultValue: '');
+    }
+
+    try {
+      // .envファイルから取得を試行
+      final envKey = dotenv.env['HOTPEPPER_API_KEY'];
+      if (envKey != null && envKey.isNotEmpty) {
+        return envKey;
+      }
+    } catch (e) {
+      // dotenvエラーの場合は環境変数にフォールバック
     }
 
     // 環境変数から取得（フォールバック）
@@ -139,10 +220,26 @@ class EnvironmentConfig {
 
   /// Google Maps API キーを取得（全環境共通）
   static String get googleMapsApiKey {
-    // .envファイルから取得を試行
-    final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-    if (envKey != null && envKey.isNotEmpty) {
-      return envKey;
+    // 初期化チェック
+    if (!_initialized) {
+      // テスト環境では環境変数から取得を試行
+      if (_isTestEnvironment()) {
+        return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
+            defaultValue: 'AIzaSyTestDummyGoogleMapsKey12345678901');
+      }
+      // 初期化されていない場合は環境変数からのみ取得
+      return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
+          defaultValue: '');
+    }
+
+    try {
+      // .envファイルから取得を試行
+      final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
+      if (envKey != null && envKey.isNotEmpty) {
+        return envKey;
+      }
+    } catch (e) {
+      // dotenvエラーの場合は環境変数にフォールバック
     }
 
     // 環境変数から取得（フォールバック）

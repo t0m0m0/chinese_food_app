@@ -106,10 +106,33 @@ class _SwipePageState extends State<SwipePage> {
   /// 利用可能な店舗リストを更新（状態が未設定の店舗のみ）
   void _updateAvailableStores() {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+    final allStores = storeProvider.stores;
+    final availableStores =
+        allStores.where((store) => store.status == null).toList();
+
+    debugPrint('📋 _updateAvailableStores() 実行:');
+    debugPrint('  📊 全店舗数: ${allStores.length}件');
+    debugPrint('  🎯 利用可能店舗(status==null): ${availableStores.length}件');
+
+    if (allStores.isNotEmpty) {
+      debugPrint('  📋 全店舗のステータス分布:');
+      final wantToGo =
+          allStores.where((s) => s.status == StoreStatus.wantToGo).length;
+      final visited =
+          allStores.where((s) => s.status == StoreStatus.visited).length;
+      final bad = allStores.where((s) => s.status == StoreStatus.bad).length;
+      final nullStatus = allStores.where((s) => s.status == null).length;
+      debugPrint('    - wantToGo: $wantToGo件');
+      debugPrint('    - visited: $visited件');
+      debugPrint('    - bad: $bad件');
+      debugPrint('    - null(未選択): $nullStatus件');
+    }
+
     setState(() {
-      _availableStores =
-          storeProvider.stores.where((store) => store.status == null).toList();
+      _availableStores = availableStores;
     });
+
+    debugPrint('  ✅ _availableStoresに設定完了: ${_availableStores.length}件');
   }
 
   /// プルトゥリフレッシュで新しい店舗データを取得
@@ -132,6 +155,33 @@ class _SwipePageState extends State<SwipePage> {
       } else if (direction == CardSwiperDirection.left) {
         // 左スワイプ → 「興味なし」
         _updateStoreStatus(store, StoreStatus.bad);
+      }
+
+      // カード残り枚数チェック - API呼び出しを制限
+      final remainingCards = _availableStores.length - (previousIndex + 1);
+      debugPrint(
+          '🃏 カード残り枚数: $remainingCards件 (previousIndex: $previousIndex)');
+
+      // 残り2枚以下でかつ既に十分な店舗データがある場合は新規API呼び出しを行わない
+      if (remainingCards <= 2) {
+        final storeProvider =
+            Provider.of<StoreProvider>(context, listen: false);
+        final totalStores = storeProvider.stores.length;
+
+        debugPrint('⚠️ カード残り少数警告: 残り$remainingCards枚, 総店舗数: $totalStores件');
+
+        // 総店舗数が20件以上ある場合は追加API呼び出しを抑制
+        if (totalStores >= 20) {
+          debugPrint('🚫 API呼び出し抑制: 十分な店舗データが存在');
+        } else {
+          debugPrint('📡 新規API呼び出し許可: データが不足している');
+          // Future.microtaskを使用して現在のbuild cycleの後でAPI呼び出し
+          Future.microtask(() {
+            if (mounted) {
+              _loadStoresWithLocation();
+            }
+          });
+        }
       }
     }
     return true;
@@ -474,6 +524,29 @@ class _SwipePageState extends State<SwipePage> {
                                   onSwipe: _onSwipe,
                                   cardBuilder: (context, index,
                                       percentThresholdX, percentThresholdY) {
+                                    // IndexOutOfRangeエラーを防ぐための安全チェック
+                                    if (index < 0 ||
+                                        index >= _availableStores.length) {
+                                      debugPrint(
+                                          '⚠️ CardSwiper index out of range: $index, available: ${_availableStores.length}');
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.errorContainer,
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'カードの読み込みエラー',
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                              color:
+                                                  colorScheme.onErrorContainer,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
                                     return _buildStoreCard(
                                         _availableStores[index]);
                                   },
