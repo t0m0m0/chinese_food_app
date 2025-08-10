@@ -103,7 +103,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - .env  # 開発時に必要に応じて有効化（.envファイルが存在する場合のみ）
+    - .env  # 存在する場合のみ読み込まれる（動的チェック対応）
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
