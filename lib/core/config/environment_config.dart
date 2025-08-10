@@ -109,9 +109,8 @@ class EnvironmentConfig {
       if (_isTestEnvironment() ||
           const bool.fromEnvironment('flutter.test', defaultValue: false) ||
           const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
-        
         debugPrint('🧪 テスト環境での初期化を開始');
-        
+
         // .env.testファイルの存在確認
         if (await _envFileExists('.env.test')) {
           debugPrint('🔧 .env.testファイルの読み込みを開始');
@@ -125,19 +124,18 @@ HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
 GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
 ''');
         }
-        
+
         // テスト環境であることを明示的に設定
         dotenv.env['FLUTTER_ENV'] = 'test';
-        
       } else {
         // 開発/本番環境では.envファイルをチェック
         debugPrint('🔧 .envファイルの存在確認中...');
-        
+
         if (await _envFileExists('.env')) {
           debugPrint('✅ .envファイルが見つかりました。読み込み開始');
           await dotenv.load(fileName: '.env');
           debugPrint('✅ .envファイルの読み込み完了');
-          
+
           debugPrint('📋 読み込まれた環境変数:');
           debugPrint('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
           debugPrint(
@@ -157,7 +155,7 @@ GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaul
       }
     } catch (e) {
       debugPrint('❌ 初期化エラー: $e');
-      
+
       // エラー時のフォールバック処理
       if (_isTestEnvironment() ||
           const bool.fromEnvironment('flutter.test', defaultValue: false) ||
@@ -174,7 +172,8 @@ GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
           debugPrint('❌ フォールバック初期化も失敗: $fallbackError');
           dotenv.env['FLUTTER_ENV'] = 'test';
           dotenv.env['HOTPEPPER_API_KEY'] = 'testdummyhotpepperkey123456789';
-          dotenv.env['GOOGLE_MAPS_API_KEY'] = 'AIzaSyTestDummyGoogleMapsKey12345678901';
+          dotenv.env['GOOGLE_MAPS_API_KEY'] =
+              'AIzaSyTestDummyGoogleMapsKey12345678901';
         }
       } else {
         // 開発環境用フォールバック
