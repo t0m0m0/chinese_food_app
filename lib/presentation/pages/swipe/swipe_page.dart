@@ -308,7 +308,7 @@ class _SwipePageState extends State<SwipePage> {
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -321,21 +321,22 @@ class _SwipePageState extends State<SwipePage> {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // 店舗画像表示（パフォーマンス最適化済み）
                 RepaintBoundary(
                   child: CachedStoreImage(
                     imageUrl: store.imageUrl,
-                    width: 120,
-                    height: 120,
-                    borderRadius: 60, // 円形にするため幅/高さの半分
+                    width: 100,
+                    height: 100,
+                    borderRadius: 50, // 円形にするため幅/高さの半分
                     fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
                   store.name,
-                  style: theme.textTheme.headlineSmall?.copyWith(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
                   ),
@@ -343,7 +344,7 @@ class _SwipePageState extends State<SwipePage> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -366,7 +367,7 @@ class _SwipePageState extends State<SwipePage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

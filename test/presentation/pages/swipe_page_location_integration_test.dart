@@ -118,6 +118,8 @@ void main() {
     testWidgets(
         'should use current location for API search instead of hardcoded coordinates',
         (WidgetTester tester) async {
+      // テストサーフェイスサイズを大きく設定（レイアウトオーバーフロー回避）
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
       // 🔴 このテストは失敗するはずです - SwipePageが位置情報サービスを使用していません
 
       // Mock位置情報（渋谷）
@@ -162,6 +164,8 @@ void main() {
 
     testWidgets('should handle location permission denied gracefully',
         (WidgetTester tester) async {
+      // テストサーフェイスサイズを大きく設定（レイアウトオーバーフロー回避）
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
       // 🔴 このテストは失敗するはずです - 位置情報権限エラーハンドリングが実装されていません
 
       mockLocationService.setLocationError(LocationException(
@@ -185,6 +189,8 @@ void main() {
 
     testWidgets('should show loading state while getting location',
         (WidgetTester tester) async {
+      // テストサーフェイスサイズを大きく設定（レイアウトオーバーフロー回避）
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
       // APIデータを設定してカードが表示されるようにする
       fakeRepository.setApiStores([
         Store(
@@ -221,6 +227,8 @@ void main() {
 
     testWidgets('should refresh location when pull-to-refresh',
         (WidgetTester tester) async {
+      // テストサーフェイスサイズを大きく設定（レイアウトオーバーフロー回避）
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
       // 🔴 このテストは失敗するはずです - プルトゥリフレッシュ時の位置情報更新が実装されていません
 
       final initialLocation = Location(
