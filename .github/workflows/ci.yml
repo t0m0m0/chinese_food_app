@@ -53,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     name: テスト実行
     needs: code-quality
+    timeout-minutes: 15
     
     steps:
     - name: リポジトリをチェックアウト
@@ -69,12 +70,14 @@ jobs:
       run: flutter pub get
       
     - name: コード生成（テスト用）
+      timeout-minutes: 8
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
     
     - name: テスト用環境変数を設定
       run: ./.github/scripts/setup-test-env.sh
       
     - name: 単体テストを実行（環境変数デバッグ付き）
+      timeout-minutes: 12
       run: ./.github/scripts/run-tests-with-debug.sh
         
     - name: テストカバレッジをアップロード
