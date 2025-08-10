@@ -15,6 +15,9 @@ class StoreProvider extends ChangeNotifier {
   /// 全ての店舗データ
   List<Store> _stores = [];
 
+  /// 検索結果専用のリスト（検索画面で使用）
+  List<Store> _searchResults = [];
+
   /// ローディング状態
   bool _isLoading = false;
 
@@ -67,6 +70,9 @@ class StoreProvider extends ChangeNotifier {
   List<Store> get newStores {
     return _stores.where((store) => store.status == null).toList();
   }
+
+  /// 検索結果専用のリスト（検索画面で使用）
+  List<Store> get searchResults => List.unmodifiable(_searchResults);
 
   /// リポジトリから全ての店舗データを取得
   ///
@@ -262,7 +268,11 @@ class StoreProvider extends ChangeNotifier {
       // バッチ追加でパフォーマンス向上
       _stores.addAll(newStores);
 
-      debugPrint('📊 最終結果: 総店舗数=${_stores.length}件, 新規追加=${newStores.length}件');
+      // 検索結果を専用リストに保存（検索画面で使用）
+      _searchResults = List.from(newStores);
+
+      debugPrint(
+          '📊 最終結果: 総店舗数=${_stores.length}件, 新規追加=${newStores.length}件, 検索結果=${_searchResults.length}件');
 
       // 空の結果時のユーザーフレンドリーなメッセージ
       if (apiStores.isEmpty) {

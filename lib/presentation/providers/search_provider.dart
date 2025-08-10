@@ -69,7 +69,7 @@ class SearchProvider extends ChangeNotifier {
           address: address,
           keyword: '中華',
         );
-        _searchResults = List<Store>.from(storeProvider.newStores);
+        _searchResults = List<Store>.from(storeProvider.searchResults);
       }
 
       _isLoading = false;
@@ -103,7 +103,7 @@ class SearchProvider extends ChangeNotifier {
         lng: location.longitude,
         keyword: '中華',
       );
-      _searchResults = List<Store>.from(storeProvider.newStores);
+      _searchResults = List<Store>.from(storeProvider.searchResults);
 
       _isLoading = false;
       notifyListeners();
