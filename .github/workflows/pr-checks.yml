@@ -29,6 +29,9 @@ jobs:
     - name: コード生成（必要に応じて）
       run: flutter packages pub run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
 
+    - name: テスト用環境変数を設定
+      run: ./.github/scripts/setup-test-env.sh
+
     - name: 変更されたファイルを取得（削除ファイルを除外）
       id: changed-files
       run: |
