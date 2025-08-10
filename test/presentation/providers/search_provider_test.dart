@@ -13,6 +13,7 @@ class MockStoreProvider extends Mock implements StoreProvider {
     double? lng,
     String? address,
     String? keyword = '中華',
+    int range = 3,
     int count = 10,
   }) =>
       super.noSuchMethod(
@@ -21,6 +22,7 @@ class MockStoreProvider extends Mock implements StoreProvider {
           #lng: lng,
           #address: address,
           #keyword: keyword,
+          #range: range,
           #count: count,
         }),
         returnValue: Future<void>.value(),

@@ -3,11 +3,14 @@ import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/error_message_helper.dart';
+import '../../../core/config/distance_config_manager.dart';
+import '../../../core/config/search_config.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/entities/location.dart';
 import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
 import '../../widgets/cached_store_image.dart';
+import '../../widgets/distance_selector_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
 class SwipePage extends StatefulWidget {
@@ -22,13 +25,49 @@ class _SwipePageState extends State<SwipePage> {
   List<Store> _availableStores = [];
   bool _isGettingLocation = false;
   String? _locationError;
+  int _selectedRange = SearchConfig.defaultRange;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSavedDistance();
       _loadStoresFromProvider();
     });
+  }
+
+  /// 保存された距離設定を読み込む
+  Future<void> _loadSavedDistance() async {
+    final savedRange = await DistanceConfigManager.getDistance();
+    setState(() {
+      _selectedRange = savedRange;
+    });
+  }
+
+  /// 距離設定を変更し、店舗を再読み込み
+  Future<void> _onDistanceChanged(int newRange) async {
+    if (newRange == _selectedRange) return;
+
+    setState(() {
+      _selectedRange = newRange;
+    });
+
+    // 設定を保存
+    await DistanceConfigManager.saveDistance(newRange);
+
+    // 店舗を再読み込み
+    await _loadStoresWithLocation();
+
+    if (mounted) {
+      final meters = SearchConfig.rangeToMeter(newRange) ?? 1000;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('検索範囲を${meters}mに変更しました'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
@@ -58,6 +97,7 @@ class _SwipePageState extends State<SwipePage> {
       await storeProvider.loadNewStoresFromApi(
         lat: location.latitude,
         lng: location.longitude,
+        range: _selectedRange,
         count: ApiConstants.defaultStoreCount,
       );
     } on LocationException {
@@ -70,6 +110,7 @@ class _SwipePageState extends State<SwipePage> {
       await storeProvider.loadNewStoresFromApi(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
+        range: _selectedRange,
         count: ApiConstants.defaultStoreCount,
       );
 
@@ -91,6 +132,7 @@ class _SwipePageState extends State<SwipePage> {
       await storeProvider.loadNewStoresFromApi(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
+        range: _selectedRange,
         count: ApiConstants.defaultStoreCount,
       );
     } finally {
@@ -266,7 +308,7 @@ class _SwipePageState extends State<SwipePage> {
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -279,21 +321,22 @@ class _SwipePageState extends State<SwipePage> {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // 店舗画像表示（パフォーマンス最適化済み）
                 RepaintBoundary(
                   child: CachedStoreImage(
                     imageUrl: store.imageUrl,
-                    width: 120,
-                    height: 120,
-                    borderRadius: 60, // 円形にするため幅/高さの半分
+                    width: 100,
+                    height: 100,
+                    borderRadius: 50, // 円形にするため幅/高さの半分
                     fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
                   store.name,
-                  style: theme.textTheme.headlineSmall?.copyWith(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
                   ),
@@ -301,7 +344,7 @@ class _SwipePageState extends State<SwipePage> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -324,7 +367,7 @@ class _SwipePageState extends State<SwipePage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -360,6 +403,12 @@ class _SwipePageState extends State<SwipePage> {
       ),
       body: Column(
         children: [
+          // 距離設定UI
+          DistanceSelectorWidget(
+            selectedRange: _selectedRange,
+            onChanged: _onDistanceChanged,
+          ),
+          // スワイプ操作説明
           RepaintBoundary(
             child: Container(
               padding: const EdgeInsets.all(16.0),
@@ -556,7 +605,6 @@ class _SwipePageState extends State<SwipePage> {
                     },
                   ),
           ),
-          const Text('AppCardSwiper'), // テスト用テキスト
         ],
       ),
     );

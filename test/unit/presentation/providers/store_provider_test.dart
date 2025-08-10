@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/core/config/search_config.dart';
 
 void main() {
   late StoreProvider provider;
@@ -190,6 +191,70 @@ void main() {
       expect(stopwatch.elapsedMilliseconds, lessThan(100),
           reason:
               'Normalized key generation should optimize duplicate detection');
+    });
+  });
+
+  group('距離パラメータ対応 - Issue #117', () {
+    test('loadNewStoresFromApi should accept range parameter', () async {
+      // Arrange
+      final apiStores = [
+        Store(
+          id: 'api_store_1',
+          name: 'テスト中華料理店',
+          address: '東京都新宿区',
+          lat: 35.6917,
+          lng: 139.7006,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      mockRepository.stubGetAllStores([]);
+      mockRepository.stubSearchStoresFromApi(apiStores);
+
+      // Act
+      await provider.loadNewStoresFromApi(
+        lat: 35.6917,
+        lng: 139.7006,
+        range: SearchConfig.defaultRange,
+        count: 10,
+      );
+
+      // Assert
+      expect(provider.stores.length, equals(1));
+      expect(provider.stores.first.name, equals('テスト中華料理店'));
+    });
+
+    test('loadNewStoresFromApi should use different range values', () async {
+      // Arrange
+      final apiStores = [
+        Store(
+          id: 'api_store_1',
+          name: '近距離店舗',
+          address: '東京都新宿区',
+          lat: 35.6917,
+          lng: 139.7006,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      mockRepository.stubGetAllStores([]);
+      mockRepository.stubSearchStoresFromApi(apiStores);
+
+      // Act - すべての有効な距離範囲でテスト
+      for (final range in [1, 2, 3, 4, 5]) {
+        await provider.loadNewStoresFromApi(
+          lat: 35.6917,
+          lng: 139.7006,
+          range: range,
+          count: 10,
+        );
+
+        // Assert - 各範囲で正常に実行されることを確認
+        expect(provider.isLoading, isFalse);
+        expect(provider.error, isNull);
+      }
     });
   });
 }

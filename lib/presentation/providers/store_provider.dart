@@ -207,10 +207,11 @@ class StoreProvider extends ChangeNotifier {
     double? lng,
     String? address,
     String? keyword = '中華',
+    int range = 3,
     int count = 10,
   }) async {
     debugPrint(
-        '🔍 API呼び出し開始: lat=$lat, lng=$lng, keyword=$keyword, count=$count');
+        '🔍 API呼び出し開始: lat=$lat, lng=$lng, keyword=$keyword, range=$range, count=$count');
     _setLoading(true);
     _clearError();
 
@@ -221,6 +222,7 @@ class StoreProvider extends ChangeNotifier {
         lng: lng,
         address: address,
         keyword: keyword,
+        range: range,
         count: count,
       );
       debugPrint('$apiStores');

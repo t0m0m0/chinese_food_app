@@ -6,7 +6,9 @@ import 'package:mockito/mockito.dart';
 import 'package:chinese_food_app/presentation/pages/swipe/swipe_page.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/domain/services/location_service.dart';
 
 // Simple mock implementation for testing
 class MockStoreRepository extends Mock implements StoreRepository {
@@ -30,15 +32,40 @@ class MockStoreRepository extends Mock implements StoreRepository {
 
   @override
   Future<List<Store>> searchStores(String query) async => [];
+
+  @override
+  Future<List<Store>> searchStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async =>
+      [];
+}
+
+class MockLocationService extends Mock implements LocationService {
+  @override
+  Future<Location> getCurrentLocation() async {
+    return Location(
+      latitude: 35.6917,
+      longitude: 139.7006,
+      timestamp: DateTime.now(),
+    );
+  }
 }
 
 void main() {
   late MockStoreRepository mockRepository;
   late StoreProvider storeProvider;
+  late MockLocationService mockLocationService;
 
   setUp(() {
     mockRepository = MockStoreRepository();
     storeProvider = StoreProvider(repository: mockRepository);
+    mockLocationService = MockLocationService();
   });
 
   Widget createTestWidget() {
@@ -46,6 +73,7 @@ void main() {
       home: MultiProvider(
         providers: [
           ChangeNotifierProvider<StoreProvider>.value(value: storeProvider),
+          Provider<LocationService>.value(value: mockLocationService),
         ],
         child: const SwipePage(),
       ),
@@ -58,8 +86,10 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // then: flutter_card_swiperが使用されている（実装がないため失敗するはず）
-      expect(find.text('AppCardSwiper'), findsOneWidget);
+      // then: スワイプページのタイトルが表示される
+      expect(find.text('スワイプ'), findsOneWidget);
+      // and: 距離設定UIが表示される
+      expect(find.text('検索範囲'), findsOneWidget);
     });
 
     testWidgets('should handle right swipe to set want_to_go status',
