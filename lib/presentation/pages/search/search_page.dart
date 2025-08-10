@@ -152,7 +152,7 @@ class _SearchPageState extends State<SearchPage> {
                       value: true,
                       groupValue: state.useCurrentLocation,
                       onChanged: (value) {
-                        _searchProvider.setUseCurrentLocation(value ?? true);
+                        _searchProvider.setUseCurrentLocation(true);
                       },
                     ),
                   ),
@@ -162,8 +162,7 @@ class _SearchPageState extends State<SearchPage> {
                       value: false,
                       groupValue: state.useCurrentLocation,
                       onChanged: (value) {
-                        _searchProvider
-                            .setUseCurrentLocation(!(value ?? false));
+                        _searchProvider.setUseCurrentLocation(false);
                       },
                     ),
                   ),

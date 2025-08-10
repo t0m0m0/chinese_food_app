@@ -121,5 +121,74 @@ void main() {
           widget.groupValue == true);
       expect(currentLocationRadio, findsOneWidget);
     });
+
+    testWidgets(
+        'should allow switching to address search mode by tapping radio button',
+        (tester) async {
+      // when: SearchPageを表示
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // then: 初期状態では住所入力フィールドが表示されていない
+      expect(find.byType(TextField), findsNothing);
+
+      // when: 「住所で検索」ラジオボタンをタップ
+      final addressRadio = find.byWidgetPredicate((Widget widget) =>
+          widget is RadioListTile<bool> &&
+          widget.title is Text &&
+          (widget.title as Text).data == '住所で検索');
+      expect(addressRadio, findsOneWidget);
+
+      await tester.tap(addressRadio);
+      await tester.pumpAndSettle();
+
+      // then: 住所入力フィールドが表示される
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('住所を入力'), findsOneWidget);
+
+      // then: 住所検索ラジオボタンが選択状態になる
+      final selectedAddressRadio = find.byWidgetPredicate((Widget widget) =>
+          widget is RadioListTile<bool> &&
+          widget.value == false &&
+          widget.groupValue == false);
+      expect(selectedAddressRadio, findsOneWidget);
+    });
+
+    testWidgets('should allow switching back to current location search mode',
+        (tester) async {
+      // when: SearchPageを表示
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // when: 「住所で検索」ラジオボタンをタップして住所検索モードに切り替え
+      final addressRadio = find.byWidgetPredicate((Widget widget) =>
+          widget is RadioListTile<bool> &&
+          widget.title is Text &&
+          (widget.title as Text).data == '住所で検索');
+      await tester.tap(addressRadio);
+      await tester.pumpAndSettle();
+
+      // then: 住所入力フィールドが表示されている
+      expect(find.byType(TextField), findsOneWidget);
+
+      // when: 「現在地で検索」ラジオボタンをタップして現在地検索モードに戻る
+      final currentLocationRadio = find.byWidgetPredicate((Widget widget) =>
+          widget is RadioListTile<bool> &&
+          widget.title is Text &&
+          (widget.title as Text).data == '現在地で検索');
+      await tester.tap(currentLocationRadio);
+      await tester.pumpAndSettle();
+
+      // then: 住所入力フィールドが隠される
+      expect(find.byType(TextField), findsNothing);
+
+      // then: 現在地検索ラジオボタンが選択状態になる
+      final selectedCurrentLocationRadio = find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RadioListTile<bool> &&
+              widget.value == true &&
+              widget.groupValue == true);
+      expect(selectedCurrentLocationRadio, findsOneWidget);
+    });
   });
 }
