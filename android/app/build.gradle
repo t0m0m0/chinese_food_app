@@ -48,11 +48,44 @@ android {
         resValue "string", "google_maps_api_key", googleMapsApiKey
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // リリース用署名設定
+            // 本番リリース時は以下の環境変数を設定すること:
+            // RELEASE_STORE_FILE, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD, RELEASE_KEY_PASSWORD
+            if (System.getenv("RELEASE_STORE_FILE") != null) {
+                storeFile file(System.getenv("RELEASE_STORE_FILE"))
+                keyAlias System.getenv("RELEASE_KEY_ALIAS")
+                storePassword System.getenv("RELEASE_STORE_PASSWORD")
+                keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            // デバッグビルドはデバッグ証明書を使用
             signingConfig = signingConfigs.debug
+            minifyEnabled false
+            applicationIdSuffix ".debug"
+        }
+        release {
+            // リリースビルド設定
+            // 環境変数が設定されていればリリース証明書を使用、そうでなければデバッグ証明書
+            signingConfig = System.getenv("RELEASE_STORE_FILE") != null
+                ? signingConfigs.release
+                : signingConfigs.debug
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // 本番リリース時の署名チェック
+            doFirst {
+                if (signingConfig == signingConfigs.debug) {
+                    logger.warn("⚠️  リリースビルドですがデバッグ証明書を使用しています")
+                    logger.warn("   本番リリースには環境変数でリリース証明書を設定してください:")
+                    logger.warn("   RELEASE_STORE_FILE, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD, RELEASE_KEY_PASSWORD")
+                }
+            }
         }
     }
 }
