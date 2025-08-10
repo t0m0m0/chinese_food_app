@@ -604,7 +604,6 @@ class _SwipePageState extends State<SwipePage> {
                     },
                   ),
           ),
-          const Text('AppCardSwiper'), // テスト用テキスト
         ],
       ),
     );
