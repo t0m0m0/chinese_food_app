@@ -18,6 +18,9 @@ class StoreProvider extends ChangeNotifier {
   /// 検索結果専用のリスト（検索画面で使用）
   List<Store> _searchResults = [];
 
+  /// スワイプ画面専用のリスト（現在地周辺の店舗のみ）
+  List<Store> _swipeStores = [];
+
   /// ローディング状態
   bool _isLoading = false;
 
@@ -73,6 +76,11 @@ class StoreProvider extends ChangeNotifier {
 
   /// 検索結果専用のリスト（検索画面で使用）
   List<Store> get searchResults => List.unmodifiable(_searchResults);
+
+  /// スワイプ画面専用のリスト（現在地周辺の未設定ステータス店舗のみ）
+  List<Store> get swipeStores {
+    return _swipeStores.where((store) => store.status == null).toList();
+  }
 
   /// リポジトリから全ての店舗データを取得
   ///
@@ -205,6 +213,52 @@ class StoreProvider extends ChangeNotifier {
   void refreshCache() {
     _clearCache();
     notifyListeners();
+  }
+
+  /// スワイプ画面専用: 現在地周辺の店舗データを読み込み
+  Future<void> loadSwipeStores({
+    required double lat,
+    required double lng,
+    int range = 3,
+    int count = 20,
+  }) async {
+    debugPrint(
+        '🎴 スワイプ用店舗読み込み開始: lat=$lat, lng=$lng, range=$range, count=$count');
+    _setLoading(true);
+    _clearError();
+
+    try {
+      debugPrint('🌐 スワイプ用API呼び出し中...');
+      final apiStores = await repository.searchStoresFromApi(
+        lat: lat,
+        lng: lng,
+        keyword: '中華',
+        range: range,
+        count: count,
+      );
+      debugPrint('✅ スワイプ用API応答受信: ${apiStores.length}件の店舗データ');
+
+      // スワイプ画面用リストを直接上書き（検索結果とは独立）
+      _swipeStores =
+          apiStores.map((store) => store.copyWith(resetStatus: true)).toList();
+
+      debugPrint('🎴 スワイプ用店舗リスト更新完了: ${_swipeStores.length}件');
+
+      // 空の結果時のメッセージ
+      if (apiStores.isEmpty) {
+        debugPrint('⚠️ スワイプ用API応答が空でした');
+        _setError('現在地周辺に中華料理店が見つかりませんでした。範囲を広げてみてください。');
+        return;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ スワイプ用API呼び出しエラー: $e');
+      _setError('現在地周辺の店舗取得に失敗しました');
+    } finally {
+      _setLoading(false);
+      debugPrint('🏁 loadSwipeStores() 完了');
+    }
   }
 
   /// HotPepper APIから新しい店舗データを検索して追加
