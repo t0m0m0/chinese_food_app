@@ -171,6 +171,16 @@ jobs:
     - name: 依存関係をインストール
       run: flutter pub get
       
+    - name: CI環境用.envファイル作成（セキュリティスキャン用）
+      run: |
+        echo "CI環境用の.envファイルを作成（セキュリティスキャン対応）"
+        cat > .env << EOF
+        FLUTTER_ENV=ci
+        HOTPEPPER_API_KEY=ci_dummy_key_for_security_12345
+        GOOGLE_MAPS_API_KEY=ci_dummy_maps_key_for_security_12345
+        EOF
+        echo "✅ CI環境用.envファイル作成完了"
+      
     - name: 依存関係の脆弱性をスキャン
       run: flutter pub deps --json | grep -E "(dependencies|dev_dependencies)" || echo "セキュリティスキャン完了"
       
