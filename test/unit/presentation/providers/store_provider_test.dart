@@ -333,7 +333,7 @@ class MockLocationService implements LocationService {
   @override
   Future<Location> getCurrentLocation() async {
     if (_shouldThrowError) {
-      throw LocationException(
+      throw const LocationException(
           'テスト用エラー', LocationExceptionType.locationUnavailable);
     }
     return _stubCurrentLocation ??
