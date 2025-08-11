@@ -152,4 +152,66 @@ class ErrorMessageHelper {
         return '店舗関連の処理に失敗しました。再試行してください。';
     }
   }
+
+  /// 訪問記録に関するエラーメッセージを取得
+  ///
+  /// [errorType] エラータイプを表す文字列
+  /// 戻り値: エラータイプに応じた日本語のメッセージ
+  static String getVisitRecordErrorMessage(String errorType) {
+    switch (errorType.toLowerCase()) {
+      case 'menu_empty':
+        return 'メニューを入力してください。';
+      case 'menu_length_exceeded':
+        return 'メニューは100文字以内で入力してください。';
+      case 'memo_length_exceeded':
+        return 'メモは500文字以内で入力してください。';
+      case 'future_date':
+        return '訪問日時は未来の日付にできません。';
+      case 'store_not_found':
+        return '対象の店舗が見つかりません。';
+      case 'duplicate_record':
+        return 'この訪問記録は既に存在します。';
+      default:
+        return 'データの保存に失敗しました。しばらくしてから再試行してください。';
+    }
+  }
+
+  /// 例外から訪問記録に関するエラーメッセージを取得
+  ///
+  /// [exception] 発生した例外オブジェクト
+  /// 戻り値: 例外の内容に応じた日本語のメッセージ
+  static String getVisitRecordErrorFromException(dynamic exception) {
+    if (exception == null) {
+      return getVisitRecordErrorMessage('default');
+    }
+
+    final errorString = exception.toString().toLowerCase();
+
+    // ArgumentErrorのパターンマッチング
+    if (exception is ArgumentError) {
+      final message = exception.message.toString().toLowerCase();
+      
+      if (message.contains('menu cannot be empty')) {
+        return getVisitRecordErrorMessage('menu_empty');
+      } else if (message.contains('menu must be 100 characters or less')) {
+        return getVisitRecordErrorMessage('menu_length_exceeded');
+      } else if (message.contains('memo must be 500 characters or less')) {
+        return getVisitRecordErrorMessage('memo_length_exceeded');
+      } else if (message.contains('visited date cannot be in the future')) {
+        return getVisitRecordErrorMessage('future_date');
+      }
+    }
+
+    // データベース関連エラー
+    if (errorString.contains('foreign key constraint failed')) {
+      return getVisitRecordErrorMessage('store_not_found');
+    }
+
+    if (errorString.contains('unique constraint failed')) {
+      return getVisitRecordErrorMessage('duplicate_record');
+    }
+
+    // その他のエラー
+    return getVisitRecordErrorMessage('default');
+  }
 }
