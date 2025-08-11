@@ -170,8 +170,9 @@ void main() {
       expect(storeProvider.visitedStores, hasLength(1));
       expect(storeProvider.badStores, isEmpty);
       expect(storeProvider.isLoading, false);
-      // APIが空の結果を返すのでエラーメッセージが設定される
-      expect(storeProvider.error, isNotNull);
+      // APIが空の結果を返すので情報メッセージが設定される（エラーではない）
+      expect(storeProvider.error, isNull);
+      expect(storeProvider.infoMessage, isNotNull);
     });
 
     test('should handle loading error', () async {
