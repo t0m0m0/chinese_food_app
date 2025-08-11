@@ -21,6 +21,9 @@ class StoreProvider extends ChangeNotifier {
   /// エラーメッセージ
   String? _error;
 
+  /// 情報メッセージ（検索結果0件など、異常ではない状況のメッセージ）
+  String? _infoMessage;
+
   /// キャッシュされたステータス別店舗リスト（メモリ効率化）
   List<Store>? _cachedWantToGoStores;
   List<Store>? _cachedVisitedStores;
@@ -38,6 +41,7 @@ class StoreProvider extends ChangeNotifier {
   List<Store> get stores => List.unmodifiable(_stores);
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get infoMessage => _infoMessage;
 
   /// 「行きたい」ステータスの店舗リスト（キャッシュ機能付き）
   List<Store> get wantToGoStores {
@@ -187,9 +191,10 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
-  /// エラーをクリア
+  /// エラーと情報メッセージをクリア
   void clearError() {
     _clearError();
+    _clearInfoMessage();
   }
 
   /// キャッシュをリフレッシュして最新状態を反映
@@ -214,6 +219,7 @@ class StoreProvider extends ChangeNotifier {
         '🔍 API呼び出し開始: lat=$lat, lng=$lng, keyword=$keyword, range=$range, count=$count');
     _setLoading(true);
     _clearError();
+    _clearInfoMessage();
 
     try {
       debugPrint('🌐 repository.searchStoresFromApi() 呼び出し中...');
@@ -267,7 +273,7 @@ class StoreProvider extends ChangeNotifier {
       // 空の結果時のユーザーフレンドリーなメッセージ
       if (apiStores.isEmpty) {
         debugPrint('⚠️ API応答が空でした');
-        _setError('近くに新しい中華料理店が見つかりませんでした。検索範囲を広げてみてください。');
+        _setInfoMessage('近くに新しい中華料理店が見つかりませんでした。検索範囲を広げてみてください。');
         return;
       }
 
@@ -301,6 +307,18 @@ class StoreProvider extends ChangeNotifier {
   void _clearError() {
     if (_error != null) {
       _error = null;
+      notifyListeners();
+    }
+  }
+
+  void _setInfoMessage(String infoMessage) {
+    _infoMessage = infoMessage;
+    notifyListeners();
+  }
+
+  void _clearInfoMessage() {
+    if (_infoMessage != null) {
+      _infoMessage = null;
       notifyListeners();
     }
   }

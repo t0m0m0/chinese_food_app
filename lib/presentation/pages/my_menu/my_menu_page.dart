@@ -66,6 +66,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
           ({
             bool isLoading,
             String? error,
+            String? infoMessage,
             List<Store> wantToGoStores,
             List<Store> visitedStores,
             List<Store> badStores
@@ -73,6 +74,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
         selector: (context, provider) => (
           isLoading: provider.isLoading,
           error: provider.error,
+          infoMessage: provider.infoMessage,
           wantToGoStores: provider.wantToGoStores,
           visitedStores: provider.visitedStores,
           badStores: provider.badStores,
@@ -124,6 +126,43 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                           .refreshCache();
                     },
                     child: const Text('再試行'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // 情報メッセージ表示
+          if (state.infoMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 64,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'お知らせ',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.infoMessage!,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Provider.of<StoreProvider>(context, listen: false)
+                          .clearError(); // 情報メッセージもクリア
+                    },
+                    child: const Text('了解'),
                   ),
                 ],
               ),

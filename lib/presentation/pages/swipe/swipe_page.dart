@@ -470,11 +470,18 @@ class _SwipePageState extends State<SwipePage> {
                       ],
                     ),
                   )
-                : Selector<StoreProvider,
-                    ({bool isLoading, String? error, List<Store> stores})>(
+                : Selector<
+                    StoreProvider,
+                    ({
+                      bool isLoading,
+                      String? error,
+                      String? infoMessage,
+                      List<Store> stores
+                    })>(
                     selector: (context, provider) => (
                       isLoading: provider.isLoading,
                       error: provider.error,
+                      infoMessage: provider.infoMessage,
                       stores: provider.stores,
                     ),
                     builder: (context, state, child) {
@@ -529,6 +536,45 @@ class _SwipePageState extends State<SwipePage> {
                                   _loadStoresFromProvider();
                                 },
                                 child: const Text('再試行'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      // 情報メッセージ表示（検索結果0件など）
+                      if (state.infoMessage != null) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                size: 64,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                '検索結果',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                state.infoMessage!,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Provider.of<StoreProvider>(context,
+                                          listen: false)
+                                      .clearError(); // 情報メッセージもクリア
+                                  _loadStoresFromProvider();
+                                },
+                                child: const Text('別の場所で検索'),
                               ),
                             ],
                           ),
