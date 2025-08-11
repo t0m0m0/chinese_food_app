@@ -1,3 +1,44 @@
+/// 訪問記録のエラーパターン定数クラス
+class _ErrorPatterns {
+  const _ErrorPatterns();
+
+  // ArgumentError patterns
+  static const String menuEmpty = 'menu cannot be empty';
+  static const String menuTooLong = 'menu must be 100 characters or less';
+  static const String memoTooLong = 'memo must be 500 characters or less';
+  static const String futureDate = 'visited date cannot be in the future';
+
+  // Database constraint patterns
+  static const String foreignKeyConstraint = 'foreign key constraint failed';
+  static const String uniqueConstraint = 'unique constraint failed';
+}
+
+/// 訪問記録のエラータイプ定数クラス
+class _ErrorTypes {
+  const _ErrorTypes();
+
+  static const String menuEmpty = 'menu_empty';
+  static const String menuLengthExceeded = 'menu_length_exceeded';
+  static const String memoLengthExceeded = 'memo_length_exceeded';
+  static const String futureDate = 'future_date';
+  static const String storeNotFound = 'store_not_found';
+  static const String duplicateRecord = 'duplicate_record';
+  static const String defaultError = 'default';
+}
+
+/// 訪問記録のエラーメッセージ定数クラス
+class _ErrorMessages {
+  const _ErrorMessages();
+
+  static const String menuEmpty = 'メニューを入力してください。';
+  static const String menuLengthExceeded = 'メニューは100文字以内で入力してください。';
+  static const String memoLengthExceeded = 'メモは500文字以内で入力してください。';
+  static const String futureDate = '訪問日時は未来の日付にできません。';
+  static const String storeNotFound = '対象の店舗が見つかりません。';
+  static const String duplicateRecord = 'この訪問記録は既に存在します。';
+  static const String defaultError = 'データの保存に失敗しました。しばらくしてから再試行してください。';
+}
+
 /// ユーザーフレンドリーなエラーメッセージを生成するヘルパークラス
 ///
 /// 技術的なエラーメッセージを、エンドユーザーが理解しやすい
@@ -151,5 +192,67 @@ class ErrorMessageHelper {
       default:
         return '店舗関連の処理に失敗しました。再試行してください。';
     }
+  }
+
+  /// 訪問記録に関するエラーメッセージを取得
+  ///
+  /// [errorType] エラータイプを表す文字列
+  /// 戻り値: エラータイプに応じた日本語のメッセージ
+  static String getVisitRecordErrorMessage(String errorType) {
+    switch (errorType.toLowerCase()) {
+      case _ErrorTypes.menuEmpty:
+        return _ErrorMessages.menuEmpty;
+      case _ErrorTypes.menuLengthExceeded:
+        return _ErrorMessages.menuLengthExceeded;
+      case _ErrorTypes.memoLengthExceeded:
+        return _ErrorMessages.memoLengthExceeded;
+      case _ErrorTypes.futureDate:
+        return _ErrorMessages.futureDate;
+      case _ErrorTypes.storeNotFound:
+        return _ErrorMessages.storeNotFound;
+      case _ErrorTypes.duplicateRecord:
+        return _ErrorMessages.duplicateRecord;
+      default:
+        return _ErrorMessages.defaultError;
+    }
+  }
+
+  /// 例外から訪問記録に関するエラーメッセージを取得
+  ///
+  /// [exception] 発生した例外オブジェクト
+  /// 戻り値: 例外の内容に応じた日本語のメッセージ
+  static String getVisitRecordErrorFromException(dynamic exception) {
+    if (exception == null) {
+      return getVisitRecordErrorMessage(_ErrorTypes.defaultError);
+    }
+
+    final errorString = exception.toString().toLowerCase();
+
+    // ArgumentErrorのパターンマッチング
+    if (exception is ArgumentError) {
+      final message = exception.message.toString().toLowerCase();
+
+      if (message.contains(_ErrorPatterns.menuEmpty)) {
+        return getVisitRecordErrorMessage(_ErrorTypes.menuEmpty);
+      } else if (message.contains(_ErrorPatterns.menuTooLong)) {
+        return getVisitRecordErrorMessage(_ErrorTypes.menuLengthExceeded);
+      } else if (message.contains(_ErrorPatterns.memoTooLong)) {
+        return getVisitRecordErrorMessage(_ErrorTypes.memoLengthExceeded);
+      } else if (message.contains(_ErrorPatterns.futureDate)) {
+        return getVisitRecordErrorMessage(_ErrorTypes.futureDate);
+      }
+    }
+
+    // データベース関連エラー
+    if (errorString.contains(_ErrorPatterns.foreignKeyConstraint)) {
+      return getVisitRecordErrorMessage(_ErrorTypes.storeNotFound);
+    }
+
+    if (errorString.contains(_ErrorPatterns.uniqueConstraint)) {
+      return getVisitRecordErrorMessage(_ErrorTypes.duplicateRecord);
+    }
+
+    // その他のエラー
+    return getVisitRecordErrorMessage(_ErrorTypes.defaultError);
   }
 }

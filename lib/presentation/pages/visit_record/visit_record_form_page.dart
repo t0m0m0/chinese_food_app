@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/error_message_helper.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/usecases/add_visit_record_usecase.dart';
 
@@ -69,7 +70,7 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
 
               // 訪問日時フィールド
               InkWell(
-                key: const Key('visit_date_field'),
+                key: const Key('date_selector'),
                 onTap: _selectDate,
                 child: InputDecorator(
                   decoration: const InputDecoration(
@@ -95,10 +96,10 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'メニューを入力してください';
+                    return 'メニューを入力してください。';
                   }
                   if (value.trim().length > 100) {
-                    return 'メニュー名は100文字以内で入力してください';
+                    return 'メニューは100文字以内で入力してください。';
                   }
                   return null;
                 },
@@ -117,7 +118,7 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
                 maxLines: 3,
                 validator: (value) {
                   if (value != null && value.trim().length > 500) {
-                    return 'メモは500文字以内で入力してください';
+                    return 'メモは500文字以内で入力してください。';
                   }
                   return null;
                 },
@@ -209,12 +210,20 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
       }
     } catch (e) {
       if (mounted) {
+        // 具体的なエラーメッセージを取得
+        final errorMessage =
+            ErrorMessageHelper.getVisitRecordErrorFromException(e);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('保存に失敗しました'),
+          SnackBar(
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4), // 少し長めに表示
           ),
         );
+
+        // デバッグ用のログ出力
+        debugPrint('Visit record save error: $e');
       }
     } finally {
       if (mounted) {

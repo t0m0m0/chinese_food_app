@@ -86,13 +86,13 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 5));
 
         // 期待する結果：APIデータが取得されて、新しい店舗が追加されている
-        // APIデータのみが設定されているため2つの店舗が取得される
-        expect(storeProvider.newStores.length, 2);
+        // スワイプ用店舗リストに2つの店舗が設定される
+        expect(storeProvider.swipeStores.length, 2);
 
         // APIデータが含まれていることを確認
-        bool hasApiStore1 = storeProvider.newStores
+        bool hasApiStore1 = storeProvider.swipeStores
             .any((store) => store.name == 'HotPepper API店舗 1');
-        bool hasApiStore2 = storeProvider.newStores
+        bool hasApiStore2 = storeProvider.swipeStores
             .any((store) => store.name == 'HotPepper API店舗 2');
         expect(hasApiStore1, true);
         expect(hasApiStore2, true);
