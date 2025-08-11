@@ -205,6 +205,7 @@ class AppDIContainer implements DIContainerInterface {
     _serviceContainer.register<StoreProvider>(() {
       return StoreProvider(
         repository: _serviceContainer.resolve<StoreRepositoryImpl>(),
+        locationService: _serviceContainer.resolve<LocationService>(),
       );
     });
 
