@@ -42,7 +42,8 @@ class MockStoreRepository extends Mock implements StoreRepository {
     int range = 3,
     int count = 20,
     int start = 1,
-  }) async => [];
+  }) async =>
+      [];
 }
 
 class MockLocationService extends Mock implements LocationService {
