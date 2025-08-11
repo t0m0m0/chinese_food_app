@@ -32,6 +32,17 @@ class MockStoreRepository extends Mock implements StoreRepository {
 
   @override
   Future<List<Store>> searchStores(String query) async => [];
+
+  @override
+  Future<List<Store>> searchStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async => [];
 }
 
 class MockLocationService extends Mock implements LocationService {
@@ -41,6 +52,15 @@ class MockLocationService extends Mock implements LocationService {
         longitude: 139.6503,
         timestamp: DateTime.now(),
       );
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => true;
+
+  @override
+  Future<bool> hasLocationPermission() async => true;
+
+  @override
+  Future<bool> requestLocationPermission() async => true;
 }
 
 void main() {
@@ -50,11 +70,11 @@ void main() {
 
   setUp(() {
     mockRepository = MockStoreRepository();
+    mockLocationService = MockLocationService();
     storeProvider = StoreProvider(
       repository: mockRepository,
       locationService: mockLocationService,
     );
-    mockLocationService = MockLocationService();
   });
 
   Widget createTestWidget() {
