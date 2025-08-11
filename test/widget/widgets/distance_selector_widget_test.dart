@@ -181,7 +181,8 @@ void main() {
           findsOneWidget); // バッジテキスト確認
     });
 
-    testWidgets('滑らかなSliderの値変換とスナップ機能が正しく動作する', (WidgetTester tester) async {
+    testWidgets('100m単位Sliderの値変換とAPIマッピングが正しく動作する',
+        (WidgetTester tester) async {
       // Arrange
       final changedValues = <int>[];
 
@@ -198,19 +199,58 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle(); // アニメーション完了を待機
+      await tester.pumpAndSettle();
 
-      // Act & Assert - 各距離に近い値でスナップ動作をテスト
+      // Act & Assert - 100m単位の値がAPIレンジに正しくマッピングされることをテスト
       final slider = find.byType(Slider);
       final sliderWidget = tester.widget<Slider>(slider);
 
-      final testValues = [320.0, 480.0, 950.0, 1800.0, 2900.0]; // 各有効値に近い値
-      final expectedRanges = [1, 2, 3, 4, 5]; // スナップ後の期待値
+      final testValues = [
+        300.0, // 100m単位で300m → range=1
+        500.0, // 100m単位で500m → range=2
+        1200.0, // 100m単位で1200m → range=3
+        1800.0, // 100m単位で1800m → range=4
+        2700.0, // 100m単位で2700m → range=5
+      ];
+      final expectedRanges = [1, 2, 3, 4, 5];
 
       for (int i = 0; i < testValues.length; i++) {
         sliderWidget.onChangeEnd?.call(testValues[i]);
         expect(changedValues[i], equals(expectedRanges[i]));
       }
+    });
+
+    testWidgets('100m刻みの滑らかな値表示が正しく動作する', (WidgetTester tester) async {
+      // Arrange
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DistanceSelectorWidget(
+              selectedRange: 3, // 1000m
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Act - 1350m位置での操作をシミュレート
+      final slider = find.byType(Slider);
+      final sliderWidget = tester.widget<Slider>(slider);
+
+      // 1300mをSliderで選択（100m単位）
+      sliderWidget.onChanged?.call(1300.0);
+
+      await tester.pump();
+
+      // Assert - 1300mで表示されることを確認
+      expect(
+          find.descendant(
+            of: find.byType(Container),
+            matching: find.text('1300m'),
+          ),
+          findsOneWidget);
     });
   });
 }

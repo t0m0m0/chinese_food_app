@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/config/search_config.dart';
 
 /// 距離選択ウィジェット
 ///
@@ -42,9 +41,9 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
       curve: Curves.easeInOut,
     ));
 
-    _currentSliderValue =
-        (SearchConfig.rangeToMeter(widget.selectedRange) ?? 1000).toDouble();
-    _displayMeters = _currentSliderValue.round();
+    // API rangeから表示用メートルを逆算
+    _displayMeters = _rangeToDisplayMeters(widget.selectedRange);
+    _currentSliderValue = _displayMeters.toDouble();
     _animationController.forward();
   }
 
@@ -52,12 +51,11 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
   void didUpdateWidget(DistanceSelectorWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedRange != oldWidget.selectedRange) {
-      final newValue =
-          (SearchConfig.rangeToMeter(widget.selectedRange) ?? 1000).toDouble();
-      if (newValue != _currentSliderValue) {
+      final newMeters = _rangeToDisplayMeters(widget.selectedRange);
+      if (newMeters != _displayMeters) {
         setState(() {
-          _currentSliderValue = newValue;
-          _displayMeters = newValue.round();
+          _displayMeters = newMeters;
+          _currentSliderValue = newMeters.toDouble();
         });
       }
     }
@@ -138,20 +136,22 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                     value: _currentSliderValue,
                     min: 300.0,
                     max: 3000.0,
-                    divisions: 27, // より細かい分割で滑らか操作
+                    divisions: 27, // 100m刻みで滑らかな操作 (3000-300)/100 = 27
                     label: '${_displayMeters}m',
                     onChanged: (value) {
+                      final roundedValue =
+                          (value / 100).round() * 100; // 100m単位に丸める
                       setState(() {
-                        _currentSliderValue = value;
-                        _displayMeters = _snapToValidValue(value);
+                        _currentSliderValue = roundedValue.toDouble();
+                        _displayMeters = roundedValue;
                       });
                     },
                     onChangeEnd: (value) {
-                      final snappedMeters = _snapToValidValue(value);
-                      final range = _metersToRange(snappedMeters);
+                      final finalMeters = (value / 100).round() * 100;
+                      final range = _metersToApiRange(finalMeters);
                       setState(() {
-                        _currentSliderValue = snappedMeters.toDouble();
-                        _displayMeters = snappedMeters;
+                        _currentSliderValue = finalMeters.toDouble();
+                        _displayMeters = finalMeters;
                       });
                       widget.onChanged(range);
                     },
@@ -175,6 +175,21 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                // API範囲の説明表示
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'API検索範囲: ${_getApiRangeDescription(_metersToApiRange(_displayMeters))}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -183,36 +198,48 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
     );
   }
 
-  int _snapToValidValue(double value) {
-    final ranges = [300, 500, 1000, 2000, 3000];
-    int closest = ranges.first;
-    double minDistance = (value - ranges.first).abs();
-
-    for (final range in ranges) {
-      final distance = (value - range).abs();
-      if (distance < minDistance) {
-        minDistance = distance;
-        closest = range;
-      }
-    }
-
-    return closest;
+  /// ユーザー選択メートルをHotPepper API範囲にマッピング
+  int _metersToApiRange(int meters) {
+    if (meters <= 399) return 1; // 300-399m → 300m API
+    if (meters <= 749) return 2; // 400-749m → 500m API
+    if (meters <= 1499) return 3; // 750-1499m → 1000m API
+    if (meters <= 2499) return 4; // 1500-2499m → 2000m API
+    return 5; // 2500-3000m → 3000m API
   }
 
-  int _metersToRange(int meters) {
-    switch (meters) {
-      case 300:
-        return 1;
-      case 500:
-        return 2;
-      case 1000:
-        return 3;
-      case 2000:
-        return 4;
-      case 3000:
-        return 5;
+  /// API範囲から表示用メートルを逆算（初期化・外部更新時用）
+  int _rangeToDisplayMeters(int apiRange) {
+    switch (apiRange) {
+      case 1:
+        return 300;
+      case 2:
+        return 500;
+      case 3:
+        return 1000;
+      case 4:
+        return 2000;
+      case 5:
+        return 3000;
       default:
-        return 3;
+        return 1000;
+    }
+  }
+
+  /// API範囲の説明を取得
+  String _getApiRangeDescription(int apiRange) {
+    switch (apiRange) {
+      case 1:
+        return '300m以内で検索';
+      case 2:
+        return '500m以内で検索';
+      case 3:
+        return '1000m以内で検索';
+      case 4:
+        return '2000m以内で検索';
+      case 5:
+        return '3000m以内で検索';
+      default:
+        return '1000m以内で検索';
     }
   }
 }
