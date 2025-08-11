@@ -20,7 +20,10 @@ void main() {
     // モックサービスを作成
     final mockLocationService = MockLocationService();
     final fakeRepository = FakeStoreRepository();
-    final storeProvider = StoreProvider(repository: fakeRepository);
+    final storeProvider = StoreProvider(
+      repository: fakeRepository,
+      locationService: mockLocationService,
+    );
     final mockContainer = MockDIContainer(
       storeProvider: storeProvider,
       locationService: mockLocationService,
@@ -51,7 +54,10 @@ void main() {
     // モックサービスを作成
     final mockLocationService = MockLocationService();
     final fakeRepository = FakeStoreRepository();
-    final storeProvider = StoreProvider(repository: fakeRepository);
+    final storeProvider = StoreProvider(
+      repository: fakeRepository,
+      locationService: mockLocationService,
+    );
 
     // 事前初期化をシミュレート
     await storeProvider.loadStores();
@@ -82,8 +88,11 @@ void main() {
   testWidgets('初期化エラー時のフォールバック動作テスト', (WidgetTester tester) async {
     // エラーを発生させるMockRepositoryを作成
     final errorRepository = ErrorStoreRepository();
-    final storeProvider = StoreProvider(repository: errorRepository);
     final mockLocationService = MockLocationService();
+    final storeProvider = StoreProvider(
+      repository: errorRepository,
+      locationService: mockLocationService,
+    );
 
     // 初期化エラーをシミュレート
     try {

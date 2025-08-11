@@ -34,7 +34,8 @@ class DIContainer {
     );
 
     // Providerの作成
-    return StoreProvider(repository: repository);
+    return StoreProvider(
+        repository: repository, locationService: createLocationService());
   }
 
   /// 環境に応じたAPIデータソースを作成

@@ -20,8 +20,11 @@ void main() {
       fakeRepository = FakeStoreRepository();
       // 初期サンプルデータを設定（空のリストから開始）
       fakeRepository.setStores([]);
-      storeProvider = StoreProvider(repository: fakeRepository);
       mockLocationService = MockLocationService();
+      storeProvider = StoreProvider(
+        repository: fakeRepository,
+        locationService: mockLocationService,
+      );
     });
 
     Widget createTestWidget() {

@@ -55,6 +55,15 @@ class MockLocationService extends Mock implements LocationService {
       timestamp: DateTime.now(),
     );
   }
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => true;
+
+  @override
+  Future<bool> hasLocationPermission() async => true;
+
+  @override
+  Future<bool> requestLocationPermission() async => true;
 }
 
 void main() {
@@ -64,8 +73,11 @@ void main() {
 
   setUp(() {
     mockRepository = MockStoreRepository();
-    storeProvider = StoreProvider(repository: mockRepository);
     mockLocationService = MockLocationService();
+    storeProvider = StoreProvider(
+      repository: mockRepository,
+      locationService: mockLocationService,
+    );
   });
 
   Widget createTestWidget() {

@@ -1,9 +1,48 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
 // シンプルなテストダブル
+class MockLocationService implements LocationService {
+  Location? _stubCurrentLocation;
+  bool _shouldThrowError = false;
+
+  void stubGetCurrentLocation(Location location) {
+    _stubCurrentLocation = location;
+    _shouldThrowError = false;
+  }
+
+  void stubGetCurrentLocationError() {
+    _shouldThrowError = true;
+  }
+
+  @override
+  Future<Location> getCurrentLocation() async {
+    if (_shouldThrowError) {
+      throw const LocationException(
+          'テスト用エラー', LocationExceptionType.locationUnavailable);
+    }
+    return _stubCurrentLocation ??
+        Location(
+          latitude: 35.6917,
+          longitude: 139.7006,
+          timestamp: DateTime.now(),
+        );
+  }
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => true;
+
+  @override
+  Future<bool> hasLocationPermission() async => true;
+
+  @override
+  Future<bool> requestLocationPermission() async => true;
+}
+
 class FakeStoreRepository implements StoreRepository {
   List<Store> _stores = [];
   bool _shouldThrowOnUpdate = false;
@@ -79,10 +118,15 @@ class FakeStoreRepository implements StoreRepository {
 void main() {
   late StoreProvider storeProvider;
   late FakeStoreRepository fakeRepository;
+  late MockLocationService mockLocationService;
 
   setUp(() {
     fakeRepository = FakeStoreRepository();
-    storeProvider = StoreProvider(repository: fakeRepository);
+    mockLocationService = MockLocationService();
+    storeProvider = StoreProvider(
+      repository: fakeRepository,
+      locationService: mockLocationService,
+    );
   });
 
   group('StoreProvider Tests', () {
@@ -126,8 +170,9 @@ void main() {
       expect(storeProvider.visitedStores, hasLength(1));
       expect(storeProvider.badStores, isEmpty);
       expect(storeProvider.isLoading, false);
-      // APIが空の結果を返すのでエラーメッセージが設定される
-      expect(storeProvider.error, isNotNull);
+      // APIが空の結果を返すので情報メッセージが設定される（エラーではない）
+      expect(storeProvider.error, isNull);
+      expect(storeProvider.infoMessage, isNotNull);
     });
 
     test('should handle loading error', () async {
