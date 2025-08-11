@@ -211,8 +211,9 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
     } catch (e) {
       if (mounted) {
         // 具体的なエラーメッセージを取得
-        final errorMessage = ErrorMessageHelper.getVisitRecordErrorFromException(e);
-        
+        final errorMessage =
+            ErrorMessageHelper.getVisitRecordErrorFromException(e);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -220,7 +221,7 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
             duration: const Duration(seconds: 4), // 少し長めに表示
           ),
         );
-        
+
         // デバッグ用のログ出力
         debugPrint('Visit record save error: $e');
       }

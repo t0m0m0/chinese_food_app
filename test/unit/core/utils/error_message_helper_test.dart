@@ -88,7 +88,8 @@ void main() {
         final exception = ArgumentError('Menu cannot be empty');
 
         // act
-        final result = ErrorMessageHelper.getVisitRecordErrorFromException(exception);
+        final result =
+            ErrorMessageHelper.getVisitRecordErrorFromException(exception);
 
         // assert
         expect(result, 'メニューを入力してください。');
@@ -96,10 +97,12 @@ void main() {
 
       test('ArgumentError with menu length exceeded message', () {
         // arrange
-        final exception = ArgumentError('Menu must be 100 characters or less: 150 characters');
+        final exception = ArgumentError(
+            'Menu must be 100 characters or less: 150 characters');
 
         // act
-        final result = ErrorMessageHelper.getVisitRecordErrorFromException(exception);
+        final result =
+            ErrorMessageHelper.getVisitRecordErrorFromException(exception);
 
         // assert
         expect(result, 'メニューは100文字以内で入力してください。');
@@ -107,10 +110,12 @@ void main() {
 
       test('ArgumentError with memo length exceeded message', () {
         // arrange
-        final exception = ArgumentError('Memo must be 500 characters or less: 600 characters');
+        final exception = ArgumentError(
+            'Memo must be 500 characters or less: 600 characters');
 
         // act
-        final result = ErrorMessageHelper.getVisitRecordErrorFromException(exception);
+        final result =
+            ErrorMessageHelper.getVisitRecordErrorFromException(exception);
 
         // assert
         expect(result, 'メモは500文字以内で入力してください。');
@@ -118,10 +123,12 @@ void main() {
 
       test('ArgumentError with future date message', () {
         // arrange
-        final exception = ArgumentError('Visited date cannot be in the future: 2025-12-31');
+        final exception =
+            ArgumentError('Visited date cannot be in the future: 2025-12-31');
 
         // act
-        final result = ErrorMessageHelper.getVisitRecordErrorFromException(exception);
+        final result =
+            ErrorMessageHelper.getVisitRecordErrorFromException(exception);
 
         // assert
         expect(result, '訪問日時は未来の日付にできません。');
@@ -129,10 +136,12 @@ void main() {
 
       test('Foreign Key constraint error', () {
         // arrange
-        final exception = Exception('SqliteException(787): FOREIGN KEY constraint failed');
+        final exception =
+            Exception('SqliteException(787): FOREIGN KEY constraint failed');
 
         // act
-        final result = ErrorMessageHelper.getVisitRecordErrorFromException(exception);
+        final result =
+            ErrorMessageHelper.getVisitRecordErrorFromException(exception);
 
         // assert
         expect(result, '対象の店舗が見つかりません。');
@@ -140,10 +149,12 @@ void main() {
 
       test('UNIQUE constraint error', () {
         // arrange
-        final exception = Exception('SqliteException(2067): UNIQUE constraint failed');
+        final exception =
+            Exception('SqliteException(2067): UNIQUE constraint failed');
 
         // act
-        final result = ErrorMessageHelper.getVisitRecordErrorFromException(exception);
+        final result =
+            ErrorMessageHelper.getVisitRecordErrorFromException(exception);
 
         // assert
         expect(result, 'この訪問記録は既に存在します。');
@@ -154,7 +165,8 @@ void main() {
         final exception = Exception('Some other database error');
 
         // act
-        final result = ErrorMessageHelper.getVisitRecordErrorFromException(exception);
+        final result =
+            ErrorMessageHelper.getVisitRecordErrorFromException(exception);
 
         // assert
         expect(result, 'データの保存に失敗しました。しばらくしてから再試行してください。');

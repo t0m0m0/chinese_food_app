@@ -190,7 +190,7 @@ class ErrorMessageHelper {
     // ArgumentErrorのパターンマッチング
     if (exception is ArgumentError) {
       final message = exception.message.toString().toLowerCase();
-      
+
       if (message.contains('menu cannot be empty')) {
         return getVisitRecordErrorMessage('menu_empty');
       } else if (message.contains('menu must be 100 characters or less')) {
