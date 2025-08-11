@@ -124,7 +124,8 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                     overlayShape:
                         const RoundSliderOverlayShape(overlayRadius: 20.0),
                     activeTrackColor: colorScheme.primary,
-                    inactiveTrackColor: colorScheme.primary.withValues(alpha: 0.3),
+                    inactiveTrackColor:
+                        colorScheme.primary.withValues(alpha: 0.3),
                     thumbColor: colorScheme.primary,
                     overlayColor: colorScheme.primary.withValues(alpha: 0.2),
                     valueIndicatorColor: colorScheme.inverseSurface,
