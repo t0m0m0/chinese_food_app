@@ -184,7 +184,7 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'API検索範囲: ${_getApiRangeDescription(_metersToApiRange(_displayMeters))}',
+                    '実際の検索: ${_getApiRangeDescription(_metersToApiRange(_displayMeters))}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -225,21 +225,21 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
     }
   }
 
-  /// API範囲の説明を取得
+  /// 検索範囲の説明を取得
   String _getApiRangeDescription(int apiRange) {
     switch (apiRange) {
       case 1:
-        return '300m以内で検索';
+        return '300m以内';
       case 2:
-        return '500m以内で検索';
+        return '500m以内';
       case 3:
-        return '1000m以内で検索';
+        return '1000m以内';
       case 4:
-        return '2000m以内で検索';
+        return '2000m以内';
       case 5:
-        return '3000m以内で検索';
+        return '3000m以内';
       default:
-        return '1000m以内で検索';
+        return '1000m以内';
     }
   }
 }
