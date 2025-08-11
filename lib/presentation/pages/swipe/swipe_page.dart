@@ -93,8 +93,8 @@ class _SwipePageState extends State<SwipePage> {
       // 現在位置を取得
       final location = await locationService.getCurrentLocation();
 
-      // 位置情報を使ってAPI検索
-      await storeProvider.loadNewStoresFromApi(
+      // 位置情報を使ってスワイプ画面専用API検索
+      await storeProvider.loadSwipeStores(
         lat: location.latitude,
         lng: location.longitude,
         range: _selectedRange,
@@ -106,8 +106,8 @@ class _SwipePageState extends State<SwipePage> {
         _locationError = '位置情報の取得に失敗しました';
       });
 
-      // フォールバック: デフォルト位置で検索
-      await storeProvider.loadNewStoresFromApi(
+      // フォールバック: デフォルト位置でスワイプ画面専用検索
+      await storeProvider.loadSwipeStores(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
         range: _selectedRange,
@@ -128,8 +128,8 @@ class _SwipePageState extends State<SwipePage> {
         _locationError = 'エラーが発生しました: $e';
       });
 
-      // フォールバック: デフォルト位置で検索
-      await storeProvider.loadNewStoresFromApi(
+      // フォールバック: デフォルト位置でスワイプ画面専用検索
+      await storeProvider.loadSwipeStores(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
         range: _selectedRange,
@@ -145,29 +145,17 @@ class _SwipePageState extends State<SwipePage> {
     }
   }
 
-  /// 利用可能な店舗リストを更新（状態が未設定の店舗のみ）
+  /// 利用可能な店舗リストを更新（スワイプ画面専用の現在地周辺店舗のみ）
   void _updateAvailableStores() {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
-    final allStores = storeProvider.stores;
-    final availableStores =
-        allStores.where((store) => store.status == null).toList();
+    final swipeStores = storeProvider.swipeStores; // スワイプ専用リストを使用
+    final availableStores = swipeStores; // swipeStoresは既にstatus==nullでフィルタ済み
 
-    debugPrint('📋 _updateAvailableStores() 実行:');
-    debugPrint('  📊 全店舗数: ${allStores.length}件');
-    debugPrint('  🎯 利用可能店舗(status==null): ${availableStores.length}件');
+    debugPrint('🎴 _updateAvailableStores() 実行 (スワイプ専用):');
+    debugPrint('  🎯 スワイプ用店舗数: ${availableStores.length}件');
 
-    if (allStores.isNotEmpty) {
-      debugPrint('  📋 全店舗のステータス分布:');
-      final wantToGo =
-          allStores.where((s) => s.status == StoreStatus.wantToGo).length;
-      final visited =
-          allStores.where((s) => s.status == StoreStatus.visited).length;
-      final bad = allStores.where((s) => s.status == StoreStatus.bad).length;
-      final nullStatus = allStores.where((s) => s.status == null).length;
-      debugPrint('    - wantToGo: $wantToGo件');
-      debugPrint('    - visited: $visited件');
-      debugPrint('    - bad: $bad件');
-      debugPrint('    - null(未選択): $nullStatus件');
+    if (availableStores.isNotEmpty) {
+      debugPrint('  📋 スワイプ用店舗はすべて未設定ステータス（現在地周辺のみ）');
     }
 
     setState(() {
@@ -204,19 +192,20 @@ class _SwipePageState extends State<SwipePage> {
       debugPrint(
           '🃏 カード残り枚数: $remainingCards件 (previousIndex: $previousIndex)');
 
-      // 残り2枚以下でかつ既に十分な店舗データがある場合は新規API呼び出しを行わない
+      // 残り2枚以下の場合、スワイプ用店舗の追加取得を検討
       if (remainingCards <= 2) {
         final storeProvider =
             Provider.of<StoreProvider>(context, listen: false);
-        final totalStores = storeProvider.stores.length;
+        final swipeStoresCount = storeProvider.swipeStores.length;
 
-        debugPrint('⚠️ カード残り少数警告: 残り$remainingCards枚, 総店舗数: $totalStores件');
+        debugPrint(
+            '⚠️ カード残り少数警告: 残り$remainingCards枚, スワイプ用店舗数: $swipeStoresCount件');
 
-        // 総店舗数が20件以上ある場合は追加API呼び出しを抑制
-        if (totalStores >= 20) {
-          debugPrint('🚫 API呼び出し抑制: 十分な店舗データが存在');
+        // スワイプ用店舗が10件以上ある場合は追加API呼び出しを抑制
+        if (swipeStoresCount >= 10) {
+          debugPrint('🚫 API呼び出し抑制: 十分なスワイプ用店舗データが存在');
         } else {
-          debugPrint('📡 新規API呼び出し許可: データが不足している');
+          debugPrint('📡 新規API呼び出し許可: スワイプ用データが不足している');
           // Future.microtaskを使用して現在のbuild cycleの後でAPI呼び出し
           Future.microtask(() {
             if (mounted) {
