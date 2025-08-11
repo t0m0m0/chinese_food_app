@@ -57,7 +57,7 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Assert
-      expect(find.byKey(const Key('visit_date_field')), findsOneWidget);
+      expect(find.byKey(const Key('date_selector')), findsOneWidget);
       expect(find.byKey(const Key('menu_field')), findsOneWidget);
       expect(find.byKey(const Key('memo_field')), findsOneWidget);
       expect(find.byKey(const Key('save_button')), findsOneWidget);
@@ -69,11 +69,13 @@ void main() {
       await tester.pumpWidget(createTestWidget());
 
       // Act
-      await tester.tap(find.byKey(const Key('save_button')));
+      // フォームバリデーションを直接実行する
+      final formState = tester.state<FormState>(find.byType(Form));
+      formState.validate();
       await tester.pump();
 
       // Assert
-      expect(find.text('メニューを入力してください'), findsOneWidget);
+      expect(find.text('メニューを入力してください。'), findsOneWidget);
     });
 
     testWidgets('should call AddVisitRecordUsecase when form is valid',
