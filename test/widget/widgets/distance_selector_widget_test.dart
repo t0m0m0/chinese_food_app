@@ -252,5 +252,80 @@ void main() {
           ),
           findsOneWidget);
     });
+
+    testWidgets('初期状態でSliderが折りたたまれている', (WidgetTester tester) async {
+      // Arrange
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DistanceSelectorWidget(
+              selectedRange: 3,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Assert - SizeTransitionは存在するが、Sliderは見えない状態（sizeFactor=0）
+      expect(find.byType(SizeTransition), findsOneWidget);
+      expect(find.byIcon(Icons.expand_more), findsOneWidget);
+    });
+
+    testWidgets('ヘッダータップでSliderが展開される', (WidgetTester tester) async {
+      // Arrange
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DistanceSelectorWidget(
+              selectedRange: 3,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Act - ヘッダーをタップして展開
+      await tester.tap(find.byType(InkWell));
+      await tester.pumpAndSettle();
+
+      // Assert - Sliderが表示されていることを確認
+      expect(find.byType(Slider), findsOneWidget);
+      expect(find.text('300m'), findsOneWidget); // 範囲ラベル
+      expect(find.text('3000m'), findsOneWidget); // 範囲ラベル
+    });
+
+    testWidgets('展開後、再度タップで折りたたまれる', (WidgetTester tester) async {
+      // Arrange
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DistanceSelectorWidget(
+              selectedRange: 3,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Act - まず展開
+      await tester.tap(find.byType(InkWell));
+      await tester.pumpAndSettle();
+
+      // 展開されていることを確認
+      expect(find.byType(Slider), findsOneWidget);
+
+      // 再度タップして折りたたみ
+      await tester.tap(find.byType(InkWell));
+      await tester.pumpAndSettle();
+
+      // Assert - SizeTransitionは存在するが、Sliderは見えない状態
+      expect(find.byType(SizeTransition), findsOneWidget);
+    });
   });
 }
