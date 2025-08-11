@@ -24,6 +24,7 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final meters = SearchConfig.rangeToMeter(widget.selectedRange) ?? 1000;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -40,27 +41,21 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 8.0,
-              children: SearchConfig.rangeToMeters.entries.map((entry) {
-                final range = entry.key;
-                final meters = entry.value;
-                final isSelected = range == widget.selectedRange;
-
-                return FilterChip(
-                  label: Text('${meters}m'),
-                  selected: isSelected,
-                  onSelected: (_) => widget.onChanged(range),
-                  selectedColor: colorScheme.primaryContainer,
-                  checkmarkColor: colorScheme.onPrimaryContainer,
-                );
-              }).toList(),
+            const SizedBox(height: 16),
+            Slider(
+              value: meters.toDouble(),
+              min: 300.0,
+              max: 3000.0,
+              divisions: 4,
+              label: '${meters}m',
+              onChanged: (value) {
+                final range = _metersToRange(value.round());
+                widget.onChanged(range);
+              },
             ),
             const SizedBox(height: 8),
             Text(
-              '現在の設定: ${SearchConfig.rangeToMeter(widget.selectedRange) ?? 1000}m',
+              '現在の設定: ${meters}m',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -69,5 +64,22 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget> {
         ),
       ),
     );
+  }
+
+  int _metersToRange(int meters) {
+    switch (meters) {
+      case 300:
+        return 1;
+      case 500:
+        return 2;
+      case 1000:
+        return 3;
+      case 2000:
+        return 4;
+      case 3000:
+        return 5;
+      default:
+        return 3;
+    }
   }
 }
