@@ -3,7 +3,9 @@ import '../../core/utils/error_message_helper.dart';
 import '../../core/utils/duplicate_store_checker.dart';
 import '../../core/utils/database_error_handler.dart';
 import '../../domain/entities/store.dart';
+import '../../domain/entities/location.dart';
 import '../../domain/repositories/store_repository.dart';
+import '../../domain/services/location_service.dart';
 
 /// 店舗データの状態管理を行うProvider
 ///
@@ -11,6 +13,7 @@ import '../../domain/repositories/store_repository.dart';
 /// Clean ArchitectureのPresentation層でドメイン層のRepositoryと連携する
 class StoreProvider extends ChangeNotifier {
   final StoreRepository repository;
+  final LocationService locationService;
 
   /// 全ての店舗データ
   List<Store> _stores = [];
@@ -35,7 +38,7 @@ class StoreProvider extends ChangeNotifier {
   static int get _cacheMaxAge => _defaultCacheMaxAge; // 将来的に設定ファイルから取得可能
   int? _lastCacheUpdateTime;
 
-  StoreProvider({required this.repository});
+  StoreProvider({required this.repository, required this.locationService});
 
   // Getters
   List<Store> get stores => List.unmodifiable(_stores);
@@ -89,7 +92,7 @@ class StoreProvider extends ChangeNotifier {
         debugPrint('ローカルデータが少ないため、APIから店舗データを取得します（現在: ${_stores.length}件）');
 
         // デフォルトの検索条件でAPIから店舗データを取得
-        await _loadStoresFromApiWithDefaultLocation();
+        await _loadStoresFromApiWithCurrentLocation();
       }
 
       notifyListeners();
@@ -101,13 +104,30 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
-  /// デフォルト位置（新宿駅）からAPIで店舗データを取得
-  Future<void> _loadStoresFromApiWithDefaultLocation() async {
+  /// 現在地優先でAPIから店舗データを取得（デフォルト位置フォールバック付き）
+  Future<void> _loadStoresFromApiWithCurrentLocation() async {
+    double lat = 35.6917; // デフォルト: 新宿駅の座標
+    double lng = 139.7006;
+
     try {
-      // 新宿駅周辺の中華料理店を検索
+      // まず現在地取得を試行
+      final location = await locationService.getCurrentLocation();
+      lat = location.latitude;
+      lng = location.longitude;
+      debugPrint('現在地を取得しました: ($lat, $lng)');
+    } on LocationException catch (e) {
+      debugPrint('現在地取得に失敗、デフォルト位置を使用: $e');
+      // フォールバック: デフォルト位置（新宿駅）を使用
+    } catch (e) {
+      debugPrint('現在地取得でエラー、デフォルト位置を使用: $e');
+      // フォールバック: デフォルト位置（新宿駅）を使用
+    }
+
+    try {
+      // 取得した位置（現在地またはデフォルト）で中華料理店を検索
       await loadNewStoresFromApi(
-        lat: 35.6917, // 新宿駅の座標
-        lng: 139.7006,
+        lat: lat,
+        lng: lng,
         keyword: '中華',
         count: 20, // より多くのデータを取得
       );

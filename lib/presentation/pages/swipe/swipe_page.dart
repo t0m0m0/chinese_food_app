@@ -567,15 +567,6 @@ class _SwipePageState extends State<SwipePage> {
                                 style: theme.textTheme.bodyMedium,
                               ),
                               const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Provider.of<StoreProvider>(context,
-                                          listen: false)
-                                      .clearError(); // 情報メッセージもクリア
-                                  _loadStoresFromProvider();
-                                },
-                                child: const Text('別の場所で検索'),
-                              ),
                             ],
                           ),
                         );
