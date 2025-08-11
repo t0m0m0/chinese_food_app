@@ -50,7 +50,10 @@ void main() {
 
   setUp(() {
     mockRepository = MockStoreRepository();
-    storeProvider = StoreProvider(repository: mockRepository);
+    storeProvider = StoreProvider(
+      repository: mockRepository,
+      locationService: mockLocationService,
+    );
     mockLocationService = MockLocationService();
   });
 

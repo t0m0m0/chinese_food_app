@@ -20,7 +20,10 @@ void main() {
       fakeRepository = FakeStoreRepository();
       // 初期サンプルデータを設定（空のリストから開始）
       fakeRepository.setStores([]);
-      storeProvider = StoreProvider(repository: fakeRepository);
+      storeProvider = StoreProvider(
+        repository: fakeRepository,
+        locationService: mockLocationService,
+      );
       mockLocationService = MockLocationService();
     });
 

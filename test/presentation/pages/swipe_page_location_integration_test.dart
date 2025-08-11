@@ -90,7 +90,10 @@ void main() {
       ]);
 
       mockLocationService = MockLocationService();
-      storeProvider = StoreProvider(repository: fakeRepository);
+      storeProvider = StoreProvider(
+        repository: fakeRepository,
+        locationService: mockLocationService,
+      );
     });
 
     Future<void> initializeStoreProvider() async {

@@ -1,16 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
+import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/core/config/search_config.dart';
 
 void main() {
   late StoreProvider provider;
   late MockStoreRepository mockRepository;
+  late MockLocationService mockLocationService;
 
   setUp(() {
     mockRepository = MockStoreRepository();
-    provider = StoreProvider(repository: mockRepository);
+    mockLocationService = MockLocationService();
+    provider = StoreProvider(
+      repository: mockRepository,
+      locationService: mockLocationService,
+    );
   });
 
   group('N+1 Query Performance Tests - Issue #84', () {
@@ -307,4 +314,42 @@ class MockStoreRepository implements StoreRepository {
 
   @override
   Future<List<Store>> searchStores(String query) async => [];
+}
+
+// テスト用モックLocationService
+class MockLocationService implements LocationService {
+  Location? _stubCurrentLocation;
+  bool _shouldThrowError = false;
+
+  void stubGetCurrentLocation(Location location) {
+    _stubCurrentLocation = location;
+    _shouldThrowError = false;
+  }
+
+  void stubGetCurrentLocationError() {
+    _shouldThrowError = true;
+  }
+
+  @override
+  Future<Location> getCurrentLocation() async {
+    if (_shouldThrowError) {
+      throw LocationException(
+          'テスト用エラー', LocationExceptionType.locationUnavailable);
+    }
+    return _stubCurrentLocation ??
+        Location(
+          latitude: 35.6917,
+          longitude: 139.7006,
+          timestamp: DateTime.now(),
+        ); // デフォルト: 新宿駅
+  }
+
+  @override
+  Future<bool> isLocationServiceEnabled() async => true;
+
+  @override
+  Future<bool> hasLocationPermission() async => true;
+
+  @override
+  Future<bool> requestLocationPermission() async => true;
 }
