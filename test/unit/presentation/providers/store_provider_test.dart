@@ -264,6 +264,148 @@ void main() {
       }
     });
   });
+
+  group('スワイプ画面での重複表示問題 - Issue #129', () {
+    test('should not show already swiped stores in swipe list', () async {
+      // Red: スワイプ済み店舗が再表示される問題のテスト
+
+      // 既存店舗（ステータス設定済み）をモック
+      final existingStores = [
+        Store(
+          id: 'store_1',
+          name: '中華料理店A',
+          address: '東京都新宿区',
+          lat: 35.6917,
+          lng: 139.7006,
+          status: StoreStatus.wantToGo, // 既にスワイプ済み
+          createdAt: DateTime.now(),
+        ),
+        Store(
+          id: 'store_2',
+          name: '中華料理店B',
+          address: '東京都渋谷区',
+          lat: 35.6580,
+          lng: 139.7016,
+          status: StoreStatus.bad, // 既にスワイプ済み
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      // API検索結果（既存店舗 + 新規店舗）
+      final apiStores = [
+        // 既存店舗がAPIからも返される（実際のHotPepper APIの挙動）
+        Store(
+          id: 'store_1',
+          name: '中華料理店A',
+          address: '東京都新宿区',
+          lat: 35.6917,
+          lng: 139.7006,
+          status: null, // APIから取得時はステータス未設定
+          createdAt: DateTime.now(),
+        ),
+        Store(
+          id: 'store_2',
+          name: '中華料理店B',
+          address: '東京都渋谷区',
+          lat: 35.6580,
+          lng: 139.7016,
+          status: null, // APIから取得時はステータス未設定
+          createdAt: DateTime.now(),
+        ),
+        // 新規店舗
+        Store(
+          id: 'store_3',
+          name: '中華料理店C',
+          address: '東京都港区',
+          lat: 35.6762,
+          lng: 139.7653,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      // モックの設定
+      mockRepository.stubGetAllStores(existingStores);
+      mockRepository.stubSearchStoresFromApi(apiStores);
+
+      // 既存店舗を事前にロード（実際のアプリ動作と同じ）
+      await provider.loadStores();
+
+      // スワイプ用店舗を読み込み
+      await provider.loadSwipeStores(
+        lat: 35.6917,
+        lng: 139.7006,
+        range: 3,
+        count: 20,
+      );
+
+      // swipeStoresには未スワイプ店舗（store_3）のみが含まれるべき
+      final swipeStores = provider.swipeStores;
+
+      // 期待値：未スワイプの店舗（store_3）のみが含まれる
+      expect(swipeStores.length, equals(1));
+      expect(swipeStores.first.id, equals('store_3'));
+      expect(swipeStores.first.status, isNull);
+
+      // スワイプ済み店舗（store_1, store_2）は含まれない
+      expect(swipeStores.any((store) => store.id == 'store_1'), isFalse);
+      expect(swipeStores.any((store) => store.id == 'store_2'), isFalse);
+    });
+
+    test('should remove store from swipe list after status update', () async {
+      // Red: ステータス更新後にスワイプリストから店舗が除去されるテスト
+
+      // 未スワイプ店舗を準備
+      final newStores = [
+        Store(
+          id: 'new_store_1',
+          name: '新規中華店A',
+          address: '東京都中央区',
+          lat: 35.6796,
+          lng: 139.7707,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+        Store(
+          id: 'new_store_2',
+          name: '新規中華店B',
+          address: '東京都千代田区',
+          lat: 35.6926,
+          lng: 139.7543,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      // モック設定
+      mockRepository.stubGetAllStores(newStores);
+      mockRepository.stubSearchStoresFromApi(newStores);
+
+      // 既存店舗を事前にロード
+      await provider.loadStores();
+
+      // スワイプ用店舗を読み込み
+      await provider.loadSwipeStores(
+        lat: 35.6917,
+        lng: 139.7006,
+      );
+
+      // 初期状態：2店舗がスワイプリストに含まれる
+      expect(provider.swipeStores.length, equals(2));
+
+      // new_store_1をスワイプ（ステータス更新）
+      await provider.updateStoreStatus('new_store_1', StoreStatus.wantToGo);
+
+      // ステータス更新後：スワイプリストから除去されるべき
+      final swipeStoresAfterUpdate = provider.swipeStores;
+      expect(swipeStoresAfterUpdate.length, equals(1));
+      expect(swipeStoresAfterUpdate.first.id, equals('new_store_2'));
+
+      // ステータス更新した店舗は含まれない
+      expect(swipeStoresAfterUpdate.any((store) => store.id == 'new_store_1'),
+          isFalse);
+    });
+  });
 }
 
 // テスト用モックリポジトリ
