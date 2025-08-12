@@ -297,10 +297,10 @@ class StoreProvider extends ChangeNotifier {
 
       debugPrint('[SWIPE] 店舗リスト更新完了: ${_swipeStores.length}件');
 
-      // 空の結果時のメッセージ
+      // 空の結果時の情報メッセージ（エラーではない正常状況）
       if (_swipeStores.isEmpty) {
         debugPrint('[SWIPE] 対象店舗が見つかりませんでした');
-        _setError('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。');
+        _setInfoMessage('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。');
         return;
       }
 

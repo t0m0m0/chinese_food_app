@@ -197,14 +197,14 @@ void main() {
       // then: CardSwiperのクラッシュが発生せず、適切なメッセージが表示される
       expect(find.byType(CardSwiper), findsNothing);
 
-      // StoreProviderのエラーメッセージが表示されることを確認
-      expect(find.text('エラーが発生しました'), findsOneWidget);
+      // StoreProviderの情報メッセージが表示されることを確認（エラーではない）
+      expect(find.text('検索結果'), findsOneWidget);
 
-      // より具体的なエラーメッセージの検証
+      // より具体的な情報メッセージの検証
       expect(
         find.text('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。'),
         findsOneWidget,
-        reason: 'StoreProvider.loadSwipeStores()の距離500m設定時の適切なエラーメッセージ表示',
+        reason: 'StoreProvider.loadSwipeStores()の距離500m設定時の適切な情報メッセージ表示',
       );
 
       // CardSwiperが初期化されていないことの確認
@@ -235,9 +235,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // then: loadSwipeStoresでエラーメッセージが設定された状態を確認
-      // MockStoreRepositoryは空のリストを返すため、StoreProviderがエラーメッセージを設定
-      expect(find.text('エラーが発生しました'), findsOneWidget);
+      // then: loadSwipeStoresで情報メッセージが設定された状態を確認
+      // MockStoreRepositoryは空のリストを返すため、StoreProviderが情報メッセージを設定
+      expect(find.text('検索結果'), findsOneWidget);
       expect(
         find.text('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。'),
         findsOneWidget,
