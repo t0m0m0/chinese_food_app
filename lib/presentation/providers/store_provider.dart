@@ -174,6 +174,10 @@ class StoreProvider extends ChangeNotifier {
 
       // 成功後にローカル状態を更新
       _stores[storeIndex] = updatedStore;
+
+      // スワイプリストからも同じ店舗を除去（ステータス設定済みのため）
+      _swipeStores.removeWhere((store) => store.id == storeId);
+
       _clearCache(); // ステータス別キャッシュもクリア
       notifyListeners();
       _clearError();
@@ -263,16 +267,37 @@ class StoreProvider extends ChangeNotifier {
       );
       debugPrint('✅ スワイプ用API応答受信: ${apiStores.length}件の店舗データ');
 
-      // スワイプ画面用リストを直接上書き（検索結果とは独立）
-      _swipeStores =
-          apiStores.map((store) => store.copyWith(resetStatus: true)).toList();
+      // スワイプ画面用リストを構築（既存店舗のステータス考慮）
+      final filteredStores = <Store>[];
+      for (final apiStore in apiStores) {
+        // 既存店舗を検索してステータス情報を取得
+        final existingStoreIndex =
+            _stores.indexWhere((store) => store.id == apiStore.id);
+
+        if (existingStoreIndex != -1) {
+          // 既存店舗が見つかった場合：そのステータスを確認
+          final existingStore = _stores[existingStoreIndex];
+          if (existingStore.status == null) {
+            // ステータス未設定の場合のみスワイプ対象に追加
+            filteredStores.add(existingStore);
+          }
+          // ステータス設定済みの場合は除外
+        } else {
+          // 新規店舗の場合：_storesに追加してスワイプ対象にも追加
+          final newStore = apiStore.copyWith(resetStatus: true);
+          _stores.add(newStore);
+          filteredStores.add(newStore);
+        }
+      }
+
+      _swipeStores = filteredStores;
 
       debugPrint('🎴 スワイプ用店舗リスト更新完了: ${_swipeStores.length}件');
 
       // 空の結果時のメッセージ
-      if (apiStores.isEmpty) {
-        debugPrint('⚠️ スワイプ用API応答が空でした');
-        _setError('現在地周辺に中華料理店が見つかりませんでした。範囲を広げてみてください。');
+      if (_swipeStores.isEmpty) {
+        debugPrint('⚠️ スワイプ対象店舗が見つかりませんでした');
+        _setError('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。');
         return;
       }
 
