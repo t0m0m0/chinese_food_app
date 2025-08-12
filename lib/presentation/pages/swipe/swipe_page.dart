@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
@@ -597,21 +598,25 @@ class _SwipePageState extends State<SwipePage> {
                         );
                       }
 
-                      // スワイプ可能な店舗の表示制御
-                      // 1. 空の場合: 全店舗確認済みメッセージ表示
-                      // 2. データありの場合: CardSwiperまたはリフレッシュ可能なエリア表示
-                      return _availableStores.isEmpty
+                      // スワイプ可能な店舗の表示制御（競合状態防止）
+                      // アトミックな参照により一貫性を保証
+                      final currentStores = List<Store>.from(_availableStores);
+                      final hasStores = currentStores.isNotEmpty;
+
+                      return !hasStores
                           ? _buildEmptyStoreMessage(theme, colorScheme)
                           : RefreshIndicator(
                               onRefresh: _refreshStores,
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
-                                // CardSwiper初期化防護: cardsCount=0でのassertion error防止
-                                // 二重チェックによりWeb環境での堅牢性確保（Issue #130対応）
-                                child: _availableStores.isNotEmpty
+                                // CardSwiper初期化防護: 競合状態による cardsCount=0 防止
+                                // アトミック参照により堅牢性確保（Issue #130根本対応）
+                                child: hasStores
                                     ? CardSwiper(
                                         controller: controller,
-                                        cardsCount: _availableStores.length,
+                                        cardsCount: currentStores.length,
+                                        numberOfCardsDisplayed:
+                                            math.min(currentStores.length, 3),
                                         onSwipe: _onSwipe,
                                         cardBuilder: (context,
                                             index,
@@ -619,10 +624,9 @@ class _SwipePageState extends State<SwipePage> {
                                             percentThresholdY) {
                                           // IndexOutOfRangeエラーを防ぐための安全チェック
                                           if (index < 0 ||
-                                              index >=
-                                                  _availableStores.length) {
+                                              index >= currentStores.length) {
                                             debugPrint(
-                                                '⚠️ CardSwiper index out of range: $index, available: ${_availableStores.length}');
+                                                '⚠️ CardSwiper index out of range: $index, available: ${currentStores.length}');
                                             return Container(
                                               decoration: BoxDecoration(
                                                 color:
@@ -644,7 +648,7 @@ class _SwipePageState extends State<SwipePage> {
                                             );
                                           }
                                           return _buildStoreCard(
-                                              _availableStores[index]);
+                                              currentStores[index]);
                                         },
                                       )
                                     // フォールバック: 極端な競合状態での安全なUI表示
