@@ -150,10 +150,54 @@ void main() {
       // then: CardSwiperのクラッシュが発生せず、適切なメッセージが表示される
       expect(find.byType(CardSwiper), findsNothing);
 
-      // 適切な空状態メッセージが表示されることを確認
+      // StoreProviderのエラーメッセージが表示されることを確認
+      expect(find.text('エラーが発生しました'), findsOneWidget);
+
+      // より具体的なエラーメッセージの検証
+      expect(
+        find.text('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。'),
+        findsOneWidget,
+        reason: 'StoreProvider.loadSwipeStores()の距離500m設定時の適切なエラーメッセージ表示',
+      );
+
+      // CardSwiperが初期化されていないことの確認
+      expect(
+        find.byType(CardSwiper),
+        findsNothing,
+        reason: 'カード数0でのCardSwiper初期化防止（Issue #130対応）',
+      );
+    });
+
+    testWidgets('should handle empty state with proper fallback UI',
+        (tester) async {
+      // given: SwipePageを表示
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // when: 空店舗リスト状態をシミュレート
+      final storeProvider = Provider.of<StoreProvider>(
+        tester.element(find.byType(SwipePage)),
+        listen: false,
+      );
+
+      await storeProvider.loadSwipeStores(
+        lat: 35.6917,
+        lng: 139.7006,
+        range: 1, // 任意の距離設定
+        count: 20,
+      );
+      await tester.pumpAndSettle();
+
+      // then: loadSwipeStoresでエラーメッセージが設定された状態を確認
+      // MockStoreRepositoryは空のリストを返すため、StoreProviderがエラーメッセージを設定
       expect(find.text('エラーが発生しました'), findsOneWidget);
       expect(
-          find.text('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。'), findsOneWidget);
+        find.text('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。'),
+        findsOneWidget,
+      );
+
+      // CardSwiperが表示されていないことを確認
+      expect(find.byType(CardSwiper), findsNothing);
     });
   });
 }
