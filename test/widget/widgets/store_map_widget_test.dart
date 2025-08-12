@@ -25,7 +25,7 @@ void main() {
         id: 'test_store_2',
         name: 'エッジケース店舗',
         address: '境界値テスト場所',
-        lat: 90.0,  // 有効な緯度の境界値
+        lat: 90.0, // 有効な緯度の境界値
         lng: 180.0, // 有効な経度の境界値
         status: StoreStatus.wantToGo,
         memo: null,
@@ -33,7 +33,8 @@ void main() {
       );
     });
 
-    testWidgets('should display error UI when GoogleMaps is unavailable', (WidgetTester tester) async {
+    testWidgets('should display error UI when GoogleMaps is unavailable',
+        (WidgetTester tester) async {
       // MockGoogleMapsが利用できない環境をシミュレート
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -49,15 +50,16 @@ void main() {
 
       // エラーアイコンが表示されることを確認
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
-      
+
       // エラーメッセージが表示されることを確認
       expect(find.text('地図を表示できません'), findsOneWidget);
-      
+
       // 外部地図アプリボタンが表示されることを確認
       expect(find.text('外部地図アプリで開く'), findsOneWidget);
     });
 
-    testWidgets('should display loading indicator initially', (WidgetTester tester) async {
+    testWidgets('should display loading indicator initially',
+        (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: StoreMapWidget(store: validStore),
@@ -68,7 +70,8 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('should display external map button when error occurs', (WidgetTester tester) async {
+    testWidgets('should display external map button when error occurs',
+        (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: StoreMapWidget(store: edgeCaseStore),

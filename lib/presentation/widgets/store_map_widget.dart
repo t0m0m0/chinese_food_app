@@ -30,11 +30,11 @@ class StoreMapWidget extends StatelessWidget {
             child: CircularProgressIndicator(),
           );
         }
-        
+
         if (snapshot.hasError || !(snapshot.data ?? false)) {
           return _buildErrorWidget(context);
         }
-        
+
         return _buildGoogleMap();
       },
     );
@@ -130,9 +130,7 @@ class StoreMapWidget extends StatelessWidget {
       final apiKey = ConfigManager.googleMapsApiKey;
       if (!MapUtils.isValidGoogleMapsApiKey(apiKey)) {
         if (kDebugMode) {
-          debugPrint(
-            'StoreMapWidget: Invalid Google Maps API key'
-          );
+          debugPrint('StoreMapWidget: Invalid Google Maps API key');
         }
         return false;
       }

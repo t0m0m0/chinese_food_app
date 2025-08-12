@@ -119,7 +119,7 @@ class StoreDetailPage extends StatelessWidget {
       if (kDebugMode) {
         debugPrint('StoreDetailPage: Map dialog display error: $e');
       }
-      
+
       // エラー時はフォールバックダイアログを表示
       _showMapErrorDialog(context);
     }
@@ -178,7 +178,7 @@ class StoreDetailPage extends StatelessWidget {
           'StoreDetailPage: All navigation URLs failed for store: ${store.name}',
         );
       }
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -192,7 +192,7 @@ class StoreDetailPage extends StatelessWidget {
       if (kDebugMode) {
         debugPrint('StoreDetailPage: External map app launch error: $e');
       }
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
