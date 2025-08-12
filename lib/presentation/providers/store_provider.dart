@@ -252,12 +252,12 @@ class StoreProvider extends ChangeNotifier {
     int count = 20,
   }) async {
     debugPrint(
-        '🎴 スワイプ用店舗読み込み開始: lat=$lat, lng=$lng, range=$range, count=$count');
+        '[SWIPE] 店舗読み込み開始: lat=$lat, lng=$lng, range=$range, count=$count');
     _setLoading(true);
     _clearError();
 
     try {
-      debugPrint('🌐 スワイプ用API呼び出し中...');
+      debugPrint('[SWIPE] API呼び出し中...');
       final apiStores = await repository.searchStoresFromApi(
         lat: lat,
         lng: lng,
@@ -265,18 +265,20 @@ class StoreProvider extends ChangeNotifier {
         range: range,
         count: count,
       );
-      debugPrint('✅ スワイプ用API応答受信: ${apiStores.length}件の店舗データ');
+      debugPrint('[SWIPE] API応答受信: ${apiStores.length}件の店舗データ');
 
       // スワイプ画面用リストを構築（既存店舗のステータス考慮）
+      // パフォーマンス最適化: HashMapによる高速検索
+      final existingStoreMap = <String, Store>{
+        for (final store in _stores) store.id: store
+      };
+
       final filteredStores = <Store>[];
       for (final apiStore in apiStores) {
-        // 既存店舗を検索してステータス情報を取得
-        final existingStoreIndex =
-            _stores.indexWhere((store) => store.id == apiStore.id);
+        final existingStore = existingStoreMap[apiStore.id];
 
-        if (existingStoreIndex != -1) {
+        if (existingStore != null) {
           // 既存店舗が見つかった場合：そのステータスを確認
-          final existingStore = _stores[existingStoreIndex];
           if (existingStore.status == null) {
             // ステータス未設定の場合のみスワイプ対象に追加
             filteredStores.add(existingStore);
@@ -286,28 +288,29 @@ class StoreProvider extends ChangeNotifier {
           // 新規店舗の場合：_storesに追加してスワイプ対象にも追加
           final newStore = apiStore.copyWith(resetStatus: true);
           _stores.add(newStore);
+          existingStoreMap[newStore.id] = newStore; // マップも更新
           filteredStores.add(newStore);
         }
       }
 
       _swipeStores = filteredStores;
 
-      debugPrint('🎴 スワイプ用店舗リスト更新完了: ${_swipeStores.length}件');
+      debugPrint('[SWIPE] 店舗リスト更新完了: ${_swipeStores.length}件');
 
       // 空の結果時のメッセージ
       if (_swipeStores.isEmpty) {
-        debugPrint('⚠️ スワイプ対象店舗が見つかりませんでした');
+        debugPrint('[SWIPE] 対象店舗が見つかりませんでした');
         _setError('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。');
         return;
       }
 
       notifyListeners();
     } catch (e) {
-      debugPrint('❌ スワイプ用API呼び出しエラー: $e');
+      debugPrint('[SWIPE] API呼び出しエラー: $e');
       _setError('現在地周辺の店舗取得に失敗しました');
     } finally {
       _setLoading(false);
-      debugPrint('🏁 loadSwipeStores() 完了');
+      debugPrint('[SWIPE] loadSwipeStores() 完了');
     }
   }
 
@@ -321,13 +324,13 @@ class StoreProvider extends ChangeNotifier {
     int count = 10,
   }) async {
     debugPrint(
-        '🔍 API呼び出し開始: lat=$lat, lng=$lng, keyword=$keyword, range=$range, count=$count');
+        '[API] 呼び出し開始: lat=$lat, lng=$lng, keyword=$keyword, range=$range, count=$count');
     _setLoading(true);
     _clearError();
     _clearInfoMessage();
 
     try {
-      debugPrint('🌐 repository.searchStoresFromApi() 呼び出し中...');
+      debugPrint('[API] repository.searchStoresFromApi() 呼び出し中...');
       final apiStores = await repository.searchStoresFromApi(
         lat: lat,
         lng: lng,
@@ -337,7 +340,7 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
       debugPrint('$apiStores');
-      debugPrint('✅ API応答受信: ${apiStores.length}件の店舗データ');
+      debugPrint('[API] 応答受信: ${apiStores.length}件の店舗データ');
 
       // Issue #96: 統一化されたDuplicateStoreCheckerを使用
       // 既存店舗と新規店舗を比較して重複を除去
@@ -358,7 +361,7 @@ class StoreProvider extends ChangeNotifier {
         }
       }
 
-      debugPrint('🏪 重複除去後: ${newStores.length}件の新店舗');
+      debugPrint('[API] 重複除去後: ${newStores.length}件の新店舗');
 
       // 新しい店舗をローカルデータベースにも保存
       for (final store in newStores) {
@@ -377,22 +380,22 @@ class StoreProvider extends ChangeNotifier {
       _searchResults = List.from(newStores);
 
       debugPrint(
-          '📊 最終結果: 総店舗数=${_stores.length}件, 新規追加=${newStores.length}件, 検索結果=${_searchResults.length}件');
+          '[API] 最終結果: 総店舗数=${_stores.length}件, 新規追加=${newStores.length}件, 検索結果=${_searchResults.length}件');
 
       // 空の結果時のユーザーフレンドリーなメッセージ
       if (apiStores.isEmpty) {
-        debugPrint('⚠️ API応答が空でした');
+        debugPrint('[API] 応答が空でした');
         _setInfoMessage('近くに新しい中華料理店が見つかりませんでした。検索範囲を広げてみてください。');
         return;
       }
 
       notifyListeners();
     } catch (e) {
-      debugPrint('❌ API呼び出しエラー: $e');
+      debugPrint('[API] 呼び出しエラー: $e');
       _setError('新しい店舗の取得に失敗しました');
     } finally {
       _setLoading(false);
-      debugPrint('🏁 loadNewStoresFromApi() 完了');
+      debugPrint('[API] loadNewStoresFromApi() 完了');
     }
   }
 
