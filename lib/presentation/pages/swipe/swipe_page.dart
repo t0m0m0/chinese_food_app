@@ -593,9 +593,10 @@ class _SwipePageState extends State<SwipePage> {
                               onRefresh: _refreshStores,
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
-                                child: CardSwiper(
-                                  controller: controller,
-                                  cardsCount: _availableStores.length,
+                                child: _availableStores.isNotEmpty && _availableStores.length > 0
+                                    ? CardSwiper(
+                                        controller: controller,
+                                        cardsCount: _availableStores.length,
                                   onSwipe: _onSwipe,
                                   cardBuilder: (context, index,
                                       percentThresholdX, percentThresholdY) {
@@ -625,7 +626,33 @@ class _SwipePageState extends State<SwipePage> {
                                     return _buildStoreCard(
                                         _availableStores[index]);
                                   },
-                                ),
+                                )
+                                    : Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.sentiment_satisfied,
+                                              size: 64,
+                                              color: colorScheme.primary,
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Text(
+                                              'すべての店舗を確認済みです！',
+                                              style: theme.textTheme.titleLarge?.copyWith(
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              '検索画面で新しい店舗を探してみましょう',
+                                              style: theme.textTheme.bodyMedium?.copyWith(
+                                                color: colorScheme.onSurfaceVariant,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                               ),
                             );
                     },
