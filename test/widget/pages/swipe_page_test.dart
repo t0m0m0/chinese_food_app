@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 import 'package:chinese_food_app/presentation/pages/swipe/swipe_page.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
@@ -42,8 +43,10 @@ class MockStoreRepository extends Mock implements StoreRepository {
     int range = 3,
     int count = 20,
     int start = 1,
-  }) async =>
-      [];
+  }) async {
+    // 距離500m（range=2）の場合は空のリストを返す（APIエラーではなく正常応答）
+    return [];
+  }
 }
 
 class MockLocationService extends Mock implements LocationService {
@@ -123,13 +126,34 @@ void main() {
       expect(find.text('← 興味なし'), findsOneWidget);
     });
 
-    testWidgets('should show empty state when no more cards', (tester) async {
-      // when: SwipePageを表示
+    testWidgets(
+        'should show appropriate message when no stores found with 500m range',
+        (tester) async {
+      // given: SwipePageを表示
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // then: 空の状態メッセージが表示される（実装がないため失敗するはず）
-      expect(find.text('カードがありません'), findsNothing);
+      // when: StoreProviderのloadSwipeStoresメソッドを距離500m（range=2）で呼び出し
+      final storeProvider = Provider.of<StoreProvider>(
+        tester.element(find.byType(SwipePage)),
+        listen: false,
+      );
+
+      await storeProvider.loadSwipeStores(
+        lat: 35.6917,
+        lng: 139.7006,
+        range: 2, // 距離500m
+        count: 20,
+      );
+      await tester.pumpAndSettle();
+
+      // then: CardSwiperのクラッシュが発生せず、適切なメッセージが表示される
+      expect(find.byType(CardSwiper), findsNothing);
+
+      // 適切な空状態メッセージが表示されることを確認
+      expect(find.text('エラーが発生しました'), findsOneWidget);
+      expect(
+          find.text('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。'), findsOneWidget);
     });
   });
 }
