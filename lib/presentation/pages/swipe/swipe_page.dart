@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
@@ -266,6 +267,42 @@ class _SwipePageState extends State<SwipePage> {
         );
       }
     }
+  }
+
+  /// 店舗が見つからない場合の空状態UIを構築
+  ///
+  /// 店舗リストが空の時に表示される共通のメッセージUI
+  ///
+  /// [theme] アプリのテーマデータ
+  /// [colorScheme] カラースキーム
+  /// 戻り値: 空状態を示すCenterウィジェット
+  Widget _buildEmptyStoreMessage(ThemeData theme, ColorScheme colorScheme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.sentiment_satisfied,
+            size: 64,
+            color: colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'すべての店舗を確認済みです！',
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '検索画面で新しい店舗を探してみましょう',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 店舗情報を表示するカードウィジェットを構築
@@ -561,71 +598,63 @@ class _SwipePageState extends State<SwipePage> {
                         );
                       }
 
-                      // カードスワイプ表示
-                      return _availableStores.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.sentiment_satisfied,
-                                    size: 64,
-                                    color: colorScheme.primary,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'すべての店舗を確認済みです！',
-                                    style: theme.textTheme.titleLarge?.copyWith(
-                                      color: colorScheme.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '検索画面で新しい店舗を探してみましょう',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
+                      // スワイプ可能な店舗の表示制御（競合状態防止）
+                      // アトミックな参照により一貫性を保証
+                      final currentStores = List<Store>.from(_availableStores);
+                      final hasStores = currentStores.isNotEmpty;
+
+                      return !hasStores
+                          ? _buildEmptyStoreMessage(theme, colorScheme)
                           : RefreshIndicator(
                               onRefresh: _refreshStores,
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
-                                child: CardSwiper(
-                                  controller: controller,
-                                  cardsCount: _availableStores.length,
-                                  onSwipe: _onSwipe,
-                                  cardBuilder: (context, index,
-                                      percentThresholdX, percentThresholdY) {
-                                    // IndexOutOfRangeエラーを防ぐための安全チェック
-                                    if (index < 0 ||
-                                        index >= _availableStores.length) {
-                                      debugPrint(
-                                          '⚠️ CardSwiper index out of range: $index, available: ${_availableStores.length}');
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.errorContainer,
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'カードの読み込みエラー',
-                                            style: theme.textTheme.bodyMedium
-                                                ?.copyWith(
-                                              color:
-                                                  colorScheme.onErrorContainer,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return _buildStoreCard(
-                                        _availableStores[index]);
-                                  },
-                                ),
+                                // CardSwiper初期化防護: 競合状態による cardsCount=0 防止
+                                // アトミック参照により堅牢性確保（Issue #130根本対応）
+                                child: hasStores
+                                    ? CardSwiper(
+                                        controller: controller,
+                                        cardsCount: currentStores.length,
+                                        numberOfCardsDisplayed:
+                                            math.min(currentStores.length, 3),
+                                        onSwipe: _onSwipe,
+                                        cardBuilder: (context,
+                                            index,
+                                            percentThresholdX,
+                                            percentThresholdY) {
+                                          // IndexOutOfRangeエラーを防ぐための安全チェック
+                                          if (index < 0 ||
+                                              index >= currentStores.length) {
+                                            debugPrint(
+                                                '⚠️ CardSwiper index out of range: $index, available: ${currentStores.length}');
+                                            return Container(
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    colorScheme.errorContainer,
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  'カードの読み込みエラー',
+                                                  style: theme
+                                                      .textTheme.bodyMedium
+                                                      ?.copyWith(
+                                                    color: colorScheme
+                                                        .onErrorContainer,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return _buildStoreCard(
+                                              currentStores[index]);
+                                        },
+                                      )
+                                    // フォールバック: 極端な競合状態での安全なUI表示
+                                    // （理論上発生しないが、Web環境での予期しない状態変化に対応）
+                                    : _buildEmptyStoreMessage(
+                                        theme, colorScheme),
                               ),
                             );
                     },

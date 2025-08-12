@@ -255,6 +255,7 @@ class StoreProvider extends ChangeNotifier {
         '[SWIPE] 店舗読み込み開始: lat=$lat, lng=$lng, range=$range, count=$count');
     _setLoading(true);
     _clearError();
+    _clearInfoMessage(); // 情報メッセージもクリアして新しい検索結果を表示
 
     try {
       debugPrint('[SWIPE] API呼び出し中...');
@@ -297,13 +298,15 @@ class StoreProvider extends ChangeNotifier {
 
       debugPrint('[SWIPE] 店舗リスト更新完了: ${_swipeStores.length}件');
 
-      // 空の結果時のメッセージ
+      // 空の結果時の情報メッセージ（エラーではない正常状況）
       if (_swipeStores.isEmpty) {
         debugPrint('[SWIPE] 対象店舗が見つかりませんでした');
-        _setError('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。');
+        _setInfoMessage('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。');
         return;
       }
 
+      // 店舗が正常に見つかった場合は情報メッセージをクリア
+      _clearInfoMessage();
       notifyListeners();
     } catch (e) {
       debugPrint('[SWIPE] API呼び出しエラー: $e');
