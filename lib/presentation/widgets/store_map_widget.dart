@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/core/utils/map_utils.dart';
+import 'package:chinese_food_app/core/config/config_manager.dart';
 
 /// StoreMapWidget用の定数
 class _StoreMapConstants {
@@ -20,6 +22,52 @@ class StoreMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _checkGoogleMapsAvailability(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        
+        if (snapshot.hasError || !(snapshot.data ?? false)) {
+          return _buildErrorWidget(context);
+        }
+        
+        return _buildGoogleMap();
+      },
+    );
+  }
+
+  /// Google Maps表示エラー時のウィジェット
+  Widget _buildErrorWidget(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '地図を表示できません',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () => _openExternalNavigation(),
+            child: const Text('外部地図アプリで開く'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Google Mapウィジェット
+  Widget _buildGoogleMap() {
     return Stack(
       children: [
         GoogleMap(
@@ -62,6 +110,40 @@ class StoreMapWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Google Mapsの利用可能性をチェック
+  Future<bool> _checkGoogleMapsAvailability() async {
+    try {
+      // 座標値の検証
+      if (!MapUtils.isValidCoordinate(store.lat, store.lng)) {
+        if (kDebugMode) {
+          debugPrint(
+            'StoreMapWidget: Invalid coordinates - '
+            'lat: ${store.lat}, lng: ${store.lng}',
+          );
+        }
+        return false;
+      }
+
+      // APIキーの検証
+      final apiKey = ConfigManager.googleMapsApiKey;
+      if (!MapUtils.isValidGoogleMapsApiKey(apiKey)) {
+        if (kDebugMode) {
+          debugPrint(
+            'StoreMapWidget: Invalid Google Maps API key'
+          );
+        }
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('StoreMapWidget: Google Maps availability check failed: $e');
+      }
+      return false;
+    }
   }
 
   Future<void> _openExternalNavigation() async {
