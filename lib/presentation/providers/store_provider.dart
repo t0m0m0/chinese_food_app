@@ -255,6 +255,7 @@ class StoreProvider extends ChangeNotifier {
         '[SWIPE] 店舗読み込み開始: lat=$lat, lng=$lng, range=$range, count=$count');
     _setLoading(true);
     _clearError();
+    _clearInfoMessage(); // 情報メッセージもクリアして新しい検索結果を表示
 
     try {
       debugPrint('[SWIPE] API呼び出し中...');
@@ -304,6 +305,8 @@ class StoreProvider extends ChangeNotifier {
         return;
       }
 
+      // 店舗が正常に見つかった場合は情報メッセージをクリア
+      _clearInfoMessage();
       notifyListeners();
     } catch (e) {
       debugPrint('[SWIPE] API呼び出しエラー: $e');
