@@ -37,5 +37,37 @@ void main() {
         expect(MapUtils.isValidCoordinate(35.6762, double.negativeInfinity), isFalse);
       });
     });
+
+    group('isValidGoogleMapsApiKey', () {
+      test('should return true for valid API key', () {
+        const validApiKey = 'AIzaSyBvOkBOwOxWWN83WM6-5l8Kpj1zKsL4g7E';
+        expect(MapUtils.isValidGoogleMapsApiKey(validApiKey), isTrue);
+      });
+      
+      test('should return false for null or empty API key', () {
+        expect(MapUtils.isValidGoogleMapsApiKey(null), isFalse);
+        expect(MapUtils.isValidGoogleMapsApiKey(''), isFalse);
+        expect(MapUtils.isValidGoogleMapsApiKey('   '), isFalse);
+      });
+      
+      test('should return false for dummy or placeholder keys', () {
+        expect(MapUtils.isValidGoogleMapsApiKey('AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT'), isFalse);
+        expect(MapUtils.isValidGoogleMapsApiKey('YOUR_API_KEY_HERE'), isFalse);
+        expect(MapUtils.isValidGoogleMapsApiKey('YOUR_GOOGLE_MAPS_API_KEY'), isFalse);
+        expect(MapUtils.isValidGoogleMapsApiKey('\${GOOGLE_MAPS_API_KEY}'), isFalse);
+      });
+      
+      test('should return false for invalid format API key', () {
+        expect(MapUtils.isValidGoogleMapsApiKey('invalid-key'), isFalse);
+        expect(MapUtils.isValidGoogleMapsApiKey('123456'), isFalse);
+        expect(MapUtils.isValidGoogleMapsApiKey('random-string'), isFalse);
+      });
+      
+      test('should return true for valid format but potentially inactive key', () {
+        // Valid format but may not be active (still should pass format validation)
+        const validFormatKey = 'AIzaSyBvOkBOwOxWWN83WM6-5l8Kpj1zKsL4g7A';
+        expect(MapUtils.isValidGoogleMapsApiKey(validFormatKey), isTrue);
+      });
+    });
   });
 }

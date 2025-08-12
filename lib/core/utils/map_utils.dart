@@ -26,4 +26,36 @@ class MapUtils {
     
     return true;
   }
+
+  /// Google Maps APIキーが有効かどうかを検証する
+  /// 
+  /// [apiKey] Google Maps APIキー文字列
+  /// 
+  /// Returns: APIキーが有効な形式の場合true、無効な場合false
+  static bool isValidGoogleMapsApiKey(String? apiKey) {
+    // null, 空文字, 空白のみをチェック
+    if (apiKey == null || apiKey.trim().isEmpty) {
+      return false;
+    }
+    
+    final trimmedApiKey = apiKey.trim();
+    
+    // ダミーキーやプレースホルダーをチェック
+    const invalidKeys = [
+      'AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT',
+      'YOUR_API_KEY_HERE',
+      'YOUR_GOOGLE_MAPS_API_KEY',
+      '\${GOOGLE_MAPS_API_KEY}',
+    ];
+    
+    if (invalidKeys.contains(trimmedApiKey)) {
+      return false;
+    }
+    
+    // Google Maps API キーの基本的な形式チェック
+    // AIzaSy で始まり、39文字の英数字とハイフン、アンダースコアで構成
+    final apiKeyPattern = RegExp(r'^AIzaSy[A-Za-z0-9_-]{33}$');
+    
+    return apiKeyPattern.hasMatch(trimmedApiKey);
+  }
 }
