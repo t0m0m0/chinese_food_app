@@ -95,7 +95,8 @@ void main() {
       });
     });
 
-    group('Legacy Tests (ConfigManager Dependent - Expected to Show Error)', () {
+    group('Legacy Tests (ConfigManager Dependent - Expected to Show Error)',
+        () {
       // 注意: これらのテストは現在の実装ではConfigManagerが初期化されていないため、
       // エラー状態を表示することが期待されます。これは正常な動作です。
 
