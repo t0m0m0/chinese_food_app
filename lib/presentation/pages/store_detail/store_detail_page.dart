@@ -117,7 +117,7 @@ class StoreDetailPage extends StatelessWidget {
       );
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('StoreDetailPage: Map dialog display error: $e');
+        debugPrint('[StoreDetailPage] Map dialog display error: $e');
       }
 
       // エラー時はフォールバックダイアログを表示

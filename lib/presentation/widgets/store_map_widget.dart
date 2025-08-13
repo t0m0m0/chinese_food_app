@@ -119,7 +119,7 @@ class StoreMapWidget extends StatelessWidget {
       if (!MapUtils.isValidCoordinate(store.lat, store.lng)) {
         if (kDebugMode) {
           debugPrint(
-            'StoreMapWidget: Invalid coordinates - '
+            '[StoreMapWidget] Invalid coordinates - '
             'lat: ${store.lat}, lng: ${store.lng}',
           );
         }
@@ -130,7 +130,7 @@ class StoreMapWidget extends StatelessWidget {
       final apiKey = ConfigManager.googleMapsApiKey;
       if (!MapUtils.isValidGoogleMapsApiKey(apiKey)) {
         if (kDebugMode) {
-          debugPrint('StoreMapWidget: Invalid Google Maps API key');
+          debugPrint('[StoreMapWidget] Invalid Google Maps API key');
         }
         return false;
       }
@@ -138,7 +138,7 @@ class StoreMapWidget extends StatelessWidget {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('StoreMapWidget: Google Maps availability check failed: $e');
+        debugPrint('[StoreMapWidget] Availability check failed: $e');
       }
       return false;
     }
@@ -167,11 +167,11 @@ class StoreMapWidget extends StatelessWidget {
       // 全てのURLが失敗した場合
       if (kDebugMode) {
         debugPrint(
-            'StoreMapWidget: All navigation URLs failed for store: ${store.name}');
+            '[StoreMapWidget] All navigation URLs failed for store: ${store.name}');
       }
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('StoreMapWidget navigation error: $e');
+        debugPrint('[StoreMapWidget] Navigation error: $e');
       }
       // 本番環境ではサイレントフェール
     }

@@ -53,7 +53,11 @@ class MapUtils {
     }
 
     // Google Maps API キーの基本的な形式チェック
-    // AIzaSy で始まり、39文字の英数字とハイフン、アンダースコアで構成
+    // 構成: AIzaSy（固定6文字） + 英数字・ハイフン・アンダースコア（33文字）= 計39文字
+    // パターン詳細:
+    // - ^AIzaSy: 必ずAIzaSyで開始
+    // - [A-Za-z0-9_-]{33}: 大小英数字、アンダースコア、ハイフンが33文字
+    // - $: 文字列終端（余計な文字なし）
     final apiKeyPattern = RegExp(r'^AIzaSy[A-Za-z0-9_-]{33}$');
 
     return apiKeyPattern.hasMatch(trimmedApiKey);
