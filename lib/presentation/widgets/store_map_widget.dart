@@ -5,6 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/core/utils/map_utils.dart';
 import 'package:chinese_food_app/core/config/config_manager.dart';
+import '../../main.dart';
+import 'safe_google_map.dart';
+import 'webview_map_widget.dart';
+import '../../core/debug/crash_handler.dart';
 
 /// StoreMapWidget用の定数
 class _StoreMapConstants {
@@ -14,14 +18,22 @@ class _StoreMapConstants {
 
 class StoreMapWidget extends StatelessWidget {
   final Store store;
+  final bool useWebView;
 
   const StoreMapWidget({
     super.key,
     required this.store,
+    this.useWebView = false, // デフォルトはネイティブGoogleMap
   });
 
   @override
   Widget build(BuildContext context) {
+    // WebView版を使用する場合
+    if (useWebView) {
+      return WebViewMapWidget(store: store);
+    }
+
+    // ネイティブGoogleMap版を使用する場合
     return FutureBuilder<bool>(
       future: _checkGoogleMapsAvailability(),
       builder: (context, snapshot) {
@@ -70,7 +82,7 @@ class StoreMapWidget extends StatelessWidget {
   Widget _buildGoogleMap() {
     return Stack(
       children: [
-        GoogleMap(
+        SafeGoogleMap(
           initialCameraPosition: CameraPosition(
             target: LatLng(store.lat, store.lng),
             zoom: _StoreMapConstants.defaultZoom,
@@ -114,32 +126,111 @@ class StoreMapWidget extends StatelessWidget {
 
   /// Google Mapsの利用可能性をチェック
   Future<bool> _checkGoogleMapsAvailability() async {
+    CrashHandler.logGoogleMapsEvent('WIDGET_AVAILABILITY_CHECK_START',
+        details: {
+          'store_id': store.id,
+          'store_name': store.name,
+          'coordinates': '${store.lat},${store.lng}',
+        });
+
     try {
       // 座標値の検証
-      if (!MapUtils.isValidCoordinate(store.lat, store.lng)) {
+      final coordsValid = MapUtils.isValidCoordinate(store.lat, store.lng);
+      CrashHandler.logGoogleMapsEvent('COORDINATE_VALIDATION', details: {
+        'lat': store.lat,
+        'lng': store.lng,
+        'valid': coordsValid,
+      });
+
+      if (!coordsValid) {
         if (kDebugMode) {
           debugPrint(
             '[StoreMapWidget] Invalid coordinates - '
             'lat: ${store.lat}, lng: ${store.lng}',
           );
         }
+        CrashHandler.logGoogleMapsEvent('AVAILABILITY_FAIL_COORDINATES');
+        return false;
+      }
+
+      // Google Maps SDKの初期化状態をチェック
+      final sdkInitialized = GoogleMapsInitializer.isInitialized;
+      CrashHandler.logGoogleMapsEvent('SDK_STATUS_CHECK', details: {
+        'sdk_initialized': sdkInitialized,
+      });
+
+      if (!sdkInitialized) {
+        if (kDebugMode) {
+          debugPrint(
+              '[StoreMapWidget] Google Maps SDK not initialized - attempting initialization');
+        }
+
+        CrashHandler.logGoogleMapsEvent('WIDGET_ATTEMPTING_SDK_INIT');
+
+        // SDK初期化を試行
+        final initializationSuccess =
+            await GoogleMapsInitializer.ensureInitialized();
+        CrashHandler.logGoogleMapsEvent('WIDGET_SDK_INIT_RESULT', details: {
+          'success': initializationSuccess,
+        });
+
+        if (!initializationSuccess) {
+          if (kDebugMode) {
+            debugPrint(
+                '[StoreMapWidget] Google Maps SDK initialization failed');
+          }
+          CrashHandler.logGoogleMapsEvent('AVAILABILITY_FAIL_SDK_INIT');
+          return false;
+        }
+      }
+
+      // ConfigManagerの初期化状態を安全にチェック
+      final configInitialized = ConfigManager.isInitialized;
+      CrashHandler.logGoogleMapsEvent('CONFIG_STATUS_CHECK', details: {
+        'config_initialized': configInitialized,
+      });
+
+      if (!configInitialized) {
+        if (kDebugMode) {
+          debugPrint('[StoreMapWidget] ConfigManager not initialized');
+        }
+        CrashHandler.logGoogleMapsEvent('AVAILABILITY_FAIL_CONFIG');
         return false;
       }
 
       // APIキーの検証
       final apiKey = ConfigManager.googleMapsApiKey;
-      if (!MapUtils.isValidGoogleMapsApiKey(apiKey)) {
+      final apiKeyValid = MapUtils.isValidGoogleMapsApiKey(apiKey);
+      CrashHandler.logGoogleMapsEvent('API_KEY_VALIDATION', details: {
+        'api_key_valid': apiKeyValid,
+        'api_key_length': apiKey.length,
+        'api_key_starts_with':
+            apiKey.isNotEmpty ? apiKey.substring(0, 6) : 'empty',
+      });
+
+      if (!apiKeyValid) {
         if (kDebugMode) {
           debugPrint('[StoreMapWidget] Invalid Google Maps API key');
         }
+        CrashHandler.logGoogleMapsEvent('AVAILABILITY_FAIL_API_KEY');
         return false;
       }
 
+      CrashHandler.logGoogleMapsEvent('AVAILABILITY_CHECK_SUCCESS');
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('[StoreMapWidget] Availability check failed: $e');
       }
+
+      CrashHandler.logGoogleMapsEvent('AVAILABILITY_CHECK_EXCEPTION',
+          details: {
+            'error': e.toString(),
+            'error_type': e.runtimeType.toString(),
+            'store_id': store.id,
+          },
+          stackTrace: stackTrace);
+
       return false;
     }
   }

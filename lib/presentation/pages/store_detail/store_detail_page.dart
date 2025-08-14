@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/config/config_manager.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/store_utils.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
-import '../../widgets/store_map_widget.dart';
+import '../../widgets/webview_map_widget.dart';
 import 'widgets/store_header_widget.dart';
 import 'widgets/store_info_widget.dart';
 import 'widgets/store_action_widget.dart';
@@ -89,31 +90,52 @@ class StoreDetailPage extends StatelessWidget {
 
   void _showMap(BuildContext context) {
     try {
+      // ConfigManagerの初期化状態を事前確認
+      if (!ConfigManager.isInitialized) {
+        if (kDebugMode) {
+          debugPrint(
+              '[StoreDetailPage] ConfigManager not initialized, showing fallback');
+        }
+        _showMapErrorDialog(context);
+        return;
+      }
+
       showDialog(
         context: context,
-        builder: (context) => Dialog(
-          child: SizedBox(
-            height: 400.0, // 明示的にdouble型
-            width: double.maxFinite,
-            child: Column(
-              children: [
-                AppBar(
-                  title: Text(store.name),
-                  automaticallyImplyLeading: false,
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(context).pop(),
+        builder: (context) {
+          try {
+            final dialog = Dialog(
+              child: SizedBox(
+                height: 400.0, // 明示的にdouble型
+                width: double.maxFinite,
+                child: Column(
+                  children: [
+                    AppBar(
+                      title: Text(store.name),
+                      automaticallyImplyLeading: false,
+                      actions: [
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: WebViewMapWidget(
+                        store: store,
+                        useOpenStreetMap: true, // OpenStreetMap使用
+                      ),
                     ),
                   ],
                 ),
-                Expanded(
-                  child: StoreMapWidget(store: store),
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
+            );
+
+            return dialog;
+          } catch (e) {
+            rethrow;
+          }
+        },
       );
     } catch (e) {
       if (kDebugMode) {
