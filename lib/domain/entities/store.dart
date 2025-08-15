@@ -1,3 +1,5 @@
+import '../../core/utils/map_utils.dart';
+
 /// 店舗のステータス
 enum StoreStatus {
   /// 行きたい
@@ -88,12 +90,12 @@ class Store {
     if (address.isEmpty) {
       throw ArgumentError('Store address cannot be empty');
     }
-    if (lat < -90.0 || lat > 90.0) {
-      throw ArgumentError('Latitude must be between -90.0 and 90.0, got: $lat');
-    }
-    if (lng < -180.0 || lng > 180.0) {
-      throw ArgumentError(
-          'Longitude must be between -180.0 and 180.0, got: $lng');
+    // MapUtilsを使用した堅牢な座標値検証
+    if (!MapUtils.isValidCoordinate(lat, lng)) {
+      throw ArgumentError('Invalid coordinates: lat=$lat, lng=$lng. '
+          'Latitude must be between -90.0 and 90.0, '
+          'longitude must be between -180.0 and 180.0, '
+          'and values must not be NaN or Infinity.');
     }
   }
 

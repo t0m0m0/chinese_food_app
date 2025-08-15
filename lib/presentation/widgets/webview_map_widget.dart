@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../domain/entities/store.dart';
+import '../../core/debug/crash_handler.dart';
 
 /// WebViewを使用した地図表示ウィジェット
 class WebViewMapWidget extends StatefulWidget {
@@ -205,9 +205,11 @@ class _WebViewMapWidgetState extends State<WebViewMapWidget> {
         // TODO: 実際の実装ではurl_launcherを使用
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[WebViewMapWidget] External app launch error: $e');
-      }
+      CrashHandler.logEvent('WEBVIEW_EXTERNAL_NAV_ERROR', details: {
+        'error': e.toString(),
+        'store_id': widget.store.id,
+        'store_name': widget.store.name,
+      });
     }
   }
 }

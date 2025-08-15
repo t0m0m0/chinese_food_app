@@ -130,6 +130,56 @@ void main() {
           throwsA(isA<ArgumentError>()));
     });
 
+    test('should validate coordinates using MapUtils (NaN and Infinity)', () {
+      // NaN値のテスト
+      expect(
+          () => Store(
+                id: 'test-store-id',
+                name: '中華料理 テスト',
+                address: '東京都渋谷区テスト1-1-1',
+                lat: double.nan,
+                lng: 139.6503,
+                status: StoreStatus.wantToGo,
+                createdAt: DateTime(2025, 6, 23, 16, 0, 0),
+              ),
+          throwsA(allOf(
+              isA<ArgumentError>(),
+              predicate<ArgumentError>(
+                  (e) => e.message.contains('Invalid coordinates')))));
+
+      // Infinity値のテスト
+      expect(
+          () => Store(
+                id: 'test-store-id',
+                name: '中華料理 テスト',
+                address: '東京都渋谷区テスト1-1-1',
+                lat: 35.6762,
+                lng: double.infinity,
+                status: StoreStatus.wantToGo,
+                createdAt: DateTime(2025, 6, 23, 16, 0, 0),
+              ),
+          throwsA(allOf(
+              isA<ArgumentError>(),
+              predicate<ArgumentError>(
+                  (e) => e.message.contains('Invalid coordinates')))));
+
+      // -Infinity値のテスト
+      expect(
+          () => Store(
+                id: 'test-store-id',
+                name: '中華料理 テスト',
+                address: '東京都渋谷区テスト1-1-1',
+                lat: double.negativeInfinity,
+                lng: 139.6503,
+                status: StoreStatus.wantToGo,
+                createdAt: DateTime(2025, 6, 23, 16, 0, 0),
+              ),
+          throwsA(allOf(
+              isA<ArgumentError>(),
+              predicate<ArgumentError>(
+                  (e) => e.message.contains('Invalid coordinates')))));
+    });
+
     test('should validate required fields', () {
       expect(
           () => Store(
