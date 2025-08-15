@@ -32,7 +32,7 @@ api:
   google_maps:
     timeout_seconds: 45
     retry_attempts: 2
-    # APIキーは環境変数 GOOGLE_MAPS_API_KEY から取得
+    # Google Maps APIキーは不要（WebView地図実装により）
     
 # データベース設定
 database:

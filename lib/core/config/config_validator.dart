@@ -51,7 +51,7 @@ class ConfigValidator {
   /// APIキーの存在を検証
   static void _validateApiKeys(List<String> errors) {
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    final googleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
+    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
       errors.add(
@@ -59,17 +59,13 @@ class ConfigValidator {
       );
     }
 
-    if (googleMapsKey.isEmpty) {
-      errors.add(
-        'Google Maps API キーが設定されていません (環境: ${EnvironmentConfig.current.name})',
-      );
-    }
+    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// APIキーの形式を検証
   static void _validateApiKeyFormats(List<String> errors) {
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    final googleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
+    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isNotEmpty && !_isValidHotpepperApiKey(hotpepperKey)) {
       errors.add(
@@ -77,11 +73,7 @@ class ConfigValidator {
       );
     }
 
-    if (googleMapsKey.isNotEmpty && !_isValidGoogleMapsApiKey(googleMapsKey)) {
-      errors.add(
-        'Google Maps API キーの形式が無効です (AIza で始まる39文字のキーが必要)',
-      );
-    }
+    // Google Maps APIキーの形式チェックは削除（WebView実装により不要）
   }
 
   /// 環境固有の設定を検証
@@ -108,46 +100,39 @@ class ConfigValidator {
   static void _validateProductionConfig(List<String> errors) {
     // 本番環境では厳密な検証を実施
     final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
-    final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
+    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
       errors.add('本番環境: HOTPEPPER_API_KEY が設定されていません');
     }
 
-    if (googleMapsKey.isEmpty) {
-      errors.add('本番環境: GOOGLE_MAPS_API_KEY が設定されていません');
-    }
-
+    // Google Maps APIキーのチェックは削除（WebView実装により不要）
     // フォールバック機能は削除されたため、この警告は不要
   }
 
   /// ステージング環境の設定を検証
   static void _validateStagingConfig(List<String> errors) {
     final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
-    final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
+    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
       errors.add('ステージング環境: HOTPEPPER_API_KEY が設定されていません');
     }
 
-    if (googleMapsKey.isEmpty) {
-      errors.add('ステージング環境: GOOGLE_MAPS_API_KEY が設定されていません');
-    }
+    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// 開発環境の設定を検証
   static void _validateDevelopmentConfig(List<String> errors) {
     // 開発環境では警告レベルの検証
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    final googleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
+    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
       errors.add('開発環境: HotPepper API キーが設定されていません（機能制限あり）');
     }
 
-    if (googleMapsKey.isEmpty) {
-      errors.add('開発環境: Google Maps API キーが設定されていません（地図機能無効）');
-    }
+    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// テスト環境の設定を検証
@@ -155,7 +140,7 @@ class ConfigValidator {
     // テスト環境では最小限の検証のみ
     // ダミーAPIキーが設定されていれば問題なし
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    final googleMapsKey = EnvironmentConfig.effectiveGoogleMapsApiKey;
+    // Google Maps APIキーは不要（WebView地図実装により）
 
     // テスト環境ではAPIキーが設定されていればOK（実際の形式は問わない）
     // ダミーキーでもテストには支障がない
@@ -163,9 +148,7 @@ class ConfigValidator {
       errors.add('テスト環境: HotPepper API キーが設定されていません（テスト実行に影響なし）');
     }
 
-    if (googleMapsKey.isEmpty) {
-      errors.add('テスト環境: Google Maps API キーが設定されていません（テスト実行に影響なし）');
-    }
+    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// HotPepper API キーの形式を検証
@@ -179,17 +162,7 @@ class ConfigValidator {
     return true;
   }
 
-  /// Google Maps API キーの形式を検証
-  static bool _isValidGoogleMapsApiKey(String apiKey) {
-    // Google Maps API キーの基本的な形式チェック
-    // - AIza で始まる
-    // - 39文字
-    if (apiKey.length != 39) return false;
-    if (!apiKey.startsWith('AIza')) return false;
-    if (!RegExp(r'^AIza[a-zA-Z0-9_-]+$').hasMatch(apiKey)) return false;
-
-    return true;
-  }
+  // Google Maps API キーの形式検証メソッドは削除（WebView実装により不要）
 
   /// 設定が有効かどうかを判定
   static bool get isConfigurationValid {

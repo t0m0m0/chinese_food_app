@@ -33,13 +33,15 @@ class TestConstants {
   static const String defaultTestEnvironmentConfig = '''
 FLUTTER_ENV=$testEnvValue
 HOTPEPPER_API_KEY=$dummyHotpepperApiKey
-GOOGLE_MAPS_API_KEY=$dummyGoogleMapsApiKey
+# GOOGLE_MAPS_API_KEY は不要（WebView地図実装により）
 LOCATION_MODE=$locationModeTest
 PERMISSION_TEST_MODE=$permissionTestModeMock
 TEST_DEBUG_LOGGING=$testDebugLoggingTrue''';
 
   /// テスト用環境変数キー定数
   static const String hotpepperApiKeyEnv = 'HOTPEPPER_API_KEY';
+  // Google Maps APIキーは不要（WebView地図実装により）
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static const String googleMapsApiKeyEnv = 'GOOGLE_MAPS_API_KEY';
   static const String flutterEnvKey = 'FLUTTER_ENV';
   static const String testEnvValue = 'test';
@@ -78,6 +80,6 @@ TEST_DEBUG_LOGGING=$testDebugLoggingTrue''';
   static const String integrationTestEnvironmentConfig = '''
 FLUTTER_ENV=$integrationEnvValue
 HOTPEPPER_API_KEY=$integrationTestHotpepperApiKey
-GOOGLE_MAPS_API_KEY=$integrationTestGoogleMapsApiKey
+# GOOGLE_MAPS_API_KEY は不要（WebView地図実装により）
 LOCATION_MODE=$locationModeMock''';
 }

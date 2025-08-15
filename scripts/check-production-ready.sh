@@ -208,7 +208,8 @@ else
     check_warn "HotPepper APIキー: 環境変数未設定（本番では Secure Storage から取得）"
 fi
 
-if [ -n "$GOOGLE_MAPS_API_KEY" ]; then
+# Google Maps APIキーチェックは削除（WebView実装により不要）
+# if [ -n "$GOOGLE_MAPS_API_KEY" ]; then
     check_pass "Google Maps APIキー: 環境変数に設定済み"
 else
     check_warn "Google Maps APIキー: 環境変数未設定（本番では Secure Storage から取得）"

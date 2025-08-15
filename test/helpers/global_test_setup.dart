@@ -13,7 +13,7 @@ void setupGlobalTestEnvironment() {
       // フォールバック：.env.testが存在しない場合
       dotenv.testLoad(fileInput: '''
 HOTPEPPER_API_KEY=test_hotpepper_api_key_for_testing
-GOOGLE_MAPS_API_KEY=test_google_maps_api_key_for_testing
+# GOOGLE_MAPS_API_KEY は不要（WebView地図実装により）
 FLUTTER_ENV=development
 TEST_DATABASE_PATH=:memory:
 ENABLE_DEBUG_LOGGING=false
