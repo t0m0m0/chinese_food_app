@@ -33,7 +33,8 @@ void main() {
     });
 
     group('WebView Map Display Tests', () {
-      testWidgets('should display Stack with WebViewMapWidget and FloatingActionButton',
+      testWidgets(
+          'should display Stack with WebViewMapWidget and FloatingActionButton',
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
@@ -44,7 +45,7 @@ void main() {
         // StoreMapWidgetのStackとFloatingActionButtonが表示されることを確認
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
         expect(find.byType(FloatingActionButton), findsOneWidget);
-        
+
         // 外部地図アプリ起動ボタンが表示されることを確認
         expect(find.byIcon(Icons.navigation), findsOneWidget);
         expect(find.byTooltip('外部地図アプリで開く'), findsOneWidget);
@@ -60,7 +61,7 @@ void main() {
 
         // Semanticsラベルが正しく設定されていることを確認
         expect(find.byType(Semantics), findsAtLeastNWidgets(1));
-        
+
         // NavigationアイコンとTooltipが存在することを確認
         expect(find.byIcon(Icons.navigation), findsOneWidget);
         expect(find.byTooltip('外部地図アプリで開く'), findsOneWidget);
@@ -77,7 +78,7 @@ void main() {
         // ナビゲーションボタンをタップ（実際の外部アプリ起動はしない）
         final navigationButton = find.byType(FloatingActionButton);
         expect(navigationButton, findsOneWidget);
-        
+
         await tester.tap(navigationButton);
         await tester.pump();
 
@@ -113,7 +114,7 @@ void main() {
         // Positionedウィジェットで適切な位置に配置されていることを確認
         final positioned = find.byType(Positioned);
         expect(positioned, findsOneWidget);
-        
+
         final positionedWidget = tester.widget<Positioned>(positioned);
         expect(positionedWidget.top, equals(16.0));
         expect(positionedWidget.right, equals(16.0));
@@ -146,12 +147,12 @@ void main() {
         // 境界値座標でもエラーが発生しないことを確認
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
         expect(find.byType(FloatingActionButton), findsOneWidget);
-        
+
         // ナビゲーションボタンタップテスト
         final navigationButton = find.byType(FloatingActionButton);
         await tester.tap(navigationButton);
         await tester.pump();
-        
+
         // エラーなく処理されることを確認
         expect(navigationButton, findsOneWidget);
       });
@@ -168,16 +169,16 @@ void main() {
 
         // アクセシビリティ要素の確認
         expect(find.byTooltip('外部地図アプリで開く'), findsOneWidget);
-        
+
         // Semanticsラベルが適切に設定されていることを確認
         final semanticsList = find.byType(Semantics);
         expect(semanticsList, findsAtLeastNWidgets(1));
-        
+
         // ラベル付きSemanticsウィジェットの存在を確認
         bool hasLabeledSemantics = false;
         for (int i = 0; i < semanticsList.evaluate().length; i++) {
           final semantics = tester.widget<Semantics>(semanticsList.at(i));
-          if (semantics.properties.label != null && 
+          if (semantics.properties.label != null &&
               semantics.properties.label!.contains('ナビゲーション')) {
             hasLabeledSemantics = true;
             break;
@@ -197,7 +198,7 @@ void main() {
         // FloatingActionButtonがインタラクティブであることを確認
         final fab = find.byType(FloatingActionButton);
         expect(fab, findsOneWidget);
-        
+
         // ボタンが有効であることを確認
         final fabWidget = tester.widget<FloatingActionButton>(fab);
         expect(fabWidget.onPressed, isNotNull);
