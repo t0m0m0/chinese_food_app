@@ -121,7 +121,7 @@ class EnvironmentConfig {
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=test
 HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
-# GOOGLE_MAPS_API_KEY は不要（WebView実装により）
+
 ''');
         }
 
@@ -147,7 +147,7 @@ HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=${const String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development')}
 HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
-# GOOGLE_MAPS_API_KEY は不要（WebView実装により）
+
 ''');
           debugPrint('✅ 環境変数からの設定完了');
         }
@@ -164,14 +164,13 @@ HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultVal
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=test
 HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
-# GOOGLE_MAPS_API_KEY は不要（WebView実装により）
+
 ''');
           debugPrint('🔄 テスト環境フォールバック初期化完了');
         } catch (fallbackError) {
           debugPrint('❌ フォールバック初期化も失敗: $fallbackError');
           dotenv.env['FLUTTER_ENV'] = 'test';
           dotenv.env['HOTPEPPER_API_KEY'] = 'testdummyhotpepperkey123456789';
-          // Google Maps APIキーは不要（WebView実装により）
         }
       } else {
         // 開発環境用フォールバック
@@ -179,7 +178,7 @@ HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
         dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=development
 HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
-# GOOGLE_MAPS_API_KEY は不要（WebView実装により）
+
 ''');
       }
     }
