@@ -78,7 +78,7 @@ class GoogleMapsInitializer {
         return false;
       }
 
-      // API키 검증
+      // APIキーの検証
       final apiKey = ConfigManager.googleMapsApiKey;
       final apiKeyValid = apiKey.isNotEmpty;
       CrashHandler.logEvent('API_KEY_CHECK', details: {
@@ -93,15 +93,15 @@ class GoogleMapsInitializer {
         return false;
       }
 
-      // Google Maps Services를 명시적으로 초기化
-      // 이는 네이티브 SDK의 precondition check가 안전하게 통과하도록 보장합니다
+      // Google Maps Servicesを明示的に初期化
+      // これによりネイティブSDKのprecondition checkが安全に通過するよう保証します
       debugPrint(
           '[GoogleMapsInitializer] Initializing Google Maps Services...');
       CrashHandler.logEvent('SDK_INIT_START', details: {
         'api_key_first_6': apiKey.substring(0, 6),
       });
 
-      // Android 및 iOS에서 Google Maps SDK 초기化
+      // AndroidおよびiOSでGoogle Maps SDKを初期化
       await _initializeGoogleMapsServices(apiKey);
 
       _completeInitialization(true);
@@ -124,13 +124,13 @@ class GoogleMapsInitializer {
     }
   }
 
-  /// 플랫폼별 Google Maps Services 초기화
+  /// プラットフォーム別Google Maps Services初期化
   static Future<void> _initializeGoogleMapsServices(String apiKey) async {
     try {
-      // Google Maps Flutter plugin의 내부 초기화를 트리거하기 위한 더미 작업
-      // 이는 실제 GoogleMap 위젯 생성 전에 SDK를 사전 초기화합니다
+      // Google Maps Flutter pluginの内部初期化をトリガーするためのダミー作業
+      // これにより実際のGoogleMapウィジェット生成前にSDKを事前初期化します
 
-      // SDK 내부 초기화를 위한 지연
+      // SDK内部初期化のための遅延
       await Future.delayed(const Duration(milliseconds: 100));
 
       debugPrint('[GoogleMapsInitializer] Platform initialization completed');
@@ -140,7 +140,7 @@ class GoogleMapsInitializer {
     }
   }
 
-  /// 초기화 완료 处理
+  /// 初期化完了処理
   static void _completeInitialization(bool success) {
     _isInitialized = success;
     _initializationInProgress = false;
@@ -151,7 +151,7 @@ class GoogleMapsInitializer {
     return const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false);
   }
 
-  /// 테스트용 초기화 상태 리셋
+  /// テスト用初期化状態リセット
   @visibleForTesting
   static void resetForTesting() {
     _isInitialized = false;
