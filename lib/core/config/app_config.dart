@@ -10,7 +10,6 @@ import '../exceptions/infrastructure/security_exception.dart';
 class AppConfig {
   // テスト用のAPIキー保存
   static String? _testHotpepperApiKey;
-  static String? _testGoogleMapsApiKey;
 
   // 初期化フラグ
   static bool _initialized = false;
@@ -133,95 +132,23 @@ class AppConfig {
     _initialized = true;
   }
 
-  /// Google Maps APIキー
+  /// Google Maps APIキー（WebView実装により使用していません）
   ///
-  /// テスト環境: テスト用APIキーを使用
-  /// 本番環境: flutter_secure_storage から取得
-  /// 開発環境: .envファイルまたは環境変数から取得
+  /// WebView地図実装により、Google Maps APIキーは不要になりました。
+  /// 互換性のため残していますが、常に空文字列を返します。
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static Future<String?> get googleMapsApiKey async {
-    // テスト環境ではテスト用APIキーを使用
-    if (_testGoogleMapsApiKey != null) {
-      return _testGoogleMapsApiKey;
-    }
-
-    // 本番環境では secure_storage を使用
-    if (isProduction) {
-      try {
-        final key = await _storage.read(key: 'GOOGLE_MAPS_API_KEY');
-        if (key == null || key.isEmpty) {
-          throw APIKeyNotFoundException(
-            'Google Maps API',
-            context: 'セキュアストレージにAPIキーが設定されていません',
-          );
-        }
-        return key;
-      } catch (e) {
-        // 開発時にはログ出力
-        if (isDevelopment) {
-          developer.log(
-            'Google Maps APIキー取得エラー: ${e.toString()}',
-            name: 'AppConfig',
-            level: 1000,
-          );
-        }
-
-        if (e is SecurityException) {
-          rethrow;
-        }
-
-        throw APIKeyAccessException(
-          'Google Maps API',
-          'セキュアストレージからの読み込みに失敗しました',
-          context: '本番環境でのAPIキー取得',
-          originalException: e is Exception ? e : Exception(e.toString()),
-        );
-      }
-    }
-
-    // 開発環境では.envファイルまたは環境変数から取得
-    await initialize();
-
-    // .envファイルから取得を試行
-    final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-    if (envKey != null && envKey.isNotEmpty) {
-      return envKey;
-    }
-
-    // 環境変数から取得（フォールバック）
-    final environmentKey = const String.fromEnvironment('GOOGLE_MAPS_API_KEY');
-
-    // 開発者への設定ガイダンス
-    if (isDevelopment && environmentKey.isEmpty) {
-      developer.log(
-        '推奨: .envファイルにGOOGLE_MAPS_API_KEY=your_key_here を設定してください',
-        name: 'AppConfig',
-      );
-    }
-
-    return environmentKey;
+    // WebView実装により不要だが、互換性のため空文字列を返す
+    return '';
   }
 
-  /// Google Maps APIキー（同期版・テスト用のみ）
+  /// Google Maps APIキー（同期版・WebView実装により使用していません）
   ///
-  /// テスト環境でのみ使用可能。本番環境では非同期版を使用してください。
+  /// WebView地図実装により不要になりました。互換性のため残しています。
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static String? get googleMapsApiKeySync {
-    if (_testGoogleMapsApiKey != null) {
-      return _testGoogleMapsApiKey;
-    }
-
-    if (isProduction) {
-      throw UnsupportedError('本番環境では非同期版のAPIキー取得を使用してください');
-    }
-
-    // .envファイルから取得を試行（既に初期化済みの場合のみ）
-    if (_initialized) {
-      final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-      if (envKey != null && envKey.isNotEmpty) {
-        return envKey;
-      }
-    }
-
-    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+    // WebView実装により不要だが、互換性のため空文字列を返す
+    return '';
   }
 
   /// APIキーが設定されているかどうかをチェック（同期版）
@@ -245,25 +172,22 @@ class AppConfig {
     return key != null && key.isNotEmpty && key != 'YOUR_API_KEY_HERE';
   }
 
-  /// Google Maps APIキーが設定されているかどうかをチェック（同期版）
+  /// Google Maps APIキーが設定されているかどうかをチェック（WebView実装により不要）
   ///
-  /// テスト環境および開発環境でのみ使用可能
+  /// WebView地図実装により、Google Maps APIキーは不要になりました。
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static bool get hasGoogleMapsApiKey {
-    if (isProduction) {
-      // 本番環境では非同期版を使用すべきため、警告を出力
-      return false;
-    }
-
-    final key = googleMapsApiKeySync;
-    return key != null && key.isNotEmpty && key != 'YOUR_API_KEY_HERE';
+    // WebView実装により常にfalseを返す
+    return false;
   }
 
-  /// Google Maps APIキーが設定されているかどうかをチェック（非同期版）
+  /// Google Maps APIキーが設定されているかどうかをチェック（WebView実装により不要）
   ///
-  /// 本番環境では必ずこちらを使用してください
+  /// WebView地図実装により、Google Maps APIキーは不要になりました。
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static Future<bool> get hasGoogleMapsApiKeyAsync async {
-    final key = await googleMapsApiKey;
-    return key != null && key.isNotEmpty && key != 'YOUR_API_KEY_HERE';
+    // WebView実装により常にfalseを返す
+    return false;
   }
 
   /// 開発環境かどうかを判定
@@ -282,7 +206,7 @@ class AppConfig {
       'isDevelopment': isDevelopment,
       'isProduction': isProduction,
       'hasHotpepperApiKey': hasHotpepperApiKey,
-      'hasGoogleMapsApiKey': hasGoogleMapsApiKey,
+      'hasGoogleMapsApiKey': false, // WebView実装により不要
       'initialized': _initialized,
     };
   }
@@ -292,15 +216,15 @@ class AppConfig {
     _testHotpepperApiKey = apiKey;
   }
 
-  /// テスト用にGoogle Maps APIキーを設定
+  /// テスト用にGoogle Maps APIキーを設定（WebView実装により不要）
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static void setTestGoogleMapsApiKey(String apiKey) {
-    _testGoogleMapsApiKey = apiKey;
+    // WebView実装により何もしない（互換性のため残す）
   }
 
   /// テスト用APIキーをすべてクリア
   static void clearTestApiKey() {
     _testHotpepperApiKey = null;
-    _testGoogleMapsApiKey = null;
   }
 
   /// 初期化状態をリセット（テスト用）

@@ -55,11 +55,7 @@ if [ -z "$HOTPEPPER_API_KEY" ]; then
     exit 1
 fi
 
-if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
-    echo -e "${RED}❌ Google Maps APIキーが設定されていません${NC}"
-    echo "環境変数 GOOGLE_MAPS_API_KEY を設定してください"
-    exit 1
-fi
+
 
 echo -e "${GREEN}✅ 前提条件チェック完了${NC}"
 
@@ -109,7 +105,7 @@ case $PLATFORM in
             --dart-define=FLUTTER_ENV=production \
             --dart-define=PRODUCTION=true \
             --dart-define=HOTPEPPER_API_KEY="$HOTPEPPER_API_KEY" \
-            --dart-define=GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" \
+
             --build-name=1.0.0 \
             --build-number="$(date +%Y%m%d%H%M)"
             
@@ -153,7 +149,7 @@ case $PLATFORM in
             --dart-define=FLUTTER_ENV=production \
             --dart-define=PRODUCTION=true \
             --dart-define=HOTPEPPER_API_KEY="$HOTPEPPER_API_KEY" \
-            --dart-define=GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" \
+
             --build-name=1.0.0 \
             --build-number="$(date +%Y%m%d%H%M)" \
             --obfuscate \
@@ -179,7 +175,7 @@ case $PLATFORM in
             --dart-define=FLUTTER_ENV=production \
             --dart-define=PRODUCTION=true \
             --dart-define=HOTPEPPER_API_KEY="$HOTPEPPER_API_KEY" \
-            --dart-define=GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" \
+
             --web-renderer=html \
             --base-href="/"
             

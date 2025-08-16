@@ -19,25 +19,16 @@ void main() {
       test('空のAPIキーは無効として判定される', () {
         AppConfig.setTestApiKey('');
         expect(AppConfig.hasHotpepperApiKey, isFalse);
-
-        AppConfig.setTestGoogleMapsApiKey('');
-        expect(AppConfig.hasGoogleMapsApiKey, isFalse);
       });
 
       test('プレースホルダーAPIキーは無効として判定される', () {
         AppConfig.setTestApiKey('YOUR_API_KEY_HERE');
         expect(AppConfig.hasHotpepperApiKey, isFalse);
-
-        AppConfig.setTestGoogleMapsApiKey('YOUR_API_KEY_HERE');
-        expect(AppConfig.hasGoogleMapsApiKey, isFalse);
       });
 
       test('有効なAPIキーは正しく判定される', () {
         AppConfig.setTestApiKey('valid_hotpepper_key');
         expect(AppConfig.hasHotpepperApiKey, isTrue);
-
-        AppConfig.setTestGoogleMapsApiKey('valid_google_maps_key');
-        expect(AppConfig.hasGoogleMapsApiKey, isTrue);
       });
 
       test('本番環境では同期版APIキー取得は例外を投げる', () {
@@ -45,7 +36,6 @@ void main() {
         // 本番環境で実行された場合のみテストが有効
         if (!AppConfig.isProduction) {
           expect(AppConfig.hotpepperApiKeySync, isA<String?>());
-          expect(AppConfig.googleMapsApiKeySync, isA<String?>());
         }
       });
     });
@@ -61,18 +51,14 @@ void main() {
     group('セキュリティ機能', () {
       test('テスト用APIキーは正しく設定・クリアされる', () {
         const testKey = 'test_key_123';
-        const testGoogleKey = 'test_google_key_456';
 
         AppConfig.setTestApiKey(testKey);
-        AppConfig.setTestGoogleMapsApiKey(testGoogleKey);
 
         expect(AppConfig.hotpepperApiKeySync, equals(testKey));
-        expect(AppConfig.googleMapsApiKeySync, equals(testGoogleKey));
 
         AppConfig.clearTestApiKey();
 
         expect(AppConfig.hotpepperApiKeySync, isNot(equals(testKey)));
-        expect(AppConfig.googleMapsApiKeySync, isNot(equals(testGoogleKey)));
       });
 
       test('初期化状態は正しく管理される', () {
@@ -94,17 +80,6 @@ void main() {
         final hasKey = await AppConfig.hasHotpepperApiKeyAsync;
         expect(hasKey, isTrue);
       });
-
-      test('Google Maps API非同期版も正しく動作する', () async {
-        const testKey = 'async_google_test_key';
-        AppConfig.setTestGoogleMapsApiKey(testKey);
-
-        final googleKey = await AppConfig.googleMapsApiKey;
-        expect(googleKey, equals(testKey));
-
-        final hasKey = await AppConfig.hasGoogleMapsApiKeyAsync;
-        expect(hasKey, isTrue);
-      });
     });
 
     group('デバッグ情報', () {
@@ -114,7 +89,6 @@ void main() {
         expect(debugInfo, containsPair('isDevelopment', isA<bool>()));
         expect(debugInfo, containsPair('isProduction', isA<bool>()));
         expect(debugInfo, containsPair('hasHotpepperApiKey', isA<bool>()));
-        expect(debugInfo, containsPair('hasGoogleMapsApiKey', isA<bool>()));
         expect(debugInfo, containsPair('initialized', isA<bool>()));
       });
     });

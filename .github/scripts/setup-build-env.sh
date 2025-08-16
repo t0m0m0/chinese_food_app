@@ -13,11 +13,6 @@ else
     echo "HOTPEPPER_API_KEY=dummy_hotpepper_key_for_build_12345" >> .env
 fi
 
-if [ -n "$GOOGLE_MAPS_API_KEY_PROD" ]; then
-    echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY_PROD" >> .env
-else
-    echo "GOOGLE_MAPS_API_KEY=dummy_maps_key_for_build_12345" >> .env
-fi
 
 echo "=== ビルド用環境ファイル確認（機密情報はマスク） ==="
 sed 's/API_KEY=.*/API_KEY=***MASKED***/g' .env

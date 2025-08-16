@@ -121,7 +121,7 @@ class EnvironmentConfig {
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=test
 HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
-GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
+
 ''');
         }
 
@@ -140,15 +140,13 @@ GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
           debugPrint('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
           debugPrint(
               '  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
-          debugPrint(
-              '  GOOGLE_MAPS_API_KEY: ${dotenv.env['GOOGLE_MAPS_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['GOOGLE_MAPS_API_KEY']?.length}文字)' : '未設定'}');
         } else {
           debugPrint('⚠️ .envファイルが存在しません。環境変数から直接取得します');
           // 環境変数から直接設定を行う
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=${const String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development')}
 HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
-GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '')}
+
 ''');
           debugPrint('✅ 環境変数からの設定完了');
         }
@@ -165,15 +163,13 @@ GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaul
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=test
 HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
-GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
+
 ''');
           debugPrint('🔄 テスト環境フォールバック初期化完了');
         } catch (fallbackError) {
           debugPrint('❌ フォールバック初期化も失敗: $fallbackError');
           dotenv.env['FLUTTER_ENV'] = 'test';
           dotenv.env['HOTPEPPER_API_KEY'] = 'testdummyhotpepperkey123456789';
-          dotenv.env['GOOGLE_MAPS_API_KEY'] =
-              'AIzaSyTestDummyGoogleMapsKey12345678901';
         }
       } else {
         // 開発環境用フォールバック
@@ -181,7 +177,7 @@ GOOGLE_MAPS_API_KEY=AIzaSyTestDummyGoogleMapsKey12345678901
         dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=development
 HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
-GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '')}
+
 ''');
       }
     }
@@ -218,40 +214,19 @@ GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaul
     return const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '');
   }
 
-  /// Google Maps API キーを取得（全環境共通）
+  /// Google Maps API キーを取得（WebView実装により使用していません）
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static String get googleMapsApiKey {
-    // 初期化チェック
-    if (!_initialized) {
-      // テスト環境では環境変数から取得を試行
-      if (_isTestEnvironment()) {
-        return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
-            defaultValue: 'AIzaSyTestDummyGoogleMapsKey12345678901');
-      }
-      // 初期化されていない場合は環境変数からのみ取得
-      return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
-          defaultValue: '');
-    }
-
-    try {
-      // .envファイルから取得を試行
-      final envKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-      if (envKey != null && envKey.isNotEmpty) {
-        return envKey;
-      }
-    } catch (e) {
-      // dotenvエラーの場合は環境変数にフォールバック
-    }
-
-    // 環境変数から取得（フォールバック）
-    return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
-        defaultValue: '');
+    // WebView実装により不要だが、互換性のため空文字列を返す
+    return '';
   }
 
   /// 実際に使用するHotPepper APIキーを取得
   static String get effectiveHotpepperApiKey => hotpepperApiKey;
 
-  /// 実際に使用するGoogle Maps APIキーを取得
-  static String get effectiveGoogleMapsApiKey => googleMapsApiKey;
+  /// 実際に使用するGoogle Maps APIキーを取得（WebView実装により不要）
+  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
+  static String get effectiveGoogleMapsApiKey => '';
 
   /// 初期化されているかどうかを確認
   static bool get isInitialized => _initialized;
@@ -268,9 +243,7 @@ GOOGLE_MAPS_API_KEY=${const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaul
       'hotpepperApiKey': effectiveHotpepperApiKey.isNotEmpty
           ? '${effectiveHotpepperApiKey.substring(0, 8)}...'
           : '(未設定)',
-      'googleMapsApiKey': effectiveGoogleMapsApiKey.isNotEmpty
-          ? '${effectiveGoogleMapsApiKey.substring(0, 8)}...'
-          : '(未設定)',
+      'googleMapsApiKey': '(未使用：WebView実装)',
       'hotpepperApiUrl': hotpepperApiUrl,
     };
   }

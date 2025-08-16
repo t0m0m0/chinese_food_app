@@ -5,7 +5,7 @@ import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/store_utils.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
-import '../../widgets/store_map_widget.dart';
+import '../../widgets/webview_map_widget.dart';
 import 'widgets/store_header_widget.dart';
 import 'widgets/store_info_widget.dart';
 import 'widgets/store_action_widget.dart';
@@ -90,7 +90,7 @@ class StoreDetailPage extends StatelessWidget {
       context: context,
       builder: (context) => Dialog(
         child: SizedBox(
-          height: 400.0, // 明示的にdouble型
+          height: 400.0,
           width: double.maxFinite,
           child: Column(
             children: [
@@ -105,7 +105,10 @@ class StoreDetailPage extends StatelessWidget {
                 ],
               ),
               Expanded(
-                child: StoreMapWidget(store: store),
+                child: WebViewMapWidget(
+                  store: store,
+                  useOpenStreetMap: true,
+                ),
               ),
             ],
           ),
