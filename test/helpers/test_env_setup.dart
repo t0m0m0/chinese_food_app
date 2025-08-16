@@ -46,8 +46,7 @@ class TestEnvSetup {
 
     // テスト用のダミーAPIキーを設定（.env.testに値がない場合のみ）
     final hotpepperKey = dotenv.env['HOTPEPPER_API_KEY'];
-    final googleMapsKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-    if ((hotpepperKey?.isEmpty ?? true) || (googleMapsKey?.isEmpty ?? true)) {
+    if (hotpepperKey?.isEmpty ?? true) {
       _setDefaultTestValues();
     }
 
@@ -85,18 +84,12 @@ class TestEnvSetup {
     // 必要な設定値を補完
     env[TestConstants.hotpepperApiKeyEnv] ??=
         TestConstants.dummyHotpepperApiKey;
-    env[TestConstants.googleMapsApiKeyEnv] ??=
-        TestConstants.dummyGoogleMapsApiKey;
     env[TestConstants.flutterEnvKey] ??= TestConstants.testEnvValue;
 
     // 空の値をデフォルト値で置き換え
     if (env[TestConstants.hotpepperApiKeyEnv]?.isEmpty ?? false) {
       env[TestConstants.hotpepperApiKeyEnv] =
           TestConstants.dummyHotpepperApiKey;
-    }
-    if (env[TestConstants.googleMapsApiKeyEnv]?.isEmpty ?? false) {
-      env[TestConstants.googleMapsApiKeyEnv] =
-          TestConstants.dummyGoogleMapsApiKey;
     }
   }
 
