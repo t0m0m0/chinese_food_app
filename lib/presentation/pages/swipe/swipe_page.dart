@@ -227,19 +227,6 @@ class _SwipePageState extends State<SwipePage> {
       debugPrint('店舗 ${store.name} のステータスを ${status.value} に更新');
 
       // Consumer<StoreProvider>が自動的に更新を処理するため、手動更新は不要
-
-      // 成功時のフィードバック
-      if (mounted) {
-        final statusText = status == StoreStatus.wantToGo ? '行きたい' : '興味なし';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${store.name}を「$statusText」に追加しました'),
-            backgroundColor:
-                status == StoreStatus.wantToGo ? Colors.green : Colors.orange,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
     } catch (e) {
       debugPrint('店舗ステータス更新エラー: $e');
 
