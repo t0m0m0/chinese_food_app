@@ -33,10 +33,11 @@ void main() {
       test('should throw ValidationException for invalid latitude', () async {
         // Mockはパラメータ検証をスキップするので、実際のHotpepperApiDatasourceImplでテスト
         final realDatasource = HotpepperApiDatasourceImpl(mockHttpClient);
-        
+
         // テスト用APIキーを設定（パラメータ検証はキー検証前に実行される）
-        TestEnvSetup.setTestApiKey('HOTPEPPER_API_KEY', 'test_key_for_validation');
-        
+        TestEnvSetup.setTestApiKey(
+            'HOTPEPPER_API_KEY', 'test_key_for_validation');
+
         // 緯度範囲外のテストはパラメータ検証で弾かれるのでAPIキーエラーにならない
         await expectLater(
           () => realDatasource.searchStores(lat: -95.0, lng: 139.0),
@@ -129,10 +130,11 @@ void main() {
           () async {
         // Mockはエラーを発生させないので、セキュリティテストは正常動作を確認
         final result = await datasource.searchStores();
-        
+
         // Mockのデータに機密情報が含まれていないことを確認
         expect(result.shops.isNotEmpty, isTrue,
-            reason: 'Mock should return safe test data without sensitive information');
+            reason:
+                'Mock should return safe test data without sensitive information');
       });
 
       test('should not log sensitive data in API requests', () async {
@@ -144,8 +146,7 @@ void main() {
         );
 
         expect(true, isTrue,
-            reason:
-                'Mock implementation ensures no sensitive data is logged');
+            reason: 'Mock implementation ensures no sensitive data is logged');
       });
     });
 
@@ -221,7 +222,6 @@ class MockAppHttpClient extends AppHttpClient {
                 '{"results": {"shop": [], "results_available": 0, "results_returned": 0, "results_start": 1}}');
   }
 }
-
 
 // Request capture class
 class GetRequest {
