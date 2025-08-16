@@ -20,7 +20,7 @@ void main() {
         AppConfig.setTestApiKey('');
         expect(AppConfig.hasHotpepperApiKey, isFalse);
 
-        AppConfig.setTestGoogleMapsApiKey('');
+        // Google Maps APIは不要（WebView実装により常にfalse）
         expect(AppConfig.hasGoogleMapsApiKey, isFalse);
       });
 
@@ -28,7 +28,7 @@ void main() {
         AppConfig.setTestApiKey('YOUR_API_KEY_HERE');
         expect(AppConfig.hasHotpepperApiKey, isFalse);
 
-        AppConfig.setTestGoogleMapsApiKey('YOUR_API_KEY_HERE');
+        // Google Maps APIは不要（WebView実装により常にfalse）
         expect(AppConfig.hasGoogleMapsApiKey, isFalse);
       });
 
@@ -36,8 +36,8 @@ void main() {
         AppConfig.setTestApiKey('valid_hotpepper_key');
         expect(AppConfig.hasHotpepperApiKey, isTrue);
 
-        AppConfig.setTestGoogleMapsApiKey('valid_google_maps_key');
-        expect(AppConfig.hasGoogleMapsApiKey, isTrue);
+        // Google Maps APIは不要（WebView実装により常にfalse）
+        expect(AppConfig.hasGoogleMapsApiKey, isFalse);
       });
 
       test('本番環境では同期版APIキー取得は例外を投げる', () {
@@ -45,7 +45,8 @@ void main() {
         // 本番環境で実行された場合のみテストが有効
         if (!AppConfig.isProduction) {
           expect(AppConfig.hotpepperApiKeySync, isA<String?>());
-          expect(AppConfig.googleMapsApiKeySync, isA<String?>());
+          // Google Maps APIは不要（WebView実装により常に空文字列）
+          expect(AppConfig.googleMapsApiKeySync, equals(''));
         }
       });
     });
@@ -61,18 +62,20 @@ void main() {
     group('セキュリティ機能', () {
       test('テスト用APIキーは正しく設定・クリアされる', () {
         const testKey = 'test_key_123';
-        const testGoogleKey = 'test_google_key_456';
 
         AppConfig.setTestApiKey(testKey);
-        AppConfig.setTestGoogleMapsApiKey(testGoogleKey);
+        // Google Maps APIは不要（WebView実装により何もしない）
+        AppConfig.setTestGoogleMapsApiKey('ignored_value');
 
         expect(AppConfig.hotpepperApiKeySync, equals(testKey));
-        expect(AppConfig.googleMapsApiKeySync, equals(testGoogleKey));
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(AppConfig.googleMapsApiKeySync, equals(''));
 
         AppConfig.clearTestApiKey();
 
         expect(AppConfig.hotpepperApiKeySync, isNot(equals(testKey)));
-        expect(AppConfig.googleMapsApiKeySync, isNot(equals(testGoogleKey)));
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(AppConfig.googleMapsApiKeySync, equals(''));
       });
 
       test('初期化状態は正しく管理される', () {
@@ -95,15 +98,17 @@ void main() {
         expect(hasKey, isTrue);
       });
 
-      test('Google Maps API非同期版も正しく動作する', () async {
-        const testKey = 'async_google_test_key';
-        AppConfig.setTestGoogleMapsApiKey(testKey);
+      test('Google Maps API非同期版も正しく動作する（WebView実装により不要）', () async {
+        // Google Maps APIは不要（WebView実装により何もしない）
+        AppConfig.setTestGoogleMapsApiKey('ignored_value');
 
         final googleKey = await AppConfig.googleMapsApiKey;
-        expect(googleKey, equals(testKey));
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(googleKey, equals(''));
 
         final hasKey = await AppConfig.hasGoogleMapsApiKeyAsync;
-        expect(hasKey, isTrue);
+        // Google Maps APIは不要（WebView実装により常にfalse）
+        expect(hasKey, isFalse);
       });
     });
 
