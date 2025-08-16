@@ -6,7 +6,6 @@ set -e  # エラー時に停止
 
 echo "FLUTTER_ENV=integration" > .env.integration
 echo "HOTPEPPER_API_KEY=integration_test_key_12345" >> .env.integration
-echo "GOOGLE_MAPS_API_KEY=integration_test_maps_key_12345" >> .env.integration
 echo "LOCATION_MODE=mock" >> .env.integration
 
 echo "=== 統合テスト環境設定完了 ==="

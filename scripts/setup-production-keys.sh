@@ -104,13 +104,11 @@ void main() async {
   try {
     // APIキーを安全に保存
     await storage.write(key: 'HOTPEPPER_API_KEY', value: hotpepperKey);
-    await storage.write(key: 'GOOGLE_MAPS_API_KEY', value: googleMapsKey);
     
     print('✅ APIキーをSecure Storageに保存しました');
     
     // 検証: 保存されたキーを読み取り
     final storedHotpepper = await storage.read(key: 'HOTPEPPER_API_KEY');
-    final storedGoogleMaps = await storage.read(key: 'GOOGLE_MAPS_API_KEY');
     
     if (storedHotpepper != null && storedGoogleMaps != null) {
       print('✅ APIキーの保存を確認しました');
