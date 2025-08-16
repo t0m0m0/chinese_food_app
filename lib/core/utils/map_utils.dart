@@ -44,8 +44,6 @@ class MapUtils {
     const invalidKeys = [
       'AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT',
       'YOUR_API_KEY_HERE',
-      'YOUR_GOOGLE_MAPS_API_KEY',
-      '\${GOOGLE_MAPS_API_KEY}',
     ];
 
     if (invalidKeys.contains(trimmedApiKey)) {

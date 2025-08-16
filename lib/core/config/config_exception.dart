@@ -13,7 +13,6 @@ class ConfigurationException implements Exception {
 1. プロジェクトルートに .env ファイルを作成
 2. 以下の環境変数を追加:
    HOTPEPPER_API_KEY=あなたのHotPepper_API_キー
-   GOOGLE_MAPS_API_KEY=あなたのGoogle_Maps_API_キー
 3. アプリケーションを再起動
 
 詳細については README.md#環境設定 を参照してください。

@@ -19,9 +19,6 @@ void main() {
         SecureLogger.info(
             '  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']}',
             name: 'EnvTestVerification');
-        SecureLogger.info(
-            '  GOOGLE_MAPS_API_KEY: ${dotenv.env['GOOGLE_MAPS_API_KEY']}',
-            name: 'EnvTestVerification');
         SecureLogger.info('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}',
             name: 'EnvTestVerification');
         SecureLogger.info(
@@ -49,8 +46,6 @@ void main() {
         // 期待値と比較（ファイルから読み込まれた場合）
         expect(dotenv.env['HOTPEPPER_API_KEY'],
             equals('test_hotpepper_api_key_for_testing_from_file'));
-        expect(dotenv.env['GOOGLE_MAPS_API_KEY'],
-            equals('test_google_maps_api_key_for_testing_from_file'));
         expect(dotenv.env['FLUTTER_ENV'], equals('development'));
         expect(dotenv.env['TEST_ENV_SOURCE'], equals('file'));
       } catch (e) {
@@ -62,7 +57,6 @@ void main() {
             name: 'EnvTestVerification');
         dotenv.testLoad(fileInput: '''
 HOTPEPPER_API_KEY=test_hotpepper_api_key_for_testing_from_fallback
-GOOGLE_MAPS_API_KEY=test_google_maps_api_key_for_testing_from_fallback
 FLUTTER_ENV=development
 TEST_ENV_SOURCE=fallback
 ''');

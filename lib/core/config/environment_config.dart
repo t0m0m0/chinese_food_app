@@ -140,7 +140,6 @@ HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
           debugPrint('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
           debugPrint(
               '  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
-          debugPrint('  GOOGLE_MAPS_API_KEY: 未使用（WebView実装により不要）');
         } else {
           debugPrint('⚠️ .envファイルが存在しません。環境変数から直接取得します');
           // 環境変数から直接設定を行う

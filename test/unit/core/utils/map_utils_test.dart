@@ -58,10 +58,6 @@ void main() {
                 'AIzaSyDUMMY_KEY_FOR_CI_ENVIRONMENT'),
             isFalse);
         expect(MapUtils.isValidGoogleMapsApiKey('YOUR_API_KEY_HERE'), isFalse);
-        expect(MapUtils.isValidGoogleMapsApiKey('YOUR_GOOGLE_MAPS_API_KEY'),
-            isFalse);
-        expect(MapUtils.isValidGoogleMapsApiKey('\${GOOGLE_MAPS_API_KEY}'),
-            isFalse);
       });
 
       test('should return false for invalid format API key', () {
