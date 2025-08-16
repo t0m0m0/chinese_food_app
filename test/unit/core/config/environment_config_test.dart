@@ -45,13 +45,12 @@ void main() {
         // テスト環境では最低限の長さがあることを確認
         expect(hotpepperKey.length, greaterThan(10),
             reason: 'HotPepper APIキーが短すぎます。実際の値の長さ: ${hotpepperKey.length}');
-        expect(googleMapsKey.length, greaterThan(10),
-            reason: 'Google Maps APIキーが短すぎます。実際の値の長さ: ${googleMapsKey.length}');
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(googleMapsKey, equals(''),
+            reason: 'Google Maps APIキーはWebView実装により不要です');
 
         // テスト用のキーかどうかを確認
         expect(hotpepperKey,
-            anyOf(contains('test_dummy'), hasLength(greaterThan(20))));
-        expect(googleMapsKey,
             anyOf(contains('test_dummy'), hasLength(greaterThan(20))));
       });
 
@@ -63,8 +62,9 @@ void main() {
 
         expect(effectiveHotpepperKey, isNotEmpty,
             reason: 'Effective HotPepper APIキーが空です。');
-        expect(effectiveGoogleMapsKey, isNotEmpty,
-            reason: 'Effective Google Maps APIキーが空です。');
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(effectiveGoogleMapsKey, equals(''),
+            reason: 'Effective Google Maps APIキーはWebView実装により不要です。');
       });
     });
 
@@ -111,12 +111,14 @@ void main() {
               contains('test_dummy'),
             ));
 
+        // Google Maps APIは不要（WebView実装により表示メッセージが異なる）
         expect(
             googleMapsKey,
             anyOf(
               equals('(未設定)'),
               matches(r'^.{8}\.\.\.'),
               contains('test_dummy'),
+              equals('(未使用：WebView実装)'),
             ));
       });
     });
