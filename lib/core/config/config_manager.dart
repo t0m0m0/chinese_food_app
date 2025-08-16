@@ -144,7 +144,6 @@ class ConfigManager {
     return {
       'environment': EnvironmentConfig.current.name,
       'hotpepperApiKey': EnvironmentConfig.effectiveHotpepperApiKey,
-      'googleMapsApiKey': EnvironmentConfig.effectiveGoogleMapsApiKey,
       'hotpepperApiUrl': EnvironmentConfig.hotpepperApiUrl,
       'isDevelopment': EnvironmentConfig.isDevelopment,
       'isStaging': EnvironmentConfig.isStaging,

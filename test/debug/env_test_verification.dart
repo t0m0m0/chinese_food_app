@@ -37,9 +37,6 @@ void main() {
             '  hotpepperApiKey: ${EnvironmentConfig.hotpepperApiKey}',
             name: 'EnvTestVerification');
         SecureLogger.info(
-            '  googleMapsApiKey: ${EnvironmentConfig.googleMapsApiKey}',
-            name: 'EnvTestVerification');
-        SecureLogger.info(
             '  current environment: ${EnvironmentConfig.current.name}',
             name: 'EnvTestVerification');
 

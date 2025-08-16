@@ -40,14 +40,10 @@ void main() {
     group('API keys', () {
       test('should return API keys from .env.test file when available', () {
         final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
-        final googleMapsKey = EnvironmentConfig.googleMapsApiKey;
 
         // テスト環境では最低限の長さがあることを確認
         expect(hotpepperKey.length, greaterThan(10),
             reason: 'HotPepper APIキーが短すぎます。実際の値の長さ: ${hotpepperKey.length}');
-        // Google Maps APIは不要（WebView実装により常に空文字列）
-        expect(googleMapsKey, equals(''),
-            reason: 'Google Maps APIキーはWebView実装により不要です');
 
         // テスト用のキーかどうかを確認
         expect(hotpepperKey,
@@ -57,14 +53,9 @@ void main() {
       test('should use effective API keys', () {
         final effectiveHotpepperKey =
             EnvironmentConfig.effectiveHotpepperApiKey;
-        final effectiveGoogleMapsKey =
-            EnvironmentConfig.effectiveGoogleMapsApiKey;
 
         expect(effectiveHotpepperKey, isNotEmpty,
             reason: 'Effective HotPepper APIキーが空です。');
-        // Google Maps APIは不要（WebView実装により常に空文字列）
-        expect(effectiveGoogleMapsKey, equals(''),
-            reason: 'Effective Google Maps APIキーはWebView実装により不要です。');
       });
     });
 

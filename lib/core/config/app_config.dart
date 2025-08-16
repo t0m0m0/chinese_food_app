@@ -10,9 +10,6 @@ import '../exceptions/infrastructure/security_exception.dart';
 class AppConfig {
   // テスト用のAPIキー保存
   static String? _testHotpepperApiKey;
-  // Google Maps APIキーは不要（WebView実装により）
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static String? _testGoogleMapsApiKey;
 
   // 初期化フラグ
   static bool _initialized = false;
@@ -223,13 +220,11 @@ class AppConfig {
   @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
   static void setTestGoogleMapsApiKey(String apiKey) {
     // WebView実装により何もしない（互換性のため残す）
-    _testGoogleMapsApiKey = null;
   }
 
   /// テスト用APIキーをすべてクリア
   static void clearTestApiKey() {
     _testHotpepperApiKey = null;
-    _testGoogleMapsApiKey = null;
   }
 
   /// 初期化状態をリセット（テスト用）
