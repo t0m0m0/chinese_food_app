@@ -66,14 +66,16 @@ void main() {
       test('非同期API取得でセキュリティ例外が適切に処理される', () async {
         // テスト環境では.envファイルが存在しないため、テスト用APIキーを設定
         AppConfig.setTestApiKey('test_hotpepper_key');
-        AppConfig.setTestGoogleMapsApiKey('test_google_key');
+        // Google Maps APIは不要（WebView実装により何もしない）
+        AppConfig.setTestGoogleMapsApiKey('ignored_value');
 
         // 非同期版での取得確認
         final hotpepperKey = await AppConfig.hotpepperApiKey;
         final googleKey = await AppConfig.googleMapsApiKey;
 
         expect(hotpepperKey, equals('test_hotpepper_key'));
-        expect(googleKey, equals('test_google_key'));
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(googleKey, equals(''));
       });
 
       test('同期版API取得は開発環境で正常動作する', () {
@@ -85,7 +87,8 @@ void main() {
       test('API キー検証メソッドは例外を発生させない', () async {
         // テスト用APIキーを設定
         AppConfig.setTestApiKey('test_key');
-        AppConfig.setTestGoogleMapsApiKey('test_google_key');
+        // Google Maps APIは不要（WebView実装により何もしない）
+        AppConfig.setTestGoogleMapsApiKey('ignored_value');
 
         // 検証メソッドは例外を発生させずにboolを返す
         expect(() => AppConfig.hasHotpepperApiKey, returnsNormally);
@@ -96,52 +99,60 @@ void main() {
         final hasGoogle = await AppConfig.hasGoogleMapsApiKeyAsync;
 
         expect(hasHotpepper, isTrue);
-        expect(hasGoogle, isTrue);
+        // Google Maps APIは不要（WebView実装により常にfalse）
+        expect(hasGoogle, isFalse);
       });
     });
 
     group('セキュリティ機能統合テスト', () {
       test('テスト用APIキー設定は正常に動作する', () async {
         const testHotpepperKey = 'test_hotpepper_12345';
-        const testGoogleKey = 'test_google_67890';
 
         AppConfig.setTestApiKey(testHotpepperKey);
-        AppConfig.setTestGoogleMapsApiKey(testGoogleKey);
+        // Google Maps APIは不要（WebView実装により何もしない）
+        AppConfig.setTestGoogleMapsApiKey('ignored_value');
 
         // 非同期版での取得確認
         final hotpepperKey = await AppConfig.hotpepperApiKey;
         final googleKey = await AppConfig.googleMapsApiKey;
 
         expect(hotpepperKey, equals(testHotpepperKey));
-        expect(googleKey, equals(testGoogleKey));
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(googleKey, equals(''));
 
         // 同期版での取得確認
         expect(AppConfig.hotpepperApiKeySync, equals(testHotpepperKey));
-        expect(AppConfig.googleMapsApiKeySync, equals(testGoogleKey));
+        // Google Maps APIは不要（WebView実装により常に空文字列）
+        expect(AppConfig.googleMapsApiKeySync, equals(''));
 
         // 検証メソッドの確認
         expect(AppConfig.hasHotpepperApiKey, isTrue);
-        expect(AppConfig.hasGoogleMapsApiKey, isTrue);
+        // Google Maps APIは不要（WebView実装により常にfalse）
+        expect(AppConfig.hasGoogleMapsApiKey, isFalse);
 
         final hasHotpepperAsync = await AppConfig.hasHotpepperApiKeyAsync;
         final hasGoogleAsync = await AppConfig.hasGoogleMapsApiKeyAsync;
         expect(hasHotpepperAsync, isTrue);
-        expect(hasGoogleAsync, isTrue);
+        // Google Maps APIは不要（WebView実装により常にfalse）
+        expect(hasGoogleAsync, isFalse);
       });
 
       test('APIキークリア機能は正常に動作する', () {
         // APIキーを設定
         AppConfig.setTestApiKey('test_key');
-        AppConfig.setTestGoogleMapsApiKey('test_google_key');
+        // Google Maps APIは不要（WebView実装により何もしない）
+        AppConfig.setTestGoogleMapsApiKey('ignored_value');
 
         expect(AppConfig.hasHotpepperApiKey, isTrue);
-        expect(AppConfig.hasGoogleMapsApiKey, isTrue);
+        // Google Maps APIは不要（WebView実装により常にfalse）
+        expect(AppConfig.hasGoogleMapsApiKey, isFalse);
 
         // クリア実行
         AppConfig.clearTestApiKey();
 
         // クリア後の確認
         expect(AppConfig.hasHotpepperApiKey, isFalse);
+        // Google Maps APIは不要（WebView実装により常にfalse）
         expect(AppConfig.hasGoogleMapsApiKey, isFalse);
       });
 
