@@ -144,7 +144,7 @@ class ConfigManager {
     return {
       'environment': EnvironmentConfig.current.name,
       'hotpepperApiKey': EnvironmentConfig.effectiveHotpepperApiKey,
-      'googleMapsApiKey': EnvironmentConfig.effectiveGoogleMapsApiKey,
+      'googleMapsApiKey': '', // WebView実装によりGoogle Maps APIキーは不要
       'hotpepperApiUrl': EnvironmentConfig.hotpepperApiUrl,
       'isDevelopment': EnvironmentConfig.isDevelopment,
       'isStaging': EnvironmentConfig.isStaging,
