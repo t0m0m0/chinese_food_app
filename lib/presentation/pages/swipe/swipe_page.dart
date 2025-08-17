@@ -59,16 +59,7 @@ class _SwipePageState extends State<SwipePage> {
     // 店舗を再読み込み
     await _loadStoresWithLocation();
 
-    if (mounted) {
-      final meters = SearchConfig.rangeToMeter(newRange) ?? 1000;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('検索範囲を${meters}mに変更しました'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
+    // 検索範囲変更成功 - DistanceSelectorWidgetの表示変更で十分
   }
 
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
@@ -115,14 +106,7 @@ class _SwipePageState extends State<SwipePage> {
         count: ApiConstants.defaultStoreCount,
       );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('デフォルトの場所で検索しています'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
+      // デフォルト位置使用 - _locationErrorで状態表示するためスナックバー削除
     } catch (e) {
       // その他のエラー
       setState(() {

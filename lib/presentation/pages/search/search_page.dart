@@ -411,15 +411,7 @@ class _SearchPageState extends State<SearchPage> {
       final storeWithStatus = store.copyWith(status: StoreStatus.wantToGo);
       await storeProvider.addStore(storeWithStatus);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${store.name}を「行きたい」に追加しました'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      // 店舗追加成功 - ボタンの状態変化で十分なためスナックバー削除
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

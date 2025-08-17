@@ -440,22 +440,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
     try {
       await storeProvider.updateStoreStatus(storeId, newStatus);
 
-      if (mounted) {
-        final statusText = newStatus == StoreStatus.wantToGo
-            ? '行きたい'
-            : newStatus == StoreStatus.visited
-                ? '行った'
-                : '興味なし';
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('ステータスを「$statusText」に更新しました'),
-            backgroundColor:
-                _getStatusColor(newStatus, Theme.of(context).colorScheme),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      // ステータス更新成功 - UIの変化で十分なためスナックバー削除
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
