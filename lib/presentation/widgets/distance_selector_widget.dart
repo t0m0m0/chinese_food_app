@@ -24,6 +24,8 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
   late Animation<double> _sliderAnimation;
   late AnimationController _expandController;
   late Animation<double> _expandAnimation;
+  late AnimationController _confirmController;
+  late Animation<double> _confirmAnimation;
 
   double _currentSliderValue = 1000.0;
   int _displayMeters = 1000;
@@ -53,6 +55,18 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
       curve: Curves.easeInOut,
     );
 
+    _confirmController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _confirmAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(
+      parent: _confirmController,
+      curve: Curves.elasticOut,
+    ));
+
     // API rangeから表示用メートルを逆算
     _displayMeters = _rangeToDisplayMeters(widget.selectedRange);
     _currentSliderValue = _displayMeters.toDouble();
@@ -77,6 +91,7 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
   void dispose() {
     _animationController.dispose();
     _expandController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -124,18 +139,21 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              '${_displayMeters}m',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.w600,
+                          ScaleTransition(
+                            scale: _confirmAnimation,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                '${_displayMeters}m',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -200,6 +218,10 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                                 _displayMeters = finalMeters;
                               });
                               widget.onChanged(range);
+                              // 距離変更確認のアニメーション再生
+                              _confirmController.forward().then((_) {
+                                _confirmController.reverse();
+                              });
                             },
                           ),
                         ),

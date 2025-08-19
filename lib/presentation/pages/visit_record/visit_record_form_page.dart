@@ -200,12 +200,7 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('訪問記録を保存しました'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // 保存成功 - ページ遷移で十分なためスナックバー削除
         Navigator.of(context).pop();
       }
     } catch (e) {

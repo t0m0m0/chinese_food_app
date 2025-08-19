@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
-import '../../../core/utils/store_utils.dart';
 import '../../../domain/entities/store.dart';
 import '../../providers/store_provider.dart';
 import '../../widgets/webview_map_widget.dart';
@@ -56,17 +55,7 @@ class StoreDetailPage extends StatelessWidget {
     try {
       await storeProvider.updateStoreStatus(store.id, newStatus);
 
-      if (context.mounted) {
-        final statusText = StoreUtils.getStatusText(newStatus);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('ステータスを「$statusText」に更新しました'),
-            backgroundColor: StoreUtils.getStatusColor(
-                newStatus, Theme.of(context).colorScheme),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      // ステータス更新成功 - UI表示の変化で十分なためスナックバー削除
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

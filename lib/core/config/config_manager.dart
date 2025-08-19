@@ -144,6 +144,7 @@ class ConfigManager {
     return {
       'environment': EnvironmentConfig.current.name,
       'hotpepperApiKey': EnvironmentConfig.effectiveHotpepperApiKey,
+      'googleMapsApiKey': '', // WebView実装によりGoogle Maps APIキーは不要
       'hotpepperApiUrl': EnvironmentConfig.hotpepperApiUrl,
       'isDevelopment': EnvironmentConfig.isDevelopment,
       'isStaging': EnvironmentConfig.isStaging,
@@ -164,19 +165,30 @@ class ConfigManager {
   /// HotPepper API キーを取得
   static String get hotpepperApiKey {
     _ensureInitialized();
-    return _runtimeConfig['hotpepperApiKey'] as String;
+    final key = _runtimeConfig['hotpepperApiKey'] as String?;
+    if (key == null || key.isEmpty) {
+      throw const ConfigurationException('HotPepper API キーが設定されていません');
+    }
+    return key;
   }
 
   /// Google Maps API キーを取得
+  ///
+  /// 注意: WebView実装により空文字列が返される場合があります
   static String get googleMapsApiKey {
     _ensureInitialized();
-    return _runtimeConfig['googleMapsApiKey'] as String;
+    final key = _runtimeConfig['googleMapsApiKey'] as String?;
+    return key ?? ''; // nullの場合は空文字列を返す
   }
 
   /// HotPepper API ベースURLを取得
   static String get hotpepperApiUrl {
     _ensureInitialized();
-    return _runtimeConfig['hotpepperApiUrl'] as String;
+    final url = _runtimeConfig['hotpepperApiUrl'] as String?;
+    if (url == null) {
+      throw const ConfigurationException('HotPepper API URLが設定されていません');
+    }
+    return url;
   }
 
   /// 開発環境かどうかを判定
@@ -216,9 +228,16 @@ class ConfigManager {
   }
 
   /// APIキーが有効かどうかを判定
+  ///
+  /// HotPepper APIキーの有効性をチェックします。
+  /// Google Maps APIキーはWebView実装により不要のため、チェック対象外です。
   static bool get hasValidApiKeys {
     _ensureInitialized();
-    return hotpepperApiKey.isNotEmpty && googleMapsApiKey.isNotEmpty;
+    try {
+      return hotpepperApiKey.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// 設定の検証を再実行
