@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'config_exception.dart';
 import 'config_validator.dart';
 import 'environment_config.dart';
+import 'security_config.dart';
 import 'managers/api_config_manager.dart';
 import 'managers/database_config_manager.dart';
 import 'managers/location_config_manager.dart';
@@ -165,6 +166,12 @@ class ConfigManager {
   /// HotPepper API キーを取得
   static String get hotpepperApiKey {
     _ensureInitialized();
+
+    // セキュリティ設定でAPIキーが除去されている場合は空文字列を返す
+    if (SecurityConfig.apiKeysRemoved || SecurityConfig.isSecureMode) {
+      return '';
+    }
+
     final key = _runtimeConfig['hotpepperApiKey'] as String?;
     if (key == null || key.isEmpty) {
       throw const ConfigurationException('HotPepper API キーが設定されていません');
@@ -233,6 +240,13 @@ class ConfigManager {
   /// Google Maps APIキーはWebView実装により不要のため、チェック対象外です。
   static bool get hasValidApiKeys {
     _ensureInitialized();
+
+    // セキュリティ設定でAPIキーが除去されている場合はtrueを返す
+    // プロキシサーバー経由でのAPI呼び出しが有効なため
+    if (SecurityConfig.apiKeysRemoved || SecurityConfig.isSecureMode) {
+      return true;
+    }
+
     try {
       return hotpepperApiKey.isNotEmpty;
     } catch (e) {
