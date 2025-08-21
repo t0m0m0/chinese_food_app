@@ -57,8 +57,8 @@ class ProxyConfig {
 
   /// 環境別設定情報
   static Map<String, dynamic> get environmentInfo => {
-        'environment':
-            const String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development'),
+        'environment': const String.fromEnvironment('FLUTTER_ENV',
+            defaultValue: 'development'),
         'proxy_url': baseUrl,
         'enabled': enabled,
         'timeout': timeoutSeconds,
