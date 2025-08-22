@@ -1,0 +1,17 @@
+{
+  "name": "chinese-food-app-proxy",
+  "version": "1.0.0",
+  "description": "Proxy server for Chinese food app API security",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:production": "wrangler deploy --env production"
+  },
+  "keywords": ["cloudflare", "workers", "api", "proxy"],
+  "author": "Chinese Food App Team",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

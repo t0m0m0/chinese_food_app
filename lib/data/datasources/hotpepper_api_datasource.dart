@@ -1,5 +1,6 @@
 import '../../core/config/api_config.dart';
 import '../../core/config/config_manager.dart';
+import '../../core/config/security_config.dart';
 import '../../core/network/base_api_service.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../models/hotpepper_store_model.dart';
@@ -110,6 +111,13 @@ class HotpepperApiDatasourceImpl extends BaseApiService
     if (!ConfigManager.isInitialized) {
       throw ApiException(
         'ConfigManagerが初期化されていません。main()でConfigManager.initialize()を呼び出してください。',
+      );
+    }
+
+    // セキュアモードではAPIキー直接呼び出しを禁止
+    if (SecurityConfig.isSecureMode || SecurityConfig.apiKeysRemoved) {
+      throw ApiException(
+        'セキュアモードのため、APIキー直接アクセスは無効です。プロキシサーバー経由でのAPI呼び出しを使用してください。',
       );
     }
 
