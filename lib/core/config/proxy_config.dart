@@ -1,3 +1,5 @@
+import 'config_manager.dart';
+
 /// プロキシサーバー設定管理
 ///
 /// APIキーセキュリティ強化のため、プロキシサーバー経由での
@@ -12,19 +14,19 @@ class ProxyConfig {
 
   /// 現在の環境に応じたプロキシサーバーURL
   static String get baseUrl {
-    // TODO: 環境変数またはConfigManagerから取得
-    const String environment =
-        String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development');
+    // ConfigManagerから環境情報を取得（初期化されていない場合はフォールバック）
+    if (!ConfigManager.isInitialized) {
+      const String environment =
+          String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development');
+      return environment == 'production' ? _prodProxyUrl : _devProxyUrl;
+    }
 
-    switch (environment) {
-      case 'production':
-        return _prodProxyUrl;
-      case 'staging':
-        return _prodProxyUrl; // ステージング環境も本番と同じプロキシを使用
-      case 'development':
-      case 'test':
-      default:
-        return _devProxyUrl;
+    if (ConfigManager.isProduction) {
+      return _prodProxyUrl;
+    } else if (ConfigManager.isStaging) {
+      return _prodProxyUrl; // ステージング環境も本番と同じプロキシを使用
+    } else {
+      return _devProxyUrl; // development, test
     }
   }
 
@@ -57,8 +59,10 @@ class ProxyConfig {
 
   /// 環境別設定情報
   static Map<String, dynamic> get environmentInfo => {
-        'environment': const String.fromEnvironment('FLUTTER_ENV',
-            defaultValue: 'development'),
+        'environment': ConfigManager.isInitialized
+            ? ConfigManager.environment.name
+            : const String.fromEnvironment('FLUTTER_ENV',
+                defaultValue: 'development'),
         'proxy_url': baseUrl,
         'enabled': enabled,
         'timeout': timeoutSeconds,

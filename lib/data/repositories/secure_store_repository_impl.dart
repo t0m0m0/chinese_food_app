@@ -1,4 +1,5 @@
 import '../../core/config/proxy_config.dart';
+import '../../core/utils/app_logger.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../datasources/hotpepper_api_datasource.dart';
@@ -47,8 +48,10 @@ class SecureStoreRepositoryImpl implements StoreRepository {
           return _convertToStoreEntities(response.shops);
         } catch (proxyError) {
           // プロキシサーバーが利用できない場合はフォールバック
-          // ignore: avoid_print
-          print('プロキシサーバーエラー、フォールバックモードに切り替え: $proxyError');
+          AppLogger.proxyFallback(
+            'プロキシサーバーが利用できないため、直接API呼び出しに切り替えます',
+            originalError: proxyError,
+          );
 
           final response = await fallbackDatasource.searchStores(
             lat: lat,
