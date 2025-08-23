@@ -13,6 +13,33 @@ enum LogLevel {
 ///
 /// 本番環境での監視対応と適切なログレベル管理を提供します。
 /// printログの代替として使用します。
+///
+/// ## 使用例
+/// ```dart
+/// // 基本的な使用方法
+/// AppLogger.info('アプリケーションが開始されました');
+/// AppLogger.error('エラーが発生しました', error: exception);
+///
+/// // プロキシサーバー関連
+/// AppLogger.proxyError('接続エラー', error: connectionError);
+/// AppLogger.proxyFallback('フォールバックモードに切り替え');
+///
+/// // API関連
+/// AppLogger.apiInfo('API呼び出し成功', apiName: 'HotPepper');
+/// AppLogger.apiError('API呼び出し失敗', apiName: 'HotPepper', error: apiError);
+/// ```
+///
+/// ## ログレベル設定
+/// ```dart
+/// // 開発環境（デフォルト）
+/// AppLogger.setMinLogLevel(LogLevel.debug);
+///
+/// // ステージング環境
+/// AppLogger.setMinLogLevel(LogLevel.info);
+///
+/// // 本番環境（推奨）
+/// AppLogger.setMinLogLevel(LogLevel.warning);
+/// ```
 class AppLogger {
   /// ログレベルの重要度マッピング
   static const Map<LogLevel, int> _levelPriority = {

@@ -18,7 +18,34 @@ cd proxy-server
 npm install
 ```
 
-### 2. APIキーの設定
+### 2. KV Namespace の作成
+
+レート制限機能のためのKVストレージを作成します：
+
+```bash
+# 本番用KV Namespace作成
+wrangler kv:namespace create "RATE_LIMIT_KV"
+# 出力例: { binding = "RATE_LIMIT_KV", id = "abc123456789def" }
+
+# プレビュー用KV Namespace作成
+wrangler kv:namespace create "RATE_LIMIT_KV" --preview
+# 出力例: { binding = "RATE_LIMIT_KV", preview_id = "def987654321abc" }
+```
+
+作成したIDを`wrangler.toml`に設定：
+
+```toml
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "abc123456789def"  # 実際のIDに置き換え
+preview_id = "def987654321abc"  # 実際のIDに置き換え
+
+[[env.production.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "production_kv_id_here"  # 本番用IDに置き換え
+```
+
+### 3. APIキーの設定
 
 ```bash
 # HotPepper API Key
@@ -28,13 +55,13 @@ wrangler secret put HOTPEPPER_API_KEY
 wrangler secret put GOOGLE_MAPS_API_KEY
 ```
 
-### 3. 開発サーバー起動
+### 4. 開発サーバー起動
 
 ```bash
 npm run dev
 ```
 
-### 4. 本番デプロイ
+### 5. 本番デプロイ
 
 ```bash
 npm run deploy:production
@@ -67,8 +94,10 @@ npm run deploy:production
 - 本番環境: `ALLOWED_ORIGINS="https://your-app-domain.com"`
 
 ### レート制限
-- HotPepper API: 60リクエスト/分
-- Google Maps API: 100リクエスト/分
+- HotPepper API: 60リクエスト/時間 (Cloudflare KV使用)
+- Google Maps API: 100リクエスト/時間 (将来実装)
+
+**KV Namespaceが設定されていない場合、レート制限は無効化されます（開発環境用）**
 
 ## 環境変数
 
@@ -77,6 +106,7 @@ npm run deploy:production
 | `HOTPEPPER_API_KEY` | HotPepper API キー | ✅ |
 | `GOOGLE_MAPS_API_KEY` | Google Maps API キー | ⚪ |
 | `ALLOWED_ORIGINS` | 許可するオリジン | ✅ |
+| `RATE_LIMIT_KV` | レート制限用KV Namespace | ⚪ |
 
 ## トラブルシューティング
 
@@ -90,4 +120,11 @@ wrangler secret put HOTPEPPER_API_KEY
 `wrangler.toml`の`ALLOWED_ORIGINS`を確認
 
 ### Rate Limit
-429エラーが発生した場合は、リクエスト頻度を調整
+429エラーが発生した場合は、リクエスト頻度を調整してください。
+
+### KV Namespace エラー
+```bash
+# KV Namespaceが見つからない場合
+wrangler kv:namespace list
+# 既存のNamespaceを確認し、wrangler.tomlのIDを更新
+```
