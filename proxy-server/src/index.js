@@ -209,11 +209,57 @@ function handleCors(request, env) {
 }
 
 /**
- * レート制限チェック（簡易実装）
- * 実際の本番環境では、Cloudflare KVやDurable Objectsを使用
+ * レート制限チェック（本番対応実装）
+ * Cloudflare KVを使用したクライアントIP別レート制限
  */
 async function isRateLimited(clientIP, apiType, limit, env) {
-  // 簡易実装：実際には永続化ストレージが必要
-  // 開発版では常にfalse（制限なし）を返す
-  return false;
+  // 開発環境では制限を適用しない
+  if (!env.RATE_LIMIT_KV) {
+    return false;
+  }
+
+  try {
+    const key = `rate_limit:${clientIP}:${apiType}`;
+    const now = Math.floor(Date.now() / 1000); // Unix timestamp
+    const windowSize = 3600; // 1時間のウィンドウ
+    
+    // KVから現在のリクエスト数を取得
+    const currentData = await env.RATE_LIMIT_KV.get(key, { type: 'json' });
+    
+    let requestCount = 0;
+    let windowStart = now;
+    
+    if (currentData) {
+      // 既存データがウィンドウ内の場合は継続、古い場合はリセット
+      if (now - currentData.windowStart < windowSize) {
+        requestCount = currentData.count;
+        windowStart = currentData.windowStart;
+      }
+    }
+    
+    // レート制限チェック
+    if (requestCount >= limit) {
+      console.log(`Rate limit exceeded for ${clientIP}: ${requestCount}/${limit}`);
+      return true;
+    }
+    
+    // リクエスト数を更新してKVに保存
+    const newData = {
+      count: requestCount + 1,
+      windowStart: windowStart,
+      lastRequest: now
+    };
+    
+    // TTLを設定してKVに保存（ウィンドウサイズ + 少し余裕）
+    await env.RATE_LIMIT_KV.put(key, JSON.stringify(newData), {
+      expirationTtl: windowSize + 300
+    });
+    
+    return false;
+    
+  } catch (error) {
+    console.error('Rate limiting error:', error);
+    // エラーが発生した場合は制限を適用しない（フェイルオープン）
+    return false;
+  }
 }
