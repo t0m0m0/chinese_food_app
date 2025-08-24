@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'environment_detector.dart';
+import 'environment_initializer.dart';
+import 'api_key_constants.dart';
+import 'logging_config.dart';
 
 /// アプリケーション環境の定義
 enum Environment {
@@ -25,30 +28,22 @@ class EnvironmentConfig {
   // 初期化フラグ
   static bool _initialized = false;
 
+  /// テスト用: 初期化状態をリセット
+  @visibleForTesting
+  static void resetForTesting() {
+    _initialized = false;
+    EnvironmentDetector.setTestContext(); // テストコンテキストを明示的に設定
+  }
+
+  /// テスト用: テストコンテキストをクリア
+  @visibleForTesting
+  static void clearTestContext() {
+    EnvironmentDetector.clearTestContext();
+  }
+
   /// 現在の環境を取得
   static Environment get current {
-    // テスト環境判定を最優先で実行
-    if (_isTestEnvironment()) {
-      return Environment.test;
-    }
-
-    // 通常の環境判定ロジック
-    String env = 'development';
-
-    try {
-      // DotEnvが初期化されている場合は、DotEnvから環境を取得
-      if (dotenv.env.isNotEmpty) {
-        env = dotenv.env['FLUTTER_ENV'] ?? 'development';
-      } else {
-        // DotEnvが利用できない場合は、コンパイル時環境変数から取得
-        env = const String.fromEnvironment('FLUTTER_ENV',
-            defaultValue: 'development');
-      }
-    } catch (e) {
-      // DotEnvが初期化されていない場合は、コンパイル時環境変数から取得
-      env = const String.fromEnvironment('FLUTTER_ENV',
-          defaultValue: 'development');
-    }
+    final env = EnvironmentDetector.detectEnvironment();
 
     try {
       return Environment.values.firstWhere((e) => e.name == env);
@@ -56,26 +51,6 @@ class EnvironmentConfig {
       // 無効な環境名の場合はdevelopmentをデフォルトとする
       return Environment.development;
     }
-  }
-
-  /// テスト環境かどうかを判定
-  static bool _isTestEnvironment() {
-    // Flutter test環境の検出
-    if (const bool.fromEnvironment('flutter.test', defaultValue: false) ||
-        const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
-      return true;
-    }
-
-    // DotEnvからのテスト環境検出
-    try {
-      if (dotenv.env.isNotEmpty && dotenv.env['FLUTTER_ENV'] == 'test') {
-        return true;
-      }
-    } catch (e) {
-      // DotEnv未初期化の場合は無視
-    }
-
-    return false;
   }
 
   /// 現在の環境が開発環境かどうか
@@ -90,100 +65,27 @@ class EnvironmentConfig {
   /// 現在の環境が本番環境かどうか
   static bool get isProduction => current == Environment.production;
 
-  /// .envファイルがassetsに存在するかチェック
-  static Future<bool> _envFileExists(String fileName) async {
-    try {
-      await rootBundle.loadString(fileName);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   /// 初期化（.envファイル読み込み - 動的チェック対応）
   static Future<void> initialize() async {
     if (_initialized) return;
 
     try {
-      // テスト環境では.env.testファイルを優先
-      if (_isTestEnvironment() ||
-          const bool.fromEnvironment('flutter.test', defaultValue: false) ||
-          const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
-        debugPrint('🧪 テスト環境での初期化を開始');
-
-        // .env.testファイルの存在確認
-        if (await _envFileExists('.env.test')) {
-          debugPrint('🔧 .env.testファイルの読み込みを開始');
-          await dotenv.load(fileName: '.env.test');
-          debugPrint('✅ .env.testファイルの読み込み完了');
-        } else {
-          debugPrint('⚠️ .env.testファイルが存在しないため、テスト用設定で初期化');
-          dotenv.testLoad(fileInput: '''
-FLUTTER_ENV=test
-HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
-
-''');
-        }
-
-        // テスト環境であることを明示的に設定
-        dotenv.env['FLUTTER_ENV'] = 'test';
+      // テスト環境の場合
+      if (EnvironmentDetector.isTestEnvironment()) {
+        await EnvironmentInitializer.initializeTestEnvironment();
       } else {
-        // 開発/本番環境では.envファイルをチェック
-        debugPrint('🔧 .envファイルの存在確認中...');
-
-        if (await _envFileExists('.env')) {
-          debugPrint('✅ .envファイルが見つかりました。読み込み開始');
-          await dotenv.load(fileName: '.env');
-          debugPrint('✅ .envファイルの読み込み完了');
-
-          debugPrint('📋 読み込まれた環境変数:');
-          debugPrint('  FLUTTER_ENV: ${dotenv.env['FLUTTER_ENV']}');
-          debugPrint(
-              '  HOTPEPPER_API_KEY: ${dotenv.env['HOTPEPPER_API_KEY']?.isNotEmpty == true ? '設定済み(${dotenv.env['HOTPEPPER_API_KEY']?.length}文字)' : '未設定'}');
-        } else {
-          debugPrint('⚠️ .envファイルが存在しません。環境変数から直接取得します');
-          // 環境変数から直接設定を行う
-          dotenv.testLoad(fileInput: '''
-FLUTTER_ENV=${const String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development')}
-HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
-
-''');
-          debugPrint('✅ 環境変数からの設定完了');
-        }
+        // 開発/本番環境の場合
+        await EnvironmentInitializer
+            .initializeProductionOrDevelopmentEnvironment();
       }
     } catch (e) {
-      debugPrint('❌ 初期化エラー: $e');
-
+      LoggingConfig.errorLog('初期化エラー: $e');
       // エラー時のフォールバック処理
-      if (_isTestEnvironment() ||
-          const bool.fromEnvironment('flutter.test', defaultValue: false) ||
-          const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false)) {
-        // テスト環境用フォールバック
-        try {
-          dotenv.testLoad(fileInput: '''
-FLUTTER_ENV=test
-HOTPEPPER_API_KEY=testdummyhotpepperkey123456789
-
-''');
-          debugPrint('🔄 テスト環境フォールバック初期化完了');
-        } catch (fallbackError) {
-          debugPrint('❌ フォールバック初期化も失敗: $fallbackError');
-          dotenv.env['FLUTTER_ENV'] = 'test';
-          dotenv.env['HOTPEPPER_API_KEY'] = 'testdummyhotpepperkey123456789';
-        }
-      } else {
-        // 開発環境用フォールバック
-        debugPrint('🔄 開発環境フォールバックで初期化します');
-        dotenv.testLoad(fileInput: '''
-FLUTTER_ENV=development
-HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '')}
-
-''');
-      }
+      await EnvironmentInitializer.initializeFallback();
     }
 
     _initialized = true;
-    debugPrint('🎯 EnvironmentConfig初期化完了: ${current.name}環境');
+    LoggingConfig.debugLog('EnvironmentConfig初期化完了: ${current.name}環境');
   }
 
   /// HotPepper API キーを取得（全環境共通）
@@ -191,18 +93,19 @@ HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultVal
     // 初期化チェック
     if (!_initialized) {
       // テスト環境では環境変数から取得を試行
-      if (_isTestEnvironment()) {
-        return const String.fromEnvironment('HOTPEPPER_API_KEY',
-            defaultValue: 'testdummyhotpepperkey123456789');
+      if (EnvironmentDetector.isTestEnvironment()) {
+        return const String.fromEnvironment(
+            ApiKeyConstants.hotpepperApiKeyField,
+            defaultValue: ApiKeyConstants.testDummyHotpepperApiKey);
       }
       // 初期化されていない場合は環境変数からのみ取得
-      return const String.fromEnvironment('HOTPEPPER_API_KEY',
+      return const String.fromEnvironment(ApiKeyConstants.hotpepperApiKeyField,
           defaultValue: '');
     }
 
     try {
       // .envファイルから取得を試行
-      final envKey = dotenv.env['HOTPEPPER_API_KEY'];
+      final envKey = dotenv.env[ApiKeyConstants.hotpepperApiKeyField];
       if (envKey != null && envKey.isNotEmpty) {
         return envKey;
       }
@@ -211,7 +114,8 @@ HOTPEPPER_API_KEY=${const String.fromEnvironment('HOTPEPPER_API_KEY', defaultVal
     }
 
     // 環境変数から取得（フォールバック）
-    return const String.fromEnvironment('HOTPEPPER_API_KEY', defaultValue: '');
+    return const String.fromEnvironment(ApiKeyConstants.hotpepperApiKeyField,
+        defaultValue: '');
   }
 
   /// Google Maps API キーを取得（WebView実装により使用していません）
