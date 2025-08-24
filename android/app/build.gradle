@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.example.chinese_food_app"
+    namespace = "com.machiapp.chinese_food"
     compileSdk = 35
 
     compileOptions {
@@ -37,7 +37,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.chinese_food_app"
+        applicationId = "com.machiapp.chinese_food"
         minSdk = 21
         targetSdk = 35
         versionCode = flutterVersionCode.toInteger()
