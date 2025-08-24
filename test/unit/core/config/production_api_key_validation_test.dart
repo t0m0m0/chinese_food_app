@@ -4,6 +4,46 @@ import 'package:chinese_food_app/core/config/environment_config.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../helpers/test_env_setup.dart';
 
+/// APIキー長さテスト用のデータクラス
+class _ApiKeyTestCase {
+  const _ApiKeyTestCase(this.apiKey, this.expectedErrorType, this.description);
+
+  final String apiKey;
+  final String expectedErrorType;
+  final String description;
+}
+
+/// APIキー文字セットテスト用のデータクラス
+class _CharacterTestCase {
+  const _CharacterTestCase(this.apiKey, this.shouldBeValid, this.description);
+
+  final String apiKey;
+  final bool shouldBeValid;
+  final String description;
+}
+
+/// APIキー検証結果をアサートするヘルパー関数
+void _assertApiKeyValidationResult(
+    List<String> errors, _ApiKeyTestCase testCase) {
+  if (testCase.expectedErrorType.isEmpty) {
+    // エラーがないことを期待
+    final hasApiKeyErrors = errors.any((error) =>
+        error.contains('HOTPEPPER_API_KEY') ||
+        error.contains('HotPepper API キーの形式が無効'));
+    expect(hasApiKeyErrors, isFalse, reason: testCase.description);
+  } else if (testCase.expectedErrorType == '設定されていません') {
+    // APIキー未設定エラーを期待
+    final hasMissingError = errors.any((error) =>
+        error.contains('HOTPEPPER_API_KEY') && error.contains('が設定されていません'));
+    expect(hasMissingError, isTrue, reason: testCase.description);
+  } else if (testCase.expectedErrorType == '形式が無効') {
+    // APIキー形式エラーを期待
+    final hasFormatError =
+        errors.any((error) => error.contains('HotPepper API キーの形式が無効です'));
+    expect(hasFormatError, isTrue, reason: testCase.description);
+  }
+}
+
 void main() {
   group('Production API Key Validation', () {
     setUpAll(() async {
@@ -47,9 +87,9 @@ HOTPEPPER_API_KEY=
         // Assert: 本番環境でAPIキーが空の場合はエラーが発生すること
         expect(
             errors.any((error) =>
-                error.contains('本番環境') &&
+                error.contains('production環境') &&
                 error.contains('HOTPEPPER_API_KEY') &&
-                error.contains('設定されていません')),
+                error.contains('が設定されていません')),
             isTrue,
             reason: 'Production environment should require HotPepper API key');
       });
@@ -149,8 +189,8 @@ HOTPEPPER_API_KEY=validproductionapikey123456789
 
         // Act & Assert: 全ての要件を満たす場合はクリティカルエラーはないこと
         final errors = ConfigValidator.validateConfiguration();
-        final hasCriticalProductionErrors = errors
-            .any((error) => error.contains('本番環境') || error.contains('形式が無効'));
+        final hasCriticalProductionErrors = errors.any((error) =>
+            error.contains('production環境') || error.contains('形式が無効'));
 
         expect(hasCriticalProductionErrors, isFalse,
             reason:
@@ -159,30 +199,28 @@ HOTPEPPER_API_KEY=validproductionapikey123456789
     });
 
     group('Production API Key Format Validation', () {
-      test('should validate minimum length requirement for production API keys',
-          () async {
-        // 本番環境では16文字以上の要件をテスト
-        final testCases = [
-          // 空のAPIキーの場合は「設定されていません」エラーになる
-          ('', '設定されていません', 'Empty key should show missing error'),
-          // 短いAPIキーの場合は「形式が無効」エラーになる
-          ('short', '形式が無効', '5 chars should show format error'),
-          // 有効なAPIキーの場合はエラーなし（正確に16文字）
-          ('mediumkey1234567', '', '16 chars should be valid'),
-          (
-            'verylongvalidproductionapikey1234567890',
-            '',
-            '39+ chars should be valid'
-          ),
-        ];
+      // パラメータ化テスト用のデータ定義
+      final lengthTestCases = [
+        // 空のAPIキーの場合は「設定されていません」エラーになる
+        const _ApiKeyTestCase(
+            '', '設定されていません', 'Empty key should show missing error'),
+        // 短いAPIキーの場合は「形式が無効」エラーになる
+        const _ApiKeyTestCase(
+            'short', '形式が無効', '5 chars should show format error'),
+        // 有効なAPIキーの場合はエラーなし（正確に16文字）
+        const _ApiKeyTestCase(
+            'mediumkey1234567', '', '16 chars should be valid'),
+        const _ApiKeyTestCase('verylongvalidproductionapikey1234567890', '',
+            '39+ chars should be valid'),
+      ];
 
-        for (final testCase in testCases) {
-          final (apiKey, expectedErrorType, reason) = testCase;
-
+      for (final testCase in lengthTestCases) {
+        test('should validate API key length: ${testCase.description}',
+            () async {
           // Arrange
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=production
-HOTPEPPER_API_KEY=$apiKey
+HOTPEPPER_API_KEY=${testCase.apiKey}
 ''');
 
           await EnvironmentConfig.initialize();
@@ -191,59 +229,35 @@ HOTPEPPER_API_KEY=$apiKey
           final errors = ConfigValidator.validateConfiguration();
 
           // Assert
-          if (expectedErrorType.isEmpty) {
-            // エラーがないことを期待
-            final hasApiKeyErrors = errors.any((error) =>
-                error.contains('HOTPEPPER_API_KEY') ||
-                error.contains('HotPepper API キーの形式が無効'));
-            expect(hasApiKeyErrors, isFalse, reason: reason);
-          } else if (expectedErrorType == '設定されていません') {
-            // APIキー未設定エラーを期待
-            final hasMissingError = errors.any((error) =>
-                error.contains('HOTPEPPER_API_KEY') &&
-                error.contains('設定されていません'));
-            expect(hasMissingError, isTrue, reason: reason);
-          } else if (expectedErrorType == '形式が無効') {
-            // APIキー形式エラーを期待
-            final hasFormatError = errors
-                .any((error) => error.contains('HotPepper API キーの形式が無効です'));
-            expect(hasFormatError, isTrue, reason: reason);
-          }
-        }
-      });
+          _assertApiKeyValidationResult(errors, testCase);
+        });
+      }
 
-      test('should validate character set requirement for production API keys',
-          () async {
-        // 英数字のみの要件をテスト
-        final testCases = [
-          ('validkey123456789', true, 'Alphanumeric key should be valid'),
-          ('VALIDKEY123456789', true, 'Uppercase alphanumeric should be valid'),
-          (
-            'ValidKey123456789',
-            true,
-            'Mixed case alphanumeric should be valid'
-          ),
-          ('invalid-key-123456', false, 'Key with hyphens should be invalid'),
-          (
-            'invalid_key_123456',
-            false,
-            'Key with underscores should be invalid'
-          ),
-          (
-            'invalidkey123456!',
-            false,
-            'Key with special chars should be invalid'
-          ),
-          ('invalidkey 123456', false, 'Key with spaces should be invalid'),
-        ];
+      // パラメータ化テスト用のデータ定義
+      final characterTestCases = [
+        const _CharacterTestCase(
+            'validkey123456789', true, 'Alphanumeric key should be valid'),
+        const _CharacterTestCase('VALIDKEY123456789', true,
+            'Uppercase alphanumeric should be valid'),
+        const _CharacterTestCase('ValidKey123456789', true,
+            'Mixed case alphanumeric should be valid'),
+        const _CharacterTestCase(
+            'invalid-key-123456', false, 'Key with hyphens should be invalid'),
+        const _CharacterTestCase('invalid_key_123456', false,
+            'Key with underscores should be invalid'),
+        const _CharacterTestCase('invalidkey123456!', false,
+            'Key with special chars should be invalid'),
+        const _CharacterTestCase(
+            'invalidkey 123456', false, 'Key with spaces should be invalid'),
+      ];
 
-        for (final testCase in testCases) {
-          final (apiKey, shouldBeValid, reason) = testCase;
-
+      for (final testCase in characterTestCases) {
+        test('should validate API key characters: ${testCase.description}',
+            () async {
           // Arrange
           dotenv.testLoad(fileInput: '''
 FLUTTER_ENV=production
-HOTPEPPER_API_KEY=$apiKey
+HOTPEPPER_API_KEY=${testCase.apiKey}
 ''');
 
           await EnvironmentConfig.initialize();
@@ -254,9 +268,10 @@ HOTPEPPER_API_KEY=$apiKey
               errors.any((error) => error.contains('HotPepper API キーの形式が無効です'));
 
           // Assert
-          expect(hasFormatError, !shouldBeValid, reason: reason);
-        }
-      });
+          expect(hasFormatError, !testCase.shouldBeValid,
+              reason: testCase.description);
+        });
+      }
     });
   });
 }

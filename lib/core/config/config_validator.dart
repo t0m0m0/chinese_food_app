@@ -5,6 +5,7 @@ import 'environment_config.dart';
 import 'location_config.dart';
 import 'search_config.dart';
 import 'ui_config.dart';
+import 'api_key_constants.dart';
 
 /// 設定検証クラス
 class ConfigValidator {
@@ -69,7 +70,7 @@ class ConfigValidator {
 
     if (hotpepperKey.isNotEmpty && !_isValidHotpepperApiKey(hotpepperKey)) {
       errors.add(
-        'HotPepper API キーの形式が無効です (最低16文字の英数字が必要)',
+        '${ApiKeyConstants.hotpepperApiKeyFormatError} (${ApiKeyConstants.hotpepperApiKeyFormatRequirement})',
       );
     }
 
@@ -103,7 +104,8 @@ class ConfigValidator {
     // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
-      errors.add('本番環境: HOTPEPPER_API_KEY が設定されていません');
+      errors.add(
+          '${ApiKeyConstants.productionEnv}環境: ${ApiKeyConstants.hotpepperApiKeyField} ${ApiKeyConstants.hotpepperApiKeyMissingError}');
     }
 
     // Google Maps APIキーのチェックは削除（WebView実装により不要）
@@ -116,7 +118,8 @@ class ConfigValidator {
     // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
-      errors.add('ステージング環境: HOTPEPPER_API_KEY が設定されていません');
+      errors.add(
+          '${ApiKeyConstants.stagingEnv}環境: ${ApiKeyConstants.hotpepperApiKeyField} ${ApiKeyConstants.hotpepperApiKeyMissingError}');
     }
 
     // Google Maps APIキーのチェックは削除（WebView実装により不要）
@@ -129,7 +132,8 @@ class ConfigValidator {
     // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
-      errors.add('開発環境: HotPepper API キーが設定されていません（機能制限あり）');
+      errors.add(
+          '${ApiKeyConstants.developmentEnv}環境: HotPepper API キー${ApiKeyConstants.hotpepperApiKeyMissingError}（機能制限あり）');
     }
 
     // Google Maps APIキーのチェックは削除（WebView実装により不要）
@@ -145,7 +149,8 @@ class ConfigValidator {
     // テスト環境ではAPIキーが設定されていればOK（実際の形式は問わない）
     // ダミーキーでもテストには支障がない
     if (hotpepperKey.isEmpty) {
-      errors.add('テスト環境: HotPepper API キーが設定されていません（テスト実行に影響なし）');
+      errors.add(
+          '${ApiKeyConstants.testEnv}環境: HotPepper API キー${ApiKeyConstants.hotpepperApiKeyMissingError}（テスト実行に影響なし）');
     }
 
     // Google Maps APIキーのチェックは削除（WebView実装により不要）
@@ -156,8 +161,12 @@ class ConfigValidator {
     // HotPepper API キーの基本的な形式チェック
     // - 最低16文字
     // - 英数字のみ
-    if (apiKey.length < 16) return false;
-    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(apiKey)) return false;
+    if (apiKey.length < ApiKeyConstants.hotpepperApiKeyMinLength) {
+      return false;
+    }
+    if (!RegExp(ApiKeyConstants.hotpepperApiKeyPattern).hasMatch(apiKey)) {
+      return false;
+    }
 
     return true;
   }
@@ -173,9 +182,9 @@ class ConfigValidator {
   static bool get hasCriticalErrors {
     final errors = validateConfiguration();
     return errors.any((error) =>
-        error.contains('本番環境') ||
+        error.contains('production環境') ||
         error.contains('形式が無効') ||
-        error.contains('警告: 本番環境'));
+        error.contains('警告: production環境'));
   }
 
   /// 全設定検証でCriticalエラーがあるかを判定
@@ -185,9 +194,9 @@ class ConfigValidator {
 
     // ランタイム設定のCriticalエラーチェック
     final hasCriticalRuntimeErrors = runtimeErrors.any((error) =>
-        error.contains('本番環境') ||
+        error.contains('production環境') ||
         error.contains('形式が無効') ||
-        error.contains('警告: 本番環境'));
+        error.contains('警告: production環境'));
 
     // 分野別設定のCriticalエラーチェック
     final hasCriticalDomainErrors = validationResults.values
