@@ -9,10 +9,12 @@ class GetLegalDocumentParams {
   final LegalDocumentType? type;
 
   GetLegalDocumentParams({this.id, this.type})
-      : assert(id != null || type != null, 'Either id or type must be provided');
+      : assert(
+            id != null || type != null, 'Either id or type must be provided');
 }
 
-class GetLegalDocumentUseCase extends BaseUseCase<GetLegalDocumentParams, LegalDocument> {
+class GetLegalDocumentUseCase
+    extends BaseUseCase<GetLegalDocumentParams, LegalDocument> {
   final LegalDocumentRepository _repository;
 
   GetLegalDocumentUseCase(this._repository);
@@ -21,7 +23,7 @@ class GetLegalDocumentUseCase extends BaseUseCase<GetLegalDocumentParams, LegalD
   Future<Result<LegalDocument>> call(GetLegalDocumentParams params) async {
     try {
       LegalDocument? document;
-      
+
       if (params.id != null) {
         document = await _repository.getDocument(params.id!);
       } else if (params.type != null) {

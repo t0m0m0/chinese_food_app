@@ -46,7 +46,8 @@ class FakeLegalDocumentRepository implements LegalDocumentRepository {
   }
 
   @override
-  Future<void> markDocumentAccepted(String userId, LegalDocumentType type) async {}
+  Future<void> markDocumentAccepted(
+      String userId, LegalDocumentType type) async {}
 }
 
 void main() {
@@ -74,7 +75,8 @@ void main() {
       repository.setDocumentByType(LegalDocumentType.privacyPolicy, document);
 
       // Act
-      final result = await usecase(GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy));
+      final result = await usecase(
+          GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy));
 
       // Assert
       expect(result, isA<Success<LegalDocument>>());
@@ -87,7 +89,8 @@ void main() {
       // Arrange - Repository has no document set
 
       // Act
-      final result = await usecase(GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy));
+      final result = await usecase(
+          GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy));
 
       // Assert
       expect(result, isA<Failure<LegalDocument>>());
@@ -100,7 +103,8 @@ void main() {
       repository.shouldThrowException = true;
 
       // Act
-      final result = await usecase(GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy));
+      final result = await usecase(
+          GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy));
 
       // Assert
       expect(result, isA<Failure<LegalDocument>>());
@@ -123,7 +127,8 @@ void main() {
       repository.setDocumentById('terms-of-service', document);
 
       // Act
-      final result = await usecase(GetLegalDocumentParams(id: 'terms-of-service'));
+      final result =
+          await usecase(GetLegalDocumentParams(id: 'terms-of-service'));
 
       // Assert
       expect(result, isA<Success<LegalDocument>>());
@@ -136,7 +141,8 @@ void main() {
   group('GetLegalDocumentParams', () {
     test('should create params with type', () {
       // Arrange & Act
-      final params = GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy);
+      final params =
+          GetLegalDocumentParams(type: LegalDocumentType.privacyPolicy);
 
       // Assert
       expect(params.type, equals(LegalDocumentType.privacyPolicy));

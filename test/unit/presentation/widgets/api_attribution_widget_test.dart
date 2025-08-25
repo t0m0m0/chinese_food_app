@@ -4,7 +4,8 @@ import 'package:chinese_food_app/presentation/widgets/api_attribution_widget.dar
 
 void main() {
   group('ApiAttributionWidget', () {
-    testWidgets('should display HotPepper attribution', (WidgetTester tester) async {
+    testWidgets('should display HotPepper attribution',
+        (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         const MaterialApp(
@@ -21,7 +22,8 @@ void main() {
       expect(find.byType(TextButton), findsOneWidget);
     });
 
-    testWidgets('should display Google Maps attribution', (WidgetTester tester) async {
+    testWidgets('should display Google Maps attribution',
+        (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         const MaterialApp(
@@ -37,7 +39,8 @@ void main() {
       expect(find.textContaining('Google'), findsOneWidget);
     });
 
-    testWidgets('should display OpenStreetMap attribution', (WidgetTester tester) async {
+    testWidgets('should display OpenStreetMap attribution',
+        (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         const MaterialApp(
@@ -53,10 +56,11 @@ void main() {
       expect(find.textContaining('OpenStreetMap'), findsOneWidget);
     });
 
-    testWidgets('should handle tap on attribution link', (WidgetTester tester) async {
+    testWidgets('should handle tap on attribution link',
+        (WidgetTester tester) async {
       // Arrange
       bool linkTapped = false;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -78,7 +82,8 @@ void main() {
       expect(linkTapped, isTrue);
     });
 
-    testWidgets('should display with correct styling', (WidgetTester tester) async {
+    testWidgets('should display with correct styling',
+        (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         const MaterialApp(
@@ -97,9 +102,11 @@ void main() {
 
     group('ApiAttributionType', () {
       test('should have correct display text', () {
-        expect(ApiAttributionType.hotpepper.displayText, equals('Powered by HotPepper グルメサーチAPI'));
+        expect(ApiAttributionType.hotpepper.displayText,
+            equals('Powered by HotPepper グルメサーチAPI'));
         expect(ApiAttributionType.googleMaps.displayText, contains('Google'));
-        expect(ApiAttributionType.openStreetMap.displayText, contains('OpenStreetMap'));
+        expect(ApiAttributionType.openStreetMap.displayText,
+            contains('OpenStreetMap'));
       });
 
       test('should have correct URLs', () {

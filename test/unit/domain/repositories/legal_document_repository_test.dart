@@ -36,7 +36,8 @@ class MockLegalDocumentRepository implements LegalDocumentRepository {
   }
 
   @override
-  Future<void> markDocumentAccepted(String userId, LegalDocumentType type) async {
+  Future<void> markDocumentAccepted(
+      String userId, LegalDocumentType type) async {
     // Mock implementation
   }
 }
@@ -86,7 +87,8 @@ void main() {
 
       // Act
       await repository.saveDocument(document);
-      final retrieved = await repository.getDocumentByType(LegalDocumentType.termsOfService);
+      final retrieved =
+          await repository.getDocumentByType(LegalDocumentType.termsOfService);
 
       // Assert
       expect(retrieved, isNotNull);
@@ -123,8 +125,14 @@ void main() {
 
       // Assert
       expect(allDocuments.length, equals(2));
-      expect(allDocuments.any((doc) => doc.type == LegalDocumentType.privacyPolicy), isTrue);
-      expect(allDocuments.any((doc) => doc.type == LegalDocumentType.termsOfService), isTrue);
+      expect(
+          allDocuments
+              .any((doc) => doc.type == LegalDocumentType.privacyPolicy),
+          isTrue);
+      expect(
+          allDocuments
+              .any((doc) => doc.type == LegalDocumentType.termsOfService),
+          isTrue);
     });
 
     test('should delete document', () async {
@@ -150,11 +158,13 @@ void main() {
 
     test('should track document acceptance status', () async {
       // Act & Assert
-      final isAccepted = await repository.isDocumentAccepted('user-123', LegalDocumentType.privacyPolicy);
+      final isAccepted = await repository.isDocumentAccepted(
+          'user-123', LegalDocumentType.privacyPolicy);
       expect(isAccepted, isTrue);
-      
+
       // Mark as accepted should not throw
-      await repository.markDocumentAccepted('user-123', LegalDocumentType.privacyPolicy);
+      await repository.markDocumentAccepted(
+          'user-123', LegalDocumentType.privacyPolicy);
     });
   });
 }

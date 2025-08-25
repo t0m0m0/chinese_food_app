@@ -87,7 +87,7 @@ void main() {
 
       // Act & Assert
       expect(document.isEffective, isFalse);
-      
+
       // Test with past date
       final pastDate = DateTime.now().subtract(const Duration(days: 1));
       final effectiveDocument = LegalDocument(
@@ -99,7 +99,7 @@ void main() {
         effectiveDate: pastDate,
         lastUpdated: DateTime.now(),
       );
-      
+
       expect(effectiveDocument.isEffective, isTrue);
     });
   });

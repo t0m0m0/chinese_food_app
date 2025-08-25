@@ -19,7 +19,8 @@ void main() {
       );
     });
 
-    testWidgets('should display document title in app bar', (WidgetTester tester) async {
+    testWidgets('should display document title in app bar',
+        (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         MaterialApp(
@@ -45,7 +46,8 @@ void main() {
       expect(find.textContaining('個人情報について説明します'), findsOneWidget);
     });
 
-    testWidgets('should display document version and dates', (WidgetTester tester) async {
+    testWidgets('should display document version and dates',
+        (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         MaterialApp(
@@ -74,7 +76,8 @@ void main() {
       expect(find.byType(SingleChildScrollView), findsOneWidget);
     });
 
-    testWidgets('should have proper padding for readability', (WidgetTester tester) async {
+    testWidgets('should have proper padding for readability',
+        (WidgetTester tester) async {
       // Arrange & Act
       await tester.pumpWidget(
         MaterialApp(
@@ -87,7 +90,8 @@ void main() {
       expect(paddingFinder, findsWidgets);
     });
 
-    testWidgets('should display markdown content with proper formatting', (WidgetTester tester) async {
+    testWidgets('should display markdown content with proper formatting',
+        (WidgetTester tester) async {
       // Arrange
       final markdownDocument = LegalDocument(
         id: 'test-doc',
@@ -125,7 +129,7 @@ void main() {
     testWidgets('should handle back navigation', (WidgetTester tester) async {
       // Arrange
       bool navigationPopped = false;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -135,7 +139,8 @@ void main() {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => LegalDocumentPage(document: testDocument),
+                      builder: (context) =>
+                          LegalDocumentPage(document: testDocument),
                     ),
                   );
                   navigationPopped = true;
@@ -150,10 +155,10 @@ void main() {
       // Act
       await tester.tap(find.text('Navigate'));
       await tester.pumpAndSettle();
-      
+
       // Verify we're on the legal document page
       expect(find.text('プライバシーポリシー'), findsOneWidget);
-      
+
       // Go back
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();

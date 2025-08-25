@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../domain/entities/legal_document.dart';
 
 class LegalDocumentPage extends StatelessWidget {
@@ -32,8 +31,8 @@ class LegalDocumentPage extends StatelessWidget {
                     Text(
                       '文書情報',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 8),
                     _buildInfoRow('バージョン', document.version),
@@ -49,7 +48,7 @@ class LegalDocumentPage extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.info_outline, 
+                            Icon(Icons.info_outline,
                                 color: Colors.orange.shade700, size: 16),
                             const SizedBox(width: 8),
                             Expanded(
@@ -69,7 +68,7 @@ class LegalDocumentPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Document content
             Card(
               child: Padding(
@@ -77,8 +76,8 @@ class LegalDocumentPage extends StatelessWidget {
                 child: Text(
                   document.content,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    height: 1.5,
-                  ),
+                        height: 1.5,
+                      ),
                 ),
               ),
             ),

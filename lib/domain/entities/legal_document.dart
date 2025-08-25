@@ -42,7 +42,7 @@ class LegalDocument {
   }
 
   bool get isEffective {
-    return DateTime.now().isAfter(effectiveDate) || 
-           DateTime.now().isAtSameMomentAs(effectiveDate);
+    return DateTime.now().isAfter(effectiveDate) ||
+        DateTime.now().isAtSameMomentAs(effectiveDate);
   }
 }
