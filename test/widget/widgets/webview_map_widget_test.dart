@@ -20,7 +20,8 @@ void main() {
     });
 
     group('URL Launcher Integration Tests', () {
-      testWidgets('should call url_launcher when external navigation is triggered',
+      testWidgets(
+          'should call url_launcher when external navigation is triggered',
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
