@@ -354,6 +354,30 @@ class AppDIContainer implements DIContainerInterface {
   }
 
   /// Ensure container is configured before accessing services
+  /// 永続化データベース接続を作成（Issue #113 Phase 3）
+  /// 
+  /// path_providerを使用して適切なファイルパスでデータベースを作成します。
+  /// 現在は未実装のため、UnimplementedErrorを投げます。
+  Future<DatabaseConnection> createPersistentDatabaseConnection() async {
+    throw UnimplementedError('Persistent database connection not yet implemented');
+  }
+
+  /// path_providerを使用したデータベースファイルパス取得（Issue #113 Phase 3）
+  /// 
+  /// アプリケーションサポートディレクトリ内にデータベースファイルを作成します。
+  /// 現在は未実装のため、UnimplementedErrorを投げます。
+  Future<String> getDatabaseFileWithPathProvider() async {
+    throw UnimplementedError('Database file path with path_provider not yet implemented');
+  }
+
+  /// 本番環境用データベース作成（Issue #113 Phase 3）
+  /// 
+  /// 本番環境では永続化データベースを使用します。
+  /// 現在は未実装のため、UnimplementedErrorを投げます。
+  Future<DatabaseConnection> createProductionDatabase() async {
+    throw UnimplementedError('Production database creation not yet implemented');
+  }
+
   void _ensureConfigured() {
     if (!_isConfigured) {
       throw const DIContainerException(

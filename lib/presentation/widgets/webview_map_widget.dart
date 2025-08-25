@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../domain/entities/store.dart';
 import '../../core/debug/crash_handler.dart';
@@ -194,22 +196,37 @@ class _WebViewMapWidgetState extends State<WebViewMapWidget> {
     try {
       // StoreMapWidgetと同じ外部アプリ呼び出しロジック
       final navigationUrls = [
+        // iOS: Apple Maps app
         'maps://maps.apple.com/?daddr=${widget.store.lat},${widget.store.lng}',
+        // Android: Google Maps app
         'google.navigation:q=${widget.store.lat},${widget.store.lng}',
+        // Universal fallback: Web URL
         'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent('${widget.store.lat},${widget.store.lng}')}',
       ];
 
       for (final urlString in navigationUrls) {
-        Uri.parse(urlString);
-        // url_launcherの使用
-        // TODO: 実際の実装ではurl_launcherを使用
+        final url = Uri.parse(urlString);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+          return; // 成功時は処理終了
+        }
+      }
+
+      // 全てのURLが失敗した場合
+      if (kDebugMode) {
+        debugPrint(
+            '[WebViewMapWidget] All navigation URLs failed for store: ${widget.store.name}');
       }
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[WebViewMapWidget] Navigation error: $e');
+      }
       CrashHandler.logEvent('WEBVIEW_EXTERNAL_NAV_ERROR', details: {
         'error': e.toString(),
         'store_id': widget.store.id,
         'store_name': widget.store.name,
       });
+      // 本番環境ではサイレントフェール
     }
   }
 }
