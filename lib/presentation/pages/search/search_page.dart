@@ -8,6 +8,7 @@ import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../widgets/cached_store_image.dart';
+import '../../widgets/api_attribution_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
@@ -304,12 +305,21 @@ class _SearchPageState extends State<SearchPage> {
           );
         }
 
-        return ListView.builder(
-          itemCount: state.searchResults.length,
-          itemBuilder: (context, index) {
-            final store = state.searchResults[index];
-            return _buildStoreCard(store);
-          },
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: state.searchResults.length,
+                itemBuilder: (context, index) {
+                  final store = state.searchResults[index];
+                  return _buildStoreCard(store);
+                },
+              ),
+            ),
+            const ApiAttributionWidget(
+              apiType: ApiAttributionType.hotpepper,
+            ),
+          ],
         );
       },
     );
