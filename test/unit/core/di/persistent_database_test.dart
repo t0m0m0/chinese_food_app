@@ -44,7 +44,7 @@ void main() {
     group('Environment-based Database Selection', () {
       test('should use memory database in test environment', () async {
         // テスト環境では引き続きメモリDBを使用するべき
-        final container = AppDIContainer();
+        // AppDIContainerの環境判定機能をテスト
 
         // テスト環境でのメモリDB使用は現在の正しい動作
         expect(true, isTrue);

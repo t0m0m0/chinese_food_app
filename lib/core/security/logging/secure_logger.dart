@@ -379,7 +379,14 @@ class SecureLogger {
 
   /// デバッグモードかどうかを判定（レガシー実装）
   ///
-  /// 注意: 本番環境では isProductionSafeDebugMode() の使用を推奨
+  /// **非推奨**: 本番環境では isProductionSafeDebugMode() の使用を推奨
+  ///
+  /// **段階的移行計画**:
+  /// 1. Phase 1: isProductionSafeDebugMode() を既存コードで使用開始
+  /// 2. Phase 2: 既存の isDebugMode 使用箇所を段階的に移行
+  /// 3. Phase 3: isDebugMode を @deprecated マークし、最終的に削除
+  ///
+  /// **現在**: Phase 1 - 後方互換性のため維持
   static bool get isDebugMode {
     return const bool.fromEnvironment('DEBUG', defaultValue: true);
   }
