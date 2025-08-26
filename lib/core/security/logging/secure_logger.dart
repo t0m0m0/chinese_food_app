@@ -337,7 +337,56 @@ class SecureLogger {
     return true;
   }
 
-  /// デバッグモードかどうかを判定
+  /// 本番環境で安全なデバッグモード判定
+  ///
+  /// 本番環境では明示的にDEBUG=trueが設定されない限りfalseを返します
+  static bool isProductionSafeDebugMode() {
+    const isProduction =
+        bool.fromEnvironment('PRODUCTION', defaultValue: false);
+
+    if (isProduction) {
+      // 本番環境では明示的にDEBUG=trueが設定された場合のみtrue
+      return const bool.fromEnvironment('DEBUG', defaultValue: false);
+    } else {
+      // 開発・テスト環境では現在の動作を維持
+      return const bool.fromEnvironment('DEBUG', defaultValue: true);
+    }
+  }
+
+  /// 環境別デバッグ設定を取得
+  ///
+  /// Issue #142: 環境別のデバッグ設定管理
+  /// 現在は未実装のため、UnimplementedErrorを投げます
+  static Map<String, dynamic> getEnvironmentDebugConfig() {
+    throw UnimplementedError('Environment debug config not yet implemented');
+  }
+
+  /// 環境別ログレベルを取得
+  ///
+  /// Issue #142: 環境別ログレベル設定
+  /// 現在は未実装のため、UnimplementedErrorを投げます
+  static int getEnvironmentLogLevel() {
+    throw UnimplementedError('Environment log level not yet implemented');
+  }
+
+  /// 本番環境向けセキュアログ設定を取得
+  ///
+  /// Issue #142: セキュリティログ設定の最適化
+  /// 現在は未実装のため、UnimplementedErrorを投げます
+  static Map<String, dynamic> getProductionSecureConfig() {
+    throw UnimplementedError('Production secure config not yet implemented');
+  }
+
+  /// デバッグモードかどうかを判定（レガシー実装）
+  ///
+  /// **非推奨**: 本番環境では isProductionSafeDebugMode() の使用を推奨
+  ///
+  /// **段階的移行計画**:
+  /// 1. Phase 1: isProductionSafeDebugMode() を既存コードで使用開始
+  /// 2. Phase 2: 既存の isDebugMode 使用箇所を段階的に移行
+  /// 3. Phase 3: isDebugMode を @deprecated マークし、最終的に削除
+  ///
+  /// **現在**: Phase 1 - 後方互換性のため維持
   static bool get isDebugMode {
     return const bool.fromEnvironment('DEBUG', defaultValue: true);
   }

@@ -83,17 +83,67 @@ class DatabaseErrorHandler {
     }
   }
 
+  /// sqlite3パッケージのSqliteException型チェックがサポートされているかを確認
+  ///
+  /// Issue #113 Phase 2: 型安全性向上のためのサポート確認
+  /// 現在は未実装のため、常にtrueを返します（将来の実装のための基盤）
+  static bool supportsSqliteExceptionTypeCheck() {
+    // 将来的にはsqlite3パッケージの利用可能性をチェック
+    return true; // 基盤実装として常にtrueを返す
+  }
+
+  /// 型安全なデータベースエラーハンドラーを作成
+  ///
+  /// Issue #113 Phase 2: sqlite3パッケージのSqliteExceptionを使用した
+  /// 型安全なエラー処理の実装
+  /// 現在は未実装のため、UnimplementedErrorを投げます
+  static TypedDatabaseErrorHandler createTypedHandler() {
+    throw UnimplementedError(
+        'Typed database error handler not yet implemented');
+  }
+
+  /// 多言語対応エラーメッセージを取得
+  ///
+  /// Issue #113 Phase 2: エラーメッセージの多言語化
+  /// 現在は未実装のため、UnimplementedErrorを投げます
+  static Map<String, String> getLocalizedErrorMessages() {
+    throw UnimplementedError('Localized error messages not yet implemented');
+  }
+
   /// データベースファイルアクセスエラーのパターンマッチング
   static bool _matchesDatabaseFileError(String errorString) {
     // SQLITE_CANTOPEN (14) エラーの様々なパターン
     final patterns = [
       'SqliteException(14)',
       'unable to open database file',
+      'cannot open database file',
       'database disk image is malformed',
       'database is locked',
       'SQLITE_CANTOPEN',
+      'disk I/O error',
     ];
 
     return patterns.any((pattern) => errorString.contains(pattern));
   }
+}
+
+/// 型安全なデータベースエラーハンドラー（Issue #113 Phase 2）
+///
+/// sqlite3パッケージのSqliteExceptionを使用した型安全なエラー処理を提供します。
+/// 現在は基盤実装のため、実際の型チェックは未実装です。
+abstract class TypedDatabaseErrorHandler {
+  /// データベースファイルアクセスエラーの型安全な判定
+  bool get isDatabaseFileAccessError;
+
+  /// FFIエラーの型安全な判定
+  bool get isFFIError;
+
+  /// 初期化エラーの型安全な判定
+  bool get isInitializationError;
+
+  /// ユーザーフレンドリーなエラーメッセージの生成
+  String get userFriendlyMessage;
+
+  /// エラーの重要度レベル
+  int get errorSeverity;
 }
