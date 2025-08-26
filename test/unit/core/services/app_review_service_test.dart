@@ -133,8 +133,9 @@ void main() {
 
         // Simulate passing enough days
         final prefs = await SharedPreferences.getInstance();
+        final daysToSubtract = AsoConfig.daysSinceInstallForReview + 1;
         final pastDate = DateTime.now()
-            .subtract(Duration(days: AsoConfig.daysSinceInstallForReview + 1))
+            .subtract(Duration(days: daysToSubtract))
             .millisecondsSinceEpoch;
         await prefs.setInt('app_install_date', pastDate);
 
