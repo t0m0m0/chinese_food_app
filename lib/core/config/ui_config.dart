@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 /// UI関連の設定を管理するクラス
 class UiConfig {
-  /// アプリ情報
-  static const String appName = 'マチアプ';
+  /// アプリ情報 - ASO最適化対応
+  static const String appName = '町中華探索「マチアプ」';
+  static const String appShortName = 'マチアプ';
   static const String appVersion = '1.0.0';
-  static const String appDescription = '町中華探索アプリ';
+  static const String appDescription = '中華料理店を発見・記録するグルメアプリ';
 
   /// レイアウト設定
   static const double cardBorderRadius = 14.0;
@@ -115,6 +116,7 @@ class UiConfig {
   static Map<String, dynamic> get debugInfo {
     return {
       'appName': appName,
+      'appShortName': appShortName,
       'appVersion': appVersion,
       'appDescription': appDescription,
       'cardBorderRadius': cardBorderRadius,
