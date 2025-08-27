@@ -224,21 +224,36 @@ void main() {
     });
 
     testWidgets('should handle continue button tap', (tester) async {
-      // Arrange & Act
+      // Arrange
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
-            body: AppReviewThanksDialog(),
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  AppReviewThanksDialog.show(context);
+                },
+                child: const Text('Show Thanks'),
+              ),
+            ),
           ),
         ),
       );
 
-      // Act
+      // Show the dialog
+      await tester.tap(find.text('Show Thanks'));
+      await tester.pumpAndSettle();
+
+      // Verify the button exists
+      expect(find.text('探索を続ける'), findsOneWidget);
+
+      // Act - Tap the continue button
       await tester.tap(find.text('探索を続ける'));
       await tester.pumpAndSettle();
 
-      // Assert - Dialog should close (we can't test navigation directly)
-      expect(find.text('探索を続ける'), findsOneWidget);
+      // Assert - Dialog should close
+      expect(find.text('探索を続ける'), findsNothing);
+      expect(find.text('ありがとうございます！'), findsNothing);
     });
 
     testWidgets('should show via static method', (tester) async {
