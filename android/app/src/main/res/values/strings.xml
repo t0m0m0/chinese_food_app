@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- アプリ名（日本語版） - ASO最適化 -->
-    <string name="app_name">町中華探索「マチアプ」- グルメ記録</string>
+    <string name="app_name">町中華探索アプリ「マチアプ」</string>
     
     <!-- Google Maps API Key -->
     <!-- CI環境用のダミーキー。本番環境では実際のAPIキーで上書きする -->
