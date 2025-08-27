@@ -242,6 +242,7 @@ class AppReviewThanksDialog extends StatelessWidget {
           ),
         ],
       ),
+      // ignore: prefer_const_constructors (動的な文字列補間のため)
       content: Text(
         'レビューをいただき、ありがとうございます。\nあなたの声が、${AsoConfig.appShortName}をより良くする励みになります！\n\nこれからも町中華探索をお楽しみください。',
         style: const TextStyle(fontSize: 16, height: 1.5),
