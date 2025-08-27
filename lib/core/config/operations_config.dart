@@ -7,10 +7,12 @@ class OperationsConfig {
   // サポート体制設定
   static const String supportEmail = 'support@machiapp.local';
   static const int supportResponseTimeHours = 24;
+  static const int maxSupportTicketsPerDay = 100;
 
   // 監視・アラート設定
   static const double crashRateThreshold = 0.001; // 0.1%
   static const double appStoreRatingThreshold = 4.0;
+  static const int maxErrorReportsPerHour = 50;
 
   // KPI監視間隔設定
   static const int dailyAnalyticsUpdateHour = 9; // 9時
@@ -27,10 +29,13 @@ class OperationsConfig {
 
   // バリデーション関数
 
-  /// メールアドレス形式の検証
+  /// メールアドレス形式の検証（RFC 5322準拠）
   static bool isValidEmailFormat(String email) {
     if (email.isEmpty) return false;
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+    if (email.length > 254) return false; // RFC制限
+
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegex.hasMatch(email);
   }
 

@@ -189,6 +189,33 @@ void main() {
         // Assert
         expect(result.isFailure, isTrue);
       });
+
+      test('should validate bug report length limits', () async {
+        // Arrange
+        final longTitleReport = BugReport(
+          title: 'a' * 101, // 100文字超過
+          description: 'description',
+          stepsToReproduce: ['step 1'],
+          userEmail: 'test@example.com',
+          deviceInfo: 'device info',
+        );
+
+        final longDescriptionReport = BugReport(
+          title: 'title',
+          description: 'a' * 2001, // 2000文字超過
+          stepsToReproduce: ['step 1'],
+          userEmail: 'test@example.com',
+          deviceInfo: 'device info',
+        );
+
+        // Act
+        final result1 = await supportService.reportBug(longTitleReport);
+        final result2 = await supportService.reportBug(longDescriptionReport);
+
+        // Assert
+        expect(result1.isFailure, isTrue);
+        expect(result2.isFailure, isTrue);
+      });
     });
   });
 }

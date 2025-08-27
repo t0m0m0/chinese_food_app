@@ -163,8 +163,16 @@ class SupportService {
         return Failure(BaseException('バグのタイトルを入力してください。'));
       }
 
+      if (bugReport.title.length > 100) {
+        return Failure(BaseException('バグのタイトルは100文字以内で入力してください。'));
+      }
+
       if (bugReport.description.trim().isEmpty) {
         return Failure(BaseException('バグの説明を入力してください。'));
+      }
+
+      if (bugReport.description.length > 2000) {
+        return Failure(BaseException('バグの説明は2000文字以内で入力してください。'));
       }
 
       if (!OperationsConfig.isValidEmailFormat(bugReport.userEmail)) {
@@ -212,11 +220,18 @@ $userBody
   }
 
   String _createBugReportBody(BugReport bugReport) {
-    final stepsText =
-        bugReport.stepsToReproduce.map((step) => '  $step').join('\n');
+    final stepsText = bugReport.stepsToReproduce
+        .asMap()
+        .entries
+        .map((entry) => '  ${entry.key + 1}. ${entry.value}')
+        .join('\n');
+
+    final reportId =
+        'BUG-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
 
     return '''
 【バグレポート】
+レポートID: $reportId
 
 ■ 問題の概要
 ${bugReport.title}
@@ -233,12 +248,16 @@ ${bugReport.deviceInfo}
 ■ 発生頻度
 ${bugReport.frequency ?? '未設定'}
 
-■ その他の情報
+■ うまの情報
 ${bugReport.additionalInfo ?? '特になし'}
+
+■ 優先度
+${_determineBugPriority(bugReport)}
 
 ---
 報告者: ${bugReport.userEmail}
 報告日時: ${DateTime.now().toIso8601String()}
+アプリバージョン: 1.0.0+1
 ''';
   }
 
@@ -341,8 +360,34 @@ ${bugReport.additionalInfo ?? '特になし'}
             'お問い合わせの際は、使用デバイスとアプリバージョンをお知らせください。',
           ],
         ),
+        HelpContentSection(
+          title: 'サポートガイドライン',
+          items: [
+            'バグ報告は再現手順を明確に記載してください',
+            '機能提案は具体的な使用ケースを含めてください',
+            '緊急性の高い問題は件名に【緊急】を付けてください',
+          ],
+        ),
       ],
     );
+  }
+
+  /// バグの優先度を判定
+  String _determineBugPriority(BugReport bugReport) {
+    final title = bugReport.title.toLowerCase();
+    final description = bugReport.description.toLowerCase();
+
+    if (title.contains('クラッシュ') ||
+        title.contains('起動しない') ||
+        description.contains('アプリが落ちる')) {
+      return '高（Critical）';
+    } else if (title.contains('データ') ||
+        title.contains('表示されない') ||
+        description.contains('機能が使えない')) {
+      return '中（High）';
+    } else {
+      return '低（Medium）';
+    }
   }
 }
 

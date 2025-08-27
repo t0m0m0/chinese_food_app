@@ -45,6 +45,12 @@ void main() {
       expect(OperationsConfig.isValidEmailFormat('invalid-email'), isFalse);
       expect(OperationsConfig.isValidEmailFormat('test@example.com'), isTrue);
       expect(OperationsConfig.isValidEmailFormat(''), isFalse);
+
+      // RFC 5322制限テスト
+      expect(OperationsConfig.isValidEmailFormat('a@b.co'), isTrue);
+      expect(OperationsConfig.isValidEmailFormat('test@domain'), isFalse);
+      expect(OperationsConfig.isValidEmailFormat('a' * 255 + '@example.com'),
+          isFalse);
     });
 
     test('should validate crash rate threshold', () {

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/services/crash_monitoring_service.dart';
+
 void main() {
   group('CrashMonitoringService', () {
     late CrashMonitoringService crashMonitoringService;
@@ -36,6 +37,29 @@ void main() {
         // Assert
         expect(result1.isFailure, isTrue); // テスト環境では失敗想定
         expect(result2.isFailure, isTrue);
+      });
+
+      test('should prevent duplicate errors', () async {
+        // Arrange
+        final error = Exception('Duplicate test error');
+        const reason = 'Duplicate test';
+
+        // Act - 同じエラーを短時間で連続送信
+        await crashMonitoringService.recordError(
+          error: error,
+          stackTrace: StackTrace.current,
+          reason: reason,
+        );
+
+        final duplicateResult = await crashMonitoringService.recordError(
+          error: error,
+          stackTrace: StackTrace.current,
+          reason: reason,
+        );
+
+        // Assert
+        expect(duplicateResult.isFailure, isTrue);
+        expect(duplicateResult.exceptionOrNull?.message, contains('同様のエラー'));
       });
     });
 

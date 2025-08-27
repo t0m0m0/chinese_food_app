@@ -36,6 +36,11 @@ class CrashMonitoringService {
         return Failure(BaseException('エラーの理由を入力してください。'));
       }
 
+      // 重複エラーのチェック
+      if (_isDuplicateError(error, reason)) {
+        return Failure(BaseException('同様のエラーが既に記録されています。'));
+      }
+
       // エラー記録をメモリに保存（本番環境ではCrashlyticsに送信）
       final record = ErrorRecord(
         error: error,
@@ -134,8 +139,13 @@ class CrashMonitoringService {
   CrashRateInfo getCrashRate() {
     // テスト環境では模擬データを返す
     _totalSessions = _totalSessions > 0 ? _totalSessions : 100;
+
+    // 24時間以内のクリティカルエラーをカウント
+    final now = DateTime.now();
     _crashedSessions = _errorRecords
-        .where((record) => record.severity == CrashSeverity.critical)
+        .where((record) =>
+            record.severity == CrashSeverity.critical &&
+            now.difference(record.timestamp).inHours < 24)
         .length;
 
     final rate = _totalSessions > 0 ? _crashedSessions / _totalSessions : 0.0;
@@ -189,15 +199,46 @@ class CrashMonitoringService {
   // プライベートメソッド
 
   CrashSeverity _determineSeverity(Object error) {
-    if (error is Error) {
+    final errorString = error.toString().toLowerCase();
+
+    // Critical: アプリクラッシュやメモリ不足
+    if (error is Error ||
+        errorString.contains('outofmemoryerror') ||
+        errorString.contains('stackoverflow') ||
+        errorString.contains('null check operator')) {
       return CrashSeverity.critical;
-    } else if (error.toString().toLowerCase().contains('network')) {
-      return CrashSeverity.medium;
-    } else if (error.toString().toLowerCase().contains('warning')) {
-      return CrashSeverity.low;
-    } else {
+    }
+
+    // High: 機能的な問題
+    if (errorString.contains('permission') ||
+        errorString.contains('unauthorized') ||
+        errorString.contains('database')) {
       return CrashSeverity.high;
     }
+
+    // Medium: ネットワークやAPI関連
+    if (errorString.contains('network') ||
+        errorString.contains('timeout') ||
+        errorString.contains('connection')) {
+      return CrashSeverity.medium;
+    }
+
+    // Low: 警告や軽微な問題
+    if (errorString.contains('warning') || errorString.contains('deprecated')) {
+      return CrashSeverity.low;
+    }
+
+    return CrashSeverity.medium; // デフォルト
+  }
+
+  /// 重複エラーのチョック
+  bool _isDuplicateError(Object error, String reason) {
+    final now = DateTime.now();
+    return _errorRecords.any((record) =>
+            record.reason == reason &&
+            record.error.toString() == error.toString() &&
+            now.difference(record.timestamp).inMinutes < 5 // 5分以内の重複を防ぐ
+        );
   }
 }
 
