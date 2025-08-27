@@ -381,6 +381,24 @@ class AppDIContainer implements DIContainerInterface {
         'Production database creation not yet implemented');
   }
 
+  /// メモリDBから永続化DBへの移行処理（Issue #113 Phase 3）
+  ///
+  /// 既存のデータを新しい永続化データベースに移行します。
+  /// 現在は未実装のため、UnimplementedErrorを投げます。
+  Future<void> migrateToPersistentDatabase() async {
+    throw UnimplementedError(
+        'Migration to persistent database not yet implemented');
+  }
+
+  /// データ構造保持確認（Issue #113 Phase 3）
+  ///
+  /// 永続化モードでもデータ構造が正しく保持されていることを確認します。
+  /// 現在は未実装のため、UnimplementedErrorを投げます。
+  Future<bool> verifyDataStructurePreservation() async {
+    throw UnimplementedError(
+        'Data structure preservation verification not yet implemented');
+  }
+
   void _ensureConfigured() {
     if (!_isConfigured) {
       throw const DIContainerException(

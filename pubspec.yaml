@@ -1,5 +1,5 @@
 name: chinese_food_app
-description: "町中華探索アプリ「マチアプ」- 中華料理店を発見・記録するFlutterアプリ"
+description: "町中華探索アプリ「マチアプ」- 中華料理店を発見・記録する究極のグルメアプリ。位置情報検索、スワイプ操作、訪問記録機能で町中華ライフを充実させます。"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

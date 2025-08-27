@@ -5,9 +5,10 @@ import 'package:chinese_food_app/core/config/ui_config.dart';
 void main() {
   group('UiConfig Tests', () {
     test('should have correct default values', () {
-      expect(UiConfig.appName, 'マチアプ');
+      expect(UiConfig.appName, '町中華探索「マチアプ」');
+      expect(UiConfig.appShortName, 'マチアプ');
       expect(UiConfig.appVersion, '1.0.0');
-      expect(UiConfig.appDescription, '町中華探索アプリ');
+      expect(UiConfig.appDescription, '中華料理店を発見・記録するグルメアプリ');
       expect(UiConfig.cardBorderRadius, 14.0);
       expect(UiConfig.defaultPadding, 16.0);
       expect(UiConfig.smallPadding, 8.0);
