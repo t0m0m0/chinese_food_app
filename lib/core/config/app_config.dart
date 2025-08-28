@@ -2,11 +2,18 @@ import 'dart:developer' as developer;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../exceptions/infrastructure/security_exception.dart';
+import 'api_config.dart';
+import 'ui_config.dart';
+import 'database_config.dart';
+import 'location_config.dart';
+import 'search_config.dart';
 
 /// アプリケーション設定管理クラス
 ///
 /// 環境変数やAPIキーなどの機密情報を安全に管理します。
 /// 本番環境では flutter_secure_storage を使用して機密情報を保護します。
+///
+/// Facade Pattern を使用してすべての設定への統一アクセスを提供します。
 class AppConfig {
   // テスト用のAPIキー保存
   static String? _testHotpepperApiKey;
@@ -23,6 +30,51 @@ class AppConfig {
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
   );
+
+  /// アプリの初期化状態を取得
+  static bool get isInitialized => _initialized;
+
+  /// API設定への統一アクセス
+  static ApiConfigAccessor get api => ApiConfigAccessor._();
+
+  /// UI設定への統一アクセス
+  static UiConfigAccessor get ui => UiConfigAccessor._();
+
+  /// データベース設定への統一アクセス
+  static DatabaseConfigAccessor get database => DatabaseConfigAccessor._();
+
+  /// ロケーション設定への統一アクセス
+  static LocationConfigAccessor get location => LocationConfigAccessor._();
+
+  /// 検索設定への統一アクセス
+  static SearchConfigAccessor get search => SearchConfigAccessor._();
+
+  /// 設定システムが有効かどうか
+  static bool get isValid {
+    final errors = validationErrors;
+    return errors.isEmpty;
+  }
+
+  /// 設定検証エラーのリスト
+  static List<String> get validationErrors {
+    final results = validateAll();
+    final List<String> allErrors = [];
+    for (final errors in results.values) {
+      allErrors.addAll(errors);
+    }
+    return allErrors;
+  }
+
+  /// すべての設定を検証
+  static Map<String, List<String>> validateAll() {
+    return {
+      'api': [], // TODO: API設定の検証を実装
+      'ui': [], // TODO: UI設定の検証を実装
+      'database': [], // TODO: データベース設定の検証を実装
+      'location': [], // TODO: ロケーション設定の検証を実装
+      'search': [], // TODO: 検索設定の検証を実装
+    };
+  }
 
   /// ホットペッパーAPIキー
   ///
@@ -115,11 +167,11 @@ class AppConfig {
     return const String.fromEnvironment('HOTPEPPER_API_KEY');
   }
 
-  /// アプリ初期化
+  /// アプリ初期化（後方互換性のため）
   ///
   /// .envファイルの読み込みを行います（存在する場合のみ）
-  static Future<void> initialize() async {
-    if (_initialized) return;
+  static Future<void> initialize({bool force = false}) async {
+    if (_initialized && !force) return;
 
     try {
       // .envファイルが存在する場合のみ読み込み
@@ -203,11 +255,16 @@ class AppConfig {
   /// デバッグ情報を表示
   static Map<String, dynamic> get debugInfo {
     return {
+      'initialized': _initialized,
       'isDevelopment': isDevelopment,
       'isProduction': isProduction,
       'hasHotpepperApiKey': hasHotpepperApiKey,
       'hasGoogleMapsApiKey': false, // WebView実装により不要
-      'initialized': _initialized,
+      'api': api.debugInfo,
+      'ui': ui.debugInfo,
+      'database': database.debugInfo,
+      'location': location.debugInfo,
+      'search': search.debugInfo,
     };
   }
 
@@ -231,4 +288,77 @@ class AppConfig {
   static void resetInitialization() {
     _initialized = false;
   }
+}
+
+/// API設定へのアクセサークラス
+class ApiConfigAccessor {
+  ApiConfigAccessor._();
+
+  /// HotPepper API キー
+  String get hotpepperApiKey => AppConfig.hotpepperApiKeySync ?? '';
+
+  /// HotPepper API URL
+  String get hotpepperApiUrl => ApiConfig.hotpepperApiUrl;
+
+  /// HotPepper API タイムアウト
+  int get hotpepperApiTimeout => ApiConfig.hotpepperApiTimeout;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => ApiConfig.debugInfo;
+}
+
+/// UI設定へのアクセサークラス
+class UiConfigAccessor {
+  UiConfigAccessor._();
+
+  /// アプリ名
+  String get appName => UiConfig.appName;
+
+  /// デフォルトパディング
+  double get defaultPadding => UiConfig.defaultPadding;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => UiConfig.debugInfo;
+}
+
+/// データベース設定へのアクセサークラス
+class DatabaseConfigAccessor {
+  DatabaseConfigAccessor._();
+
+  /// データベース名
+  String get databaseName => DatabaseConfig.databaseName;
+
+  /// データベースバージョン
+  int get databaseVersion => DatabaseConfig.databaseVersion;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => DatabaseConfig.debugInfo;
+}
+
+/// ロケーション設定へのアクセサークラス
+class LocationConfigAccessor {
+  LocationConfigAccessor._();
+
+  /// ロケーション精度
+  dynamic get locationAccuracy => LocationConfig.defaultAccuracy;
+
+  /// ロケーションタイムアウト
+  int get locationTimeout => LocationConfig.defaultTimeoutSeconds;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => LocationConfig.debugInfo;
+}
+
+/// 検索設定へのアクセサークラス
+class SearchConfigAccessor {
+  SearchConfigAccessor._();
+
+  /// デフォルト検索範囲
+  int get defaultSearchRange => SearchConfig.defaultRange;
+
+  /// 最大結果数
+  int get maxResults => SearchConfig.maxCount;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => SearchConfig.debugInfo;
 }
