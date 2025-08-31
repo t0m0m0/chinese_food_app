@@ -1,5 +1,5 @@
 import '../../core/config/api_config.dart';
-import '../../core/config/config_manager.dart';
+import '../../core/config/app_config.dart';
 import '../../core/config/security_config.dart';
 import '../../core/network/base_api_service.dart';
 import '../../core/exceptions/domain_exceptions.dart';
@@ -108,9 +108,9 @@ class HotpepperApiDatasourceImpl extends BaseApiService
 
   /// APIキーの取得と存在確認
   Future<String> _getApiKey() async {
-    if (!ConfigManager.isInitialized) {
+    if (!AppConfig.isInitialized) {
       throw ApiException(
-        'ConfigManagerが初期化されていません。main()でConfigManager.initialize()を呼び出してください。',
+        'AppConfigが初期化されていません。main()でAppConfig.initialize()を呼び出してください。',
       );
     }
 
@@ -121,8 +121,8 @@ class HotpepperApiDatasourceImpl extends BaseApiService
       );
     }
 
-    final apiKey = ConfigManager.hotpepperApiKey;
-    final hasValidApiKeys = ConfigManager.hasValidApiKeys;
+    final apiKey = AppConfig.api.hotpepperApiKey;
+    final hasValidApiKeys = await AppConfig.hasHotpepperApiKeyAsync;
 
     if (!hasValidApiKeys || apiKey.isEmpty) {
       throw ApiException(

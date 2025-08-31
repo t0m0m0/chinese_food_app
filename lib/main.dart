@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'core/config/config_manager.dart';
+import 'core/config/app_config.dart';
 import 'core/config/environment_config.dart';
 import 'core/config/ui_config.dart';
 import 'core/di/app_di_container.dart';
@@ -65,21 +65,21 @@ class GoogleMapsInitializer {
     CrashHandler.logEvent('INIT_PROGRESS_START');
 
     try {
-      // ConfigManagerが初期化されているかチェック
-      final configManagerInitialized = ConfigManager.isInitialized;
+      // 新しい統一設定システムの初期化状態をチェック
+      final configManagerInitialized = AppConfig.isInitialized;
       CrashHandler.logEvent('CONFIG_CHECK', details: {
         'config_manager_initialized': configManagerInitialized,
       });
 
       if (!configManagerInitialized) {
-        debugPrint('[GoogleMapsInitializer] ConfigManager not initialized');
+        debugPrint('[GoogleMapsInitializer] AppConfig not initialized');
         CrashHandler.logEvent('INIT_FAIL_CONFIG_MANAGER');
         _completeInitialization(false);
         return false;
       }
 
-      // APIキーの検証
-      final apiKey = ConfigManager.googleMapsApiKey;
+      // APIキーの検証（Google Maps APIキーは廃止済み）
+      final apiKey = '';
       final apiKeyValid = apiKey.isNotEmpty;
       CrashHandler.logEvent('API_KEY_CHECK', details: {
         'api_key_present': apiKeyValid,
@@ -177,17 +177,17 @@ Future<void> main() async {
       // 環境設定を先に初期化
       await EnvironmentConfig.initialize();
 
-      await ConfigManager.initialize(
+      await AppConfig.initialize(
         throwOnValidationError: false, // 開発環境では警告のみ
         enableDebugLogging: true,
       );
-      debugPrint('設定管理の初期化が完了しました: ${ConfigManager.debugString}');
+      debugPrint('設定管理の初期化が完了しました: ${AppConfig.debugInfo}');
 
       // 統合設定検証を実行
-      final validationResults = ConfigManager.validateAllConfigs();
+      final validationResults = AppConfig.validateAll();
       final hasErrors =
           validationResults.values.any((errors) => errors.isNotEmpty);
-      final hasCriticalErrors = ConfigManager.hasAnyCriticalErrors;
+      final hasCriticalErrors = AppConfig.validationErrors.isNotEmpty;
 
       if (hasErrors) {
         debugPrint('設定検証でエラーが検出されました:');

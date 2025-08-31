@@ -7,6 +7,7 @@ import 'ui_config.dart';
 import 'database_config.dart';
 import 'location_config.dart';
 import 'search_config.dart';
+import 'config_manager.dart';
 
 /// アプリケーション設定管理クラス
 ///
@@ -67,6 +68,16 @@ class AppConfig {
 
   /// すべての設定を検証
   static Map<String, List<String>> validateAll() {
+    try {
+      // ConfigManagerが初期化されている場合は既存検証を利用
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.validateAllConfigs();
+      }
+    } catch (e) {
+      // ConfigManagerが利用できない場合は個別検証
+    }
+
+    // フォールバック: 個別検証
     return {
       'api': [], // TODO: API設定の検証を実装
       'ui': [], // TODO: UI設定の検証を実装
@@ -170,7 +181,11 @@ class AppConfig {
   /// アプリ初期化（後方互換性のため）
   ///
   /// .envファイルの読み込みを行います（存在する場合のみ）
-  static Future<void> initialize({bool force = false}) async {
+  static Future<void> initialize({
+    bool force = false,
+    bool throwOnValidationError = false,
+    bool enableDebugLogging = false,
+  }) async {
     if (_initialized && !force) return;
 
     try {
@@ -179,6 +194,25 @@ class AppConfig {
     } catch (e) {
       // .envファイルが存在しない場合や読み込みエラーは無視
       // 本番環境や環境変数が直接設定されている場合は問題なし
+    }
+
+    // ConfigManagerも連動して初期化（後方互換性のため）
+    if (!ConfigManager.isInitialized || force) {
+      try {
+        await ConfigManager.initialize(
+          throwOnValidationError: throwOnValidationError,
+          enableDebugLogging: enableDebugLogging,
+        );
+      } catch (e) {
+        // ConfigManagerの初期化エラーは警告として扱う
+        if (enableDebugLogging) {
+          developer.log(
+            'ConfigManager初期化警告: $e',
+            name: 'AppConfig',
+          );
+        }
+        // AppConfig自体の初期化は継続
+      }
     }
 
     _initialized = true;
@@ -244,11 +278,31 @@ class AppConfig {
 
   /// 開発環境かどうかを判定
   static bool get isDevelopment {
+    try {
+      // ConfigManagerが初期化されている場合はそちらを優先
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.isDevelopment;
+      }
+    } catch (e) {
+      // ConfigManagerでエラーが発生した場合はフォールバック
+    }
+
+    // フォールバック: 環境変数ベース
     return const bool.fromEnvironment('DEVELOPMENT', defaultValue: true);
   }
 
   /// 本番環境かどうかを判定
   static bool get isProduction {
+    try {
+      // ConfigManagerが初期化されている場合はそちらを優先
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.isProduction;
+      }
+    } catch (e) {
+      // ConfigManagerでエラーが発生した場合はフォールバック
+    }
+
+    // フォールバック: 環境変数ベース
     return const bool.fromEnvironment('PRODUCTION', defaultValue: false);
   }
 
@@ -295,7 +349,19 @@ class ApiConfigAccessor {
   ApiConfigAccessor._();
 
   /// HotPepper API キー
-  String get hotpepperApiKey => AppConfig.hotpepperApiKeySync ?? '';
+  String get hotpepperApiKey {
+    try {
+      // ConfigManagerが初期化されている場合はそちらを優先
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.hotpepperApiKey;
+      }
+    } catch (e) {
+      // ConfigManagerでエラーが発生した場合はAppConfigにフォールバック
+    }
+
+    // フォールバック: AppConfigの同期版APIキー
+    return AppConfig.hotpepperApiKeySync ?? '';
+  }
 
   /// HotPepper API URL
   String get hotpepperApiUrl => ApiConfig.hotpepperApiUrl;
