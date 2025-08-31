@@ -8,6 +8,7 @@ import 'database_config.dart';
 import 'location_config.dart';
 import 'search_config.dart';
 import 'config_manager.dart';
+import 'validation/config_validator_facade.dart';
 
 /// アプリケーション設定管理クラス
 ///
@@ -35,20 +36,29 @@ class AppConfig {
   /// アプリの初期化状態を取得
   static bool get isInitialized => _initialized;
 
+  // Singleton instances for memory efficiency
+  static final ApiConfigAccessor _apiAccessor = ApiConfigAccessor._();
+  static final UiConfigAccessor _uiAccessor = UiConfigAccessor._();
+  static final DatabaseConfigAccessor _databaseAccessor =
+      DatabaseConfigAccessor._();
+  static final LocationConfigAccessor _locationAccessor =
+      LocationConfigAccessor._();
+  static final SearchConfigAccessor _searchAccessor = SearchConfigAccessor._();
+
   /// API設定への統一アクセス
-  static ApiConfigAccessor get api => ApiConfigAccessor._();
+  static ApiConfigAccessor get api => _apiAccessor;
 
   /// UI設定への統一アクセス
-  static UiConfigAccessor get ui => UiConfigAccessor._();
+  static UiConfigAccessor get ui => _uiAccessor;
 
   /// データベース設定への統一アクセス
-  static DatabaseConfigAccessor get database => DatabaseConfigAccessor._();
+  static DatabaseConfigAccessor get database => _databaseAccessor;
 
   /// ロケーション設定への統一アクセス
-  static LocationConfigAccessor get location => LocationConfigAccessor._();
+  static LocationConfigAccessor get location => _locationAccessor;
 
   /// 検索設定への統一アクセス
-  static SearchConfigAccessor get search => SearchConfigAccessor._();
+  static SearchConfigAccessor get search => _searchAccessor;
 
   /// 設定システムが有効かどうか
   static bool get isValid {
@@ -74,17 +84,11 @@ class AppConfig {
         return ConfigManager.validateAllConfigs();
       }
     } catch (e) {
-      // ConfigManagerが利用できない場合は個別検証
+      // ConfigManagerが利用できない場合は新しい検証システムを使用
     }
 
-    // フォールバック: 個別検証
-    return {
-      'api': [], // TODO: API設定の検証を実装
-      'ui': [], // TODO: UI設定の検証を実装
-      'database': [], // TODO: データベース設定の検証を実装
-      'location': [], // TODO: ロケーション設定の検証を実装
-      'search': [], // TODO: 検索設定の検証を実装
-    };
+    // 新しい統合検証システムを使用
+    return ConfigValidatorFacade.validateAll();
   }
 
   /// ホットペッパーAPIキー
