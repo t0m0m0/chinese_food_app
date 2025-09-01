@@ -1,20 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/proxy_config.dart';
-import 'package:chinese_food_app/core/config/config_manager.dart';
+import 'package:chinese_food_app/core/config/app_config.dart';
 
 void main() {
   group('ProxyConfig', () {
     setUp(() {
-      // ConfigManagerが初期化されていない状態にリセット
-      ConfigManager.forceInitialize();
+      // AppConfigが初期化されていない状態にリセット
+      AppConfig.forceUninitialize();
     });
 
     group('baseUrl', () {
-      test(
-          'should return development URL when ConfigManager is not initialized',
+      test('should return development URL when AppConfig is not initialized',
           () {
-        // ConfigManagerが初期化されていない場合の動作確認
-        expect(ConfigManager.isInitialized, isFalse);
+        // AppConfigが初期化されていない場合の動作確認
+        expect(AppConfig.isInitialized, isFalse);
 
         final url = ProxyConfig.baseUrl;
         expect(url, equals('http://localhost:8787'));
@@ -24,23 +23,23 @@ void main() {
           'should return production URL when environment variable is production',
           () {
         // 環境変数をproductionに設定した場合の動作確認
-        // この場合ConfigManagerは初期化されていないため、環境変数を直接参照
+        // この場合AppConfigは初期化されていないため、環境変数を直接参照
         final url = ProxyConfig.baseUrl;
 
         // 開発環境では通常developmentなので、開発URLが返される
         expect(url, equals('http://localhost:8787'));
       });
 
-      test('should use ConfigManager when initialized', () async {
-        // ConfigManagerを初期化
-        await ConfigManager.initialize(
+      test('should use AppConfig when initialized', () async {
+        // AppConfigを初期化
+        await AppConfig.initialize(
           throwOnValidationError: false,
           enableDebugLogging: false,
         );
 
-        expect(ConfigManager.isInitialized, isTrue);
+        expect(AppConfig.isInitialized, isTrue);
 
-        // ConfigManager経由で環境が判定される
+        // AppConfig経由で環境が判定される
         final url = ProxyConfig.baseUrl;
 
         // テスト環境では開発環境として判定されるはず
@@ -94,9 +93,8 @@ void main() {
     });
 
     group('environmentInfo', () {
-      test('should return environment info when ConfigManager not initialized',
-          () {
-        expect(ConfigManager.isInitialized, isFalse);
+      test('should return environment info when AppConfig not initialized', () {
+        expect(AppConfig.isInitialized, isFalse);
 
         final info = ProxyConfig.environmentInfo;
 
@@ -107,18 +105,19 @@ void main() {
         expect(info['retry_count'], equals(ProxyConfig.retryCount));
       });
 
-      test('should return environment info when ConfigManager is initialized',
+      test('should return environment info when AppConfig is initialized',
           () async {
-        await ConfigManager.initialize(
+        await AppConfig.initialize(
           throwOnValidationError: false,
           enableDebugLogging: false,
         );
 
-        expect(ConfigManager.isInitialized, isTrue);
+        expect(AppConfig.isInitialized, isTrue);
 
         final info = ProxyConfig.environmentInfo;
 
-        expect(info['environment'], equals(ConfigManager.environment.name));
+        expect(info['environment'],
+            equals(AppConfig.isProduction ? 'production' : 'development'));
         expect(info['proxy_url'], equals(ProxyConfig.baseUrl));
         expect(info['enabled'], equals(ProxyConfig.enabled));
         expect(info['timeout'], equals(ProxyConfig.timeoutSeconds));
@@ -126,28 +125,27 @@ void main() {
       });
     });
 
-    group('ConfigManager integration', () {
-      test('should handle ConfigManager initialization state properly',
-          () async {
+    group('AppConfig integration', () {
+      test('should handle AppConfig initialization state properly', () async {
         // 初期状態（未初期化）
-        expect(ConfigManager.isInitialized, isFalse);
+        expect(AppConfig.isInitialized, isFalse);
         final urlBefore = ProxyConfig.baseUrl;
 
-        // ConfigManagerを初期化
-        await ConfigManager.initialize(
+        // AppConfigを初期化
+        await AppConfig.initialize(
           throwOnValidationError: false,
           enableDebugLogging: false,
         );
 
-        expect(ConfigManager.isInitialized, isTrue);
+        expect(AppConfig.isInitialized, isTrue);
         final urlAfter = ProxyConfig.baseUrl;
 
         // どちらも開発環境の場合は同じURLが返される
         expect(urlBefore, equals(urlAfter));
       });
 
-      test('should fallback gracefully when ConfigManager throws', () {
-        // ConfigManagerが初期化されていない状態で環境情報を取得
+      test('should fallback gracefully when AppConfig throws', () {
+        // AppConfigが初期化されていない状態で環境情報を取得
         expect(() => ProxyConfig.baseUrl, returnsNormally);
         expect(() => ProxyConfig.environmentInfo, returnsNormally);
       });
@@ -155,7 +153,7 @@ void main() {
 
     group('environment-specific URLs', () {
       test('should use correct URLs for different environments', () {
-        // ConfigManagerが初期化されていない場合の環境変数ベースの判定
+        // AppConfigが初期化されていない場合の環境変数ベースの判定
         final baseUrl = ProxyConfig.baseUrl;
 
         // デフォルトでは開発環境のURLが使用される

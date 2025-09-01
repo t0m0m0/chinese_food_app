@@ -222,6 +222,21 @@ class AppConfig {
     _initialized = true;
   }
 
+  /// テスト用の強制初期化解除
+  ///
+  /// テスト環境での初期化状態のリセットに使用します
+  static void forceUninitialize() {
+    _initialized = false;
+    _testHotpepperApiKey = null;
+
+    // ConfigManagerも連動して初期化解除
+    try {
+      ConfigManager.forceInitialize();
+    } catch (e) {
+      // ConfigManagerの初期化解除エラーは無視
+    }
+  }
+
   /// Google Maps APIキー（WebView実装により使用していません）
   ///
   /// WebView地図実装により、Google Maps APIキーは不要になりました。
