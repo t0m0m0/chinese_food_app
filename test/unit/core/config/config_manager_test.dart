@@ -42,7 +42,6 @@ FLUTTER_ENV=development
       test('should throw StateError when accessing uninitialized manager', () {
         expect(() => ConfigManager.environment, throwsStateError);
         expect(() => ConfigManager.hotpepperApiKey, throwsStateError);
-        expect(() => ConfigManager.googleMapsApiKey, throwsStateError);
       });
 
       test('should provide debug string for uninitialized state', () {
@@ -63,7 +62,6 @@ FLUTTER_ENV=development
       test('should provide access to configuration values', () {
         expect(ConfigManager.environment, isA<Environment>());
         expect(ConfigManager.hotpepperApiKey, isA<String>());
-        expect(ConfigManager.googleMapsApiKey, isA<String>());
         expect(ConfigManager.hotpepperApiUrl, isA<String>());
       });
 
@@ -89,7 +87,6 @@ FLUTTER_ENV=development
         expect(debugInfo, isA<Map<String, dynamic>>());
         expect(debugInfo['environment'], isA<String>());
         expect(debugInfo['hotpepperApiKey'], isA<String>());
-        expect(debugInfo['googleMapsApiKey'], isA<String>());
       });
 
       test('should provide debug string', () {
@@ -156,7 +153,6 @@ FLUTTER_ENV=development
       test('should handle empty API keys gracefully', () {
         // In test environment, keys are typically empty
         expect(ConfigManager.hotpepperApiKey, isA<String>());
-        expect(ConfigManager.googleMapsApiKey, isA<String>());
       });
     });
   });

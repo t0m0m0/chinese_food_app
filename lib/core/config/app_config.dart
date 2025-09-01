@@ -237,25 +237,6 @@ class AppConfig {
     }
   }
 
-  /// Google Maps APIキー（WebView実装により使用していません）
-  ///
-  /// WebView地図実装により、Google Maps APIキーは不要になりました。
-  /// 互換性のため残していますが、常に空文字列を返します。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static Future<String?> get googleMapsApiKey async {
-    // WebView実装により不要だが、互換性のため空文字列を返す
-    return '';
-  }
-
-  /// Google Maps APIキー（同期版・WebView実装により使用していません）
-  ///
-  /// WebView地図実装により不要になりました。互換性のため残しています。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static String? get googleMapsApiKeySync {
-    // WebView実装により不要だが、互換性のため空文字列を返す
-    return '';
-  }
-
   /// APIキーが設定されているかどうかをチェック（同期版）
   ///
   /// テスト環境および開発環境でのみ使用可能

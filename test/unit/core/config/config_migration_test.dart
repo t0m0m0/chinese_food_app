@@ -50,18 +50,6 @@ void main() {
         // 両方とも同じ値を返すべき（ConfigManagerのデフォルトキーまたは設定値）
         expect(appConfigKey, equals(configManagerKey));
       });
-
-      test('Google Maps API key migration compatibility', () async {
-        await AppConfig.initialize();
-
-        // Google Maps APIキーは廃止予定のため、両方とも空文字列
-        // ignore: deprecated_member_use
-        final appConfigKey = await AppConfig.googleMapsApiKey;
-        final configManagerKey = ConfigManager.googleMapsApiKey;
-
-        expect(appConfigKey, equals(configManagerKey));
-        expect(appConfigKey, equals(''));
-      });
     });
 
     group('Validation migration', () {
@@ -127,7 +115,6 @@ void main() {
         // ConfigManagerの古いメソッドも動作すべき
         expect(ConfigManager.isInitialized, isTrue);
         expect(ConfigManager.hotpepperApiKey, isA<String>());
-        expect(ConfigManager.googleMapsApiKey, equals(''));
         expect(ConfigManager.isDevelopment, isA<bool>());
         expect(ConfigManager.isProduction, isA<bool>());
       });
