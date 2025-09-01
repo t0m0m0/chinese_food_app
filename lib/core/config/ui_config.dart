@@ -67,11 +67,6 @@ class UiConfig {
   static const Color subtitleColor = Color(0xFF666666);
   static const Color dividerColor = Color(0xFFE0E0E0);
 
-  /// Google Maps設定
-  static const double defaultMapZoom = 15.0;
-  static const double minMapZoom = 10.0;
-  static const double maxMapZoom = 20.0;
-
   /// 設定値の妥当性チェック
   static bool isValidPadding(double padding) {
     return padding >= 0 && padding <= 100;
@@ -105,11 +100,6 @@ class UiConfig {
   /// 設定値の妥当性チェック
   static bool isValidSwipeThreshold(double threshold) {
     return threshold >= 0.1 && threshold <= 1.0;
-  }
-
-  /// 設定値の妥当性チェック
-  static bool isValidMapZoom(double zoom) {
-    return zoom >= minMapZoom && zoom <= maxMapZoom;
   }
 
   /// デバッグ情報を取得
@@ -158,9 +148,6 @@ class UiConfig {
       'textColor': textColor.toString(),
       'subtitleColor': subtitleColor.toString(),
       'dividerColor': dividerColor.toString(),
-      'defaultMapZoom': defaultMapZoom,
-      'minMapZoom': minMapZoom,
-      'maxMapZoom': maxMapZoom,
     };
   }
 }

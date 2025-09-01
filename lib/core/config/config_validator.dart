@@ -52,21 +52,16 @@ class ConfigValidator {
   /// APIキーの存在を検証
   static void _validateApiKeys(List<String> errors) {
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    // Google Maps APIキーは不要（WebView地図実装により）
-
     if (hotpepperKey.isEmpty) {
       errors.add(
         'HotPepper API キーが設定されていません (環境: ${EnvironmentConfig.current.name})',
       );
     }
-
-    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// APIキーの形式を検証
   static void _validateApiKeyFormats(List<String> errors) {
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isNotEmpty && !_isValidHotpepperApiKey(hotpepperKey)) {
       errors.add(
@@ -101,42 +96,32 @@ class ConfigValidator {
   static void _validateProductionConfig(List<String> errors) {
     // 本番環境では厳密な検証を実施
     final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
-    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
       errors.add(
           '${ApiKeyConstants.productionEnv}環境: ${ApiKeyConstants.hotpepperApiKeyField} ${ApiKeyConstants.hotpepperApiKeyMissingError}');
     }
-
-    // Google Maps APIキーのチェックは削除（WebView実装により不要）
-    // フォールバック機能は削除されたため、この警告は不要
   }
 
   /// ステージング環境の設定を検証
   static void _validateStagingConfig(List<String> errors) {
     final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
-    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
       errors.add(
           '${ApiKeyConstants.stagingEnv}環境: ${ApiKeyConstants.hotpepperApiKeyField} ${ApiKeyConstants.hotpepperApiKeyMissingError}');
     }
-
-    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// 開発環境の設定を検証
   static void _validateDevelopmentConfig(List<String> errors) {
     // 開発環境では警告レベルの検証
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    // Google Maps APIキーは不要（WebView地図実装により）
 
     if (hotpepperKey.isEmpty) {
       errors.add(
           '${ApiKeyConstants.developmentEnv}環境: HotPepper API キー${ApiKeyConstants.hotpepperApiKeyMissingError}（機能制限あり）');
     }
-
-    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// テスト環境の設定を検証
@@ -144,7 +129,6 @@ class ConfigValidator {
     // テスト環境では最小限の検証のみ
     // ダミーAPIキーが設定されていれば問題なし
     final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    // Google Maps APIキーは不要（WebView地図実装により）
 
     // テスト環境ではAPIキーが設定されていればOK（実際の形式は問わない）
     // ダミーキーでもテストには支障がない
@@ -152,8 +136,6 @@ class ConfigValidator {
       errors.add(
           '${ApiKeyConstants.testEnv}環境: HotPepper API キー${ApiKeyConstants.hotpepperApiKeyMissingError}（テスト実行に影響なし）');
     }
-
-    // Google Maps APIキーのチェックは削除（WebView実装により不要）
   }
 
   /// HotPepper API キーの形式を検証
@@ -170,8 +152,6 @@ class ConfigValidator {
 
     return true;
   }
-
-  // Google Maps API キーの形式検証メソッドは削除（WebView実装により不要）
 
   /// 設定が有効かどうかを判定
   static bool get isConfigurationValid {
@@ -290,10 +270,6 @@ class ConfigValidator {
 
     if (!UiConfig.isValidBorderRadius(UiConfig.cardBorderRadius)) {
       errors.add('UI設定: カード角丸値が無効です (${UiConfig.cardBorderRadius})');
-    }
-
-    if (!UiConfig.isValidMapZoom(UiConfig.defaultMapZoom)) {
-      errors.add('UI設定: デフォルトマップズームが無効です (${UiConfig.defaultMapZoom})');
     }
   }
 

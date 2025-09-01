@@ -2,11 +2,20 @@ import 'dart:developer' as developer;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../exceptions/infrastructure/security_exception.dart';
+import 'api_config.dart';
+import 'ui_config.dart';
+import 'database_config.dart';
+import 'location_config.dart';
+import 'search_config.dart';
+import 'config_manager.dart';
+import 'validation/config_validator_facade.dart';
 
 /// アプリケーション設定管理クラス
 ///
 /// 環境変数やAPIキーなどの機密情報を安全に管理します。
 /// 本番環境では flutter_secure_storage を使用して機密情報を保護します。
+///
+/// Facade Pattern を使用してすべての設定への統一アクセスを提供します。
 class AppConfig {
   // テスト用のAPIキー保存
   static String? _testHotpepperApiKey;
@@ -23,6 +32,64 @@ class AppConfig {
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
   );
+
+  /// アプリの初期化状態を取得
+  static bool get isInitialized => _initialized;
+
+  // Singleton instances for memory efficiency
+  static final ApiConfigAccessor _apiAccessor = ApiConfigAccessor._();
+  static final UiConfigAccessor _uiAccessor = UiConfigAccessor._();
+  static final DatabaseConfigAccessor _databaseAccessor =
+      DatabaseConfigAccessor._();
+  static final LocationConfigAccessor _locationAccessor =
+      LocationConfigAccessor._();
+  static final SearchConfigAccessor _searchAccessor = SearchConfigAccessor._();
+
+  /// API設定への統一アクセス
+  static ApiConfigAccessor get api => _apiAccessor;
+
+  /// UI設定への統一アクセス
+  static UiConfigAccessor get ui => _uiAccessor;
+
+  /// データベース設定への統一アクセス
+  static DatabaseConfigAccessor get database => _databaseAccessor;
+
+  /// ロケーション設定への統一アクセス
+  static LocationConfigAccessor get location => _locationAccessor;
+
+  /// 検索設定への統一アクセス
+  static SearchConfigAccessor get search => _searchAccessor;
+
+  /// 設定システムが有効かどうか
+  static bool get isValid {
+    final errors = validationErrors;
+    return errors.isEmpty;
+  }
+
+  /// 設定検証エラーのリスト
+  static List<String> get validationErrors {
+    final results = validateAll();
+    final List<String> allErrors = [];
+    for (final errors in results.values) {
+      allErrors.addAll(errors);
+    }
+    return allErrors;
+  }
+
+  /// すべての設定を検証
+  static Map<String, List<String>> validateAll() {
+    try {
+      // ConfigManagerが初期化されている場合は既存検証を利用
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.validateAllConfigs();
+      }
+    } catch (e) {
+      // ConfigManagerが利用できない場合は新しい検証システムを使用
+    }
+
+    // 新しい統合検証システムを使用
+    return ConfigValidatorFacade.validateAll();
+  }
 
   /// ホットペッパーAPIキー
   ///
@@ -115,11 +182,15 @@ class AppConfig {
     return const String.fromEnvironment('HOTPEPPER_API_KEY');
   }
 
-  /// アプリ初期化
+  /// アプリ初期化（後方互換性のため）
   ///
   /// .envファイルの読み込みを行います（存在する場合のみ）
-  static Future<void> initialize() async {
-    if (_initialized) return;
+  static Future<void> initialize({
+    bool force = false,
+    bool throwOnValidationError = false,
+    bool enableDebugLogging = false,
+  }) async {
+    if (_initialized && !force) return;
 
     try {
       // .envファイルが存在する場合のみ読み込み
@@ -129,26 +200,41 @@ class AppConfig {
       // 本番環境や環境変数が直接設定されている場合は問題なし
     }
 
+    // ConfigManagerも連動して初期化（後方互換性のため）
+    if (!ConfigManager.isInitialized || force) {
+      try {
+        await ConfigManager.initialize(
+          throwOnValidationError: throwOnValidationError,
+          enableDebugLogging: enableDebugLogging,
+        );
+      } catch (e) {
+        // ConfigManagerの初期化エラーは警告として扱う
+        if (enableDebugLogging) {
+          developer.log(
+            'ConfigManager初期化警告: $e',
+            name: 'AppConfig',
+          );
+        }
+        // AppConfig自体の初期化は継続
+      }
+    }
+
     _initialized = true;
   }
 
-  /// Google Maps APIキー（WebView実装により使用していません）
+  /// テスト用の強制初期化解除
   ///
-  /// WebView地図実装により、Google Maps APIキーは不要になりました。
-  /// 互換性のため残していますが、常に空文字列を返します。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static Future<String?> get googleMapsApiKey async {
-    // WebView実装により不要だが、互換性のため空文字列を返す
-    return '';
-  }
+  /// テスト環境での初期化状態のリセットに使用します
+  static void forceUninitialize() {
+    _initialized = false;
+    _testHotpepperApiKey = null;
 
-  /// Google Maps APIキー（同期版・WebView実装により使用していません）
-  ///
-  /// WebView地図実装により不要になりました。互換性のため残しています。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static String? get googleMapsApiKeySync {
-    // WebView実装により不要だが、互換性のため空文字列を返す
-    return '';
+    // ConfigManagerも連動して初期化解除
+    try {
+      ConfigManager.forceInitialize();
+    } catch (e) {
+      // ConfigManagerの初期化解除エラーは無視
+    }
   }
 
   /// APIキーが設定されているかどうかをチェック（同期版）
@@ -172,54 +258,55 @@ class AppConfig {
     return key != null && key.isNotEmpty && key != 'YOUR_API_KEY_HERE';
   }
 
-  /// Google Maps APIキーが設定されているかどうかをチェック（WebView実装により不要）
-  ///
-  /// WebView地図実装により、Google Maps APIキーは不要になりました。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static bool get hasGoogleMapsApiKey {
-    // WebView実装により常にfalseを返す
-    return false;
-  }
-
-  /// Google Maps APIキーが設定されているかどうかをチェック（WebView実装により不要）
-  ///
-  /// WebView地図実装により、Google Maps APIキーは不要になりました。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static Future<bool> get hasGoogleMapsApiKeyAsync async {
-    // WebView実装により常にfalseを返す
-    return false;
-  }
-
   /// 開発環境かどうかを判定
   static bool get isDevelopment {
+    try {
+      // ConfigManagerが初期化されている場合はそちらを優先
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.isDevelopment;
+      }
+    } catch (e) {
+      // ConfigManagerでエラーが発生した場合はフォールバック
+    }
+
+    // フォールバック: 環境変数ベース
     return const bool.fromEnvironment('DEVELOPMENT', defaultValue: true);
   }
 
   /// 本番環境かどうかを判定
   static bool get isProduction {
+    try {
+      // ConfigManagerが初期化されている場合はそちらを優先
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.isProduction;
+      }
+    } catch (e) {
+      // ConfigManagerでエラーが発生した場合はフォールバック
+    }
+
+    // フォールバック: 環境変数ベース
     return const bool.fromEnvironment('PRODUCTION', defaultValue: false);
   }
 
   /// デバッグ情報を表示
   static Map<String, dynamic> get debugInfo {
     return {
+      'initialized': _initialized,
       'isDevelopment': isDevelopment,
       'isProduction': isProduction,
       'hasHotpepperApiKey': hasHotpepperApiKey,
       'hasGoogleMapsApiKey': false, // WebView実装により不要
-      'initialized': _initialized,
+      'api': api.debugInfo,
+      'ui': ui.debugInfo,
+      'database': database.debugInfo,
+      'location': location.debugInfo,
+      'search': search.debugInfo,
     };
   }
 
   /// テスト用にHotPepper APIキーを設定
   static void setTestApiKey(String apiKey) {
     _testHotpepperApiKey = apiKey;
-  }
-
-  /// テスト用にGoogle Maps APIキーを設定（WebView実装により不要）
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static void setTestGoogleMapsApiKey(String apiKey) {
-    // WebView実装により何もしない（互換性のため残す）
   }
 
   /// テスト用APIキーをすべてクリア
@@ -231,4 +318,89 @@ class AppConfig {
   static void resetInitialization() {
     _initialized = false;
   }
+}
+
+/// API設定へのアクセサークラス
+class ApiConfigAccessor {
+  ApiConfigAccessor._();
+
+  /// HotPepper API キー
+  String get hotpepperApiKey {
+    try {
+      // ConfigManagerが初期化されている場合はそちらを優先
+      if (ConfigManager.isInitialized) {
+        return ConfigManager.hotpepperApiKey;
+      }
+    } catch (e) {
+      // ConfigManagerでエラーが発生した場合はAppConfigにフォールバック
+    }
+
+    // フォールバック: AppConfigの同期版APIキー
+    return AppConfig.hotpepperApiKeySync ?? '';
+  }
+
+  /// HotPepper API URL
+  String get hotpepperApiUrl => ApiConfig.hotpepperApiUrl;
+
+  /// HotPepper API タイムアウト
+  int get hotpepperApiTimeout => ApiConfig.hotpepperApiTimeout;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => ApiConfig.debugInfo;
+}
+
+/// UI設定へのアクセサークラス
+class UiConfigAccessor {
+  UiConfigAccessor._();
+
+  /// アプリ名
+  String get appName => UiConfig.appName;
+
+  /// デフォルトパディング
+  double get defaultPadding => UiConfig.defaultPadding;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => UiConfig.debugInfo;
+}
+
+/// データベース設定へのアクセサークラス
+class DatabaseConfigAccessor {
+  DatabaseConfigAccessor._();
+
+  /// データベース名
+  String get databaseName => DatabaseConfig.databaseName;
+
+  /// データベースバージョン
+  int get databaseVersion => DatabaseConfig.databaseVersion;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => DatabaseConfig.debugInfo;
+}
+
+/// ロケーション設定へのアクセサークラス
+class LocationConfigAccessor {
+  LocationConfigAccessor._();
+
+  /// ロケーション精度
+  dynamic get locationAccuracy => LocationConfig.defaultAccuracy;
+
+  /// ロケーションタイムアウト
+  int get locationTimeout => LocationConfig.defaultTimeoutSeconds;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => LocationConfig.debugInfo;
+}
+
+/// 検索設定へのアクセサークラス
+class SearchConfigAccessor {
+  SearchConfigAccessor._();
+
+  /// デフォルト検索範囲
+  int get defaultSearchRange => SearchConfig.defaultRange;
+
+  /// 最大結果数
+  int get maxResults => SearchConfig.maxCount;
+
+  /// デバッグ情報
+  Map<String, dynamic> get debugInfo => SearchConfig.debugInfo;
 }

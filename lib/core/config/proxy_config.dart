@@ -1,4 +1,4 @@
-import 'config_manager.dart';
+import 'app_config.dart';
 
 /// プロキシサーバー設定管理
 ///
@@ -14,27 +14,22 @@ class ProxyConfig {
 
   /// 現在の環境に応じたプロキシサーバーURL
   static String get baseUrl {
-    // ConfigManagerから環境情報を取得（初期化されていない場合はフォールバック）
-    if (!ConfigManager.isInitialized) {
+    // AppConfigから環境情報を取得（初期化されていない場合はフォールバック）
+    if (!AppConfig.isInitialized) {
       const String environment =
           String.fromEnvironment('FLUTTER_ENV', defaultValue: 'development');
       return environment == 'production' ? _prodProxyUrl : _devProxyUrl;
     }
 
-    if (ConfigManager.isProduction) {
+    if (AppConfig.isProduction) {
       return _prodProxyUrl;
-    } else if (ConfigManager.isStaging) {
-      return _prodProxyUrl; // ステージング環境も本番と同じプロキシを使用
     } else {
-      return _devProxyUrl; // development, test
+      return _devProxyUrl; // development, test, staging
     }
   }
 
   /// HotPepper API プロキシエンドポイント
   static String get hotpepperSearchUrl => '$baseUrl/api/hotpepper/search';
-
-  /// Google Maps API プロキシエンドポイント（将来拡張用）
-  static String get googleMapsUrl => '$baseUrl/api/google-maps';
 
   /// ヘルスチェックエンドポイント
   static String get healthCheckUrl => '$baseUrl/health';
@@ -59,8 +54,8 @@ class ProxyConfig {
 
   /// 環境別設定情報
   static Map<String, dynamic> get environmentInfo => {
-        'environment': ConfigManager.isInitialized
-            ? ConfigManager.environment.name
+        'environment': AppConfig.isInitialized
+            ? (AppConfig.isProduction ? 'production' : 'development')
             : const String.fromEnvironment('FLUTTER_ENV',
                 defaultValue: 'development'),
         'proxy_url': baseUrl,

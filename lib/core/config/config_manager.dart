@@ -145,7 +145,6 @@ class ConfigManager {
     return {
       'environment': EnvironmentConfig.current.name,
       'hotpepperApiKey': EnvironmentConfig.effectiveHotpepperApiKey,
-      'googleMapsApiKey': '', // WebView実装によりGoogle Maps APIキーは不要
       'hotpepperApiUrl': EnvironmentConfig.hotpepperApiUrl,
       'isDevelopment': EnvironmentConfig.isDevelopment,
       'isStaging': EnvironmentConfig.isStaging,
@@ -177,15 +176,6 @@ class ConfigManager {
       throw const ConfigurationException('HotPepper API キーが設定されていません');
     }
     return key;
-  }
-
-  /// Google Maps API キーを取得
-  ///
-  /// 注意: WebView実装により空文字列が返される場合があります
-  static String get googleMapsApiKey {
-    _ensureInitialized();
-    final key = _runtimeConfig['googleMapsApiKey'] as String?;
-    return key ?? ''; // nullの場合は空文字列を返す
   }
 
   /// HotPepper API ベースURLを取得
@@ -237,7 +227,6 @@ class ConfigManager {
   /// APIキーが有効かどうかを判定
   ///
   /// HotPepper APIキーの有効性をチェックします。
-  /// Google Maps APIキーはWebView実装により不要のため、チェック対象外です。
   static bool get hasValidApiKeys {
     _ensureInitialized();
 
@@ -281,7 +270,6 @@ class ConfigManager {
 ConfigManager 設定情報:
 - 環境: ${info['environment']}
 - HotPepper APIキー: ${info['hotpepperApiKey'].toString().isNotEmpty ? '設定済み' : '未設定'}
-- Google Maps APIキー: ${info['googleMapsApiKey'].toString().isNotEmpty ? '設定済み' : '未設定'}
 - 設定有効: ${info['isValid']}
 - 重要エラー: ${info['hasCriticalErrors']}
 ''';

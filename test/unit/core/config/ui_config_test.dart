@@ -14,9 +14,6 @@ void main() {
       expect(UiConfig.smallPadding, 8.0);
       expect(UiConfig.largePadding, 24.0);
       expect(UiConfig.extraLargePadding, 32.0);
-      expect(UiConfig.defaultMapZoom, 15.0);
-      expect(UiConfig.minMapZoom, 10.0);
-      expect(UiConfig.maxMapZoom, 20.0);
     });
 
     test('should validate padding values correctly', () {
@@ -85,14 +82,6 @@ void main() {
       expect(UiConfig.isValidSwipeThreshold(1.1), false);
     });
 
-    test('should validate map zoom values correctly', () {
-      expect(UiConfig.isValidMapZoom(10.0), true);
-      expect(UiConfig.isValidMapZoom(15.0), true);
-      expect(UiConfig.isValidMapZoom(20.0), true);
-      expect(UiConfig.isValidMapZoom(9.9), false);
-      expect(UiConfig.isValidMapZoom(20.1), false);
-    });
-
     test('should provide comprehensive debug info', () {
       final debugInfo = UiConfig.debugInfo;
 
@@ -108,7 +97,6 @@ void main() {
       expect(debugInfo['defaultAnimationDuration'], isA<int>());
       expect(debugInfo['swipeThreshold'], isA<double>());
       expect(debugInfo['primaryColor'], isA<String>());
-      expect(debugInfo['defaultMapZoom'], isA<double>());
     });
 
     test('should have correct color types', () {

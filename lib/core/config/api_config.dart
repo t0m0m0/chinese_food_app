@@ -9,12 +9,6 @@ class ApiConfig {
   static const int hotpepperRateLimit = 5; // 1秒間のリクエスト数制限
   static const int hotpepperDailyLimit = 3000; // 1日のリクエスト数制限
 
-  /// Google Maps API設定
-  static const String googleMapsApiUrl =
-      'https://maps.googleapis.com/maps/api/';
-  static const int googleMapsApiTimeout = 15; // 秒
-  static const int googleMapsApiRetryCount = 2;
-
   /// 共通API設定
   static const String userAgent = 'MachiApp/1.0.0';
   static const Map<String, String> commonHeaders = {
@@ -55,9 +49,6 @@ class ApiConfig {
       'hotpepperMaxResults': hotpepperMaxResults,
       'hotpepperRateLimit': hotpepperRateLimit,
       'hotpepperDailyLimit': hotpepperDailyLimit,
-      'googleMapsApiUrl': googleMapsApiUrl,
-      'googleMapsApiTimeout': googleMapsApiTimeout,
-      'googleMapsApiRetryCount': googleMapsApiRetryCount,
       'userAgent': userAgent,
     };
   }
