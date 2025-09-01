@@ -1,0 +1,80 @@
+import '../di_container_interface.dart';
+import '../service_container.dart';
+import '../base_service_registrator.dart';
+import '../../../presentation/providers/store_provider.dart';
+import '../../../domain/services/location_service.dart';
+
+/// Development environment specific DI container
+///
+/// This container provides development-friendly configurations with
+/// fallback to mock services when real services are not available.
+class DevelopmentDIContainer implements DIContainerInterface {
+  final ServiceContainer _serviceContainer = ServiceContainer();
+  bool _isConfigured = false;
+
+  @override
+  bool get isConfigured => _isConfigured;
+
+  @override
+  void configure() {
+    configureForEnvironment(Environment.development);
+  }
+
+  @override
+  void configureForEnvironment(Environment environment) {
+    // For development container, we always configure for development
+    if (environment != Environment.development) {
+      throw DIContainerException(
+        'DevelopmentDIContainer can only be configured for development environment',
+      );
+    }
+
+    // Clear existing registrations
+    _serviceContainer.dispose();
+
+    // Register development services
+    _registerDevelopmentServices();
+
+    _isConfigured = true;
+  }
+
+  @override
+  StoreProvider getStoreProvider() {
+    _ensureConfigured();
+    return _serviceContainer.resolve<StoreProvider>();
+  }
+
+  @override
+  LocationService getLocationService() {
+    _ensureConfigured();
+    return _serviceContainer.resolve<LocationService>();
+  }
+
+  @override
+  void registerTestProvider(StoreProvider provider) {
+    _serviceContainer.register<StoreProvider>(() => provider);
+  }
+
+  @override
+  void dispose() {
+    _serviceContainer.dispose();
+    _isConfigured = false;
+  }
+
+  /// Register services specific to development environment
+  void _registerDevelopmentServices() {
+    // Register development API datasource
+    BaseServiceRegistrator.registerDevelopmentApiDatasource(_serviceContainer);
+
+    // Register common services
+    BaseServiceRegistrator.registerCommonServices(_serviceContainer);
+  }
+
+  void _ensureConfigured() {
+    if (!_isConfigured) {
+      throw const DIContainerException(
+        'Container is not configured. Call configure() first.',
+      );
+    }
+  }
+}
