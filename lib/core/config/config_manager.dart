@@ -227,7 +227,6 @@ class ConfigManager {
   /// APIキーが有効かどうかを判定
   ///
   /// HotPepper APIキーの有効性をチェックします。
-  /// Google Maps APIキーはWebView実装により不要のため、チェック対象外です。
   static bool get hasValidApiKeys {
     _ensureInitialized();
 

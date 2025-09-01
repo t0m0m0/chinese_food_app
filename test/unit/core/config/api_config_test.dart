@@ -11,8 +11,6 @@ void main() {
       expect(ApiConfig.hotpepperMaxResults, 100);
       expect(ApiConfig.hotpepperRateLimit, 5);
       expect(ApiConfig.hotpepperDailyLimit, 3000);
-      expect(ApiConfig.googleMapsApiTimeout, 15);
-      expect(ApiConfig.googleMapsApiRetryCount, 2);
       expect(ApiConfig.userAgent, 'MachiApp/1.0.0');
     });
 

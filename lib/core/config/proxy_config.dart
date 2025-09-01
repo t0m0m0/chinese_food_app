@@ -31,9 +31,6 @@ class ProxyConfig {
   /// HotPepper API プロキシエンドポイント
   static String get hotpepperSearchUrl => '$baseUrl/api/hotpepper/search';
 
-  /// Google Maps API プロキシエンドポイント（将来拡張用）
-  static String get googleMapsUrl => '$baseUrl/api/google-maps';
-
   /// ヘルスチェックエンドポイント
   static String get healthCheckUrl => '$baseUrl/health';
 

@@ -118,19 +118,8 @@ class EnvironmentConfig {
         defaultValue: '');
   }
 
-  /// Google Maps API キーを取得（WebView実装により使用していません）
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static String get googleMapsApiKey {
-    // WebView実装により不要だが、互換性のため空文字列を返す
-    return '';
-  }
-
   /// 実際に使用するHotPepper APIキーを取得
   static String get effectiveHotpepperApiKey => hotpepperApiKey;
-
-  /// 実際に使用するGoogle Maps APIキーを取得（WebView実装により不要）
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static String get effectiveGoogleMapsApiKey => '';
 
   /// 初期化されているかどうかを確認
   static bool get isInitialized => _initialized;

@@ -258,24 +258,6 @@ class AppConfig {
     return key != null && key.isNotEmpty && key != 'YOUR_API_KEY_HERE';
   }
 
-  /// Google Maps APIキーが設定されているかどうかをチェック（WebView実装により不要）
-  ///
-  /// WebView地図実装により、Google Maps APIキーは不要になりました。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static bool get hasGoogleMapsApiKey {
-    // WebView実装により常にfalseを返す
-    return false;
-  }
-
-  /// Google Maps APIキーが設定されているかどうかをチェック（WebView実装により不要）
-  ///
-  /// WebView地図実装により、Google Maps APIキーは不要になりました。
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static Future<bool> get hasGoogleMapsApiKeyAsync async {
-    // WebView実装により常にfalseを返す
-    return false;
-  }
-
   /// 開発環境かどうかを判定
   static bool get isDevelopment {
     try {
@@ -325,12 +307,6 @@ class AppConfig {
   /// テスト用にHotPepper APIキーを設定
   static void setTestApiKey(String apiKey) {
     _testHotpepperApiKey = apiKey;
-  }
-
-  /// テスト用にGoogle Maps APIキーを設定（WebView実装により不要）
-  @Deprecated('WebView地図実装によりGoogle Maps APIキーは不要です')
-  static void setTestGoogleMapsApiKey(String apiKey) {
-    // WebView実装により何もしない（互換性のため残す）
   }
 
   /// テスト用APIキーをすべてクリア

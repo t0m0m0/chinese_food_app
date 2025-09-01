@@ -54,12 +54,6 @@ void main() {
         expect(url, startsWith(ProxyConfig.baseUrl));
       });
 
-      test('should return correct Google Maps URL', () {
-        final url = ProxyConfig.googleMapsUrl;
-        expect(url, endsWith('/api/google-maps'));
-        expect(url, startsWith(ProxyConfig.baseUrl));
-      });
-
       test('should return correct health check URL', () {
         final url = ProxyConfig.healthCheckUrl;
         expect(url, endsWith('/health'));
