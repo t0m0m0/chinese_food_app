@@ -25,7 +25,7 @@ class DIContainer {
     final HotpepperApiDatasource apiDatasource = _createApiDatasource();
 
     // ローカルデータソースの作成
-    final StoreLocalDatasourceImpl localDatasource = _createLocalDatasource();
+    final StoreLocalDatasource localDatasource = _createLocalDatasource();
 
     // リポジトリの作成
     final StoreRepositoryImpl repository = StoreRepositoryImpl(
@@ -53,7 +53,7 @@ class DIContainer {
   }
 
   /// ローカルデータソースを作成
-  static StoreLocalDatasourceImpl _createLocalDatasource() {
+  static StoreLocalDatasource _createLocalDatasource() {
     final database =
         AppDatabase(DatabaseConnection(NativeDatabase.createInBackground(
       File('app_db.sqlite'),

@@ -34,16 +34,16 @@ abstract class BaseServiceRegistrator {
     );
 
     // Register Drift datasources
-    serviceContainer.register<StoreLocalDatasourceImpl>(() {
+    serviceContainer.register<StoreLocalDatasource>(() {
       return StoreLocalDatasourceImpl(serviceContainer.resolve<AppDatabase>());
     });
 
-    serviceContainer.register<VisitRecordLocalDatasourceImpl>(() {
+    serviceContainer.register<VisitRecordLocalDatasource>(() {
       return VisitRecordLocalDatasourceImpl(
           serviceContainer.resolve<AppDatabase>());
     });
 
-    serviceContainer.register<PhotoLocalDatasourceImpl>(() {
+    serviceContainer.register<PhotoLocalDatasource>(() {
       return PhotoLocalDatasourceImpl(serviceContainer.resolve<AppDatabase>());
     });
 
@@ -51,7 +51,7 @@ abstract class BaseServiceRegistrator {
     serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
         apiDatasource: serviceContainer.resolve<HotpepperApiDatasource>(),
-        localDatasource: serviceContainer.resolve<StoreLocalDatasourceImpl>(),
+        localDatasource: serviceContainer.resolve<StoreLocalDatasource>(),
       );
     });
 

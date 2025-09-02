@@ -172,16 +172,16 @@ class AppDIContainer implements DIContainerInterface {
     );
 
     // Register Drift datasources
-    _serviceContainer.register<StoreLocalDatasourceImpl>(() {
+    _serviceContainer.register<StoreLocalDatasource>(() {
       return StoreLocalDatasourceImpl(_serviceContainer.resolve<AppDatabase>());
     });
 
-    _serviceContainer.register<VisitRecordLocalDatasourceImpl>(() {
+    _serviceContainer.register<VisitRecordLocalDatasource>(() {
       return VisitRecordLocalDatasourceImpl(
           _serviceContainer.resolve<AppDatabase>());
     });
 
-    _serviceContainer.register<PhotoLocalDatasourceImpl>(() {
+    _serviceContainer.register<PhotoLocalDatasource>(() {
       return PhotoLocalDatasourceImpl(_serviceContainer.resolve<AppDatabase>());
     });
 
@@ -189,7 +189,7 @@ class AppDIContainer implements DIContainerInterface {
     _serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
         apiDatasource: _serviceContainer.resolve<HotpepperApiDatasource>(),
-        localDatasource: _serviceContainer.resolve<StoreLocalDatasourceImpl>(),
+        localDatasource: _serviceContainer.resolve<StoreLocalDatasource>(),
       );
     });
 

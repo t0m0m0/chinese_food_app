@@ -47,7 +47,9 @@ abstract class StoreLocalDatasource {
   });
 }
 
-/// Drift版のローカルデータベースでの店舗データアクセス
+/// 店舗データのローカルデータソース実装
+///
+/// Driftを使用したSQLiteデータベースアクセスを提供
 class StoreLocalDatasourceImpl implements StoreLocalDatasource {
   final AppDatabase _database;
 

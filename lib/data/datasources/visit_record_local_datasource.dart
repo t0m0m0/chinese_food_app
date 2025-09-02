@@ -23,7 +23,9 @@ abstract class VisitRecordLocalDatasource {
   Future<void> deleteVisitRecord(String id);
 }
 
-/// Drift版のローカルデータベースでの訪問記録データアクセス
+/// 訪問記録データのローカルデータソース実装
+///
+/// Driftを使用したSQLiteデータベースアクセスを提供
 class VisitRecordLocalDatasourceImpl implements VisitRecordLocalDatasource {
   final AppDatabase _database;
 

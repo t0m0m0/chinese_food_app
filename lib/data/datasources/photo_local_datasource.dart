@@ -26,7 +26,9 @@ abstract class PhotoLocalDatasource {
   Future<void> deletePhoto(String id);
 }
 
-/// Drift版Photo用ローカルデータソース
+/// 写真データのローカルデータソース実装
+///
+/// Driftを使用したSQLiteデータベースアクセスを提供
 class PhotoLocalDatasourceImpl implements PhotoLocalDatasource {
   final AppDatabase _database;
 
