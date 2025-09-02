@@ -24,7 +24,7 @@ class ProductionDIContainer implements DIContainerInterface {
   void configureForEnvironment(Environment environment) {
     // For production container, we always configure for production
     if (environment != Environment.production) {
-      throw DIContainerException(
+      throw const DIContainerException(
         'ProductionDIContainer can only be configured for production environment',
       );
     }
@@ -52,7 +52,7 @@ class ProductionDIContainer implements DIContainerInterface {
 
   @override
   void registerTestProvider(StoreProvider provider) {
-    throw DIContainerException(
+    throw const DIContainerException(
       'Test provider registration is not allowed in production container',
     );
   }

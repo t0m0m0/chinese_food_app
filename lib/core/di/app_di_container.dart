@@ -17,7 +17,6 @@ import '../../domain/services/location_service.dart';
 /// - Maintains full backward compatibility with existing API
 class AppDIContainer implements DIContainerInterface {
   DIContainerInterface? _delegate;
-  Environment? _currentEnvironment;
 
   @override
   bool get isConfigured => _delegate?.isConfigured ?? false;
@@ -39,7 +38,6 @@ class AppDIContainer implements DIContainerInterface {
 
     // Create new environment-specific container
     _delegate = DIContainerFactory.createAndConfigure(environment);
-    _currentEnvironment = environment;
 
     developer.log(
         'AppDIContainer configured successfully for ${environment.name}',
@@ -68,7 +66,6 @@ class AppDIContainer implements DIContainerInterface {
   void dispose() {
     _delegate?.dispose();
     _delegate = null;
-    _currentEnvironment = null;
     developer.log('AppDIContainer disposed', name: 'DI');
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/di/app_di_container.dart';
 
 void main() {
   group('Persistent Database Implementation (Issue #113 Phase 3)', () {

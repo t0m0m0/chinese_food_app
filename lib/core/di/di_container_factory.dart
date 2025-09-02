@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'di_container_interface.dart';
 import 'containers/production_di_container.dart';

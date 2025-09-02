@@ -24,7 +24,7 @@ class DevelopmentDIContainer implements DIContainerInterface {
   void configureForEnvironment(Environment environment) {
     // For development container, we always configure for development
     if (environment != Environment.development) {
-      throw DIContainerException(
+      throw const DIContainerException(
         'DevelopmentDIContainer can only be configured for development environment',
       );
     }

@@ -24,7 +24,7 @@ class TestDIContainer implements DIContainerInterface {
   void configureForEnvironment(Environment environment) {
     // For test container, we always configure for test
     if (environment != Environment.test) {
-      throw DIContainerException(
+      throw const DIContainerException(
         'TestDIContainer can only be configured for test environment',
       );
     }
