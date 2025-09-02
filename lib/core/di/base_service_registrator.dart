@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:developer' as developer;
 
 import 'service_container.dart';
+import '../config/environment_config.dart' as env_config;
+import 'di_error_handler.dart';
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
@@ -96,17 +98,44 @@ abstract class BaseServiceRegistrator {
     });
   }
 
-  /// Register development-specific API datasource with fallback
+  /// Register development-specific API datasource with automatic fallback
   static void registerDevelopmentApiDatasource(
       ServiceContainer serviceContainer) {
     serviceContainer.register<HotpepperApiDatasource>(() {
-      // TODO: Implement environment-aware API datasource creation
-      // For now, use mock to avoid API key dependency
-      developer.log(
-          'Using mock API datasource (development - API key not configured)',
-          name: 'DI');
-      return MockHotpepperApiDatasource();
+      return _createDevelopmentApiDatasource();
     });
+  }
+
+  /// Create API datasource for development with smart environment detection
+  static HotpepperApiDatasource _createDevelopmentApiDatasource() {
+    try {
+      // Check if API key is available in environment configuration
+      final apiKey = env_config.EnvironmentConfig.hotpepperApiKey;
+      final apiKeyStatus =
+          apiKey.isNotEmpty ? '設定済み(${apiKey.length}文字)' : '未設定';
+
+      if (apiKey.isNotEmpty) {
+        DIErrorHandler.logSuccessfulOperation(
+          'API設定確認',
+          '実際のHotPepperApiDatasourceImplを使用 (開発環境)',
+        );
+        return HotpepperApiDatasourceImpl(AppHttpClient());
+      } else {
+        DIErrorHandler.handleApiConfigurationError(
+          'development',
+          apiKeyStatus,
+          null, // Warning level (no error)
+        );
+        return MockHotpepperApiDatasource();
+      }
+    } catch (e) {
+      DIErrorHandler.handleApiConfigurationError(
+        'development',
+        'エラー発生',
+        e is Exception ? e : Exception(e.toString()),
+      );
+      return MockHotpepperApiDatasource();
+    }
   }
 
   /// Register test-specific mock services
@@ -128,29 +157,34 @@ abstract class BaseServiceRegistrator {
 
   /// Create Web platform database connection
   static DatabaseConnection _createWebDatabaseConnection() {
-    // Web環境: Drift Web APIまたはインメモリデータベース
-    developer.log('Web環境: データベース接続を作成', name: 'Database');
+    const platform = 'Web';
 
     // テスト環境でのみインメモリデータベースを使用
     if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
-      developer.log('Web環境: テスト用インメモリデータベース使用', name: 'Database');
+      DIErrorHandler.logSuccessfulOperation(
+        'データベース接続',
+        'テスト用インメモリデータベース使用 ($platform環境)',
+        isVerbose: true,
+      );
       return DatabaseConnection(NativeDatabase.memory());
     } else {
       // Issue #111 修正: Web環境での本番使用をサポート
-      developer.log(
-        'Web環境: インメモリデータベース使用（永続化なし）',
-        name: 'Database',
-        level: 900, // WARNING level
+      DIErrorHandler.handleConfigurationWarning(
+        platform,
+        'インメモリデータベース使用（永続化なし）',
+        recommendation: '将来的にはIndexedDB実装に移行予定',
       );
 
       try {
         // Web環境では永続化されないインメモリデータベースを使用
         return DatabaseConnection(NativeDatabase.memory());
       } catch (e) {
-        developer.log(
-          'Web環境でのデータベース初期化に失敗: $e',
-          name: 'Database',
-          level: 1000, // ERROR level
+        final exception = e is Exception ? e : Exception(e.toString());
+        DIErrorHandler.handleDatabaseError(
+          platform,
+          'インメモリデータベース初期化',
+          exception,
+          recoveryHint: 'ブラウザのキャッシュをクリアしてください',
         );
         rethrow;
       }
@@ -159,16 +193,22 @@ abstract class BaseServiceRegistrator {
 
   /// Create Native platform database connection
   static DatabaseConnection _createNativeDatabaseConnection() {
+    const platform = 'Native';
+
     if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
       // テスト環境: インメモリデータベース使用
-      developer.log('テスト環境: インメモリデータベース使用（race condition回避）', name: 'Database');
+      DIErrorHandler.logSuccessfulOperation(
+        'データベース接続',
+        'テスト用インメモリデータベース使用（race condition回避）',
+        isVerbose: true,
+      );
       return DatabaseConnection(NativeDatabase.memory());
     } else {
       // Issue #111 緊急修正: ファイルアクセス問題を回避するためインメモリDBを使用
-      developer.log(
-        '緊急修正: ファイルアクセス問題のためインメモリデータベースを使用',
-        name: 'Database',
-        level: 900, // WARNING level
+      DIErrorHandler.handleConfigurationWarning(
+        platform,
+        'ファイルアクセス問題のためインメモリデータベースを使用',
+        recommendation: 'Issue #113でpath_providerによる永続化実装予定',
       );
       return DatabaseConnection(NativeDatabase.memory());
     }
