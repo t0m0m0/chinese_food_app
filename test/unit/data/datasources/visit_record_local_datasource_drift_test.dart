@@ -2,17 +2,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:chinese_food_app/core/database/schema/app_database.dart'
     hide VisitRecord;
-import 'package:chinese_food_app/data/datasources/visit_record_local_datasource_drift.dart';
+import 'package:chinese_food_app/data/datasources/visit_record_local_datasource.dart';
 import 'package:chinese_food_app/domain/entities/visit_record.dart';
 import '../../../helpers/test_database_factory.dart';
 
 void main() {
   late AppDatabase database;
-  late VisitRecordLocalDatasourceDrift datasource;
+  late VisitRecordLocalDatasourceImpl datasource;
 
   setUp(() async {
     database = TestDatabaseFactory.createTestDatabase();
-    datasource = VisitRecordLocalDatasourceDrift(database);
+    datasource = VisitRecordLocalDatasourceImpl(database);
 
     // 外部キー制約のためにテスト用のstoreレコードを作成
     await database.into(database.stores).insert(StoresCompanion(

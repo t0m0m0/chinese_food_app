@@ -9,9 +9,9 @@ import 'di_error_handler.dart';
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
-import '../../data/datasources/store_local_datasource_drift.dart';
-import '../../data/datasources/visit_record_local_datasource_drift.dart';
-import '../../data/datasources/photo_local_datasource_drift.dart';
+import '../../data/datasources/store_local_datasource.dart';
+import '../../data/datasources/visit_record_local_datasource.dart';
+import '../../data/datasources/photo_local_datasource.dart';
 import '../../data/repositories/store_repository_impl.dart';
 import '../../data/repositories/visit_record_repository_impl.dart';
 import '../../data/services/geolocator_location_service.dart';
@@ -34,30 +34,30 @@ abstract class BaseServiceRegistrator {
     );
 
     // Register Drift datasources
-    serviceContainer.register<StoreLocalDatasourceDrift>(() {
-      return StoreLocalDatasourceDrift(serviceContainer.resolve<AppDatabase>());
+    serviceContainer.register<StoreLocalDatasourceImpl>(() {
+      return StoreLocalDatasourceImpl(serviceContainer.resolve<AppDatabase>());
     });
 
-    serviceContainer.register<VisitRecordLocalDatasourceDrift>(() {
-      return VisitRecordLocalDatasourceDrift(
+    serviceContainer.register<VisitRecordLocalDatasourceImpl>(() {
+      return VisitRecordLocalDatasourceImpl(
           serviceContainer.resolve<AppDatabase>());
     });
 
-    serviceContainer.register<PhotoLocalDatasourceDrift>(() {
-      return PhotoLocalDatasourceDrift(serviceContainer.resolve<AppDatabase>());
+    serviceContainer.register<PhotoLocalDatasourceImpl>(() {
+      return PhotoLocalDatasourceImpl(serviceContainer.resolve<AppDatabase>());
     });
 
     // Register repositories
     serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
         apiDatasource: serviceContainer.resolve<HotpepperApiDatasource>(),
-        localDatasource: serviceContainer.resolve<StoreLocalDatasourceDrift>(),
+        localDatasource: serviceContainer.resolve<StoreLocalDatasourceImpl>(),
       );
     });
 
     serviceContainer.register<VisitRecordRepository>(() {
       return VisitRecordRepositoryImpl(
-        serviceContainer.resolve<VisitRecordLocalDatasourceDrift>(),
+        serviceContainer.resolve<VisitRecordLocalDatasourceImpl>(),
       );
     });
 
