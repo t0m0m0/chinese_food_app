@@ -1,17 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/database/schema/app_database.dart'
     hide Store;
-import 'package:chinese_food_app/data/datasources/store_local_datasource_drift.dart';
+import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import '../../../helpers/test_database_factory.dart';
 
 void main() {
   late AppDatabase database;
-  late StoreLocalDatasourceDrift datasource;
+  late StoreLocalDatasourceImpl datasource;
 
   setUp(() {
     database = TestDatabaseFactory.createTestDatabase();
-    datasource = StoreLocalDatasourceDrift(database);
+    datasource = StoreLocalDatasourceImpl(database);
   });
 
   tearDown(() async {

@@ -6,9 +6,9 @@ import '../config/environment_config.dart' as env_config;
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
-import '../../data/datasources/store_local_datasource_drift.dart';
-import '../../data/datasources/visit_record_local_datasource_drift.dart';
-import '../../data/datasources/photo_local_datasource_drift.dart';
+import '../../data/datasources/store_local_datasource.dart';
+import '../../data/datasources/visit_record_local_datasource.dart';
+import '../../data/datasources/photo_local_datasource.dart';
 import '../../data/repositories/store_repository_impl.dart';
 import '../../data/repositories/visit_record_repository_impl.dart';
 import '../../data/services/geolocator_location_service.dart';
@@ -172,32 +172,30 @@ class AppDIContainer implements DIContainerInterface {
     );
 
     // Register Drift datasources
-    _serviceContainer.register<StoreLocalDatasourceDrift>(() {
-      return StoreLocalDatasourceDrift(
+    _serviceContainer.register<StoreLocalDatasource>(() {
+      return StoreLocalDatasourceImpl(_serviceContainer.resolve<AppDatabase>());
+    });
+
+    _serviceContainer.register<VisitRecordLocalDatasource>(() {
+      return VisitRecordLocalDatasourceImpl(
           _serviceContainer.resolve<AppDatabase>());
     });
 
-    _serviceContainer.register<VisitRecordLocalDatasourceDrift>(() {
-      return VisitRecordLocalDatasourceDrift(
-          _serviceContainer.resolve<AppDatabase>());
-    });
-
-    _serviceContainer.register<PhotoLocalDatasourceDrift>(() {
-      return PhotoLocalDatasourceDrift(
-          _serviceContainer.resolve<AppDatabase>());
+    _serviceContainer.register<PhotoLocalDatasource>(() {
+      return PhotoLocalDatasourceImpl(_serviceContainer.resolve<AppDatabase>());
     });
 
     // Register repositories
     _serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
         apiDatasource: _serviceContainer.resolve<HotpepperApiDatasource>(),
-        localDatasource: _serviceContainer.resolve<StoreLocalDatasourceDrift>(),
+        localDatasource: _serviceContainer.resolve<StoreLocalDatasource>(),
       );
     });
 
     _serviceContainer.register<VisitRecordRepository>(() {
       return VisitRecordRepositoryImpl(
-        _serviceContainer.resolve<VisitRecordLocalDatasourceDrift>(),
+        _serviceContainer.resolve<VisitRecordLocalDatasourceImpl>(),
       );
     });
 
