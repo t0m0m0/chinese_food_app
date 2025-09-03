@@ -67,6 +67,12 @@ class StoreProvider extends ChangeNotifier {
       _stateManager.clearError();
       await _businessLogic.updateStoreStatus(storeId, newStatus);
       _cacheManager.clearCache();
+      
+      // スワイプリストからステータス更新された店舗を除去
+      final updatedSwipeStores = _stateManager.swipeStores
+          .where((store) => store.id != storeId)
+          .toList();
+      _stateManager.updateSwipeStores(updatedSwipeStores);
     } catch (e) {
       _stateManager.setError('店舗ステータスの更新に失敗しました');
     }
@@ -99,12 +105,18 @@ class StoreProvider extends ChangeNotifier {
     int range = 3,
     int count = 10,
   }) async {
-    // Delegate to business logic (simplified implementation)
     try {
       _stateManager.setLoading(true);
       _stateManager.clearError();
 
-      // TODO: Add full implementation when extending StoreBusinessLogic
+      await _businessLogic.loadNewStoresFromApi(
+        lat: lat,
+        lng: lng,
+        address: address,
+        keyword: keyword,
+        range: range,
+        count: count,
+      );
 
       _stateManager.setLoading(false);
     } catch (e) {
@@ -119,13 +131,18 @@ class StoreProvider extends ChangeNotifier {
     int range = 3,
     int count = 20,
   }) async {
-    // Delegate to business logic (simplified implementation)
     try {
       _stateManager.setLoading(true);
       _stateManager.clearError();
 
-      // TODO: Add full implementation when extending StoreBusinessLogic
+      final swipeStores = await _businessLogic.loadSwipeStores(
+        lat: lat,
+        lng: lng,
+        range: range,
+        count: count,
+      );
 
+      _stateManager.updateSwipeStores(swipeStores);
       _stateManager.setLoading(false);
     } catch (e) {
       _stateManager.setError('現在地周辺の店舗取得に失敗しました');
