@@ -21,27 +21,27 @@ void main() {
     test('should set loading state', () {
       stateManager.setLoading(true);
       expect(stateManager.isLoading, true);
-      
+
       stateManager.setLoading(false);
       expect(stateManager.isLoading, false);
     });
 
     test('should set and clear error', () {
       const errorMessage = 'Test error';
-      
+
       stateManager.setError(errorMessage);
       expect(stateManager.error, errorMessage);
-      
+
       stateManager.clearError();
       expect(stateManager.error, null);
     });
 
     test('should set and clear info message', () {
       const infoMessage = 'Test info';
-      
+
       stateManager.setInfoMessage(infoMessage);
       expect(stateManager.infoMessage, infoMessage);
-      
+
       stateManager.clearInfoMessage();
       expect(stateManager.infoMessage, null);
     });
@@ -65,7 +65,7 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      
+
       stateManager.updateSearchResults(testStores);
       expect(stateManager.searchResults, testStores);
       expect(stateManager.searchResults.length, 2);

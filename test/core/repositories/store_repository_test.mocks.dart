@@ -114,6 +114,65 @@ class MockStoreLocalDatasource extends _i1.Mock
         ),
         returnValue: _i4.Future<List<_i5.Store>>.value(<_i5.Store>[]),
       ) as _i4.Future<List<_i5.Store>>);
+
+  @override
+  _i4.Future<void> insertStoresBatch(List<_i5.Store>? stores) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #insertStoresBatch,
+          [stores],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> updateStoreAtomic(_i5.Store? store) => (super.noSuchMethod(
+        Invocation.method(
+          #updateStoreAtomic,
+          [store],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<List<_i5.Store>> getStoresPaginated({
+    required int? page,
+    required int? pageSize,
+    _i5.StoreStatus? status,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getStoresPaginated,
+          [],
+          {
+            #page: page,
+            #pageSize: pageSize,
+            #status: status,
+          },
+        ),
+        returnValue: _i4.Future<List<_i5.Store>>.value(<_i5.Store>[]),
+      ) as _i4.Future<List<_i5.Store>>);
+
+  @override
+  _i4.Future<List<_i5.Store>> searchStoresPaginated({
+    required String? query,
+    required int? page,
+    required int? pageSize,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #searchStoresPaginated,
+          [],
+          {
+            #query: query,
+            #page: page,
+            #pageSize: pageSize,
+          },
+        ),
+        returnValue: _i4.Future<List<_i5.Store>>.value(<_i5.Store>[]),
+      ) as _i4.Future<List<_i5.Store>>);
 }
 
 /// A class which mocks [HotpepperApiDatasource].

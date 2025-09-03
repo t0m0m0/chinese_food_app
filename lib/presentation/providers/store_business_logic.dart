@@ -10,8 +10,8 @@ class StoreBusinessLogic {
   StoreBusinessLogic({
     required StoreRepository repository,
     required LocationService locationService,
-  }) : _repository = repository,
-       _locationService = locationService;
+  })  : _repository = repository,
+        _locationService = locationService;
 
   List<Store> get allStores => List.unmodifiable(_stores);
 

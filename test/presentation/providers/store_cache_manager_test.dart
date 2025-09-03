@@ -75,30 +75,30 @@ void main() {
     test('should cache results for performance', () {
       // 最初の呼び出し
       final wantToGoStores1 = cacheManager.getWantToGoStores(testStores);
-      
+
       // 2回目の呼び出し - キャッシュから取得される
       final wantToGoStores2 = cacheManager.getWantToGoStores(testStores);
-      
+
       // 同じインスタンス（キャッシュされている）
       expect(identical(wantToGoStores1, wantToGoStores2), true);
     });
 
     test('should clear cache manually', () {
       final wantToGoStores1 = cacheManager.getWantToGoStores(testStores);
-      
+
       cacheManager.clearCache();
-      
+
       final wantToGoStores2 = cacheManager.getWantToGoStores(testStores);
-      
+
       // キャッシュクリア後は異なるインスタンス
       expect(identical(wantToGoStores1, wantToGoStores2), false);
     });
 
     test('should check if cache is expired', () {
       expect(cacheManager.isCacheExpired(), false);
-      
+
       cacheManager.clearCache();
-      
+
       // 最初はキャッシュが期限切れでない
       expect(cacheManager.isCacheExpired(), false);
     });

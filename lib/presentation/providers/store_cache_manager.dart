@@ -25,9 +25,8 @@ class StoreCacheManager {
 
   List<Store> getBadStores(List<Store> allStores) {
     _checkCacheExpiry();
-    _cachedBadStores ??= List.unmodifiable(allStores
-        .where((store) => store.status == StoreStatus.bad)
-        .toList());
+    _cachedBadStores ??= List.unmodifiable(
+        allStores.where((store) => store.status == StoreStatus.bad).toList());
     return _cachedBadStores!;
   }
 

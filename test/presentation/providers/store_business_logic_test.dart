@@ -43,7 +43,7 @@ void main() {
       when(mockRepository.getAllStores()).thenAnswer((_) async => testStores);
 
       final result = await businessLogic.loadStores();
-      
+
       expect(result, testStores);
       expect(businessLogic.allStores, testStores);
       verify(mockRepository.getAllStores()).called(1);
@@ -58,17 +58,17 @@ void main() {
         lng: 139.7006,
         createdAt: DateTime.now(),
       );
-      
+
       // 最初に店舗をロード
       when(mockRepository.getAllStores()).thenAnswer((_) async => [testStore]);
       await businessLogic.loadStores();
-      
+
       when(mockRepository.updateStore(any)).thenAnswer((_) async => {});
 
       await businessLogic.updateStoreStatus('1', StoreStatus.wantToGo);
-      
+
       verify(mockRepository.updateStore(any)).called(1);
-      
+
       // ローカル状態も更新されているか確認
       final updatedStores = businessLogic.allStores;
       expect(updatedStores.first.status, StoreStatus.wantToGo);
@@ -87,7 +87,7 @@ void main() {
       when(mockRepository.insertStore(any)).thenAnswer((_) async => {});
 
       await businessLogic.addStore(newStore);
-      
+
       expect(businessLogic.allStores, contains(newStore));
       verify(mockRepository.insertStore(newStore)).called(1);
     });
