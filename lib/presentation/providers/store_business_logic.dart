@@ -4,6 +4,8 @@ import '../../domain/services/location_service.dart';
 
 class StoreBusinessLogic {
   final StoreRepository _repository;
+  // TODO: Issue #155 - 位置情報機能の完全実装で使用予定（loadStoresWithCurrentLocation等）
+  // ignore: unused_field
   final LocationService _locationService;
   List<Store> _stores = [];
 
