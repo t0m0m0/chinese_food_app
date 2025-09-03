@@ -16,6 +16,10 @@ class UiConfigManager {
       errors.add('カード角丸値が無効です: ${UiConfig.cardBorderRadius}');
     }
 
+    if (!UiConfig.isValidMapZoom(UiConfig.mapZoom)) {
+      errors.add('地図ズーム値が無効です: ${UiConfig.mapZoom}');
+    }
+
     return errors;
   }
 
@@ -27,6 +31,7 @@ class UiConfigManager {
       'borderRadius': UiConfig.cardBorderRadius,
       'appName': UiConfig.appName,
       'animationDuration': UiConfig.defaultAnimationDuration,
+      'mapZoom': UiConfig.mapZoom,
     };
   }
 
