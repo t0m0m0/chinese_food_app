@@ -92,7 +92,10 @@ void main() {
 
       // Assert
       expect(provider, isNotNull);
-      expect(provider.repository, isNotNull);
+      // Note: Direct repository access was removed in new architecture
+      // Instead, verify provider functionality through its public interface
+      expect(provider.stores, isNotNull);
+      expect(provider.isLoading, isFalse);
     });
 
     test('should configure dependencies correctly for test environment', () {
