@@ -56,6 +56,8 @@ class StoreProvider extends ChangeNotifier {
       await _businessLogic.loadStores();
 
       _stateManager.setLoading(false);
+      // 店舗データ読み込み後、UIに変更を通知
+      notifyListeners();
     } catch (e) {
       _stateManager.setError('店舗データの読み込みに失敗しました');
       _stateManager.setLoading(false);
@@ -82,6 +84,8 @@ class StoreProvider extends ChangeNotifier {
     try {
       _stateManager.clearError();
       await _businessLogic.addStore(store);
+      // 店舗追加後、UIに変更を通知
+      notifyListeners();
     } catch (e) {
       _stateManager.setError('店舗の追加に失敗しました');
     }
@@ -119,6 +123,8 @@ class StoreProvider extends ChangeNotifier {
       );
 
       _stateManager.setLoading(false);
+      // 新規店舗取得後、UIに変更を通知
+      notifyListeners();
     } catch (e) {
       _stateManager.setError('新しい店舗の取得に失敗しました');
       _stateManager.setLoading(false);
