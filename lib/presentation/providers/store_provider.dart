@@ -103,9 +103,9 @@ class StoreProvider extends ChangeNotifier {
     try {
       _stateManager.setLoading(true);
       _stateManager.clearError();
-      
+
       // TODO: Add full implementation when extending StoreBusinessLogic
-      
+
       _stateManager.setLoading(false);
     } catch (e) {
       _stateManager.setError('新しい店舗の取得に失敗しました');
@@ -119,13 +119,13 @@ class StoreProvider extends ChangeNotifier {
     int range = 3,
     int count = 20,
   }) async {
-    // Delegate to business logic (simplified implementation) 
+    // Delegate to business logic (simplified implementation)
     try {
       _stateManager.setLoading(true);
       _stateManager.clearError();
-      
+
       // TODO: Add full implementation when extending StoreBusinessLogic
-      
+
       _stateManager.setLoading(false);
     } catch (e) {
       _stateManager.setError('現在地周辺の店舗取得に失敗しました');
@@ -133,9 +133,27 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
+  // Database error recovery functionality
+  Future<bool> tryRecoverFromDatabaseError() async {
+    try {
+      _stateManager.clearError();
+      _stateManager.setLoading(true);
+
+      // データベース接続の再確認
+      await _businessLogic.loadStores();
+
+      _stateManager.setLoading(false);
+      return true;
+    } catch (e) {
+      _stateManager.setLoading(false);
+      _stateManager.setError('データベース復旧に失敗しました: ${e.toString()}');
+      return false;
+    }
+  }
+
   // Temporary getter for backward compatibility
   StoreRepository get repository => throw UnimplementedError(
-    'repository getter is deprecated. Direct repository access violates separation of concerns.');
+      'repository getter is deprecated. Direct repository access violates separation of concerns.');
 
   @override
   void dispose() {

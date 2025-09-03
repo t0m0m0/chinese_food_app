@@ -91,5 +91,18 @@ void main() {
       expect(businessLogic.allStores, contains(newStore));
       verify(mockRepository.insertStore(newStore)).called(1);
     });
+
+    test('should handle database error recovery', () async {
+      // データベースエラーのシミュレーション
+      when(mockRepository.getAllStores())
+          .thenThrow(Exception('Database connection failed'));
+
+      try {
+        await businessLogic.loadStores();
+        fail('Expected exception was not thrown');
+      } catch (e) {
+        expect(e.toString(), contains('Database connection failed'));
+      }
+    });
   });
 }
