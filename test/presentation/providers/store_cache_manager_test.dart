@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/presentation/providers/store_cache_manager.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/core/config/cache_config.dart';
 
 void main() {
   group('StoreCacheManager', () {
@@ -101,6 +102,20 @@ void main() {
 
       // 最初はキャッシュが期限切れでない
       expect(cacheManager.isCacheExpired(), false);
+    });
+
+    test('should use cache config for expiry time', () {
+      // キャッシュ設定からミリ秒を取得できることを確認
+      expect(CacheConfig.storeCacheMaxAgeMilliseconds, greaterThan(0));
+
+      // 開発環境では短い期限が設定されていることを確認
+      if (CacheConfig.isDevelopment) {
+        expect(CacheConfig.activeStoreCacheMaxAge,
+            equals(CacheConfig.debugCacheMaxAge));
+      } else {
+        expect(CacheConfig.activeStoreCacheMaxAge,
+            equals(CacheConfig.storeCacheMaxAge));
+      }
     });
   });
 }

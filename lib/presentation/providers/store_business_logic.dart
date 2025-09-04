@@ -1,6 +1,7 @@
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../../domain/services/location_service.dart';
+import '../../core/constants/string_constants.dart';
 
 class StoreBusinessLogic {
   final StoreRepository _repository;
@@ -45,7 +46,7 @@ class StoreBusinessLogic {
     double? lat,
     double? lng,
     String? address,
-    String? keyword = '中華',
+    String? keyword = StringConstants.defaultSearchKeyword,
     int range = 3,
     int count = 10,
   }) async {
@@ -84,56 +85,121 @@ class StoreBusinessLogic {
     int range = 3,
     int count = 20,
   }) async {
-    // APIから店舗を検索
-    final apiStores = await _repository.searchStoresFromApi(
+    final apiStores = await _fetchStoresFromApi(lat, lng, range, count);
+    final existingStoreMaps = _buildExistingStoreMaps();
+    return await _filterAndProcessSwipeStores(apiStores, existingStoreMaps);
+  }
+
+  /// Fetches stores from API with specified parameters
+  Future<List<Store>> _fetchStoresFromApi(
+    double lat,
+    double lng,
+    int range,
+    int count,
+  ) async {
+    return await _repository.searchStoresFromApi(
       lat: lat,
       lng: lng,
-      keyword: '中華',
+      keyword: StringConstants.apiKeywordParameter,
       range: range,
       count: count,
     );
+  }
 
-    // 既存店舗のIDとステータス、位置を取得
+  /// Builds maps of existing stores by ID and location for efficient lookup
+  ({Map<String, StoreStatus?> byId, Map<String, StoreStatus?> byLocation})
+      _buildExistingStoreMaps() {
     final existingStoreMap = <String, StoreStatus?>{};
     final existingLocations = <String, StoreStatus?>{};
+
     for (final store in _stores) {
       existingStoreMap[store.id] = store.status;
-      final locationKey = '${store.lat}_${store.lng}';
+      final locationKey = _createLocationKey(store.lat, store.lng);
       existingLocations[locationKey] = store.status;
     }
 
-    // 重複チェックと未スワイプフィルタリング
-    final swipeStores = <Store>[];
-    for (final apiStore in apiStores) {
-      final locationKey = '${apiStore.lat}_${apiStore.lng}';
-      final isExistingById = existingStoreMap.containsKey(apiStore.id);
-      final isExistingByLocation = existingLocations.containsKey(locationKey);
+    return (byId: existingStoreMap, byLocation: existingLocations);
+  }
 
-      if (!isExistingById && !isExistingByLocation) {
-        // 完全に新しい店舗：ローカルに追加してスワイプリストに含める
-        await _repository.insertStore(apiStore);
-        _stores.add(apiStore);
-        swipeStores.add(apiStore);
-      } else if (isExistingById) {
-        // IDで既存店舗：ステータス未設定の場合のみスワイプリストに含める
-        final existingStatus = existingStoreMap[apiStore.id];
-        if (existingStatus == null) {
-          final existingStore =
-              _stores.firstWhere((store) => store.id == apiStore.id);
-          swipeStores.add(existingStore);
-        }
-      } else if (isExistingByLocation) {
-        // 位置で既存店舗：ステータス未設定の場合のみスワイプリストに含める
-        final existingStatus = existingLocations[locationKey];
-        if (existingStatus == null) {
-          final existingStore = _stores.firstWhere((store) =>
-              store.lat == apiStore.lat && store.lng == apiStore.lng);
-          swipeStores.add(existingStore);
-        }
+  /// Filters API stores and processes them for swipe functionality
+  Future<List<Store>> _filterAndProcessSwipeStores(
+    List<Store> apiStores,
+    ({
+      Map<String, StoreStatus?> byId,
+      Map<String, StoreStatus?> byLocation
+    }) existingStoreMaps,
+  ) async {
+    final swipeStores = <Store>[];
+
+    for (final apiStore in apiStores) {
+      final processedStore =
+          await _processApiStore(apiStore, existingStoreMaps);
+      if (processedStore != null) {
+        swipeStores.add(processedStore);
       }
-      // ステータスが設定済みの店舗（既にスワイプ済み）は除外
     }
 
     return swipeStores;
+  }
+
+  /// Processes a single API store based on existence and status
+  Future<Store?> _processApiStore(
+    Store apiStore,
+    ({
+      Map<String, StoreStatus?> byId,
+      Map<String, StoreStatus?> byLocation
+    }) existingStoreMaps,
+  ) async {
+    final locationKey = _createLocationKey(apiStore.lat, apiStore.lng);
+    final isExistingById = existingStoreMaps.byId.containsKey(apiStore.id);
+    final isExistingByLocation =
+        existingStoreMaps.byLocation.containsKey(locationKey);
+
+    if (!isExistingById && !isExistingByLocation) {
+      return await _addNewStore(apiStore);
+    } else if (isExistingById) {
+      return _getExistingStoreById(apiStore.id, existingStoreMaps.byId);
+    } else if (isExistingByLocation) {
+      return _getExistingStoreByLocation(
+          apiStore, existingStoreMaps.byLocation);
+    }
+
+    return null; // Store has status (already swiped), exclude from swipe list
+  }
+
+  /// Adds a completely new store to local storage and returns it
+  Future<Store> _addNewStore(Store apiStore) async {
+    await _repository.insertStore(apiStore);
+    _stores.add(apiStore);
+    return apiStore;
+  }
+
+  /// Returns existing store by ID if it has no status (not yet swiped)
+  Store? _getExistingStoreById(
+      String storeId, Map<String, StoreStatus?> existingStoreMap) {
+    final existingStatus = existingStoreMap[storeId];
+    if (existingStatus == null) {
+      return _stores.firstWhere((store) => store.id == storeId);
+    }
+    return null;
+  }
+
+  /// Returns existing store by location if it has no status (not yet swiped)
+  Store? _getExistingStoreByLocation(
+    Store apiStore,
+    Map<String, StoreStatus?> existingLocations,
+  ) {
+    final locationKey = _createLocationKey(apiStore.lat, apiStore.lng);
+    final existingStatus = existingLocations[locationKey];
+    if (existingStatus == null) {
+      return _stores.firstWhere(
+          (store) => store.lat == apiStore.lat && store.lng == apiStore.lng);
+    }
+    return null;
+  }
+
+  /// Creates a consistent location key for store coordinates
+  String _createLocationKey(double lat, double lng) {
+    return '${lat}_$lng';
   }
 }

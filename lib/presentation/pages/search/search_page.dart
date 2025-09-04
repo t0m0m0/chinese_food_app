@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_settings/app_settings.dart';
+import '../../../core/constants/string_constants.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/duplicate_store_checker.dart';
 import '../../../domain/entities/store.dart';
@@ -196,7 +197,7 @@ class _SearchPageState extends State<SearchPage> {
                       : const Icon(Icons.search),
                   label: Text((state.isGettingLocation || state.isLoading)
                       ? (state.isGettingLocation ? '現在地取得中...' : '検索中...')
-                      : '中華料理店を検索'),
+                      : StringConstants.searchButtonLabel),
                 ),
               ),
             ],
@@ -288,7 +289,9 @@ class _SearchPageState extends State<SearchPage> {
                 const Icon(Icons.search, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
                 Text(
-                  state.hasSearched ? '検索結果が見つかりません' : '検索ボタンを押して中華料理店を探しましょう',
+                  state.hasSearched
+                      ? '検索結果が見つかりません'
+                      : StringConstants.noResultsMessage,
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),

@@ -1,11 +1,11 @@
 import '../../domain/entities/store.dart';
+import '../../core/config/cache_config.dart';
 
 class StoreCacheManager {
   List<Store>? _cachedWantToGoStores;
   List<Store>? _cachedVisitedStores;
   List<Store>? _cachedBadStores;
   int? _lastCacheUpdateTime;
-  static const int _cacheMaxAge = 30000; // 30秒
 
   List<Store> getWantToGoStores(List<Store> allStores) {
     _checkCacheExpiry();
@@ -37,7 +37,8 @@ class StoreCacheManager {
   void _checkCacheExpiry() {
     final now = DateTime.now().millisecondsSinceEpoch;
     if (_lastCacheUpdateTime != null &&
-        (now - _lastCacheUpdateTime!) > _cacheMaxAge) {
+        (now - _lastCacheUpdateTime!) >
+            CacheConfig.storeCacheMaxAgeMilliseconds) {
       clearCache();
     }
   }
@@ -54,6 +55,7 @@ class StoreCacheManager {
       return false;
     }
     final now = DateTime.now().millisecondsSinceEpoch;
-    return (now - _lastCacheUpdateTime!) > _cacheMaxAge;
+    return (now - _lastCacheUpdateTime!) >
+        CacheConfig.storeCacheMaxAgeMilliseconds;
   }
 }

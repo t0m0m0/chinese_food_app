@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../../domain/services/location_service.dart';
+import '../../core/constants/error_messages.dart';
+import '../../core/constants/info_messages.dart';
+import '../../core/constants/string_constants.dart';
 import 'store_state_manager.dart';
 import 'store_cache_manager.dart';
 import 'store_business_logic.dart';
@@ -60,7 +63,8 @@ class StoreProvider extends ChangeNotifier {
       _cacheManager.clearCache();
       notifyListeners();
     } catch (e) {
-      _stateManager.setError('店舗データの読み込みに失敗しました');
+      _stateManager
+          .setError(ErrorMessages.getStoreMessage('store_load_failed'));
       _stateManager.setLoading(false);
     }
   }
@@ -77,7 +81,8 @@ class StoreProvider extends ChangeNotifier {
           .toList();
       _stateManager.updateSwipeStores(updatedSwipeStores);
     } catch (e) {
-      _stateManager.setError('店舗ステータスの更新に失敗しました');
+      _stateManager.setError(
+          ErrorMessages.getStoreMessage('store_status_update_failed'));
     }
   }
 
@@ -89,7 +94,7 @@ class StoreProvider extends ChangeNotifier {
       _cacheManager.clearCache();
       notifyListeners();
     } catch (e) {
-      _stateManager.setError('店舗の追加に失敗しました');
+      _stateManager.setError(ErrorMessages.getStoreMessage('store_add_failed'));
     }
   }
 
@@ -107,7 +112,7 @@ class StoreProvider extends ChangeNotifier {
     double? lat,
     double? lng,
     String? address,
-    String? keyword = '中華',
+    String? keyword = StringConstants.defaultSearchKeyword,
     int range = 3,
     int count = 10,
   }) async {
@@ -129,7 +134,8 @@ class StoreProvider extends ChangeNotifier {
       _cacheManager.clearCache();
       notifyListeners();
     } catch (e) {
-      _stateManager.setError('新しい店舗の取得に失敗しました');
+      _stateManager
+          .setError(ErrorMessages.getStoreMessage('new_stores_fetch_failed'));
       _stateManager.setLoading(false);
     }
   }
@@ -155,14 +161,16 @@ class StoreProvider extends ChangeNotifier {
 
       // スワイプ用店舗が0件の場合、適切な情報メッセージを設定
       if (swipeStores.isEmpty) {
-        _stateManager.setInfoMessage('現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。');
+        _stateManager.setInfoMessage(
+            InfoMessages.getStoreMessage('no_stores_found_nearby'));
       } else {
         _stateManager.clearInfoMessage();
       }
 
       _stateManager.setLoading(false);
     } catch (e) {
-      _stateManager.setError('現在地周辺の店舗取得に失敗しました');
+      _stateManager
+          .setError(ErrorMessages.getStoreMessage('location_stores_failed'));
       _stateManager.setLoading(false);
     }
   }
@@ -180,7 +188,9 @@ class StoreProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _stateManager.setLoading(false);
-      _stateManager.setError('データベース復旧に失敗しました: ${e.toString()}');
+      _stateManager.setError(ErrorMessages.withContext(
+          ErrorMessages.getDatabaseMessage('database_recovery_failed'),
+          e.toString()));
       return false;
     }
   }

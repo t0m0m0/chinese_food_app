@@ -48,6 +48,34 @@ class ErrorMessages {
       'ja': 'データベースに接続できませんでした',
       'en': 'Database connection failed',
     },
+    'database_recovery_failed': {
+      'ja': 'データベース復旧に失敗しました',
+      'en': 'Database recovery failed',
+    },
+  };
+
+  /// 店舗関連エラーメッセージ
+  static const Map<String, Map<String, String>> _storeMessages = {
+    'store_load_failed': {
+      'ja': '店舗データの読み込みに失敗しました',
+      'en': 'Failed to load store data',
+    },
+    'store_status_update_failed': {
+      'ja': '店舗ステータスの更新に失敗しました',
+      'en': 'Failed to update store status',
+    },
+    'store_add_failed': {
+      'ja': '店舗の追加に失敗しました',
+      'en': 'Failed to add store',
+    },
+    'location_stores_failed': {
+      'ja': '現在地周辺の店舗取得に失敗しました',
+      'en': 'Failed to get stores around current location',
+    },
+    'new_stores_fetch_failed': {
+      'ja': '新しい店舗の取得に失敗しました',
+      'en': 'Failed to fetch new stores',
+    },
   };
 
   /// 一般的なエラーメッセージ
@@ -80,6 +108,11 @@ class ErrorMessages {
     return _getMessage(_databaseMessages, key);
   }
 
+  /// 店舗エラーメッセージ取得
+  static String getStoreMessage(String key) {
+    return _getMessage(_storeMessages, key);
+  }
+
   /// 一般エラーメッセージ取得
   static String getGeneralMessage(String key) {
     return _getMessage(_generalMessages, key);
@@ -109,6 +142,21 @@ class ErrorMessages {
   /// ```
   static String get currentLanguage => _currentLanguage;
 
+  /// コンテキスト付きエラーメッセージ生成
+  static String withContext(String baseMessage, String context) {
+    return '$baseMessage: $context';
+  }
+
+  /// APIエラーメッセージ（ステータスコード付き）
+  static String apiErrorWithStatus(int statusCode) {
+    return 'APIエラー (コード: $statusCode)';
+  }
+
+  /// データベース操作エラーメッセージ
+  static String databaseErrorWithOperation(String operation) {
+    return 'データベース$operation操作に失敗しました';
+  }
+
   /// サポート言語一覧
   static const List<String> supportedLanguages = ['ja', 'en'];
 
@@ -117,6 +165,7 @@ class ErrorMessages {
     final allKeys = <String>[];
     allKeys.addAll(_securityMessages.keys);
     allKeys.addAll(_databaseMessages.keys);
+    allKeys.addAll(_storeMessages.keys);
     allKeys.addAll(_generalMessages.keys);
     return allKeys;
   }
