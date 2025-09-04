@@ -60,10 +60,12 @@ class StoreBusinessLogic {
 
     // 重複チェック：既存店舗と同じIDまたは同じ位置の店舗は除外
     final existingIds = _stores.map((store) => store.id).toSet();
-    final existingLocations = _stores.map((store) => '${store.lat}_${store.lng}').toSet();
+    final existingLocations =
+        _stores.map((store) => '${store.lat}_${store.lng}').toSet();
     final newStores = apiStores.where((store) {
       final locationKey = '${store.lat}_${store.lng}';
-      return !existingIds.contains(store.id) && !existingLocations.contains(locationKey);
+      return !existingIds.contains(store.id) &&
+          !existingLocations.contains(locationKey);
     }).toList();
 
     // 新しい店舗をローカルに追加
@@ -106,7 +108,7 @@ class StoreBusinessLogic {
       final locationKey = '${apiStore.lat}_${apiStore.lng}';
       final isExistingById = existingStoreMap.containsKey(apiStore.id);
       final isExistingByLocation = existingLocations.containsKey(locationKey);
-      
+
       if (!isExistingById && !isExistingByLocation) {
         // 完全に新しい店舗：ローカルに追加してスワイプリストに含める
         await _repository.insertStore(apiStore);
@@ -116,15 +118,16 @@ class StoreBusinessLogic {
         // IDで既存店舗：ステータス未設定の場合のみスワイプリストに含める
         final existingStatus = existingStoreMap[apiStore.id];
         if (existingStatus == null) {
-          final existingStore = _stores.firstWhere((store) => store.id == apiStore.id);
+          final existingStore =
+              _stores.firstWhere((store) => store.id == apiStore.id);
           swipeStores.add(existingStore);
         }
       } else if (isExistingByLocation) {
         // 位置で既存店舗：ステータス未設定の場合のみスワイプリストに含める
         final existingStatus = existingLocations[locationKey];
         if (existingStatus == null) {
-          final existingStore = _stores.firstWhere((store) => 
-            store.lat == apiStore.lat && store.lng == apiStore.lng);
+          final existingStore = _stores.firstWhere((store) =>
+              store.lat == apiStore.lat && store.lng == apiStore.lng);
           swipeStores.add(existingStore);
         }
       }

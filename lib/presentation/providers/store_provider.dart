@@ -70,7 +70,7 @@ class StoreProvider extends ChangeNotifier {
       _stateManager.clearError();
       await _businessLogic.updateStoreStatus(storeId, newStatus);
       _cacheManager.clearCache();
-      
+
       // スワイプリストからステータス更新された店舗を除去
       final updatedSwipeStores = _stateManager.swipeStores
           .where((store) => store.id != storeId)
