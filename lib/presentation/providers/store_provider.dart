@@ -152,6 +152,16 @@ class StoreProvider extends ChangeNotifier {
       );
 
       _stateManager.updateSwipeStores(swipeStores);
+      
+      // スワイプ用店舗が0件の場合、適切な情報メッセージを設定
+      if (swipeStores.isEmpty) {
+        _stateManager.setInfoMessage(
+          '現在地周辺に新しい中華料理店が見つかりませんでした。範囲を広げてみてください。'
+        );
+      } else {
+        _stateManager.clearInfoMessage();
+      }
+      
       _stateManager.setLoading(false);
     } catch (e) {
       _stateManager.setError('現在地周辺の店舗取得に失敗しました');
