@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../core/constants/string_constants.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/services/location_service.dart';
 import './store_provider.dart';
@@ -67,7 +68,7 @@ class SearchProvider extends ChangeNotifier {
         // 住所での検索
         await storeProvider.loadNewStoresFromApi(
           address: address,
-          keyword: '中華',
+          keyword: StringConstants.defaultSearchKeyword,
         );
         _searchResults = List<Store>.from(storeProvider.searchResults);
       }
@@ -101,7 +102,7 @@ class SearchProvider extends ChangeNotifier {
       await storeProvider.loadNewStoresFromApi(
         lat: location.latitude,
         lng: location.longitude,
-        keyword: '中華',
+        keyword: StringConstants.defaultSearchKeyword,
       );
       _searchResults = List<Store>.from(storeProvider.searchResults);
 

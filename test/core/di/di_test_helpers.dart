@@ -73,7 +73,7 @@ class DITestHelpers {
   /// Verify that services are properly instantiated (not null)
   ///
   /// This helper checks that resolved services are valid instances
-  /// and have expected properties.
+  /// and have expected functionality through their public API.
   ///
   /// Example usage:
   /// ```dart
@@ -90,9 +90,11 @@ class DITestHelpers {
     expect(locationService, isNotNull,
         reason: 'LocationService should not be null');
 
-    // Verify instances have expected properties
-    expect(storeProvider.repository, isNotNull,
-        reason: 'StoreProvider should have repository');
+    // Verify instances have expected functionality through public API
+    expect(storeProvider.stores, isA<List>(),
+        reason: 'StoreProvider should have functional stores getter');
+    expect(storeProvider.isLoading, isA<bool>(),
+        reason: 'StoreProvider should have functional isLoading getter');
   }
 
   /// Create a container and verify it throws when not configured

@@ -610,6 +610,65 @@ class MockStoreLocalDatasource extends _i1.Mock
         ),
         returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
       ) as _i7.Future<List<_i11.Store>>);
+
+  @override
+  _i7.Future<void> insertStoresBatch(List<_i11.Store>? stores) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #insertStoresBatch,
+          [stores],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+
+  @override
+  _i7.Future<void> updateStoreAtomic(_i11.Store? store) => (super.noSuchMethod(
+        Invocation.method(
+          #updateStoreAtomic,
+          [store],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+
+  @override
+  _i7.Future<List<_i11.Store>> getStoresPaginated({
+    required int? page,
+    required int? pageSize,
+    _i11.StoreStatus? status,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getStoresPaginated,
+          [],
+          {
+            #page: page,
+            #pageSize: pageSize,
+            #status: status,
+          },
+        ),
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
+
+  @override
+  _i7.Future<List<_i11.Store>> searchStoresPaginated({
+    required String? query,
+    required int? page,
+    required int? pageSize,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #searchStoresPaginated,
+          [],
+          {
+            #query: query,
+            #page: page,
+            #pageSize: pageSize,
+          },
+        ),
+        returnValue: _i7.Future<List<_i11.Store>>.value(<_i11.Store>[]),
+      ) as _i7.Future<List<_i11.Store>>);
 }
 
 /// A class which mocks [PhotoLocalDatasource].

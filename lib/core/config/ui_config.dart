@@ -55,6 +55,9 @@ class UiConfig {
   static const double swipeThreshold = 0.3;
   static const double swipeVelocityThreshold = 500.0;
 
+  /// 地図設定
+  static const double mapZoom = 15.0; // 地図のデフォルトズームレベル
+
   /// 色設定
   static const Color primaryColor = Color(0xFF2196F3);
   static const Color secondaryColor = Color(0xFFFF9800);
@@ -102,6 +105,11 @@ class UiConfig {
     return threshold >= 0.1 && threshold <= 1.0;
   }
 
+  /// 設定値の妥当性チェック
+  static bool isValidMapZoom(double zoom) {
+    return zoom >= 1.0 && zoom <= 20.0;
+  }
+
   /// デバッグ情報を取得
   static Map<String, dynamic> get debugInfo {
     return {
@@ -138,6 +146,7 @@ class UiConfig {
       'slowAnimationDuration': slowAnimationDuration.inMilliseconds,
       'swipeThreshold': swipeThreshold,
       'swipeVelocityThreshold': swipeVelocityThreshold,
+      'mapZoom': mapZoom,
       'primaryColor': primaryColor.toString(),
       'secondaryColor': secondaryColor.toString(),
       'errorColor': errorColor.toString(),
