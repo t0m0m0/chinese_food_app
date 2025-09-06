@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:geolocator/geolocator.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:app_settings/app_settings.dart';
 
 import '../../exceptions/infrastructure/security_exception.dart';
@@ -123,7 +122,7 @@ class PermissionManager {
       _updatePermissionCache(result);
       developer.log('位置情報権限確認完了: ${status.name}', name: 'PermissionManager');
       return result;
-    } catch (e, stackTrace) {
+    } catch (e) {
       developer.log('位置情報権限の確認に失敗', error: e, name: 'PermissionManager');
       throw SecurityException(
         '位置情報権限の確認に失敗しました',
@@ -169,7 +168,7 @@ class PermissionManager {
       developer.log('位置情報権限リクエスト完了: ${status.name}', name: 'PermissionManager');
 
       return result;
-    } catch (e, stackTrace) {
+    } catch (e) {
       developer.log('位置情報権限のリクエストに失敗', error: e, name: 'PermissionManager');
       throw SecurityException(
         '位置情報権限のリクエストに失敗しました',

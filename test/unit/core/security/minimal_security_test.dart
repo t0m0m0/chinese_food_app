@@ -12,19 +12,22 @@ void main() {
 
     setUp(() {
       // FlutterSecureStorageのモックを設定
-      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage')
-          .setMockMethodCallHandler((methodCall) async {
-        if (methodCall.method == 'write') {
-          return null; // write成功
-        } else if (methodCall.method == 'read') {
-          final key = methodCall.arguments['key'] as String;
-          if (key == 'TEST_API_KEY') {
-            return 'test_key_123';
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+        (methodCall) async {
+          if (methodCall.method == 'write') {
+            return null; // write成功
+          } else if (methodCall.method == 'read') {
+            final key = methodCall.arguments['key'] as String;
+            if (key == 'TEST_API_KEY') {
+              return 'test_key_123';
+            }
+            return null;
           }
           return null;
-        }
-        return null;
-      });
+        },
+      );
 
       permissionManager = PermissionManager();
       securityManager = BasicSecurityManager();
@@ -33,8 +36,11 @@ void main() {
     tearDown(() {
       permissionManager.dispose();
       // モックをクリア
-      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage')
-          .setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+        null,
+      );
     });
 
     test('should only have essential security components for MVP', () {
