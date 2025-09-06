@@ -3,6 +3,7 @@ import '../app_exception.dart';
 import '../base_exception.dart';
 import '../unified_network_exception.dart';
 import '../unified_security_exception.dart';
+import '../unified_exceptions.dart';
 import '../domain/validation_exception.dart';
 import '../infrastructure/database_exception.dart';
 import '../infrastructure/location_exception.dart';
@@ -41,7 +42,8 @@ class UnifiedExceptionResult<T> {
   }
 
   /// Creates a failure result with exception and user message
-  factory UnifiedExceptionResult.failure(BaseException exception, String userMessage) {
+  factory UnifiedExceptionResult.failure(
+      BaseException exception, String userMessage) {
     return UnifiedExceptionResult._(
       isSuccess: false,
       exception: exception,
@@ -65,11 +67,28 @@ class DeveloperUnifiedExceptionLogger implements UnifiedExceptionLogger {
   @override
   void logException(Exception exception, {ExceptionSeverity? severity}) {
     final level = _getSeverityLevel(severity ?? ExceptionSeverity.medium);
+    final timestamp = DateTime.now().toIso8601String();
+
+    // Enhanced log message with structured information
+    final logMessage = StringBuffer();
+    logMessage.write('[${severity?.name ?? 'MEDIUM'}] ');
+    logMessage.write(exception.toString());
+
+    // Add additional context for BaseException
+    if (exception is BaseException) {
+      if (exception.cause != null) {
+        logMessage.write(' | Root cause: ${exception.cause}');
+      }
+      logMessage.write(' | Timestamp: $timestamp');
+    }
+
     developer.log(
-      exception.toString(),
+      logMessage.toString(),
       name: 'UnifiedExceptionHandler',
       level: level,
       error: exception,
+      time: DateTime.now(),
+      stackTrace: exception is BaseException ? exception.stackTrace : null,
     );
   }
 
@@ -112,7 +131,8 @@ class UnifiedExceptionHandler {
       : _logger = logger ?? DeveloperUnifiedExceptionLogger();
 
   /// Handle any exception and return a formatted result
-  UnifiedExceptionResult<T> handle<T>(Exception exception, [StackTrace? stackTrace]) {
+  UnifiedExceptionResult<T> handle<T>(Exception exception,
+      [StackTrace? stackTrace]) {
     // Convert to BaseException if needed
     final BaseException baseException;
     if (exception is BaseException) {
@@ -171,9 +191,24 @@ class UnifiedExceptionHandler {
 
   /// Generate user-friendly error messages based on exception type
   String _getUserMessage(BaseException exception) {
-    // Unified Network Exception handling
+    // Unified Network Exception handling with detailed error types
     if (exception is UnifiedNetworkException) {
-      return 'ネットワークエラーが発生しました。しばらくしてからお試しください。';
+      switch (exception.errorType) {
+        case NetworkErrorType.rateLimitExceeded:
+          return 'API利用制限に達しました。しばらくしてからお試しください。';
+        case NetworkErrorType.maintenance:
+          return 'サービスがメンテナンス中です。しばらくお待ちください。';
+        case NetworkErrorType.unauthorized:
+          return '認証が必要です。ログイン状態を確認してください。';
+        case NetworkErrorType.certificateError:
+          return 'セキュリティ証明書エラーが発生しました。';
+        case NetworkErrorType.dnsError:
+          return 'ネットワーク接続を確認してください。';
+        case NetworkErrorType.timeout:
+          return 'タイムアウトが発生しました。ネットワーク状況を確認してください。';
+        default:
+          return 'ネットワークエラーが発生しました。しばらくしてからお試しください。';
+      }
     }
 
     // Unified Security Exception handling

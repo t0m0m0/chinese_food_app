@@ -90,9 +90,9 @@ class UnifiedSecurityException extends BaseException {
 
   @override
   String toString() {
-    final buffer = StringBuffer('UnifiedSecurityException: $message');
+    final buffer = StringBuffer('セキュリティエラー: $message');
     if (context != null) {
-      buffer.write(' (Context: $context)');
+      buffer.write(' (詳細: $context)');
     }
     return buffer.toString();
   }

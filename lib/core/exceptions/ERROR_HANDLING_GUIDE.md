@@ -199,6 +199,220 @@ throw UnifiedSecurityException.apiKeyNotFound('HOTPEPPER_API_KEY');
    handler.handle(exception); // 自動的に適切なレベルでログ出力
    ```
 
+## 実際のコードでの使用例
+
+### Repository層での使用
+
+```dart
+class StoreRepository {
+  final HotpepperApiService _apiService;
+  final UnifiedExceptionHandler _errorHandler = UnifiedExceptionHandler();
+  
+  StoreRepository(this._apiService);
+  
+  Future<List<Store>> getStores({String? location}) async {
+    final result = await _errorHandler.executeAsync(() async {
+      try {
+        return await _apiService.fetchStores(location: location);
+      } on SocketException catch (e, stackTrace) {
+        throw UnifiedNetworkException.connection(
+          'ネットワークに接続できません',
+          cause: e,
+          stackTrace: stackTrace,
+        );
+      } on TimeoutException catch (e, stackTrace) {
+        throw UnifiedNetworkException.timeout(
+          'リクエストがタイムアウトしました',
+          cause: e,
+          stackTrace: stackTrace,
+        );
+      } on HttpException catch (e, stackTrace) {
+        if (e.message.contains('429')) {
+          throw UnifiedNetworkException.rateLimitExceeded(
+            'API利用制限に達しました',
+            statusCode: 429,
+            cause: e,
+            stackTrace: stackTrace,
+          );
+        }
+        throw UnifiedNetworkException.http(
+          e.message,
+          statusCode: e.uri != null ? 500 : 0,
+          cause: e,
+          stackTrace: stackTrace,
+        );
+      }
+    });
+    
+    if (result.isSuccess) {
+      return result.data!;
+    } else {
+      // ログは既にUnifiedExceptionHandlerで出力済み
+      throw result.exception!;
+    }
+  }
+}
+```
+
+### Provider/Controller層での使用
+
+```dart
+class SearchProvider with ChangeNotifier {
+  final StoreRepository _repository;
+  final UnifiedExceptionHandler _errorHandler = UnifiedExceptionHandler();
+  
+  List<Store> _stores = [];
+  String _userErrorMessage = '';
+  bool _isLoading = false;
+  
+  String get userErrorMessage => _userErrorMessage;
+  bool get isLoading => _isLoading;
+  List<Store> get stores => _stores;
+  
+  Future<void> searchStores(String location) async {
+    _isLoading = true;
+    _userErrorMessage = '';
+    notifyListeners();
+    
+    final result = await _errorHandler.executeAsync(() async {
+      return await _repository.getStores(location: location);
+    });
+    
+    _isLoading = false;
+    
+    if (result.isSuccess) {
+      _stores = result.data!;
+      _userErrorMessage = '';
+    } else {
+      _stores = [];
+      _userErrorMessage = result.userMessage; // ユーザーフレンドリーなメッセージ
+    }
+    
+    notifyListeners();
+  }
+}
+```
+
+### Widget層での使用
+
+```dart
+class SearchScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SearchProvider>(
+      builder: (context, provider, child) {
+        return Scaffold(
+          body: Column(
+            children: [
+              // 検索フィールド
+              SearchField(
+                onSearch: (location) => provider.searchStores(location),
+              ),
+              
+              // エラー表示
+              if (provider.userErrorMessage.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.all(16),
+                  color: Colors.red.shade50,
+                  child: Row(
+                    children: [
+                      Icon(Icons.error, color: Colors.red),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          provider.userErrorMessage, // 日本語の分かりやすいメッセージ
+                          style: TextStyle(color: Colors.red.shade800),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              
+              // ローディング・結果表示
+              Expanded(
+                child: provider.isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : StoreList(stores: provider.stores),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+```
+
+### API Service層での使用
+
+```dart
+class HotpepperApiService {
+  final http.Client _httpClient;
+  
+  HotpepperApiService(this._httpClient);
+  
+  Future<List<Store>> fetchStores({String? location}) async {
+    final apiKey = await _getApiKey();
+    final url = _buildApiUrl(location: location, apiKey: apiKey);
+    
+    try {
+      final response = await _httpClient.get(url).timeout(
+        Duration(seconds: 30),
+      );
+      
+      if (response.statusCode == 200) {
+        return _parseStoresResponse(response.body);
+      } else if (response.statusCode == 401) {
+        throw UnifiedNetworkException.unauthorized(
+          'APIキーが無効です',
+          statusCode: response.statusCode,
+        );
+      } else if (response.statusCode == 429) {
+        throw UnifiedNetworkException.rateLimitExceeded(
+          'API利用制限に達しました',
+          statusCode: response.statusCode,
+        );
+      } else if (response.statusCode == 503) {
+        throw UnifiedNetworkException.maintenance(
+          'サービスがメンテナンス中です',
+        );
+      } else {
+        throw UnifiedNetworkException.http(
+          'HTTP ${response.statusCode}: ${response.reasonPhrase}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException catch (e, stackTrace) {
+      throw UnifiedNetworkException.connection(
+        'ネットワーク接続を確認してください',
+        cause: e,
+        stackTrace: stackTrace,
+      );
+    } on TimeoutException catch (e, stackTrace) {
+      throw UnifiedNetworkException.timeout(
+        'リクエストがタイムアウトしました',
+        cause: e,
+        stackTrace: stackTrace,
+      );
+    } on FormatException catch (e, stackTrace) {
+      throw UnifiedNetworkException.api(
+        'APIレスポンスの解析に失敗しました',
+        cause: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+  
+  Future<String> _getApiKey() async {
+    try {
+      return await ConfigManager.getApiKey('HOTPEPPER_API_KEY');
+    } catch (e, stackTrace) {
+      throw UnifiedSecurityException.apiKeyNotFound('HOTPEPPER_API_KEY');
+    }
+  }
+}
+```
+
 ## テストでの使用例
 
 ```dart
@@ -213,6 +427,23 @@ test('should handle network error correctly', () {
   // Assert
   expect(result.isFailure, isTrue);
   expect(result.userMessage, equals('ネットワークエラーが発生しました。しばらくしてからお試しください。'));
+  expect(result.severity, equals(ExceptionSeverity.high));
+});
+
+test('should handle rate limit exceeded with specific message', () {
+  // Arrange
+  final exception = UnifiedNetworkException.rateLimitExceeded(
+    'Rate limit exceeded',
+    statusCode: 429,
+  );
+  final handler = UnifiedExceptionHandler();
+
+  // Act
+  final result = handler.handle<String>(exception);
+
+  // Assert
+  expect(result.isFailure, isTrue);
+  expect(result.userMessage, equals('API利用制限に達しました。しばらくしてからお試しください。'));
   expect(result.severity, equals(ExceptionSeverity.high));
 });
 ```

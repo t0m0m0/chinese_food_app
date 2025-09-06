@@ -97,7 +97,7 @@ void main() {
 
       // Assert
       expect(result,
-          equals('UnifiedSecurityException: $message (Context: $context)'));
+          equals('セキュリティエラー: $message (詳細: $context)'));
     });
 
     test('should have correct toString output without context', () {
@@ -109,7 +109,7 @@ void main() {
       final result = exception.toString();
 
       // Assert
-      expect(result, equals('UnifiedSecurityException: $message'));
+      expect(result, equals('セキュリティエラー: $message'));
     });
   });
 }

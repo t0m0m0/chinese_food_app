@@ -145,7 +145,7 @@ void main() {
       // Assert
       expect(result.isFailure, isTrue);
       expect(result.exception, equals(exception));
-      expect(result.userMessage, equals('ネットワークエラーが発生しました。しばらくしてからお試しください。'));
+      expect(result.userMessage, equals('タイムアウトが発生しました。ネットワーク状況を確認してください。'));
     });
 
     test('should execute async operation with success', () async {
@@ -172,6 +172,56 @@ void main() {
       expect(result.isFailure, isTrue);
       expect(result.exception, equals(exception));
       expect(result.userMessage, equals('認証エラーが発生しました。設定を確認してください。'));
+    });
+
+    test('should handle rate limit exception with specific user message', () {
+      // Arrange
+      final exception = UnifiedNetworkException.rateLimitExceeded(
+        'Rate limit exceeded',
+        statusCode: 429,
+      );
+
+      // Act
+      final result = handler.handle<String>(exception);
+
+      // Assert
+      expect(result.isFailure, isTrue);
+      expect(result.exception, equals(exception));
+      expect(result.userMessage, equals('API利用制限に達しました。しばらくしてからお試しください。'));
+      expect(result.severity, equals(ExceptionSeverity.high));
+    });
+
+    test('should handle maintenance exception with specific user message', () {
+      // Arrange
+      final exception = UnifiedNetworkException.maintenance(
+        'Service under maintenance',
+      );
+
+      // Act
+      final result = handler.handle<String>(exception);
+
+      // Assert
+      expect(result.isFailure, isTrue);
+      expect(result.exception, equals(exception));
+      expect(result.userMessage, equals('サービスがメンテナンス中です。しばらくお待ちください。'));
+      expect(result.severity, equals(ExceptionSeverity.medium));
+    });
+
+    test('should handle unauthorized exception with specific user message', () {
+      // Arrange
+      final exception = UnifiedNetworkException.unauthorized(
+        'Unauthorized access',
+        statusCode: 401,
+      );
+
+      // Act
+      final result = handler.handle<String>(exception);
+
+      // Assert
+      expect(result.isFailure, isTrue);
+      expect(result.exception, equals(exception));
+      expect(result.userMessage, equals('認証が必要です。ログイン状態を確認してください。'));
+      expect(result.severity, equals(ExceptionSeverity.high));
     });
   });
 }

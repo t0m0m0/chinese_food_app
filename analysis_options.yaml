@@ -17,6 +17,10 @@ analyzer:
     strict-casts: false
     strict-inference: false
     strict-raw-types: false
+  errors:
+    # 統一例外処理システム移行期間中の警告抑制（Issue #156対応）
+    # TODO: 移行完了後（2024年内予定）に削除
+    deprecated_export_use: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the

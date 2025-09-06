@@ -73,14 +73,81 @@ void main() {
       expect(
           result,
           equals(
-              'UnifiedNetworkException: $message (Status: $statusCode, Type: httpError)'));
+              'ネットワークエラー: $message (ステータス: $statusCode, 種別: HTTP通信)'));
+    });
+
+    test('should create rate limit exceeded exception', () {
+      // Arrange
+      const message = 'API rate limit exceeded';
+      const statusCode = 429;
+
+      // Act
+      final exception = UnifiedNetworkException.rateLimitExceeded(
+        message,
+        statusCode: statusCode,
+      );
+
+      // Assert
+      expect(exception.message, equals(message));
+      expect(exception.statusCode, equals(statusCode));
+      expect(exception.errorType, equals(NetworkErrorType.rateLimitExceeded));
+      expect(exception.severity, equals(ExceptionSeverity.high));
+    });
+
+    test('should create maintenance exception', () {
+      // Arrange
+      const message = 'Service under maintenance';
+
+      // Act
+      final exception = UnifiedNetworkException.maintenance(message);
+
+      // Assert
+      expect(exception.message, equals(message));
+      expect(exception.statusCode, isNull);
+      expect(exception.errorType, equals(NetworkErrorType.maintenance));
+      expect(exception.severity, equals(ExceptionSeverity.medium));
+    });
+
+    test('should create unauthorized exception', () {
+      // Arrange
+      const message = 'Unauthorized access';
+      const statusCode = 401;
+
+      // Act
+      final exception = UnifiedNetworkException.unauthorized(
+        message,
+        statusCode: statusCode,
+      );
+
+      // Assert
+      expect(exception.message, equals(message));
+      expect(exception.statusCode, equals(statusCode));
+      expect(exception.errorType, equals(NetworkErrorType.unauthorized));
+      expect(exception.severity, equals(ExceptionSeverity.high));
+    });
+
+    test('should have correct Japanese toString output', () {
+      // Arrange
+      const message = 'テストエラー';
+      const statusCode = 403;
+      final exception = UnifiedNetworkException.rateLimitExceeded(
+        message,
+        statusCode: statusCode,
+      );
+
+      // Act
+      final result = exception.toString();
+
+      // Assert
+      expect(
+          result, equals('ネットワークエラー: $message (ステータス: $statusCode, 種別: 利用制限)'));
     });
   });
 
   group('NetworkErrorType', () {
     test('should have all required error types', () {
       // Assert
-      expect(NetworkErrorType.values.length, equals(5));
+      expect(NetworkErrorType.values.length, equals(10));
       expect(
           NetworkErrorType.values.contains(NetworkErrorType.httpError), isTrue);
       expect(
@@ -89,6 +156,18 @@ void main() {
           NetworkErrorType.values.contains(NetworkErrorType.timeout), isTrue);
       expect(NetworkErrorType.values.contains(NetworkErrorType.connectionError),
           isTrue);
+      expect(
+          NetworkErrorType.values.contains(NetworkErrorType.rateLimitExceeded),
+          isTrue);
+      expect(NetworkErrorType.values.contains(NetworkErrorType.maintenance),
+          isTrue);
+      expect(NetworkErrorType.values.contains(NetworkErrorType.unauthorized),
+          isTrue);
+      expect(
+          NetworkErrorType.values.contains(NetworkErrorType.certificateError),
+          isTrue);
+      expect(
+          NetworkErrorType.values.contains(NetworkErrorType.dnsError), isTrue);
       expect(
           NetworkErrorType.values.contains(NetworkErrorType.unknown), isTrue);
     });
