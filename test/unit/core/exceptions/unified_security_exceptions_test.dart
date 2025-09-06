@@ -96,8 +96,7 @@ void main() {
       final result = exception.toString();
 
       // Assert
-      expect(result,
-          equals('セキュリティエラー: $message (詳細: $context)'));
+      expect(result, equals('セキュリティエラー: $message (詳細: $context)'));
     });
 
     test('should have correct toString output without context', () {

@@ -70,10 +70,8 @@ void main() {
       final result = exception.toString();
 
       // Assert
-      expect(
-          result,
-          equals(
-              'ネットワークエラー: $message (ステータス: $statusCode, 種別: HTTP通信)'));
+      expect(result,
+          equals('ネットワークエラー: $message (ステータス: $statusCode, 種別: HTTP通信)'));
     });
 
     test('should create rate limit exceeded exception', () {
