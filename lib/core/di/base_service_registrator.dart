@@ -111,8 +111,7 @@ abstract class BaseServiceRegistrator {
     try {
       // Check if API key is available in environment configuration
       final apiKey = env_config.EnvironmentConfig.hotpepperApiKey;
-      final apiKeyStatus =
-          apiKey.isNotEmpty ? '設定済み(${apiKey.length}文字)' : '未設定';
+      final apiKeyStatus = apiKey.isNotEmpty ? '設定済み' : '未設定';
 
       if (apiKey.isNotEmpty) {
         DIErrorHandler.logSuccessfulOperation(

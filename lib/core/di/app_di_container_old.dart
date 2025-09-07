@@ -134,8 +134,7 @@ class AppDIContainer implements DIContainerInterface {
       // Ensure EnvironmentConfig is initialized and check for API key
       final apiKey = env_config.EnvironmentConfig.hotpepperApiKey;
       developer.log('🔑 Development環境でのAPIキー確認:', name: 'DI');
-      developer.log(
-          '  APIキー: ${apiKey.isNotEmpty ? "設定済み(${apiKey.length}文字)" : "未設定"}',
+      developer.log('  APIキー: ${apiKey.isNotEmpty ? "設定済み" : "未設定"}',
           name: 'DI');
 
       if (apiKey.isNotEmpty) {
