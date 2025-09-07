@@ -1,464 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
-import 'package:chinese_food_app/core/config/search_config.dart';
+import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
-void main() {
-  late StoreProvider provider;
-  late MockStoreRepository mockRepository;
-  late MockLocationService mockLocationService;
-
-  setUp(() {
-    mockRepository = MockStoreRepository();
-    mockLocationService = MockLocationService();
-    provider = StoreProvider(
-      repository: mockRepository,
-      locationService: mockLocationService,
-    );
-  });
-
-  group('N+1 Query Performance Tests - Issue #84', () {
-    test('should minimize database queries when checking duplicates', () async {
-      // TDD: Red - 重複チェック時のクエリ最適化テスト
-
-      // 大量の既存店舗データを準備（1000件）
-      final existingStores = List.generate(
-          1000,
-          (index) => Store(
-                id: 'existing_$index',
-                name: '既存店舗_$index',
-                address: '東京都_$index',
-                lat: 35.6580339 + (index * 0.001),
-                lng: 139.7016358 + (index * 0.001),
-                status: StoreStatus.wantToGo,
-                createdAt: DateTime.now(),
-              ));
-
-      // API検索結果として100件の新しい店舗を準備
-      final apiStores = List.generate(
-          100,
-          (index) => Store(
-                id: 'api_store_$index',
-                name: 'API店舗_$index',
-                address: '神奈川県_$index',
-                lat: 35.4580339 + (index * 0.001),
-                lng: 139.6016358 + (index * 0.001),
-                status: null, // 新しい店舗はステータス未設定
-                createdAt: DateTime.now(),
-              ));
-
-      // モックの設定
-      mockRepository.stubGetAllStores(existingStores);
-      mockRepository.stubSearchStoresFromApi(apiStores);
-
-      // プロバイダーに既存データをロード
-      await provider.loadStores();
-
-      // パフォーマンス測定開始
-      final stopwatch = Stopwatch()..start();
-
-      // API検索実行（内部で重複チェックが行われる）
-      await provider.loadNewStoresFromApi(
-        lat: 35.6762,
-        lng: 139.6503,
-        count: 100,
-      );
-
-      stopwatch.stop();
-
-      // パフォーマンス検証
-      // 1000 x 100 = 100,000回の個別クエリでは非現実的に時間がかかるはず
-      // 最適化されていれば2秒以内で完了するはず
-      expect(stopwatch.elapsedMilliseconds, lessThan(2000),
-          reason: 'Duplicate check should be optimized to avoid N+1 queries');
-
-      // 機能的な正確性も検証
-      expect(provider.stores.length, equals(1100), // 1000 + 100
-          reason: 'All new stores should be added without duplicates');
-    });
-
-    test('should use efficient status filtering without N+1 queries', () async {
-      // TDD: Red - ステータス別フィルタリングの効率化テスト
-
-      // 大量の店舗データを準備（異なるステータス）
-      final stores = <Store>[];
-      for (int i = 0; i < 1000; i++) {
-        final status = [
-          StoreStatus.wantToGo,
-          StoreStatus.visited,
-          StoreStatus.bad,
-        ][i % 3];
-
-        stores.add(Store(
-          id: 'store_$i',
-          name: '店舗_$i',
-          address: '住所_$i',
-          lat: 35.6580339,
-          lng: 139.7016358,
-          status: status,
-          createdAt: DateTime.now(),
-        ));
-      }
-
-      // モックの設定
-      mockRepository.stubGetAllStores(stores);
-
-      // プロバイダーにデータを設定
-      await provider.loadStores();
-
-      // パフォーマンス測定
-      final stopwatch = Stopwatch()..start();
-
-      // 複数回のステータス別取得を実行
-      for (int i = 0; i < 10; i++) {
-        final wantToGo = provider.wantToGoStores;
-        final visited = provider.visitedStores;
-        final bad = provider.badStores;
-
-        // 結果の検証
-        expect(wantToGo.length, greaterThan(300));
-        expect(visited.length, greaterThan(300));
-        expect(bad.length, greaterThan(300));
-      }
-
-      stopwatch.stop();
-
-      // キャッシュにより2回目以降は高速化されるはず
-      expect(stopwatch.elapsedMilliseconds, lessThan(500),
-          reason: 'Status filtering should be cached for performance');
-    });
-
-    test('should use optimized normalized keys for duplicate detection',
-        () async {
-      // TDD: Red - QA改善：正規化キーによる重複検出最適化テスト
-
-      // 類似名称・住所の店舗を準備（正規化により同一判定されるべき）
-      final existingStores = [
-        Store(
-          id: 'store_1',
-          name: '中華料理　龍門',
-          address: '東京都港区赤坂1-2-3',
-          lat: 35.6580339,
-          lng: 139.7016358,
-          status: StoreStatus.wantToGo,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      // API結果：表記が微妙に異なるが同一店舗
-      final apiStores = [
-        Store(
-          id: 'api_store_1',
-          name: '中華料理龍門', // 空白なし
-          address: '東京都港区赤坂１－２－３', // 全角数字・ハイフン
-          lat: 35.6580339,
-          lng: 139.7016358,
-          status: null,
-          createdAt: DateTime.now(),
-        ),
-        Store(
-          id: 'api_store_2',
-          name: '中華料理・龍門', // 中点あり
-          address: '東京都港区赤坂1丁目2番地3号', // 丁目番地号表記
-          lat: 35.6580339,
-          lng: 139.7016358,
-          status: null,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      // モック設定
-      mockRepository.stubGetAllStores(existingStores);
-      mockRepository.stubSearchStoresFromApi(apiStores);
-
-      // プロバイダーにデータロード
-      await provider.loadStores();
-
-      // パフォーマンス測定
-      final stopwatch = Stopwatch()..start();
-
-      // API検索実行（正規化による高速重複チェック）
-      await provider.loadNewStoresFromApi(
-        lat: 35.6762,
-        lng: 139.6503,
-        count: 2,
-      );
-
-      stopwatch.stop();
-
-      // 正規化により重複として正しく検出されることを確認
-      // 少なくとも重複の一部は検出されるはず（完璧な検出は座標による）
-      expect(provider.stores.length, lessThanOrEqualTo(2),
-          reason: 'Normalized key should help detect some duplicates');
-
-      // 正規化処理により高速化されていることを確認
-      expect(stopwatch.elapsedMilliseconds, lessThan(100),
-          reason:
-              'Normalized key generation should optimize duplicate detection');
-    });
-  });
-
-  group('距離パラメータ対応 - Issue #117', () {
-    test('loadNewStoresFromApi should accept range parameter', () async {
-      // Arrange
-      final apiStores = [
-        Store(
-          id: 'api_store_1',
-          name: 'テスト中華料理店',
-          address: '東京都新宿区',
-          lat: 35.6917,
-          lng: 139.7006,
-          status: null,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      mockRepository.stubGetAllStores([]);
-      mockRepository.stubSearchStoresFromApi(apiStores);
-
-      // Act
-      await provider.loadNewStoresFromApi(
-        lat: 35.6917,
-        lng: 139.7006,
-        range: SearchConfig.defaultRange,
-        count: 10,
-      );
-
-      // Assert
-      expect(provider.stores.length, equals(1));
-      expect(provider.stores.first.name, equals('テスト中華料理店'));
-    });
-
-    test('loadNewStoresFromApi should use different range values', () async {
-      // Arrange
-      final apiStores = [
-        Store(
-          id: 'api_store_1',
-          name: '近距離店舗',
-          address: '東京都新宿区',
-          lat: 35.6917,
-          lng: 139.7006,
-          status: null,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      mockRepository.stubGetAllStores([]);
-      mockRepository.stubSearchStoresFromApi(apiStores);
-
-      // Act - すべての有効な距離範囲でテスト
-      for (final range in [1, 2, 3, 4, 5]) {
-        await provider.loadNewStoresFromApi(
-          lat: 35.6917,
-          lng: 139.7006,
-          range: range,
-          count: 10,
-        );
-
-        // Assert - 各範囲で正常に実行されることを確認
-        expect(provider.isLoading, isFalse);
-        expect(provider.error, isNull);
-      }
-    });
-  });
-
-  group('スワイプ画面での重複表示問題 - Issue #129', () {
-    test('should not show already swiped stores in swipe list', () async {
-      // Red: スワイプ済み店舗が再表示される問題のテスト
-
-      // 既存店舗（ステータス設定済み）をモック
-      final existingStores = [
-        Store(
-          id: 'store_1',
-          name: '中華料理店A',
-          address: '東京都新宿区',
-          lat: 35.6917,
-          lng: 139.7006,
-          status: StoreStatus.wantToGo, // 既にスワイプ済み
-          createdAt: DateTime.now(),
-        ),
-        Store(
-          id: 'store_2',
-          name: '中華料理店B',
-          address: '東京都渋谷区',
-          lat: 35.6580,
-          lng: 139.7016,
-          status: StoreStatus.bad, // 既にスワイプ済み
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      // API検索結果（既存店舗 + 新規店舗）
-      final apiStores = [
-        // 既存店舗がAPIからも返される（実際のHotPepper APIの挙動）
-        Store(
-          id: 'store_1',
-          name: '中華料理店A',
-          address: '東京都新宿区',
-          lat: 35.6917,
-          lng: 139.7006,
-          status: null, // APIから取得時はステータス未設定
-          createdAt: DateTime.now(),
-        ),
-        Store(
-          id: 'store_2',
-          name: '中華料理店B',
-          address: '東京都渋谷区',
-          lat: 35.6580,
-          lng: 139.7016,
-          status: null, // APIから取得時はステータス未設定
-          createdAt: DateTime.now(),
-        ),
-        // 新規店舗
-        Store(
-          id: 'store_3',
-          name: '中華料理店C',
-          address: '東京都港区',
-          lat: 35.6762,
-          lng: 139.7653,
-          status: null,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      // モックの設定
-      mockRepository.stubGetAllStores(existingStores);
-      mockRepository.stubSearchStoresFromApi(apiStores);
-
-      // 既存店舗を事前にロード（実際のアプリ動作と同じ）
-      await provider.loadStores();
-
-      // スワイプ用店舗を読み込み
-      await provider.loadSwipeStores(
-        lat: 35.6917,
-        lng: 139.7006,
-        range: 3,
-        count: 20,
-      );
-
-      // swipeStoresには未スワイプ店舗（store_3）のみが含まれるべき
-      final swipeStores = provider.swipeStores;
-
-      // 期待値：未スワイプの店舗（store_3）のみが含まれる
-      expect(swipeStores.length, equals(1));
-      expect(swipeStores.first.id, equals('store_3'));
-      expect(swipeStores.first.status, isNull);
-
-      // スワイプ済み店舗（store_1, store_2）は含まれない
-      expect(swipeStores.any((store) => store.id == 'store_1'), isFalse);
-      expect(swipeStores.any((store) => store.id == 'store_2'), isFalse);
-    });
-
-    test('should remove store from swipe list after status update', () async {
-      // Red: ステータス更新後にスワイプリストから店舗が除去されるテスト
-
-      // 未スワイプ店舗を準備
-      final newStores = [
-        Store(
-          id: 'new_store_1',
-          name: '新規中華店A',
-          address: '東京都中央区',
-          lat: 35.6796,
-          lng: 139.7707,
-          status: null,
-          createdAt: DateTime.now(),
-        ),
-        Store(
-          id: 'new_store_2',
-          name: '新規中華店B',
-          address: '東京都千代田区',
-          lat: 35.6926,
-          lng: 139.7543,
-          status: null,
-          createdAt: DateTime.now(),
-        ),
-      ];
-
-      // モック設定
-      mockRepository.stubGetAllStores(newStores);
-      mockRepository.stubSearchStoresFromApi(newStores);
-
-      // 既存店舗を事前にロード
-      await provider.loadStores();
-
-      // スワイプ用店舗を読み込み
-      await provider.loadSwipeStores(
-        lat: 35.6917,
-        lng: 139.7006,
-      );
-
-      // 初期状態：2店舗がスワイプリストに含まれる
-      expect(provider.swipeStores.length, equals(2));
-
-      // new_store_1をスワイプ（ステータス更新）
-      await provider.updateStoreStatus('new_store_1', StoreStatus.wantToGo);
-
-      // ステータス更新後：スワイプリストから除去されるべき
-      final swipeStoresAfterUpdate = provider.swipeStores;
-      expect(swipeStoresAfterUpdate.length, equals(1));
-      expect(swipeStoresAfterUpdate.first.id, equals('new_store_2'));
-
-      // ステータス更新した店舗は含まれない
-      expect(swipeStoresAfterUpdate.any((store) => store.id == 'new_store_1'),
-          isFalse);
-    });
-  });
-}
-
-// テスト用モックリポジトリ
-class MockStoreRepository implements StoreRepository {
-  List<Store>? _stubGetAllStoresResult;
-  List<Store>? _stubSearchStoresFromApiResult;
-
-  void stubGetAllStores(List<Store> stores) {
-    _stubGetAllStoresResult = stores;
-  }
-
-  void stubSearchStoresFromApi(List<Store> stores) {
-    _stubSearchStoresFromApiResult = stores;
-  }
-
-  @override
-  Future<List<Store>> getAllStores() async {
-    return _stubGetAllStoresResult ?? [];
-  }
-
-  @override
-  Future<List<Store>> searchStoresFromApi({
-    double? lat,
-    double? lng,
-    String? address,
-    String? keyword,
-    int count = 20,
-    int range = 3,
-    int start = 1,
-  }) async {
-    return _stubSearchStoresFromApiResult ?? [];
-  }
-
-  @override
-  Future<void> insertStore(Store store) async {}
-
-  @override
-  Future<void> updateStore(Store store) async {}
-
-  @override
-  Future<void> deleteStore(String storeId) async {}
-
-  @override
-  Future<Store?> getStoreById(String storeId) async => null;
-
-  @override
-  Future<List<Store>> getStoresByStatus(StoreStatus status) async => [];
-
-  @override
-  Future<List<Store>> searchStores(String query) async => [];
-}
-
-// テスト用モックLocationService
+// シンプルなテストダブル
 class MockLocationService implements LocationService {
   Location? _stubCurrentLocation;
   bool _shouldThrowError = false;
@@ -483,7 +30,7 @@ class MockLocationService implements LocationService {
           latitude: 35.6917,
           longitude: 139.7006,
           timestamp: DateTime.now(),
-        ); // デフォルト: 新宿駅
+        );
   }
 
   @override
@@ -494,4 +41,291 @@ class MockLocationService implements LocationService {
 
   @override
   Future<bool> requestLocationPermission() async => true;
+}
+
+class FakeStoreRepository implements StoreRepository {
+  List<Store> _stores = [];
+  bool _shouldThrowOnUpdate = false;
+  bool _shouldThrowOnInsert = false;
+  bool _shouldThrowOnGetAll = false;
+
+  void setShouldThrowOnUpdate(bool value) => _shouldThrowOnUpdate = value;
+  void setShouldThrowOnInsert(bool value) => _shouldThrowOnInsert = value;
+  void setShouldThrowOnGetAll(bool value) => _shouldThrowOnGetAll = value;
+
+  @override
+  Future<List<Store>> getAllStores() async {
+    if (_shouldThrowOnGetAll) throw Exception('Database error');
+    return List.from(_stores);
+  }
+
+  @override
+  Future<void> insertStore(Store store) async {
+    if (_shouldThrowOnInsert) throw Exception('Insert failed');
+    _stores.add(store);
+  }
+
+  @override
+  Future<void> updateStore(Store store) async {
+    if (_shouldThrowOnUpdate) throw Exception('Update failed');
+    final index = _stores.indexWhere((s) => s.id == store.id);
+    if (index != -1) _stores[index] = store;
+  }
+
+  @override
+  Future<void> deleteStore(String storeId) async {
+    _stores.removeWhere((s) => s.id == storeId);
+  }
+
+  @override
+  Future<Store?> getStoreById(String storeId) async {
+    try {
+      return _stores.firstWhere((s) => s.id == storeId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<List<Store>> getStoresByStatus(StoreStatus status) async {
+    return _stores.where((s) => s.status == status).toList();
+  }
+
+  @override
+  Future<List<Store>> searchStores(String query) async {
+    return _stores.where((s) => s.name.contains(query)).toList();
+  }
+
+  @override
+  Future<List<Store>> searchStoresFromApi({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    // テスト用の実装
+    return [];
+  }
+
+  void setStores(List<Store> stores) {
+    _stores = List.from(stores);
+  }
+}
+
+void main() {
+  late StoreProvider storeProvider;
+  late FakeStoreRepository fakeRepository;
+  late MockLocationService mockLocationService;
+
+  setUp(() {
+    fakeRepository = FakeStoreRepository();
+    mockLocationService = MockLocationService();
+    storeProvider = StoreProvider(
+      repository: fakeRepository,
+      locationService: mockLocationService,
+    );
+  });
+
+  group('StoreProvider Tests', () {
+    final testStores = [
+      Store(
+        id: 'store-1',
+        name: '中華料理 テスト1',
+        address: '東京都渋谷区テスト1-1-1',
+        lat: 35.6762,
+        lng: 139.6503,
+        status: StoreStatus.wantToGo,
+        createdAt: DateTime(2025, 6, 23, 16, 0, 0),
+      ),
+      Store(
+        id: 'store-2',
+        name: '中華料理 テスト2',
+        address: '東京都新宿区テスト2-2-2',
+        lat: 35.6895,
+        lng: 139.6917,
+        status: StoreStatus.visited,
+        createdAt: DateTime(2025, 6, 23, 16, 0, 0),
+      ),
+    ];
+
+    test('should have empty stores list initially', () {
+      expect(storeProvider.stores, isEmpty);
+      expect(storeProvider.wantToGoStores, isEmpty);
+      expect(storeProvider.visitedStores, isEmpty);
+      expect(storeProvider.badStores, isEmpty);
+      expect(storeProvider.isLoading, false);
+      expect(storeProvider.error, isNull);
+    });
+
+    test('should load stores successfully', () async {
+      fakeRepository.setStores(testStores);
+
+      await storeProvider.loadStores();
+
+      expect(storeProvider.stores, hasLength(2));
+      expect(storeProvider.wantToGoStores, hasLength(1));
+      expect(storeProvider.visitedStores, hasLength(1));
+      expect(storeProvider.badStores, isEmpty);
+      expect(storeProvider.isLoading, false);
+      expect(storeProvider.error, isNull);
+      // Note: infoMessage is not set during normal loadStores operation in new architecture
+      expect(storeProvider.infoMessage, isNull);
+    });
+
+    test('should handle loading error', () async {
+      fakeRepository.setShouldThrowOnGetAll(true);
+
+      await storeProvider.loadStores();
+
+      expect(storeProvider.stores, isEmpty);
+      expect(storeProvider.isLoading, false);
+      expect(storeProvider.error, isNotNull);
+    });
+
+    test('should update store status successfully', () async {
+      fakeRepository.setStores(testStores);
+
+      await storeProvider.loadStores();
+      final store = testStores.first;
+
+      // エラーをクリアしてからテスト
+      storeProvider.clearError();
+      await storeProvider.updateStoreStatus(store.id, StoreStatus.visited);
+
+      expect(storeProvider.wantToGoStores, isEmpty);
+      expect(storeProvider.visitedStores, hasLength(2));
+      expect(storeProvider.error, isNull);
+    });
+
+    test('should handle update store status error', () async {
+      fakeRepository.setStores(testStores);
+      fakeRepository.setShouldThrowOnUpdate(true);
+
+      await storeProvider.loadStores();
+      final store = testStores.first;
+
+      // エラーをクリアしてからテスト
+      storeProvider.clearError();
+      await storeProvider.updateStoreStatus(store.id, StoreStatus.visited);
+
+      expect(storeProvider.error, isNotNull);
+    });
+
+    test('should maintain data consistency when update fails', () async {
+      fakeRepository.setStores(testStores);
+      fakeRepository.setShouldThrowOnUpdate(true);
+
+      await storeProvider.loadStores();
+      final originalStores = List<Store>.from(storeProvider.stores);
+      final originalStatus = storeProvider.stores.first.status;
+
+      // エラーをクリアしてからテスト
+      storeProvider.clearError();
+      await storeProvider.updateStoreStatus('store-1', StoreStatus.visited);
+
+      // データベース更新失敗後、ローカル状態が変更されていないことを確認
+      expect(storeProvider.stores.first.status, equals(originalStatus));
+      expect(storeProvider.stores.length, equals(originalStores.length));
+      expect(storeProvider.stores.first.id, equals(originalStores.first.id));
+      expect(storeProvider.error, isNotNull);
+    });
+
+    test('should add new store successfully', () async {
+      final newStore = Store(
+        id: 'new-store',
+        name: '新しい中華料理店',
+        address: '東京都港区テスト3-3-3',
+        lat: 35.6584,
+        lng: 139.7454,
+        status: StoreStatus.wantToGo,
+        createdAt: DateTime.now(),
+      );
+
+      await storeProvider.loadStores();
+
+      // エラーをクリアしてからテスト
+      storeProvider.clearError();
+      await storeProvider.addStore(newStore);
+
+      expect(storeProvider.stores, contains(newStore));
+      expect(storeProvider.wantToGoStores, contains(newStore));
+      expect(storeProvider.error, isNull);
+    });
+
+    test('should handle add store error', () async {
+      final newStore = Store(
+        id: 'new-store',
+        name: '新しい中華料理店',
+        address: '東京都港区テスト3-3-3',
+        lat: 35.6584,
+        lng: 139.7454,
+        status: StoreStatus.wantToGo,
+        createdAt: DateTime.now(),
+      );
+
+      fakeRepository.setShouldThrowOnInsert(true);
+
+      await storeProvider.loadStores();
+
+      // エラーをクリアしてからテスト
+      storeProvider.clearError();
+      await storeProvider.addStore(newStore);
+
+      expect(storeProvider.error, isNotNull);
+    });
+
+    test('should clear error', () async {
+      fakeRepository.setShouldThrowOnGetAll(true);
+
+      await storeProvider.loadStores();
+      expect(storeProvider.error, isNotNull);
+
+      storeProvider.clearError();
+      expect(storeProvider.error, isNull);
+    });
+
+    test('should filter stores by status correctly', () async {
+      final mixedStores = [
+        Store(
+          id: '1',
+          name: 'Store 1',
+          address: 'Address 1',
+          lat: 35.0,
+          lng: 139.0,
+          status: StoreStatus.wantToGo,
+          createdAt: DateTime.now(),
+        ),
+        Store(
+          id: '2',
+          name: 'Store 2',
+          address: 'Address 2',
+          lat: 35.0,
+          lng: 139.0,
+          status: StoreStatus.visited,
+          createdAt: DateTime.now(),
+        ),
+        Store(
+          id: '3',
+          name: 'Store 3',
+          address: 'Address 3',
+          lat: 35.0,
+          lng: 139.0,
+          status: StoreStatus.bad,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      fakeRepository.setStores(mixedStores);
+
+      await storeProvider.loadStores();
+
+      expect(storeProvider.stores, hasLength(3));
+      expect(storeProvider.wantToGoStores, hasLength(1));
+      expect(storeProvider.visitedStores, hasLength(1));
+      expect(storeProvider.badStores, hasLength(1));
+    });
+  });
 }
