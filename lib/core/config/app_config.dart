@@ -264,7 +264,8 @@ class AppConfig {
     final apiKeyPattern = RegExp(r'^[a-zA-Z0-9]{32}$');
     final isValidFormat = apiKeyPattern.hasMatch(key);
 
-    if (!isValidFormat) {
+    if (!isValidFormat && isDevelopment) {
+      // セキュリティ: 開発環境でのみAPI検証の詳細をログ出力
       developer.log('⚠️ API key format validation failed', name: 'AppConfig');
     }
 
@@ -293,14 +294,14 @@ class AppConfig {
 
   /// 開発環境かどうかを判定
   static bool get isDevelopment {
-    // 環境変数ベース
-    return const bool.fromEnvironment('DEVELOPMENT', defaultValue: true);
+    // セキュリティ: 本番環境での設定ミス時にログ漏洩を防ぐため、デフォルトはfalse
+    return const bool.fromEnvironment('DEVELOPMENT', defaultValue: false);
   }
 
   /// 本番環境かどうかを判定
   static bool get isProduction {
-    // 環境変数ベース
-    return const bool.fromEnvironment('PRODUCTION', defaultValue: false);
+    // セキュリティ: 未指定の場合は本番環境として動作（より安全）
+    return const bool.fromEnvironment('PRODUCTION', defaultValue: true);
   }
 
   /// デバッグ情報を表示
