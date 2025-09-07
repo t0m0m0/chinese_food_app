@@ -45,8 +45,8 @@ void main() {
           final validation = AppConfig.validateApiKey(testKey);
 
           // Assert
-          expect(validation['validFormat'], isFalse, 
-            reason: 'Key "$testKey" should be invalid');
+          expect(validation['validFormat'], isFalse,
+              reason: 'Key "$testKey" should be invalid');
         }
       });
 
@@ -64,7 +64,7 @@ void main() {
       test('should block test operations in production-like environment', () {
         // Note: テストでは実際の本番環境フラグをシミュレートできないが、
         // コードの構造を確認することでセキュリティを保証
-        
+
         // Arrange & Act & Assert
         expect(() => AppConfig.setTestApiKey('test_key'), returnsNormally);
         expect(() => AppConfig.clearTestApiKey(), returnsNormally);
@@ -73,7 +73,8 @@ void main() {
     });
 
     group('Enhanced Error Handling', () {
-      test('should provide detailed error messages for invalid distance ranges', () {
+      test('should provide detailed error messages for invalid distance ranges',
+          () {
         // Arrange & Act & Assert
         expect(
           () => AppConfig.search.saveDistance(0),
@@ -97,7 +98,7 @@ void main() {
       test('should handle SharedPreferences errors gracefully', () async {
         // Note: SharedPreferencesのエラーは実際のデバイス環境でのみ発生するため、
         // ここではメソッドが適切にtry-catchで囲まれていることを確認
-        
+
         // Act & Assert (should not throw)
         final distance = await AppConfig.search.getDistance();
         expect(distance, isA<int>());
@@ -120,7 +121,8 @@ void main() {
     });
 
     group('Initialization Metrics', () {
-      test('should complete initialization with performance tracking', () async {
+      test('should complete initialization with performance tracking',
+          () async {
         // Arrange
         AppConfig.resetInitialization();
 
