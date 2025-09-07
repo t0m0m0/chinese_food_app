@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:geolocator/geolocator.dart';
 import 'package:app_settings/app_settings.dart';
 
-import '../../exceptions/infrastructure/security_exception.dart';
+import '../security_error_handler.dart';
 
 /// 権限の種類
 enum PermissionType {
@@ -123,12 +123,14 @@ class PermissionManager {
       developer.log('位置情報権限確認完了: ${status.name}', name: 'PermissionManager');
       return result;
     } catch (e) {
-      developer.log('位置情報権限の確認に失敗', error: e, name: 'PermissionManager');
-      throw SecurityException(
-        '位置情報権限の確認に失敗しました',
-        context: 'checkLocationPermission',
-        originalException: e is Exception ? e : Exception(e.toString()),
+      SecurityErrorHandler.handleSecurityError(
+        'checkLocationPermission',
+        e,
+        SecurityErrorSeverity.error,
+        context: 'location permission check',
       );
+      // この行は実行されないが、コンパイラエラー回避のため
+      rethrow;
     }
   }
 
@@ -169,12 +171,14 @@ class PermissionManager {
 
       return result;
     } catch (e) {
-      developer.log('位置情報権限のリクエストに失敗', error: e, name: 'PermissionManager');
-      throw SecurityException(
-        '位置情報権限のリクエストに失敗しました',
-        context: 'requestLocationPermission',
-        originalException: e is Exception ? e : Exception(e.toString()),
+      SecurityErrorHandler.handleSecurityError(
+        'requestLocationPermission',
+        e,
+        SecurityErrorSeverity.error,
+        context: 'location permission request',
       );
+      // この行は実行されないが、コンパイラエラー回避のため
+      rethrow;
     }
   }
 
@@ -195,12 +199,14 @@ class PermissionManager {
       developer.log('アプリ設定画面を開きます', name: 'PermissionManager');
       await AppSettings.openAppSettings();
     } catch (e) {
-      developer.log('アプリ設定画面を開くのに失敗', error: e, name: 'PermissionManager');
-      throw SecurityException(
-        'アプリ設定画面を開くのに失敗しました',
-        context: 'openAppSettings',
-        originalException: e is Exception ? e : Exception(e.toString()),
+      SecurityErrorHandler.handleSecurityError(
+        'openAppSettings',
+        e,
+        SecurityErrorSeverity.error,
+        context: 'app settings access',
       );
+      // この行は実行されないが、コンパイラエラー回避のため
+      rethrow;
     }
   }
 
@@ -230,7 +236,11 @@ class PermissionManager {
       try {
         callback(result);
       } catch (e) {
-        developer.log('権限コールバック実行に失敗', error: e, name: 'PermissionManager');
+        SecurityErrorHandler.logSecurityWarning(
+          'notifyCallbacks',
+          e,
+          context: 'permission callback execution',
+        );
       }
     }
   }
@@ -240,7 +250,11 @@ class PermissionManager {
     try {
       await checkLocationPermission();
     } catch (e) {
-      developer.log('バックグラウンド権限チェックに失敗', error: e, name: 'PermissionManager');
+      SecurityErrorHandler.logSecurityWarning(
+        '_checkAllPermissions',
+        e,
+        context: 'background permission check',
+      );
     }
   }
 

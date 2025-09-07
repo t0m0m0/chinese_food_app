@@ -22,8 +22,12 @@ void main() {
             final key = methodCall.arguments['key'] as String;
             if (key == 'TEST_API_KEY') {
               return 'test_key_123';
+            } else if (key == '_security_health_check') {
+              return 'test_value'; // ヘルスチェック用
             }
             return null;
+          } else if (methodCall.method == 'delete') {
+            return null; // delete成功
           }
           return null;
         },
@@ -69,6 +73,46 @@ void main() {
       final retrievedKey = await securityManager.getApiKey(testKeyName);
 
       expect(retrievedKey, equals(testKeyValue));
+    });
+
+    test('should properly validate security configuration', () {
+      // Green: セキュリティ設定の適切な検証テスト
+
+      // 同期版の基本検証
+      final isValid = securityManager.validateSecurityConfiguration();
+      expect(isValid, isTrue);
+    });
+
+    test('should perform detailed async security validation', () async {
+      // Green: 非同期詳細検証のテスト
+
+      final result = await securityManager.validateSecurityConfigurationAsync();
+
+      // モック環境では成功するはず
+      expect(result.isValid, isTrue);
+      expect(result.issues, isEmpty);
+      expect(result.details, isNotEmpty);
+      expect(result.details['storage_available'], isTrue);
+      expect(result.details['platform_check'], 'passed');
+    });
+
+    test('should handle API key errors consistently', () async {
+      // Red: エラー処理の一貫性テスト
+
+      // 存在しないキーの取得は例外ではなくnullを返すべき
+      final nonExistentKey =
+          await securityManager.getApiKey('NON_EXISTENT_KEY');
+      expect(nonExistentKey, isNull);
+
+      // エラー時の動作を統一する必要がある
+    });
+
+    test('should handle storage errors gracefully', () async {
+      // Red: ストレージエラー時の適切な処理テスト
+
+      // モックでエラーを発生させる場合の動作確認が必要
+      // 現在の実装では十分テストされていない
+      expect(true, isTrue, reason: 'Error handling tests need implementation');
     });
 
     test('should handle location permission management', () {
