@@ -8,7 +8,6 @@ import 'ui_config.dart';
 import 'database_config.dart';
 import 'location_config.dart';
 import 'search_config.dart';
-import 'config_manager.dart';
 import 'validation/config_validator_facade.dart';
 
 /// アプリケーション設定管理クラス
@@ -79,15 +78,6 @@ class AppConfig {
 
   /// すべての設定を検証
   static Map<String, List<String>> validateAll() {
-    try {
-      // ConfigManagerが初期化されている場合は既存検証を利用
-      if (ConfigManager.isInitialized) {
-        return ConfigManager.validateAllConfigs();
-      }
-    } catch (e) {
-      // ConfigManagerが利用できない場合は新しい検証システムを使用
-    }
-
     // 新しい統合検証システムを使用
     return ConfigValidatorFacade.validateAll();
   }
@@ -201,24 +191,7 @@ class AppConfig {
       // 本番環境や環境変数が直接設定されている場合は問題なし
     }
 
-    // ConfigManagerも連動して初期化（後方互換性のため）
-    if (!ConfigManager.isInitialized || force) {
-      try {
-        await ConfigManager.initialize(
-          throwOnValidationError: throwOnValidationError,
-          enableDebugLogging: enableDebugLogging,
-        );
-      } catch (e) {
-        // ConfigManagerの初期化エラーは警告として扱う
-        if (enableDebugLogging) {
-          developer.log(
-            'ConfigManager初期化警告: $e',
-            name: 'AppConfig',
-          );
-        }
-        // AppConfig自体の初期化は継続
-      }
-    }
+    // 初期化完了 - ConfigManager依存を削除済み
 
     _initialized = true;
   }
@@ -229,13 +202,7 @@ class AppConfig {
   static void forceUninitialize() {
     _initialized = false;
     _testHotpepperApiKey = null;
-
-    // ConfigManagerも連動して初期化解除
-    try {
-      ConfigManager.forceInitialize();
-    } catch (e) {
-      // ConfigManagerの初期化解除エラーは無視
-    }
+    // ConfigManager依存を削除済み
   }
 
   /// APIキーが設定されているかどうかをチェック（同期版）
@@ -261,31 +228,13 @@ class AppConfig {
 
   /// 開発環境かどうかを判定
   static bool get isDevelopment {
-    try {
-      // ConfigManagerが初期化されている場合はそちらを優先
-      if (ConfigManager.isInitialized) {
-        return ConfigManager.isDevelopment;
-      }
-    } catch (e) {
-      // ConfigManagerでエラーが発生した場合はフォールバック
-    }
-
-    // フォールバック: 環境変数ベース
+    // 環境変数ベース
     return const bool.fromEnvironment('DEVELOPMENT', defaultValue: true);
   }
 
   /// 本番環境かどうかを判定
   static bool get isProduction {
-    try {
-      // ConfigManagerが初期化されている場合はそちらを優先
-      if (ConfigManager.isInitialized) {
-        return ConfigManager.isProduction;
-      }
-    } catch (e) {
-      // ConfigManagerでエラーが発生した場合はフォールバック
-    }
-
-    // フォールバック: 環境変数ベース
+    // 環境変数ベース
     return const bool.fromEnvironment('PRODUCTION', defaultValue: false);
   }
 
@@ -327,16 +276,7 @@ class ApiConfigAccessor {
 
   /// HotPepper API キー
   String get hotpepperApiKey {
-    try {
-      // ConfigManagerが初期化されている場合はそちらを優先
-      if (ConfigManager.isInitialized) {
-        return ConfigManager.hotpepperApiKey;
-      }
-    } catch (e) {
-      // ConfigManagerでエラーが発生した場合はAppConfigにフォールバック
-    }
-
-    // フォールバック: AppConfigの同期版APIキー
+    // AppConfigの同期版APIキーを使用
     return AppConfig.hotpepperApiKeySync ?? '';
   }
 
