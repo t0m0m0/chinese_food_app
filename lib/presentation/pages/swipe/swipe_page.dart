@@ -4,7 +4,7 @@ import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/utils/error_message_helper.dart';
-import '../../../core/config/distance_config_manager.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/config/search_config.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/entities/location.dart';
@@ -39,7 +39,7 @@ class _SwipePageState extends State<SwipePage> {
 
   /// 保存された距離設定を読み込む
   Future<void> _loadSavedDistance() async {
-    final savedRange = await DistanceConfigManager.getDistance();
+    final savedRange = await AppConfig.search.getDistance();
     setState(() {
       _selectedRange = savedRange;
     });
@@ -54,7 +54,7 @@ class _SwipePageState extends State<SwipePage> {
     });
 
     // 設定を保存
-    await DistanceConfigManager.saveDistance(newRange);
+    await AppConfig.search.saveDistance(newRange);
 
     // 店舗を再読み込み
     await _loadStoresWithLocation();

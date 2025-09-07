@@ -1,7 +1,7 @@
 // test/helpers/test_env_setup.dart
 import 'dart:developer' as developer;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:chinese_food_app/core/config/config_manager.dart';
+import 'package:chinese_food_app/core/config/app_config.dart';
 import 'test_constants.dart';
 
 class TestEnvSetup {
@@ -51,13 +51,14 @@ class TestEnvSetup {
     }
 
     try {
-      // ConfigManagerを初期化
-      await ConfigManager.initialize(
+      // AppConfigを初期化
+      await AppConfig.initialize(
         throwOnValidationError: throwOnValidationError,
+        enableDebugLogging: enableDebugLogging,
       );
     } catch (e) {
       if (enableDebugLogging) {
-        developer.log('ConfigManager initialization failed: $e',
+        developer.log('AppConfig initialization failed: $e',
             name: 'TestEnvSetup');
       }
       // テスト環境では初期化エラーを無視
@@ -109,6 +110,10 @@ class TestEnvSetup {
 
     // テスト用の環境変数をクリア
     dotenv.env.clear();
+
+    // AppConfigの初期化状態もリセット
+    AppConfig.forceUninitialize();
+
     _isInitialized = false;
   }
 

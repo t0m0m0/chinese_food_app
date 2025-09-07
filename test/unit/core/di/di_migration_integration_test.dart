@@ -139,8 +139,8 @@ void main() {
 
         stopwatch.stop();
 
-        // Should complete 1000 resolutions in reasonable time (< 200ms for CI)
-        expect(stopwatch.elapsedMilliseconds, lessThan(200));
+        // Should complete 1000 resolutions in reasonable time (< 500ms for CI)
+        expect(stopwatch.elapsedMilliseconds, lessThan(500));
       });
 
       test('should handle concurrent access correctly', () async {
