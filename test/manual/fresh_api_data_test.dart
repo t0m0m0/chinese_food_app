@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
-import 'package:chinese_food_app/core/security/logging/secure_logger.dart';
+import 'dart:developer' as developer;
 import '../helpers/test_env_setup.dart';
 
 /// シンプルなモック化されたAPIデータテスト
@@ -10,8 +10,7 @@ import '../helpers/test_env_setup.dart';
 void main() {
   group('Fresh API Data Test (Simple Mock)', () {
     setUpAll(() async {
-      SecureLogger.info('=== シンプルモック化APIデータテスト開始 ===',
-          name: 'FreshApiDataTest');
+      developer.log('=== シンプルモック化APIデータテスト開始 ===', name: 'FreshApiDataTest');
 
       // テスト環境を初期化
       await TestEnvSetup.initializeTestEnvironment(
@@ -21,12 +20,12 @@ void main() {
     });
 
     test('モックAPIデータの構造確認', () async {
-      SecureLogger.info('=== モックAPIデータ構造テスト ===', name: 'FreshApiDataTest');
+      developer.log('=== モックAPIデータ構造テスト ===', name: 'FreshApiDataTest');
 
       // モックデータを作成（実際のHotPepper APIレスポンスを模擬）
       final mockStores = _createMockStores();
 
-      SecureLogger.info('取得されたモック店舗数: ${mockStores.length}',
+      developer.log('取得されたモック店舗数: ${mockStores.length}',
           name: 'FreshApiDataTest');
 
       // 基本検証
@@ -38,15 +37,15 @@ void main() {
           mockStores.where((store) => store.id.startsWith('J')).toList();
       expect(hotpepperStores.length, equals(3));
 
-      SecureLogger.info('✅ テスト成功: ${hotpepperStores.length}件のモックAPIデータを検証しました',
+      developer.log('✅ テスト成功: ${hotpepperStores.length}件のモックAPIデータを検証しました',
           name: 'FreshApiDataTest');
 
       // 店舗詳細の確認
       for (final store in hotpepperStores) {
-        SecureLogger.info('  - ${store.name} (ID: ${store.id})',
+        developer.log('  - ${store.name} (ID: ${store.id})',
             name: 'FreshApiDataTest');
-        SecureLogger.info('    住所: ${store.address}', name: 'FreshApiDataTest');
-        SecureLogger.info('    座標: ${store.lat}, ${store.lng}',
+        developer.log('    住所: ${store.address}', name: 'FreshApiDataTest');
+        developer.log('    座標: ${store.lat}, ${store.lng}',
             name: 'FreshApiDataTest');
 
         // データ整合性チェック
@@ -60,7 +59,7 @@ void main() {
     });
 
     test('複数地点のモックデータ統合テスト', () async {
-      SecureLogger.info('=== 複数地点モックデータ統合テスト ===', name: 'FreshApiDataTest');
+      developer.log('=== 複数地点モックデータ統合テスト ===', name: 'FreshApiDataTest');
 
       // 新宿エリアのモックデータ
       final shinjukuStores = _createShinjukuMockStores();
@@ -78,13 +77,13 @@ void main() {
         ...ikebukuroStores,
       ];
 
-      SecureLogger.info('最終店舗数: ${allStores.length}', name: 'FreshApiDataTest');
-      SecureLogger.info('地域別分布:', name: 'FreshApiDataTest');
-      SecureLogger.info('  - 新宿エリア: ${shinjukuStores.length}件',
+      developer.log('最終店舗数: ${allStores.length}', name: 'FreshApiDataTest');
+      developer.log('地域別分布:', name: 'FreshApiDataTest');
+      developer.log('  - 新宿エリア: ${shinjukuStores.length}件',
           name: 'FreshApiDataTest');
-      SecureLogger.info('  - 渋谷エリア: ${shibuyaStores.length}件',
+      developer.log('  - 渋谷エリア: ${shibuyaStores.length}件',
           name: 'FreshApiDataTest');
-      SecureLogger.info('  - 池袋エリア: ${ikebukuroStores.length}件',
+      developer.log('  - 池袋エリア: ${ikebukuroStores.length}件',
           name: 'FreshApiDataTest');
 
       // 検証
@@ -104,11 +103,11 @@ void main() {
         expect(store.lng, inInclusiveRange(139.5, 139.9)); // 東京都の経度範囲
       }
 
-      SecureLogger.info('✅ 複数地点からのモックデータ統合が成功しました', name: 'FreshApiDataTest');
+      developer.log('✅ 複数地点からのモックデータ統合が成功しました', name: 'FreshApiDataTest');
     });
 
     test('APIデータのフィルタリングと検索機能テスト', () async {
-      SecureLogger.info('=== APIデータフィルタリングテスト ===', name: 'FreshApiDataTest');
+      developer.log('=== APIデータフィルタリングテスト ===', name: 'FreshApiDataTest');
 
       final mockStores = _createMockStores();
 
@@ -120,7 +119,7 @@ void main() {
               store.name.contains('餃子'))
           .toList();
 
-      SecureLogger.info('中華料理店の検索結果: ${chineseStores.length}件',
+      developer.log('中華料理店の検索結果: ${chineseStores.length}件',
           name: 'FreshApiDataTest');
 
       // 距離によるフィルタリングのシミュレーション（新宿駅周辺）
@@ -134,7 +133,7 @@ void main() {
         return latDiff <= searchRadius && lngDiff <= searchRadius;
       }).toList();
 
-      SecureLogger.info('新宿駅周辺の店舗: ${nearbyStores.length}件',
+      developer.log('新宿駅周辺の店舗: ${nearbyStores.length}件',
           name: 'FreshApiDataTest');
 
       // 検証
@@ -149,12 +148,11 @@ void main() {
         expect(hasChinese, isTrue);
       }
 
-      SecureLogger.info('✅ APIデータのフィルタリング機能が正常に動作しました',
-          name: 'FreshApiDataTest');
+      developer.log('✅ APIデータのフィルタリング機能が正常に動作しました', name: 'FreshApiDataTest');
     });
 
     tearDownAll(() {
-      SecureLogger.info('=== テスト終了 ===', name: 'FreshApiDataTest');
+      developer.log('=== テスト終了 ===', name: 'FreshApiDataTest');
       TestEnvSetup.cleanupTestEnvironment();
     });
   });
