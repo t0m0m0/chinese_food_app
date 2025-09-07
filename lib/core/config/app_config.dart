@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../exceptions/infrastructure/security_exception.dart';
 import 'api_config.dart';
 import 'ui_config.dart';
@@ -395,11 +396,40 @@ class LocationConfigAccessor {
 class SearchConfigAccessor {
   SearchConfigAccessor._();
 
+  static const String _distanceKey = 'search_distance_range';
+
   /// デフォルト検索範囲
   int get defaultSearchRange => SearchConfig.defaultRange;
 
   /// 最大結果数
   int get maxResults => SearchConfig.maxCount;
+
+  /// 距離設定を保存
+  ///
+  /// [range] HotPepper API準拠の距離範囲（1=300m, 2=500m, 3=1000m, 4=2000m, 5=3000m）
+  Future<void> saveDistance(int range) async {
+    if (!SearchConfig.isValidRange(range)) {
+      throw ArgumentError('Invalid range value: $range');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_distanceKey, range);
+  }
+
+  /// 距離設定を取得（デフォルトは1000m）
+  ///
+  /// 戻り値: HotPepper API準拠の距離範囲（1-5）
+  Future<int> getDistance() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_distanceKey) ?? SearchConfig.defaultRange;
+  }
+
+  /// 距離設定をメートル単位で取得
+  ///
+  /// 戻り値: 距離（メートル）
+  Future<int> getDistanceInMeters() async {
+    final range = await getDistance();
+    return SearchConfig.rangeToMeter(range) ?? 1000;
+  }
 
   /// デバッグ情報
   Map<String, dynamic> get debugInfo => SearchConfig.debugInfo;
