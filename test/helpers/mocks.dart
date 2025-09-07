@@ -4,14 +4,19 @@ import 'package:http/http.dart' as http;
 
 // Local imports
 import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
+import 'package:chinese_food_app/data/datasources/hotpepper_proxy_datasource.dart';
 import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
 import 'package:chinese_food_app/data/datasources/photo_local_datasource.dart';
+import 'package:chinese_food_app/data/services/geolocator_location_service.dart';
 import 'package:chinese_food_app/domain/repositories/location_repository.dart';
 import 'package:chinese_food_app/domain/repositories/photo_repository.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/domain/repositories/visit_record_repository.dart';
+import 'package:chinese_food_app/domain/usecases/search_stores_usecase.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/core/services/photo_service.dart';
+import 'package:chinese_food_app/core/network/app_http_client.dart';
+import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
 /// 統一されたMockito生成用のアノテーション
 ///
@@ -48,6 +53,7 @@ import 'package:chinese_food_app/core/services/photo_service.dart';
   // Services
   LocationService,
   PhotoService,
+  GeolocatorLocationService,
 
   // Repositories
   StoreRepository,
@@ -55,10 +61,20 @@ import 'package:chinese_food_app/core/services/photo_service.dart';
   VisitRecordRepository,
   PhotoRepository,
 
+  // Use Cases
+  SearchStoresUsecase,
+
+  // Providers
+  StoreProvider,
+
   // Data Sources
   HotpepperApiDatasource,
+  HotpepperProxyDatasource,
   StoreLocalDatasource,
   PhotoLocalDatasource,
+
+  // Network
+  AppHttpClient,
 
   // External Dependencies
   http.Client,

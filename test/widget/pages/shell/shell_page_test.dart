@@ -8,7 +8,7 @@ import 'package:chinese_food_app/presentation/pages/swipe/swipe_page.dart';
 import 'package:chinese_food_app/presentation/pages/my_menu/my_menu_page.dart';
 import 'package:chinese_food_app/core/di/di_container_interface.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
-import '../../../core/di/di_test_helpers.dart';
+import '../../../unit/core/di/di_test_helpers.dart';
 
 void main() {
   group('ShellPage', () {

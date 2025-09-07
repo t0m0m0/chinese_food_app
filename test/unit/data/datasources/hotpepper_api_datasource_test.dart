@@ -3,7 +3,7 @@ import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart'
 import 'package:chinese_food_app/core/network/app_http_client.dart';
 import 'package:chinese_food_app/core/network/api_response.dart';
 import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
-import '../../../test/helpers/test_env_setup.dart';
+import '../../../helpers/test_env_setup.dart';
 
 void main() {
   group('HotpepperApiDatasourceImpl', () {
