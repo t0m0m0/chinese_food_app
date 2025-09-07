@@ -59,7 +59,7 @@ jobs:
         if grep -q "lib/.*\.dart$" changed_files.txt; then
           echo "ライブラリファイルの変更を検出、コアテストのみ実行"
           # コアテストのみ実行（パフォーマンスとネットワークテストを除外）
-          flutter test test/widget_test.dart test/widget/ test/core/entities/ test/core/types/ --coverage
+          flutter test test/widget_test.dart test/widget/ test/unit/core/types/ test/unit/core/di/ --coverage
           
           # カバレッジレポートの確認
           if [ -f "coverage/lcov.info" ]; then
