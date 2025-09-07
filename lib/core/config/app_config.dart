@@ -88,27 +88,33 @@ class AppConfig {
   /// 本番環境: flutter_secure_storage から取得
   /// 開発環境: 環境変数から取得
   static Future<String?> get hotpepperApiKey async {
+    developer.log('🔑 Retrieving HotPepper API key', name: 'AppConfig');
+    
     // テスト環境ではテスト用APIキーを使用
     if (_testHotpepperApiKey != null) {
+      developer.log('✅ Using test API key', name: 'AppConfig');
       return _testHotpepperApiKey;
     }
 
     // 本番環境では secure_storage を使用
     if (isProduction) {
+      developer.log('🔐 Accessing secure storage for production API key', name: 'AppConfig');
       try {
         final key = await _storage.read(key: 'HOTPEPPER_API_KEY');
         if (key == null || key.isEmpty) {
+          developer.log('❌ API key not found in secure storage', name: 'AppConfig', level: 1000);
           throw APIKeyNotFoundException(
             'HotPepper API',
             context: 'セキュアストレージにAPIキーが設定されていません',
           );
         }
+        developer.log('✅ Production API key retrieved successfully', name: 'AppConfig');
         return key;
       } catch (e) {
         // 開発時にはログ出力
         if (isDevelopment) {
           developer.log(
-            'HotPepper APIキー取得エラー: ${e.toString()}',
+            '❌ HotPepper APIキー取得エラー: ${e.toString()}',
             name: 'AppConfig',
             level: 1000,
           );
@@ -131,8 +137,10 @@ class AppConfig {
     await initialize();
 
     // .envファイルから取得を試行
+    developer.log('🔍 Checking .env file for API key', name: 'AppConfig');
     final envKey = dotenv.env['HOTPEPPER_API_KEY'];
     if (envKey != null && envKey.isNotEmpty) {
+      developer.log('✅ API key found in .env file', name: 'AppConfig');
       return envKey;
     }
 
@@ -181,19 +189,32 @@ class AppConfig {
     bool throwOnValidationError = false,
     bool enableDebugLogging = false,
   }) async {
-    if (_initialized && !force) return;
+    final stopwatch = Stopwatch()..start();
+    developer.log('🚀 Starting AppConfig initialization', name: 'AppConfig');
+    
+    if (_initialized && !force) {
+      developer.log('✅ AppConfig already initialized, skipping', name: 'AppConfig');
+      return;
+    }
 
     try {
+      developer.log('📁 Loading .env file', name: 'AppConfig');
       // .envファイルが存在する場合のみ読み込み
       await dotenv.load();
+      developer.log('✅ .env file loaded successfully', name: 'AppConfig');
     } catch (e) {
       // .envファイルが存在しない場合や読み込みエラーは無視
       // 本番環境や環境変数が直接設定されている場合は問題なし
+      developer.log('ℹ️ .env file not found or failed to load (this is normal in production)', 
+        name: 'AppConfig');
     }
 
     // 初期化完了 - ConfigManager依存を削除済み
-
+    stopwatch.stop();
     _initialized = true;
+    
+    developer.log('🎉 AppConfig initialization completed in ${stopwatch.elapsedMilliseconds}ms', 
+      name: 'AppConfig');
   }
 
   /// テスト用の強制初期化解除
@@ -223,7 +244,45 @@ class AppConfig {
   /// 本番環境では必ずこちらを使用してください
   static Future<bool> get hasHotpepperApiKeyAsync async {
     final key = await hotpepperApiKey;
-    return key != null && key.isNotEmpty && key != 'YOUR_API_KEY_HERE';
+    return _isValidApiKey(key);
+  }
+
+  /// HotPepper APIキーの形式を検証
+  ///
+  /// HotPepper APIキーは通常32文字の英数字です
+  static bool _isValidApiKey(String? key) {
+    if (key == null || key.isEmpty) return false;
+    if (key == 'YOUR_API_KEY_HERE') return false;
+    
+    // HotPepper APIキーの形式チェック（32文字の英数字）
+    final apiKeyPattern = RegExp(r'^[a-zA-Z0-9]{32}$');
+    final isValidFormat = apiKeyPattern.hasMatch(key);
+    
+    if (!isValidFormat) {
+      developer.log('⚠️ API key format validation failed', name: 'AppConfig');
+    }
+    
+    return isValidFormat;
+  }
+
+  /// APIキーの詳細検証（開発・デバッグ用）
+  static Map<String, dynamic> validateApiKey(String? key) {
+    return {
+      'exists': key != null,
+      'notEmpty': key != null && key.isNotEmpty,
+      'notPlaceholder': key != 'YOUR_API_KEY_HERE',
+      'validFormat': _isValidApiKey(key),
+      'length': key?.length ?? 0,
+      'isProduction': isProduction,
+      'keySource': _getApiKeySource(),
+    };
+  }
+
+  /// APIキー取得元を特定（デバッグ用）
+  static String _getApiKeySource() {
+    if (_testHotpepperApiKey != null) return 'test';
+    if (isProduction) return 'secure_storage';
+    return 'environment';
   }
 
   /// 開発環境かどうかを判定
@@ -256,16 +315,40 @@ class AppConfig {
 
   /// テスト用にHotPepper APIキーを設定
   static void setTestApiKey(String apiKey) {
+    // 本番環境での誤用を防止
+    if (isProduction) {
+      developer.log('❌ Test API key setup blocked in production environment', 
+        name: 'AppConfig', level: 1000);
+      throw StateError('Test API key setup is not allowed in production environment');
+    }
+    
+    developer.log('🧪 Setting test API key', name: 'AppConfig');
     _testHotpepperApiKey = apiKey;
   }
 
   /// テスト用APIキーをすべてクリア
   static void clearTestApiKey() {
+    // 本番環境での誤用を防止
+    if (isProduction) {
+      developer.log('❌ Test API key cleanup blocked in production environment', 
+        name: 'AppConfig', level: 1000);
+      throw StateError('Test API key cleanup is not allowed in production environment');
+    }
+    
+    developer.log('🧹 Clearing test API key', name: 'AppConfig');
     _testHotpepperApiKey = null;
   }
 
   /// 初期化状態をリセット（テスト用）
   static void resetInitialization() {
+    // 本番環境での誤用を防止
+    if (isProduction) {
+      developer.log('❌ Initialization reset blocked in production environment', 
+        name: 'AppConfig', level: 1000);
+      throw StateError('Initialization reset is not allowed in production environment');
+    }
+    
+    developer.log('🔄 Resetting initialization state', name: 'AppConfig');
     _initialized = false;
   }
 }
@@ -348,19 +431,39 @@ class SearchConfigAccessor {
   ///
   /// [range] HotPepper API準拠の距離範囲（1=300m, 2=500m, 3=1000m, 4=2000m, 5=3000m）
   Future<void> saveDistance(int range) async {
+    developer.log('💾 Saving distance setting: $range', name: 'SearchConfig');
+    
     if (!SearchConfig.isValidRange(range)) {
-      throw ArgumentError('Invalid range value: $range');
+      developer.log('❌ Invalid range value: $range', name: 'SearchConfig', level: 1000);
+      throw ArgumentError('Invalid range value: $range. Valid values: 1-5 (SearchConfig.validRanges)');
     }
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_distanceKey, range);
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_distanceKey, range);
+      developer.log('✅ Distance setting saved successfully: $range', name: 'SearchConfig');
+    } catch (e) {
+      developer.log('❌ Failed to save distance setting: ${e.toString()}', name: 'SearchConfig', level: 1000);
+      throw Exception('Failed to save distance setting: $e');
+    }
   }
 
   /// 距離設定を取得（デフォルトは1000m）
   ///
   /// 戻り値: HotPepper API準拠の距離範囲（1-5）
   Future<int> getDistance() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_distanceKey) ?? SearchConfig.defaultRange;
+    developer.log('📖 Getting distance setting', name: 'SearchConfig');
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final distance = prefs.getInt(_distanceKey) ?? SearchConfig.defaultRange;
+      developer.log('✅ Distance setting retrieved: $distance', name: 'SearchConfig');
+      return distance;
+    } catch (e) {
+      developer.log('❌ Failed to get distance setting, using default: ${SearchConfig.defaultRange}', 
+        name: 'SearchConfig', level: 1000);
+      return SearchConfig.defaultRange;
+    }
   }
 
   /// 距離設定をメートル単位で取得
