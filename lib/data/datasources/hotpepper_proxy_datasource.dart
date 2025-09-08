@@ -2,11 +2,37 @@ import '../../core/config/api_config.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../../core/network/base_api_service.dart';
 import '../models/hotpepper_store_model.dart';
+import 'hotpepper_proxy_constants.dart';
 
 /// HotPepper プロキシサーバー経由のデータソース
 ///
 /// セキュリティ向上のため、APIキーをサーバーサイドで管理し、
 /// プロキシサーバー経由でHotPepper APIにアクセスします。
+///
+/// ## 利点
+/// - APIキーの完全保護（フロントエンドに露出なし）
+/// - Cloudflare Workersによる高速・高可用性
+/// - CORS対応済み
+/// - レート制限の一元管理
+///
+/// ## 使用例
+/// ```dart
+/// final datasource = HotpepperProxyDatasourceImpl(
+///   AppHttpClient(),
+///   proxyBaseUrl: 'https://chinese-food-app-proxy.example.workers.dev',
+/// );
+///
+/// final result = await datasource.searchStores(
+///   lat: 35.6917, lng: 139.7006,
+///   keyword: '中華', range: 3, count: 20
+/// );
+/// ```
+///
+/// ## プロキシサーバー設定
+/// Cloudflare Workersでの環境変数:
+/// ```
+/// HOTPEPPER_API_KEY=your_hotpepper_api_key_here
+/// ```
 abstract class HotpepperProxyDatasource {
   /// 店舗検索を実行（プロキシサーバー経由）
   ///
@@ -38,8 +64,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
 
   HotpepperProxyDatasourceImpl(
     super.httpClient, {
-    this.proxyBaseUrl =
-        'https://chinese-food-app-proxy.your-account.workers.dev',
+    this.proxyBaseUrl = HotpepperProxyConstants.defaultProxyUrl,
   });
 
   @override
@@ -69,7 +94,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     try {
       // プロキシサーバー経由でAPIリクエスト実行
       return await postAndParse<HotpepperSearchResponse>(
-        '$proxyBaseUrl/api/hotpepper/search',
+        '$proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}',
         (json) =>
             HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
         body: requestBody,
@@ -86,36 +111,66 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
   /// パラメータの妥当性を検証
   void _validateParameters(double? lat, double? lng, String? address, int range,
       int count, int start) {
-    if (lat != null && (lat < -90.0 || lat > 90.0)) {
-      throw ValidationException('緯度は-90.0から90.0の範囲で指定してください', fieldName: 'lat');
+    // 緯度の検証
+    if (lat != null &&
+        (lat < HotpepperProxyConstants.minLatitude ||
+            lat > HotpepperProxyConstants.maxLatitude)) {
+      throw ValidationException(
+          '緯度は${HotpepperProxyConstants.minLatitude}から${HotpepperProxyConstants.maxLatitude}の範囲で指定してください\n'
+          'Latitude must be between ${HotpepperProxyConstants.minLatitude} and ${HotpepperProxyConstants.maxLatitude}',
+          fieldName: 'lat');
     }
-    if (lng != null && (lng < -180.0 || lng > 180.0)) {
-      throw ValidationException('経度は-180.0から180.0の範囲で指定してください',
+
+    // 経度の検証
+    if (lng != null &&
+        (lng < HotpepperProxyConstants.minLongitude ||
+            lng > HotpepperProxyConstants.maxLongitude)) {
+      throw ValidationException(
+          '経度は${HotpepperProxyConstants.minLongitude}から${HotpepperProxyConstants.maxLongitude}の範囲で指定してください\n'
+          'Longitude must be between ${HotpepperProxyConstants.minLongitude} and ${HotpepperProxyConstants.maxLongitude}',
           fieldName: 'lng');
     }
-    if (range < 1 || range > 5) {
-      throw ValidationException('検索範囲は1から5の間で指定してください', fieldName: 'range');
+
+    // 検索範囲の検証
+    if (range < HotpepperProxyConstants.minSearchRange ||
+        range > HotpepperProxyConstants.maxSearchRange) {
+      throw ValidationException(
+          '検索範囲は${HotpepperProxyConstants.minSearchRange}から${HotpepperProxyConstants.maxSearchRange}の間で指定してください\n'
+          'Search range must be between ${HotpepperProxyConstants.minSearchRange} and ${HotpepperProxyConstants.maxSearchRange}',
+          fieldName: 'range');
     }
-    if (count < 1 || count > 100) {
-      throw ValidationException('取得件数は1から100の間で指定してください', fieldName: 'count');
+
+    // 取得件数の検証
+    if (count < HotpepperProxyConstants.minResultCount ||
+        count > HotpepperProxyConstants.maxResultCount) {
+      throw ValidationException(
+          '取得件数は${HotpepperProxyConstants.minResultCount}から${HotpepperProxyConstants.maxResultCount}の間で指定してください\n'
+          'Result count must be between ${HotpepperProxyConstants.minResultCount} and ${HotpepperProxyConstants.maxResultCount}',
+          fieldName: 'count');
     }
-    if (start < 1) {
-      throw ValidationException('検索開始位置は1以上で指定してください', fieldName: 'start');
+
+    // 検索開始位置の検証
+    if (start < HotpepperProxyConstants.minStartPosition) {
+      throw ValidationException(
+          '検索開始位置は${HotpepperProxyConstants.minStartPosition}以上で指定してください\n'
+          'Start position must be ${HotpepperProxyConstants.minStartPosition} or greater',
+          fieldName: 'start');
     }
 
     // 住所または緯度経度のいずれかが必要
     final hasAddress = address != null && address.isNotEmpty;
     final hasLatLng = lat != null && lng != null;
     if (!hasAddress && !hasLatLng) {
-      throw ValidationException('住所または緯度経度を指定してください');
+      throw ValidationException('住所または緯度経度を指定してください\n'
+          'Either address or latitude/longitude must be specified');
     }
   }
 
   /// リクエストヘッダーを構築
   Map<String, String> _buildHeaders() {
     return {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      'Content-Type': HotpepperProxyConstants.contentTypeJson,
+      'Accept': HotpepperProxyConstants.acceptJson,
       ...ApiConfig.commonHeaders,
     };
   }
@@ -131,21 +186,25 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     switch (statusCode) {
       case 400:
         return ApiException(
+          '不正なリクエストパラメータ - 検索条件を確認してください\n'
           'Invalid request parameters - Please check search criteria',
           statusCode: statusCode,
         );
       case 403:
         return ApiException(
+          'アクセス拒否 - オリジンが許可されていません\n'
           'Unauthorized access - Origin not allowed',
           statusCode: statusCode,
         );
       case 429:
         return ApiException(
+          'レート制限エラー - プロキシサーバーへのリクエストが多すぎます\n'
           'Rate limit exceeded - Too many requests to proxy server',
           statusCode: statusCode,
         );
       case 500:
         return ApiException(
+          'プロキシサーバー内部エラー - しばらく待ってから再試行してください\n'
           'Proxy server internal error - Please try again later',
           statusCode: statusCode,
         );
@@ -153,11 +212,13 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       case 503:
       case 504:
         return ApiException(
+          'プロキシサーバーまたは上位APIが一時的に利用できません\n'
           'Proxy server or upstream API temporarily unavailable',
           statusCode: statusCode,
         );
       default:
         return ApiException(
+          'プロキシサーバーリクエストが失敗しました（ステータス: $statusCode）\n'
           'Proxy server request failed with status $statusCode: ${e.message}',
           statusCode: statusCode,
         );

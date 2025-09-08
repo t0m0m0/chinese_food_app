@@ -1,7 +1,6 @@
-import '../config/app_config.dart';
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
-import '../../data/datasources/hotpepper_api_datasource.dart';
+import '../../data/datasources/hotpepper_proxy_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/repositories/store_repository_impl.dart';
 import '../../data/services/geolocator_location_service.dart';
@@ -22,7 +21,7 @@ class DIContainer {
   /// Clean Architectureの原則に従って依存関係を構築する
   static StoreProvider createStoreProvider() {
     // API データソースの選択
-    final HotpepperApiDatasource apiDatasource = _createApiDatasource();
+    final HotpepperProxyDatasource apiDatasource = _createApiDatasource();
 
     // ローカルデータソースの作成
     final StoreLocalDatasource localDatasource = _createLocalDatasource();
@@ -39,17 +38,9 @@ class DIContainer {
   }
 
   /// 環境に応じたAPIデータソースを作成
-  static HotpepperApiDatasource _createApiDatasource() {
-    if (AppConfig.isProduction) {
-      // 本番環境では常に実APIを使用
-      return HotpepperApiDatasourceImpl(AppHttpClient());
-    } else if (AppConfig.hasHotpepperApiKey) {
-      // 開発環境でAPIキーが設定されている場合は実API使用
-      return HotpepperApiDatasourceImpl(AppHttpClient());
-    } else {
-      // APIキー未設定時はモック使用
-      return MockHotpepperApiDatasource();
-    }
+  static HotpepperProxyDatasource _createApiDatasource() {
+    // セキュアなプロキシサーバー経由でAPIを使用
+    return HotpepperProxyDatasourceImpl(AppHttpClient());
   }
 
   /// ローカルデータソースを作成

@@ -1,0 +1,19 @@
+{
+  "name": "chinese-food-app-proxy",
+  "version": "1.0.0",
+  "description": "HotPepper API Proxy Server for Chinese Food App",
+  "main": "src/worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:production": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["cloudflare-workers", "api-proxy", "hotpepper"],
+  "author": "Chinese Food App",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
