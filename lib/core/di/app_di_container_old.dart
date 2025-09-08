@@ -2,10 +2,9 @@ import 'dart:developer' as developer;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import '../config/environment_config.dart' as env_config;
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
-import '../../data/datasources/hotpepper_api_datasource.dart';
+import '../../data/datasources/hotpepper_proxy_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/datasources/visit_record_local_datasource.dart';
 import '../../data/datasources/photo_local_datasource.dart';
@@ -97,11 +96,10 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Register services for production environment
   void _registerProductionServices() {
-    // Register API datasource - always use real API in production
-    _serviceContainer.register<HotpepperApiDatasource>(() {
-      developer.log('Using real HotPepper API datasource (production)',
-          name: 'DI');
-      return HotpepperApiDatasourceImpl(AppHttpClient());
+    // Register secure proxy datasource for production
+    _serviceContainer.register<HotpepperProxyDatasource>(() {
+      developer.log('Using HotpepperProxyDatasource (production)', name: 'DI');
+      return HotpepperProxyDatasourceImpl(AppHttpClient());
     });
 
     _registerCommonServices();
@@ -109,9 +107,10 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Register services for development environment
   void _registerDevelopmentServices() {
-    // Register API datasource - use real API if key is available (lazy check)
-    _serviceContainer.register<HotpepperApiDatasource>(() {
-      return _createApiDatasourceForDevelopment();
+    // Register secure proxy datasource for development
+    _serviceContainer.register<HotpepperProxyDatasource>(() {
+      developer.log('Using HotpepperProxyDatasource (development)', name: 'DI');
+      return HotpepperProxyDatasourceImpl(AppHttpClient());
     });
 
     _registerCommonServices();
@@ -119,48 +118,12 @@ class AppDIContainer implements DIContainerInterface {
 
   /// Register services for test environment
   void _registerTestServices() {
-    // Register mock API datasource for testing
-    _serviceContainer.register<HotpepperApiDatasource>(
-      () => MockHotpepperApiDatasource(),
+    // Register mock proxy datasource for testing
+    _serviceContainer.register<HotpepperProxyDatasource>(
+      () => MockHotpepperProxyDatasource(),
     );
 
     _registerCommonServices();
-  }
-
-  /// Create API datasource for development environment
-  HotpepperApiDatasource _createApiDatasourceForDevelopment() {
-    // In development, use EnvironmentConfig which properly reads from .env files
-    try {
-      // Ensure EnvironmentConfig is initialized and check for API key
-      final apiKey = env_config.EnvironmentConfig.hotpepperApiKey;
-      developer.log('🔑 Development環境でのAPIキー確認:', name: 'DI');
-      developer.log('  APIキー: ${apiKey.isNotEmpty ? "設定済み" : "未設定"}',
-          name: 'DI');
-
-      if (apiKey.isNotEmpty) {
-        developer.log(
-            'Using real HotPepper API datasource (development) - API key found',
-            name: 'DI');
-        developer.log('✅ 実際のHotPepperApiDatasourceImplを使用', name: 'DI');
-        return HotpepperApiDatasourceImpl(AppHttpClient());
-      } else {
-        developer.log(
-            'API key not available, using mock datasource (development)',
-            name: 'DI',
-            level: 900); // WARNING level
-        developer.log('⚠️ APIキー未設定のためMockHotpepperApiDatasourceを使用',
-            name: 'DI');
-        return MockHotpepperApiDatasource();
-      }
-    } catch (e) {
-      developer.log(
-          'Error checking API key, using mock datasource (development): $e',
-          name: 'DI',
-          level: 900); // WARNING level
-      developer.log('❌ APIキー確認エラー、MockHotpepperApiDatasourceを使用: $e',
-          name: 'DI');
-      return MockHotpepperApiDatasource();
-    }
   }
 
   /// Register services common to all environments
@@ -187,7 +150,7 @@ class AppDIContainer implements DIContainerInterface {
     // Register repositories
     _serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
-        apiDatasource: _serviceContainer.resolve<HotpepperApiDatasource>(),
+        apiDatasource: _serviceContainer.resolve<HotpepperProxyDatasource>(),
         localDatasource: _serviceContainer.resolve<StoreLocalDatasource>(),
       );
     });

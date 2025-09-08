@@ -129,6 +129,37 @@ class EnvironmentConfig {
     return 'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/';
   }
 
+  /// Backend API のベースURL
+  static String get backendApiUrl {
+    try {
+      final envUrl = dotenv.env['BACKEND_API_URL'];
+      if (envUrl != null && envUrl.isNotEmpty) {
+        return envUrl;
+      }
+    } catch (e) {
+      // dotenvエラーの場合は環境変数にフォールバック
+    }
+
+    // 環境変数から取得（フォールバック）
+    return const String.fromEnvironment('BACKEND_API_URL',
+        defaultValue: 'https://api.chinese-food-app.com');
+  }
+
+  /// Backend API トークンを取得
+  static String get backendApiToken {
+    try {
+      final envToken = dotenv.env['BACKEND_API_TOKEN'];
+      if (envToken != null && envToken.isNotEmpty) {
+        return envToken;
+      }
+    } catch (e) {
+      // dotenvエラーの場合は環境変数にフォールバック
+    }
+
+    // 環境変数から取得（フォールバック）
+    return const String.fromEnvironment('BACKEND_API_TOKEN', defaultValue: '');
+  }
+
   /// デバッグ情報を取得
   static Map<String, dynamic> get debugInfo {
     return {
@@ -138,6 +169,10 @@ class EnvironmentConfig {
           : '(未設定)',
       'googleMapsApiKey': '(未使用：WebView実装)',
       'hotpepperApiUrl': hotpepperApiUrl,
+      'backendApiUrl': backendApiUrl,
+      'backendApiToken': backendApiToken.isNotEmpty
+          ? '${backendApiToken.substring(0, 8)}...'
+          : '(未設定)',
     };
   }
 }

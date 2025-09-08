@@ -94,3 +94,8 @@ app_db.sqlite
 # Node.js関連（Flutter/Dartプロジェクトでは不要）
 package-lock.json
 node_modules/
+
+# Cloudflare Workers関連
+cloudflare-workers/node_modules/
+cloudflare-workers/.wrangler/
+cloudflare-workers/dist/

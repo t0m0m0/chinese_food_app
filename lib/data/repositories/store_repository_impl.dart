@@ -1,6 +1,6 @@
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
-import '../datasources/hotpepper_api_datasource.dart';
+import '../datasources/hotpepper_proxy_datasource.dart';
 import '../datasources/store_local_datasource.dart';
 
 /// Store Repository の実装クラス
@@ -8,7 +8,7 @@ import '../datasources/store_local_datasource.dart';
 /// ローカルデータベースとAPI通信を管理し、
 /// Clean Architecture のRepository パターンを実装する
 class StoreRepositoryImpl implements StoreRepository {
-  final HotpepperApiDatasource apiDatasource;
+  final HotpepperProxyDatasource apiDatasource;
   final StoreLocalDatasource localDatasource;
 
   StoreRepositoryImpl({

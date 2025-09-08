@@ -9,6 +9,7 @@ import 'di_error_handler.dart';
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
+import '../../data/datasources/hotpepper_proxy_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/datasources/visit_record_local_datasource.dart';
 import '../../data/datasources/photo_local_datasource.dart';
@@ -33,6 +34,9 @@ abstract class BaseServiceRegistrator {
       () => AppDatabase(_openDatabaseConnection()),
     );
 
+    // Register HotpepperProxyDatasource for secure API communication
+    registerHotpepperProxyDatasource(serviceContainer);
+
     // Register Drift datasources
     serviceContainer.register<StoreLocalDatasource>(() {
       return StoreLocalDatasourceImpl(serviceContainer.resolve<AppDatabase>());
@@ -50,7 +54,7 @@ abstract class BaseServiceRegistrator {
     // Register repositories
     serviceContainer.register<StoreRepositoryImpl>(() {
       return StoreRepositoryImpl(
-        apiDatasource: serviceContainer.resolve<HotpepperApiDatasource>(),
+        apiDatasource: serviceContainer.resolve<HotpepperProxyDatasource>(),
         localDatasource: serviceContainer.resolve<StoreLocalDatasource>(),
       );
     });
@@ -142,6 +146,31 @@ abstract class BaseServiceRegistrator {
     serviceContainer.register<HotpepperApiDatasource>(
       () => MockHotpepperApiDatasource(),
     );
+  }
+
+  /// Register HotpepperProxyDatasource for secure API communication via Cloudflare Workers
+  static void registerHotpepperProxyDatasource(
+      ServiceContainer serviceContainer) {
+    serviceContainer.register<HotpepperProxyDatasource>(() {
+      // 環境設定からプロキシURLを取得（設定されていない場合はデフォルト使用）
+      final proxyUrl = env_config.EnvironmentConfig.backendApiUrl.isNotEmpty
+          ? env_config.EnvironmentConfig.backendApiUrl
+          : null;
+
+      if (proxyUrl != null && proxyUrl.isNotEmpty) {
+        developer.log(
+            'Using HotpepperProxyDatasource with custom URL: $proxyUrl',
+            name: 'DI');
+        return HotpepperProxyDatasourceImpl(
+          AppHttpClient(),
+          proxyBaseUrl: proxyUrl,
+        );
+      } else {
+        developer.log('Using HotpepperProxyDatasource with default URL',
+            name: 'DI');
+        return HotpepperProxyDatasourceImpl(AppHttpClient());
+      }
+    });
   }
 
   /// Create Drift database connection
