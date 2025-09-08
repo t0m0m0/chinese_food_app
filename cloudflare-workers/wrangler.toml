@@ -16,7 +16,4 @@ vars = { ENVIRONMENT = "development" }
 [env.production]
 vars = { ENVIRONMENT = "production" }
 
-# ルート設定
-[[routes]]
-pattern = "chinese-food-app-proxy.*.workers.dev/*"
-zone_name = ""
+# ルート設定（Workers.devサブドメインを使用）
