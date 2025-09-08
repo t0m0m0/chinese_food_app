@@ -6,9 +6,11 @@ import 'dart:developer' as developer;
 import 'service_container.dart';
 import '../config/environment_config.dart' as env_config;
 import 'di_error_handler.dart';
+import '../config/security_config.dart';
 import '../database/schema/app_database.dart';
 import '../network/app_http_client.dart';
 import '../../data/datasources/hotpepper_api_datasource.dart';
+import '../../data/datasources/backend_api_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/datasources/visit_record_local_datasource.dart';
 import '../../data/datasources/photo_local_datasource.dart';
@@ -32,6 +34,9 @@ abstract class BaseServiceRegistrator {
     serviceContainer.registerSingleton<AppDatabase>(
       () => AppDatabase(_openDatabaseConnection()),
     );
+
+    // Register BackendApiDatasource for secure API communication
+    registerBackendApiDatasource(serviceContainer);
 
     // Register Drift datasources
     serviceContainer.register<StoreLocalDatasource>(() {
@@ -142,6 +147,25 @@ abstract class BaseServiceRegistrator {
     serviceContainer.register<HotpepperApiDatasource>(
       () => MockHotpepperApiDatasource(),
     );
+  }
+
+  /// Register BackendApiDatasource for secure API communication
+  static void registerBackendApiDatasource(ServiceContainer serviceContainer) {
+    serviceContainer.register<BackendApiDatasource>(() {
+      // セキュアモードの場合はBackendApiDatasourceを使用
+      if (SecurityConfig.isSecureMode) {
+        developer.log('Using BackendApiDatasource (secure mode)', name: 'DI');
+        return BackendApiDatasourceImpl(
+          AppHttpClient(),
+          baseUrl: env_config.EnvironmentConfig.backendApiUrl,
+          apiToken: env_config.EnvironmentConfig.backendApiToken,
+        );
+      } else {
+        developer.log('Using MockBackendApiDatasource (development)',
+            name: 'DI');
+        return MockBackendApiDatasource();
+      }
+    });
   }
 
   /// Create Drift database connection
