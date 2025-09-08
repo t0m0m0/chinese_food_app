@@ -1,4 +1,5 @@
 import '../../core/config/api_config.dart';
+import '../../core/config/environment_config.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../../core/network/base_api_service.dart';
 import '../../core/types/result.dart';
@@ -86,8 +87,11 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
 
   HotpepperProxyDatasourceImpl(
     super.httpClient, {
-    this.proxyBaseUrl = HotpepperProxyConstants.defaultProxyUrl,
-  });
+    String? proxyBaseUrl,
+  }) : proxyBaseUrl = proxyBaseUrl ?? 
+           (EnvironmentConfig.backendApiUrl.isNotEmpty 
+             ? EnvironmentConfig.backendApiUrl 
+             : HotpepperProxyConstants.defaultProxyUrl);
 
   @override
   Future<HotpepperSearchResponse> searchStores({

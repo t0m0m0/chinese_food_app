@@ -35,5 +35,5 @@ class HotpepperProxyConstants {
 
   /// デフォルトプロキシサーバーURL（開発環境用）
   static const String defaultProxyUrl =
-      'https://chinese-food-app-proxy.your-account.workers.dev';
+      'https://chinese-food-app-proxy.aka-tomo06.workers.dev';
 }
