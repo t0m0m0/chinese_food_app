@@ -2,17 +2,38 @@ import '../../core/config/api_config.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../../core/network/base_api_service.dart';
 import '../models/hotpepper_store_model.dart';
+import 'backend_api_constants.dart';
 
 /// バックエンドAPI経由のデータソース抽象クラス
 ///
 /// セキュリティ向上のため、自前のバックエンドAPI経由で
 /// 各種外部API（HotPepper等）にアクセスします。
 ///
-/// 利点:
+/// ## 利点
 /// - APIキーの完全保護
 /// - レート制限とコスト制御
 /// - セキュリティ監査・監視
 /// - ビジネスロジックの中央管理
+///
+/// ## 使用例
+/// ```dart
+/// final datasource = BackendApiDatasourceImpl(
+///   AppHttpClient(),
+///   baseUrl: 'https://api.chinese-food-app.com',
+///   apiToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+/// );
+///
+/// final result = await datasource.searchStores(
+///   lat: 35.6917, lng: 139.7006,
+///   keyword: '中華', range: 3, count: 20
+/// );
+/// ```
+///
+/// ## 環境設定
+/// ```
+/// BACKEND_API_URL=https://api.chinese-food-app.com
+/// BACKEND_API_TOKEN=your_jwt_token_here
+/// ```
 abstract class BackendApiDatasource {
   /// 店舗検索を実行（バックエンドAPI経由）
   ///
@@ -84,7 +105,7 @@ class BackendApiDatasourceImpl extends BaseApiService
     try {
       // バックエンドAPI経由でリクエスト実行
       return await postAndParse<HotpepperSearchResponse>(
-        '$baseUrl/api/stores/search',
+        '$baseUrl${BackendApiConstants.searchEndpoint}',
         (json) => _parseBackendResponse(json as Map<String, dynamic>, start),
         body: requestBody,
         headers: _buildHeaders(),
@@ -100,35 +121,78 @@ class BackendApiDatasourceImpl extends BaseApiService
   /// パラメータの妥当性を検証
   void _validateParameters(double? lat, double? lng, String? address, int range,
       int count, int start) {
-    if (lat != null && (lat < -90.0 || lat > 90.0)) {
-      throw ValidationException('緯度は-90.0から90.0の範囲で指定してください', fieldName: 'lat');
+    // 緯度の検証
+    if (lat != null &&
+        (lat < BackendApiConstants.minLatitude ||
+            lat > BackendApiConstants.maxLatitude)) {
+      throw ValidationException(
+          '緯度は${BackendApiConstants.minLatitude}から${BackendApiConstants.maxLatitude}の範囲で指定してください\n'
+          'Latitude must be between ${BackendApiConstants.minLatitude} and ${BackendApiConstants.maxLatitude}',
+          fieldName: 'lat');
     }
-    if (lng != null && (lng < -180.0 || lng > 180.0)) {
-      throw ValidationException('経度は-180.0から180.0の範囲で指定してください',
+
+    // 経度の検証
+    if (lng != null &&
+        (lng < BackendApiConstants.minLongitude ||
+            lng > BackendApiConstants.maxLongitude)) {
+      throw ValidationException(
+          '経度は${BackendApiConstants.minLongitude}から${BackendApiConstants.maxLongitude}の範囲で指定してください\n'
+          'Longitude must be between ${BackendApiConstants.minLongitude} and ${BackendApiConstants.maxLongitude}',
           fieldName: 'lng');
     }
-    if (range < 1 || range > 5) {
-      throw ValidationException('検索範囲は1から5の間で指定してください', fieldName: 'range');
+
+    // 検索範囲の検証
+    if (range < BackendApiConstants.minSearchRange ||
+        range > BackendApiConstants.maxSearchRange) {
+      throw ValidationException(
+          '検索範囲は${BackendApiConstants.minSearchRange}から${BackendApiConstants.maxSearchRange}の間で指定してください\n'
+          'Search range must be between ${BackendApiConstants.minSearchRange} and ${BackendApiConstants.maxSearchRange}',
+          fieldName: 'range');
     }
-    if (count < 1 || count > 100) {
-      throw ValidationException('取得件数は1から100の間で指定してください', fieldName: 'count');
+
+    // 取得件数の検証
+    if (count < BackendApiConstants.minResultCount ||
+        count > BackendApiConstants.maxResultCount) {
+      throw ValidationException(
+          '取得件数は${BackendApiConstants.minResultCount}から${BackendApiConstants.maxResultCount}の間で指定してください\n'
+          'Result count must be between ${BackendApiConstants.minResultCount} and ${BackendApiConstants.maxResultCount}',
+          fieldName: 'count');
     }
-    if (start < 1) {
-      throw ValidationException('検索開始位置は1以上で指定してください', fieldName: 'start');
+
+    // 検索開始位置の検証
+    if (start < BackendApiConstants.minStartPosition) {
+      throw ValidationException(
+          '検索開始位置は${BackendApiConstants.minStartPosition}以上で指定してください\n'
+          'Start position must be ${BackendApiConstants.minStartPosition} or greater',
+          fieldName: 'start');
     }
 
     // 住所または緯度経度のいずれかが必要
     final hasAddress = address != null && address.isNotEmpty;
     final hasLatLng = lat != null && lng != null;
     if (!hasAddress && !hasLatLng) {
-      throw ValidationException('住所または緯度経度を指定してください');
+      throw ValidationException('住所または緯度経度を指定してください\n'
+          'Either address or latitude/longitude must be specified');
     }
   }
 
   /// APIトークンの検証
   void _validateApiToken() {
     if (apiToken.isEmpty) {
-      throw ApiException('APIトークンが設定されていません。認証情報を確認してください。');
+      throw ApiException('APIトークンが設定されていません。認証情報を確認してください。\n'
+          'API token is not configured. Please check your credentials.');
+    }
+
+    if (apiToken.length < BackendApiConstants.minApiTokenLength) {
+      throw ApiException(
+          'APIトークンの長さが不正です。最低${BackendApiConstants.minApiTokenLength}文字必要です。\n'
+          'API token length is invalid. Minimum ${BackendApiConstants.minApiTokenLength} characters required.');
+    }
+
+    final tokenPattern = RegExp(BackendApiConstants.apiTokenPattern);
+    if (!tokenPattern.hasMatch(apiToken)) {
+      throw ApiException('APIトークンの形式が不正です。英数字、ピリオド、ハイフン、アンダースコアのみ使用可能です。\n'
+          'API token format is invalid. Only alphanumeric characters, periods, hyphens, and underscores are allowed.');
     }
   }
 
@@ -146,7 +210,7 @@ class BackendApiDatasourceImpl extends BaseApiService
       'range': range,
       'count': count,
       'start': start,
-      'keyword': keyword ?? '中華',
+      'keyword': keyword ?? BackendApiConstants.defaultKeyword,
     };
 
     if (lat != null && lng != null) {
@@ -164,9 +228,9 @@ class BackendApiDatasourceImpl extends BaseApiService
   /// リクエストヘッダーを構築
   Map<String, String> _buildHeaders() {
     return {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $apiToken',
+      'Content-Type': BackendApiConstants.contentTypeJson,
+      'Accept': BackendApiConstants.acceptJson,
+      'Authorization': '${BackendApiConstants.authorizationPrefix} $apiToken',
       ...ApiConfig.commonHeaders,
     };
   }
@@ -174,14 +238,17 @@ class BackendApiDatasourceImpl extends BaseApiService
   /// バックエンドAPIレスポンスを解析
   HotpepperSearchResponse _parseBackendResponse(
       Map<String, dynamic> json, int start) {
-    if (json['success'] != true) {
+    if (json[BackendApiConstants.responseSuccessKey] != true) {
       throw ApiException(
-          'Backend API returned error: ${json['error'] ?? 'Unknown error'}');
+          'Backend API returned error: ${json[BackendApiConstants.responseErrorKey] ?? 'Unknown error'}');
     }
 
-    final data = json['data'] as Map<String, dynamic>;
-    final storesData = data['stores'] as List<dynamic>;
-    final pagination = data['pagination'] as Map<String, dynamic>;
+    final data =
+        json[BackendApiConstants.responseDataKey] as Map<String, dynamic>;
+    final storesData =
+        data[BackendApiConstants.responseStoresKey] as List<dynamic>;
+    final pagination =
+        data[BackendApiConstants.responsePaginationKey] as Map<String, dynamic>;
 
     final stores = storesData
         .map((storeJson) => _convertBackendStoreToHotpepperModel(
@@ -190,7 +257,8 @@ class BackendApiDatasourceImpl extends BaseApiService
 
     return HotpepperSearchResponse(
       shops: stores,
-      resultsAvailable: pagination['totalCount'] as int,
+      resultsAvailable:
+          pagination[BackendApiConstants.responseTotalCountKey] as int,
       resultsReturned: stores.length,
       resultsStart: start,
     );

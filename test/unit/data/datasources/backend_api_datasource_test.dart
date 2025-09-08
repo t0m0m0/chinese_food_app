@@ -123,7 +123,56 @@ void main() {
           throwsA(isA<ApiException>().having(
             (e) => e.message,
             'message',
-            contains('APIトークン'),
+            allOf(
+              contains('APIトークン'),
+              contains('API token'),
+            ),
+          )),
+        );
+      });
+
+      test('APIトークンが短すぎる場合、ApiExceptionをthrowする', () async {
+        // Arrange
+        final invalidDatasource = BackendApiDatasourceImpl(
+          mockHttpClient,
+          baseUrl: 'https://api.test.com',
+          apiToken: 'short', // 16文字未満
+        );
+
+        // Act & Assert
+        expect(
+          () async =>
+              await invalidDatasource.searchStores(lat: 35.6917, lng: 139.7006),
+          throwsA(isA<ApiException>().having(
+            (e) => e.message,
+            'message',
+            allOf(
+              contains('長さが不正'),
+              contains('length is invalid'),
+            ),
+          )),
+        );
+      });
+
+      test('APIトークンの形式が不正な場合、ApiExceptionをthrowする', () async {
+        // Arrange
+        final invalidDatasource = BackendApiDatasourceImpl(
+          mockHttpClient,
+          baseUrl: 'https://api.test.com',
+          apiToken: 'invalid@token#format!', // 不正な文字を含む
+        );
+
+        // Act & Assert
+        expect(
+          () async =>
+              await invalidDatasource.searchStores(lat: 35.6917, lng: 139.7006),
+          throwsA(isA<ApiException>().having(
+            (e) => e.message,
+            'message',
+            allOf(
+              contains('形式が不正'),
+              contains('format is invalid'),
+            ),
           )),
         );
       });
