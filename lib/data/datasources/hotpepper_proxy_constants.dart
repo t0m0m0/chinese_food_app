@@ -34,6 +34,7 @@ class HotpepperProxyConstants {
   static const String acceptJson = 'application/json';
 
   /// デフォルトプロキシサーバーURL（開発環境用）
+  /// 注意: 本番環境ではBACKEND_API_URL環境変数で上書きしてください
   static const String defaultProxyUrl =
-      'https://chinese-food-app-proxy.aka-tomo06.workers.dev';
+      'https://chinese-food-app-proxy.your-account.workers.dev';
 }
