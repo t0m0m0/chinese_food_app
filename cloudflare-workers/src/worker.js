@@ -5,15 +5,59 @@
  * フロントエンドからの安全なAPI呼び出しを可能にします。
  */
 
-// CORS ヘッダー設定
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*', // 本番では特定ドメインに制限
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+/**
+ * 環境別CORS設定
+ * 本番環境では特定ドメインのみ許可、開発環境では柔軟に対応
+ */
+function getCorsHeaders(request, env) {
+  const origin = request.headers.get('Origin');
+  
+  // 本番環境での許可ドメインリスト
+  const allowedOrigins = [
+    'https://chinese-food-app.vercel.app',
+    'https://chinese-food-app.netlify.app', 
+    'https://your-production-domain.com'
+  ];
+  
+  // 開発環境での許可ドメインパターン
+  const developmentPatterns = [
+    /^https?:\/\/localhost(:\d+)?$/,
+    /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+    /^https?:\/\/.+\.ngrok\.io$/,
+    /^https?:\/\/.+\.vercel\.app$/
+  ];
+  
+  let allowedOrigin = '*';
+  
+  if (env.ENVIRONMENT === 'production') {
+    // 本番環境: 許可リストのドメインのみ
+    if (origin && allowedOrigins.includes(origin)) {
+      allowedOrigin = origin;
+    } else {
+      allowedOrigin = allowedOrigins[0]; // デフォルトを最初のドメインに
+    }
+  } else {
+    // 開発・ステージング環境: パターンマッチングで柔軟に対応
+    if (origin && (allowedOrigins.includes(origin) || 
+        developmentPatterns.some(pattern => pattern.test(origin)))) {
+      allowedOrigin = origin;
+    } else {
+      allowedOrigin = '*'; // 開発時は緩い設定
+    }
+  }
+  
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400', // 24時間キャッシュ
+  };
+}
 
 export default {
   async fetch(request, env) {
+    const corsHeaders = getCorsHeaders(request, env);
+    
     // CORS プリフライトリクエスト対応
     if (request.method === 'OPTIONS') {
       return new Response(null, {
@@ -24,7 +68,7 @@ export default {
 
     // POST /api/hotpepper/search エンドポイント
     if (request.method === 'POST' && new URL(request.url).pathname === '/api/hotpepper/search') {
-      return handleHotpepperSearch(request, env);
+      return handleHotpepperSearch(request, env, corsHeaders);
     }
 
     // 404 レスポンス
@@ -38,7 +82,7 @@ export default {
 /**
  * HotPepper API検索リクエストの処理
  */
-async function handleHotpepperSearch(request, env) {
+async function handleHotpepperSearch(request, env, corsHeaders) {
   try {
     // リクエストボディの解析
     const requestBody = await request.json();
@@ -47,7 +91,7 @@ async function handleHotpepperSearch(request, env) {
     // パラメータバリデーション
     const validationError = validateSearchParams({ lat, lng, address, range, count, start });
     if (validationError) {
-      return createErrorResponse(400, validationError);
+      return createErrorResponse(400, validationError, corsHeaders);
     }
 
     // HotPepper API呼び出し
@@ -68,7 +112,7 @@ async function handleHotpepperSearch(request, env) {
 
   } catch (error) {
     console.error('HotPepper API proxy error:', error);
-    return createErrorResponse(500, 'Internal server error');
+    return createErrorResponse(500, 'Internal server error', corsHeaders);
   }
 }
 
@@ -184,7 +228,7 @@ function transformHotpepperResponse(hotpepperResponse) {
 /**
  * エラーレスポンス作成
  */
-function createErrorResponse(status, message) {
+function createErrorResponse(status, message, corsHeaders) {
   return new Response(JSON.stringify({ error: message }), {
     status,
     headers: {

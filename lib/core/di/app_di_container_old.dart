@@ -126,7 +126,6 @@ class AppDIContainer implements DIContainerInterface {
     _registerCommonServices();
   }
 
-
   /// Register services common to all environments
   void _registerCommonServices() {
     // Register Drift database (singleton)

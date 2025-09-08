@@ -10,11 +10,11 @@ compatibility_date = "2024-01-01"
 
 # 開発環境設定
 [env.development]
-vars = { }
+vars = { ENVIRONMENT = "development" }
 
 # 本番環境設定
 [env.production]
-vars = { }
+vars = { ENVIRONMENT = "production" }
 
 # ルート設定
 [[routes]]

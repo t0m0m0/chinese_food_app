@@ -1,6 +1,7 @@
 import '../../core/config/api_config.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../../core/network/base_api_service.dart';
+import '../../core/types/result.dart';
 import '../models/hotpepper_store_model.dart';
 import 'hotpepper_proxy_constants.dart';
 
@@ -47,6 +48,27 @@ abstract class HotpepperProxyDatasource {
   /// 戻り値: [HotpepperSearchResponse] 検索結果
   /// 例外: プロキシサーバーエラー、レート制限エラー、パラメータエラー等
   Future<HotpepperSearchResponse> searchStores({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  });
+
+  /// 店舗検索を実行（プロキシサーバー経由）- Result&lt;T&gt;パターン版
+  ///
+  /// [lat] 緯度 (-90.0 〜 90.0)
+  /// [lng] 経度 (-180.0 〜 180.0)
+  /// [address] 住所での検索
+  /// [keyword] キーワード検索 (デフォルト: \"中華\")
+  /// [range] 検索範囲 (1:300m, 2:500m, 3:1000m, 4:2000m, 5:3000m)
+  /// [count] 取得件数 (1-100)
+  /// [start] 検索開始位置 (1以上)
+  ///
+  /// 戻り値: [Result&lt;HotpepperSearchResponse&gt;] 成功時は検索結果、失敗時はエラー情報
+  Future<Result<HotpepperSearchResponse>> searchStoresResult({
     double? lat,
     double? lng,
     String? address,
@@ -105,6 +127,37 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       throw _handleProxyException(e);
     } catch (e) {
       throw ApiException('Proxy server request failed: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<Result<HotpepperSearchResponse>> searchStoresResult({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    try {
+      final response = await searchStores(
+        lat: lat,
+        lng: lng,
+        address: address,
+        keyword: keyword,
+        range: range,
+        count: count,
+        start: start,
+      );
+      return Success(response);
+    } on ValidationException catch (e) {
+      return Failure(e);
+    } on ApiException catch (e) {
+      return Failure(e);
+    } catch (e) {
+      return Failure(
+          ApiException('Unexpected proxy server error: ${e.toString()}'));
     }
   }
 
@@ -274,5 +327,31 @@ class MockHotpepperProxyDatasource implements HotpepperProxyDatasource {
       resultsReturned: mockStores.length,
       resultsStart: start,
     );
+  }
+
+  @override
+  Future<Result<HotpepperSearchResponse>> searchStoresResult({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    try {
+      final response = await searchStores(
+        lat: lat,
+        lng: lng,
+        address: address,
+        keyword: keyword,
+        range: range,
+        count: count,
+        start: start,
+      );
+      return Success(response);
+    } catch (e) {
+      return Failure(ApiException('Mock proxy error: ${e.toString()}'));
+    }
   }
 }
