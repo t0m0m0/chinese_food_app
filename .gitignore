@@ -73,3 +73,16 @@ node_modules/
 
 # Dependencies
 package-lock.json
+
+# Claude Code and MCP settings
+.claude/
+.serena/
+CLAUDE.md
+
+# Test coverage reports
+coverage/
+*.lcov
+
+# Platform-specific dependency locks
+ios/Podfile.lock
+macos/Podfile
