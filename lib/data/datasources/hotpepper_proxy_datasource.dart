@@ -95,13 +95,13 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     if (providedUrl != null && providedUrl.isNotEmpty) {
       return providedUrl;
     }
-    
+
     // 環境変数からのURL取得を試行
     final envUrl = EnvironmentConfig.backendApiUrl;
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
-    
+
     // フォールバック: デフォルトURL
     return HotpepperProxyConstants.defaultProxyUrl;
   }
