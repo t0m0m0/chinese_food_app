@@ -1,4 +1,5 @@
 import '../../core/config/api_config.dart';
+import '../../core/config/environment_config.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../../core/network/base_api_service.dart';
 import '../../core/types/result.dart';
@@ -86,8 +87,24 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
 
   HotpepperProxyDatasourceImpl(
     super.httpClient, {
-    this.proxyBaseUrl = HotpepperProxyConstants.defaultProxyUrl,
-  });
+    String? proxyBaseUrl,
+  }) : proxyBaseUrl = _resolveProxyUrl(proxyBaseUrl);
+
+  /// プロキシサーバーURLを環境設定に基づいて解決
+  static String _resolveProxyUrl(String? providedUrl) {
+    if (providedUrl != null && providedUrl.isNotEmpty) {
+      return providedUrl;
+    }
+
+    // 環境変数からのURL取得を試行
+    final envUrl = EnvironmentConfig.backendApiUrl;
+    if (envUrl.isNotEmpty) {
+      return envUrl;
+    }
+
+    // フォールバック: デフォルトURL
+    return HotpepperProxyConstants.defaultProxyUrl;
+  }
 
   @override
   Future<HotpepperSearchResponse> searchStores({

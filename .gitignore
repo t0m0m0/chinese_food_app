@@ -33,6 +33,7 @@ _*cacheMaxAge
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
@@ -48,54 +49,40 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Coverage reports
-coverage/
-
-# Mock generated files (コミットして一貫性保持)
-# **/*.mocks.dart
-
-# CI/CD artifacts
-*.apk
-*.ipa
-*.tar.gz
-
-# Project-specific documentation (contains sensitive information)
-CLAUDE.md
-
-# Environment variables (contains API keys and secrets)
+# Environment variables and secrets
 .env
-.env.local
-.env.production
-.env.staging
+.env.*
+.dev.vars
+*.env
 
-# Downloaded dependencies (external libraries and tools)
-# Java Development Kit
-jdk-*/
-openjdk-*.tar.gz
-# Android SDK Command Line Tools
-commandlinetools-*.zip
-# Archive files
-*.tar.gz
-*.zip
+# API Keys and sensitive configuration
+**/secrets/
+**/keys/
+*.key
+*.pem
+*.p8
+*.p12
+google-services.json
+GoogleService-Info.plist
 
-Pods/
-
-.claude/
-
-# CocoaPods generated files
-ios/Podfile.lock
-macos/Podfile
-
-# iOS/macOS specific generated files
-ios/Flutter/Profile.xcconfigapp_db.sqlite
-app_db.sqlite
-.serena/
-
-# Node.js関連（Flutter/Dartプロジェクトでは不要）
-package-lock.json
+# Cloudflare Workers local development
+.dev.vars
+wrangler.toml.backup
+.wrangler/
 node_modules/
 
-# Cloudflare Workers関連
-cloudflare-workers/node_modules/
-cloudflare-workers/.wrangler/
-cloudflare-workers/dist/
+# Dependencies
+package-lock.json
+
+# Claude Code and MCP settings
+.claude/
+.serena/
+CLAUDE.md
+
+# Test coverage reports
+coverage/
+*.lcov
+
+# Platform-specific dependency locks
+ios/Podfile.lock
+macos/Podfile
