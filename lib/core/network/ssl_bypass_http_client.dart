@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
@@ -13,7 +14,7 @@ class SSLBypassHttpClient extends http.BaseClient {
 
   /// SSL証明書検証をバイパスするクライアントを作成
   factory SSLBypassHttpClient.create() {
-    print('🚨 SSLBypassHttpClient.create() が呼び出されました');
+    debugPrint('🚨 SSLBypassHttpClient.create() が呼び出されました');
     final httpClient = HttpClient();
 
     // SSL証明書検証をバイパス（開発環境のみ）

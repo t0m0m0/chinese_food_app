@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../core/config/api_config.dart';
 import '../../core/config/environment_config.dart';
 import '../../core/exceptions/domain_exceptions.dart';
@@ -97,7 +99,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     String? proxyBaseUrl,
   })  : proxyBaseUrl = _resolveProxyUrl(proxyBaseUrl),
         super(AppHttpClient(client: SSLBypassHttpClient.create())) {
-    print('🔧 [HotpepperProxyDatasource] SSL証明書バイパス版で初期化');
+    debugPrint('🔧 [HotpepperProxyDatasource] SSL証明書バイパス版で初期化');
   }
 
   /// プロキシサーバーURLを環境設定に基づいて解決
@@ -127,9 +129,11 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     int start = 1,
   }) async {
     // デバッグ情報ログ
-    print('🔍 [HotpepperProxyDatasource] リクエスト開始');
-    print('📍 URL: $proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}');
-    print('📝 パラメータ: lat=$lat, lng=$lng, address=$address, keyword=$keyword');
+    debugPrint('🔍 [HotpepperProxyDatasource] リクエスト開始');
+    debugPrint(
+        '📍 URL: $proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}');
+    debugPrint(
+        '📝 パラメータ: lat=$lat, lng=$lng, address=$address, keyword=$keyword');
 
     // パラメータ検証
     _validateParameters(lat, lng, address, range, count, start);
@@ -145,11 +149,11 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       'start': start,
     };
 
-    print('📤 リクエストボディ: ${requestBody.toString()}');
+    debugPrint('📤 リクエストボディ: ${requestBody.toString()}');
 
     try {
       // プロキシサーバー経由でAPIリクエスト実行
-      print('🚀 プロキシサーバーにリクエスト送信中...');
+      debugPrint('🚀 プロキシサーバーにリクエスト送信中...');
       final response = await postAndParse<HotpepperSearchResponse>(
         '$proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}',
         (json) =>
@@ -157,14 +161,15 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
         body: requestBody,
         headers: _buildHeaders(),
       );
-      print('✅ プロキシサーバーからレスポンス取得成功: ${response.shops.length}件');
+      debugPrint('✅ プロキシサーバーからレスポンス取得成功: ${response.shops.length}件');
       return response;
     } on NetworkException catch (e) {
-      print('🚫 NetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
+      debugPrint(
+          '🚫 NetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
 
       // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
       if (e.message.contains('Handshake') || e.message.contains('SSL')) {
-        print('🔄 SSL/TLSエラーのため直接HotPepper APIにフォールバック');
+        debugPrint('🔄 SSL/TLSエラーのため直接HotPepper APIにフォールバック');
         return await _fallbackToDirectApi(
             lat, lng, address, keyword, range, count, start);
       }
@@ -172,12 +177,12 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       // プロキシサーバーのエラーレスポンスを適切なエラーに変換
       throw _handleProxyException(e);
     } catch (e, stackTrace) {
-      print('❌ 予期しないエラー発生: $e');
-      print('📍 スタックトレース: $stackTrace');
+      debugPrint('❌ 予期しないエラー発生: $e');
+      debugPrint('📍 スタックトレース: $stackTrace');
 
       // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
       if (e.toString().contains('Handshake') || e.toString().contains('SSL')) {
-        print('🔄 予期しないSSLエラーのため直接HotPepper APIにフォールバック');
+        debugPrint('🔄 予期しないSSLエラーのため直接HotPepper APIにフォールバック');
         return await _fallbackToDirectApi(
             lat, lng, address, keyword, range, count, start);
       }
@@ -294,11 +299,11 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     int count,
     int start,
   ) async {
-    print('📡 直接HotPepper API呼び出し開始');
+    debugPrint('📡 直接HotPepper API呼び出し開始');
 
     final apiKey = EnvironmentConfig.effectiveHotpepperApiKey;
     if (apiKey.isEmpty) {
-      print('❌ HotPepper APIキーが設定されていません');
+      debugPrint('❌ HotPepper APIキーが設定されていません');
       throw ApiException('API key not configured for fallback');
     }
 
@@ -323,7 +328,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     }
 
     final requestUrl = apiUrl.replace(queryParameters: queryParams);
-    print('📍 直接API URL: $requestUrl');
+    debugPrint('📍 直接API URL: $requestUrl');
 
     try {
       final response = await getAndParse<HotpepperSearchResponse>(
@@ -332,10 +337,10 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
             HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
         headers: {'User-Agent': 'MachiApp/1.0.0'},
       );
-      print('✅ 直接HotPepper APIからレスポンス取得成功: ${response.shops.length}件');
+      debugPrint('✅ 直接HotPepper APIからレスポンス取得成功: ${response.shops.length}件');
       return response;
     } catch (e) {
-      print('❌ 直接HotPepper API呼び出しも失敗: $e');
+      debugPrint('❌ 直接HotPepper API呼び出しも失敗: $e');
       throw ApiException('Both proxy and direct API failed: ${e.toString()}');
     }
   }
