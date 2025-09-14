@@ -95,7 +95,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
   /// SSL証明書問題回避用のコンストラクタ
   HotpepperProxyDatasourceImpl.withSSLBypass({
     String? proxyBaseUrl,
-  }) : proxyBaseUrl = _resolveProxyUrl(proxyBaseUrl),
+  })  : proxyBaseUrl = _resolveProxyUrl(proxyBaseUrl),
         super(AppHttpClient(client: SSLBypassHttpClient.create())) {
     print('🔧 [HotpepperProxyDatasource] SSL証明書バイパス版で初期化');
   }
@@ -161,25 +161,27 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       return response;
     } on NetworkException catch (e) {
       print('🚫 NetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
-      
+
       // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
       if (e.message.contains('Handshake') || e.message.contains('SSL')) {
         print('🔄 SSL/TLSエラーのため直接HotPepper APIにフォールバック');
-        return await _fallbackToDirectApi(lat, lng, address, keyword, range, count, start);
+        return await _fallbackToDirectApi(
+            lat, lng, address, keyword, range, count, start);
       }
-      
+
       // プロキシサーバーのエラーレスポンスを適切なエラーに変換
       throw _handleProxyException(e);
     } catch (e, stackTrace) {
       print('❌ 予期しないエラー発生: $e');
       print('📍 スタックトレース: $stackTrace');
-      
+
       // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
       if (e.toString().contains('Handshake') || e.toString().contains('SSL')) {
         print('🔄 予期しないSSLエラーのため直接HotPepper APIにフォールバック');
-        return await _fallbackToDirectApi(lat, lng, address, keyword, range, count, start);
+        return await _fallbackToDirectApi(
+            lat, lng, address, keyword, range, count, start);
       }
-      
+
       throw ApiException('Proxy server request failed: ${e.toString()}');
     }
   }
@@ -293,7 +295,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     int start,
   ) async {
     print('📡 直接HotPepper API呼び出し開始');
-    
+
     final apiKey = EnvironmentConfig.effectiveHotpepperApiKey;
     if (apiKey.isEmpty) {
       print('❌ HotPepper APIキーが設定されていません');
@@ -326,7 +328,8 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     try {
       final response = await getAndParse<HotpepperSearchResponse>(
         requestUrl.toString(),
-        (json) => HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
+        (json) =>
+            HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
         headers: {'User-Agent': 'MachiApp/1.0.0'},
       );
       print('✅ 直接HotPepper APIからレスポンス取得成功: ${response.shops.length}件');
