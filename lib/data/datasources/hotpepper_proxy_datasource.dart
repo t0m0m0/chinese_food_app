@@ -2,6 +2,8 @@ import '../../core/config/api_config.dart';
 import '../../core/config/environment_config.dart';
 import '../../core/exceptions/domain_exceptions.dart';
 import '../../core/network/base_api_service.dart';
+import '../../core/network/app_http_client.dart';
+import '../../core/network/ssl_bypass_http_client.dart';
 import '../../core/types/result.dart';
 import '../models/hotpepper_store_model.dart';
 import 'hotpepper_proxy_constants.dart';
@@ -90,6 +92,14 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     String? proxyBaseUrl,
   }) : proxyBaseUrl = _resolveProxyUrl(proxyBaseUrl);
 
+  /// SSL証明書問題回避用のコンストラクタ
+  HotpepperProxyDatasourceImpl.withSSLBypass({
+    String? proxyBaseUrl,
+  }) : proxyBaseUrl = _resolveProxyUrl(proxyBaseUrl),
+        super(AppHttpClient(client: SSLBypassHttpClient.create())) {
+    print('🔧 [HotpepperProxyDatasource] SSL証明書バイパス版で初期化');
+  }
+
   /// プロキシサーバーURLを環境設定に基づいて解決
   static String _resolveProxyUrl(String? providedUrl) {
     if (providedUrl != null && providedUrl.isNotEmpty) {
@@ -116,6 +126,11 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     int count = 20,
     int start = 1,
   }) async {
+    // デバッグ情報ログ
+    print('🔍 [HotpepperProxyDatasource] リクエスト開始');
+    print('📍 URL: $proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}');
+    print('📝 パラメータ: lat=$lat, lng=$lng, address=$address, keyword=$keyword');
+
     // パラメータ検証
     _validateParameters(lat, lng, address, range, count, start);
 
@@ -130,19 +145,41 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       'start': start,
     };
 
+    print('📤 リクエストボディ: ${requestBody.toString()}');
+
     try {
       // プロキシサーバー経由でAPIリクエスト実行
-      return await postAndParse<HotpepperSearchResponse>(
+      print('🚀 プロキシサーバーにリクエスト送信中...');
+      final response = await postAndParse<HotpepperSearchResponse>(
         '$proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}',
         (json) =>
             HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
         body: requestBody,
         headers: _buildHeaders(),
       );
+      print('✅ プロキシサーバーからレスポンス取得成功: ${response.shops.length}件');
+      return response;
     } on NetworkException catch (e) {
+      print('🚫 NetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
+      
+      // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
+      if (e.message.contains('Handshake') || e.message.contains('SSL')) {
+        print('🔄 SSL/TLSエラーのため直接HotPepper APIにフォールバック');
+        return await _fallbackToDirectApi(lat, lng, address, keyword, range, count, start);
+      }
+      
       // プロキシサーバーのエラーレスポンスを適切なエラーに変換
       throw _handleProxyException(e);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ 予期しないエラー発生: $e');
+      print('📍 スタックトレース: $stackTrace');
+      
+      // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
+      if (e.toString().contains('Handshake') || e.toString().contains('SSL')) {
+        print('🔄 予期しないSSLエラーのため直接HotPepper APIにフォールバック');
+        return await _fallbackToDirectApi(lat, lng, address, keyword, range, count, start);
+      }
+      
       throw ApiException('Proxy server request failed: ${e.toString()}');
     }
   }
@@ -243,6 +280,61 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       'Accept': HotpepperProxyConstants.acceptJson,
       ...ApiConfig.commonHeaders,
     };
+  }
+
+  /// 直接HotPepper APIにフォールバック（SSL/TLSエラー時）
+  Future<HotpepperSearchResponse> _fallbackToDirectApi(
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int range,
+    int count,
+    int start,
+  ) async {
+    print('📡 直接HotPepper API呼び出し開始');
+    
+    final apiKey = EnvironmentConfig.effectiveHotpepperApiKey;
+    if (apiKey.isEmpty) {
+      print('❌ HotPepper APIキーが設定されていません');
+      throw ApiException('API key not configured for fallback');
+    }
+
+    // HotPepper API URL構築
+    final apiUrl = Uri.parse(EnvironmentConfig.hotpepperApiUrl);
+    final queryParams = <String, String>{
+      'key': apiKey,
+      'format': 'json',
+      'keyword': keyword ?? '中華',
+      'range': range.toString(),
+      'count': count.toString(),
+      'start': start.toString(),
+    };
+
+    // 位置情報パラメータ
+    if (lat != null && lng != null) {
+      queryParams['lat'] = lat.toString();
+      queryParams['lng'] = lng.toString();
+    }
+    if (address != null && address.isNotEmpty) {
+      queryParams['address'] = address;
+    }
+
+    final requestUrl = apiUrl.replace(queryParameters: queryParams);
+    print('📍 直接API URL: $requestUrl');
+
+    try {
+      final response = await getAndParse<HotpepperSearchResponse>(
+        requestUrl.toString(),
+        (json) => HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
+        headers: {'User-Agent': 'MachiApp/1.0.0'},
+      );
+      print('✅ 直接HotPepper APIからレスポンス取得成功: ${response.shops.length}件');
+      return response;
+    } catch (e) {
+      print('❌ 直接HotPepper API呼び出しも失敗: $e');
+      throw ApiException('Both proxy and direct API failed: ${e.toString()}');
+    }
   }
 
   /// プロキシサーバーのエラーレスポンスを適切なApiExceptionに変換

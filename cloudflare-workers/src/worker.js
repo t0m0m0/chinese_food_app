@@ -84,23 +84,41 @@ export default {
  */
 async function handleHotpepperSearch(request, env, corsHeaders) {
   try {
+    console.log('🔍 [Worker] handleHotpepperSearch started');
+    
+    // 環境変数チェック
+    if (!env.HOTPEPPER_API_KEY) {
+      console.error('❌ [Worker] HOTPEPPER_API_KEY not found');
+      return createErrorResponse(500, 'API key not configured', corsHeaders);
+    }
+    console.log('✅ [Worker] HOTPEPPER_API_KEY found');
+
     // リクエストボディの解析
+    console.log('📥 [Worker] Parsing request body...');
     const requestBody = await request.json();
+    console.log('📋 [Worker] Request body:', JSON.stringify(requestBody));
     const { lat, lng, address, keyword, range, count, start } = requestBody;
 
     // パラメータバリデーション
+    console.log('🔍 [Worker] Validating parameters...');
     const validationError = validateSearchParams({ lat, lng, address, range, count, start });
     if (validationError) {
+      console.error('❌ [Worker] Validation error:', validationError);
       return createErrorResponse(400, validationError, corsHeaders);
     }
+    console.log('✅ [Worker] Parameters valid');
 
     // HotPepper API呼び出し
+    console.log('🌐 [Worker] Calling HotPepper API...');
     const hotpepperResponse = await callHotpepperApi({
       lat, lng, address, keyword, range, count, start
     }, env.HOTPEPPER_API_KEY);
+    console.log('✅ [Worker] HotPepper API response received');
 
     // レスポンス変換
+    console.log('🔄 [Worker] Transforming response...');
     const transformedResponse = transformHotpepperResponse(hotpepperResponse);
+    console.log('✅ [Worker] Response transformed, shops:', transformedResponse.shops.length);
 
     return new Response(JSON.stringify(transformedResponse), {
       status: 200,
@@ -111,8 +129,9 @@ async function handleHotpepperSearch(request, env, corsHeaders) {
     });
 
   } catch (error) {
-    console.error('HotPepper API proxy error:', error);
-    return createErrorResponse(500, 'Internal server error', corsHeaders);
+    console.error('❌ [Worker] Error in handleHotpepperSearch:', error);
+    console.error('📍 [Worker] Error stack:', error.stack);
+    return createErrorResponse(500, `Internal server error: ${error.message}`, corsHeaders);
   }
 }
 
@@ -177,6 +196,8 @@ async function callHotpepperApi(params, apiKey) {
     apiUrl.searchParams.set('address', address);
   }
 
+  console.log('🌐 [Worker] HotPepper API URL:', apiUrl.toString());
+
   // API呼び出し
   const response = await fetch(apiUrl.toString(), {
     method: 'GET',
@@ -185,11 +206,17 @@ async function callHotpepperApi(params, apiKey) {
     },
   });
 
+  console.log('📡 [Worker] HotPepper API status:', response.status);
+
   if (!response.ok) {
-    throw new Error(`HotPepper API error: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    console.error('❌ [Worker] HotPepper API error response:', errorText);
+    throw new Error(`HotPepper API error: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
-  return await response.json();
+  const jsonResponse = await response.json();
+  console.log('📊 [Worker] HotPepper API response type:', typeof jsonResponse);
+  return jsonResponse;
 }
 
 /**

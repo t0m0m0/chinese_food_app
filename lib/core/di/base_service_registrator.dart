@@ -157,19 +157,14 @@ abstract class BaseServiceRegistrator {
           ? env_config.EnvironmentConfig.backendApiUrl
           : null;
 
-      if (proxyUrl != null && proxyUrl.isNotEmpty) {
-        developer.log(
-            'Using HotpepperProxyDatasource with custom URL: $proxyUrl',
-            name: 'DI');
-        return HotpepperProxyDatasourceImpl(
-          AppHttpClient(),
-          proxyBaseUrl: proxyUrl,
-        );
-      } else {
-        developer.log('Using HotpepperProxyDatasource with default URL',
-            name: 'DI');
-        return HotpepperProxyDatasourceImpl(AppHttpClient());
-      }
+      developer.log(
+          'Using HotpepperProxyDatasource with SSL bypass: ${proxyUrl ?? "default URL"}',
+          name: 'DI');
+
+      // SSL証明書バイパス版コンストラクタを使用
+      return HotpepperProxyDatasourceImpl.withSSLBypass(
+        proxyBaseUrl: proxyUrl,
+      );
     });
   }
 
