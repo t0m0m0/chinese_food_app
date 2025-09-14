@@ -15,7 +15,7 @@ class SSLBypassHttpClient extends http.BaseClient {
   factory SSLBypassHttpClient.create() {
     print('🚨 SSLBypassHttpClient.create() が呼び出されました');
     final httpClient = HttpClient();
-    
+
     // SSL証明書検証をバイパス（開発環境のみ）
     httpClient.badCertificateCallback = (cert, host, port) {
       print('🔐 SSL証明書チェック: host=$host, port=$port');
@@ -30,8 +30,8 @@ class SSLBypassHttpClient extends http.BaseClient {
 
     // 追加のSSL設定（iOS向け）
     try {
-      httpClient.connectionTimeout = Duration(seconds: 30);
-      httpClient.idleTimeout = Duration(seconds: 30);
+      httpClient.connectionTimeout = const Duration(seconds: 30);
+      httpClient.idleTimeout = const Duration(seconds: 30);
     } catch (e) {
       print('⚠️ SSL追加設定エラー: $e');
     }
