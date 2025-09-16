@@ -4,11 +4,19 @@ import 'package:chinese_food_app/core/config/app_config.dart';
 void main() {
   group('AppConfig API Configuration Tests', () {
     setUp(() {
-      AppConfig.forceUninitialize();
+      try {
+        AppConfig.forceUninitialize();
+      } catch (e) {
+        // 本番環境では期待される動作なのでエラーを無視
+      }
     });
 
     tearDown(() {
-      AppConfig.forceUninitialize();
+      try {
+        AppConfig.forceUninitialize();
+      } catch (e) {
+        // 本番環境では期待される動作なのでエラーを無視
+      }
     });
 
     test('should provide API configuration through AppConfig.api', () {
@@ -30,8 +38,13 @@ void main() {
     });
 
     test('should handle HotPepper API key access correctly', () {
-      // Act & Assert - 開発環境では同期版のキーアクセスが可能
-      expect(() => AppConfig.api.hotpepperApiKey, returnsNormally);
+      if (AppConfig.isProduction) {
+        // 本番環境では同期版APIキー取得は例外を投げる
+        expect(() => AppConfig.api.hotpepperApiKey, throwsUnsupportedError);
+      } else {
+        // 開発環境では同期版のキーアクセスが可能
+        expect(() => AppConfig.api.hotpepperApiKey, returnsNormally);
+      }
     });
 
     test('should provide consistent API URL', () {

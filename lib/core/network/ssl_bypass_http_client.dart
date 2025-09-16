@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
@@ -14,18 +13,26 @@ class SSLBypassHttpClient extends http.BaseClient {
 
   /// SSL証明書検証をバイパスするクライアントを作成
   factory SSLBypassHttpClient.create() {
-    debugPrint('🚨 SSLBypassHttpClient.create() が呼び出されました');
+    // テスト環境では詳細ログを抑制（パフォーマンス向上のため）
+    // debugPrint('🚨 SSLBypassHttpClient.create() が呼び出されました');
     final httpClient = HttpClient();
 
     // SSL証明書検証をバイパス（開発環境のみ）
     httpClient.badCertificateCallback = (cert, host, port) {
-      print('🔐 SSL証明書チェック: host=$host, port=$port');
+      // テスト時のパフォーマンス向上のためログを一時的に無効化
+      // if (kDebugMode) {
+      //   print('🔐 SSL証明書チェック: host=$host, port=$port');
+      // }
       // Cloudflare WorkersのSSL問題を回避
       if (host.contains('workers.dev') || host.contains('cloudflare')) {
-        print('⚠️ SSL証明書検証をバイパス: $host');
+        // if (kDebugMode) {
+        //   print('⚠️ SSL証明書検証をバイパス: $host');
+        // }
         return true; // 証明書を受け入れる
       }
-      print('✅ SSL証明書検証実行: $host');
+      // if (kDebugMode) {
+      //   print('✅ SSL証明書検証実行: $host');
+      // }
       return false; // その他のホストは正常な検証を行う
     };
 
@@ -34,10 +41,16 @@ class SSLBypassHttpClient extends http.BaseClient {
       httpClient.connectionTimeout = const Duration(seconds: 30);
       httpClient.idleTimeout = const Duration(seconds: 30);
     } catch (e) {
-      print('⚠️ SSL追加設定エラー: $e');
+      // テスト時のパフォーマンス向上のためログを一時的に無効化
+      // if (kDebugMode) {
+      //   print('⚠️ SSL追加設定エラー: $e');
+      // }
     }
 
-    print('🔧 SSLBypassHttpClient作成完了');
+    // テスト時のパフォーマンス向上のためログを一時的に無効化
+    // if (kDebugMode) {
+    //   print('🔧 SSLBypassHttpClient作成完了');
+    // }
     return SSLBypassHttpClient._(IOClient(httpClient));
   }
 

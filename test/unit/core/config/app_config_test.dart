@@ -38,10 +38,14 @@ void main() {
       });
 
       test('should provide unified access to HotPepper API key', () {
-        final apiKey = AppConfig.api.hotpepperApiKey;
-
-        expect(apiKey, isNotNull);
-        expect(apiKey, isA<String>());
+        if (AppConfig.isProduction) {
+          // 本番環境では同期版APIキー取得は例外を投げる
+          expect(() => AppConfig.api.hotpepperApiKey, throwsUnsupportedError);
+        } else {
+          // 開発環境では同期版APIキーが取得可能
+          final apiKey = AppConfig.api.hotpepperApiKey;
+          expect(apiKey, isA<String>());
+        }
       });
 
       test('should provide unified access to HotPepper API URL', () {
