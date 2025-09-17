@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+
+import '../config/app_config.dart';
 
 /// SSL証明書検証をバイパスするHTTPクライアント（開発環境用）
 ///
@@ -19,7 +22,18 @@ class SSLBypassHttpClient extends http.BaseClient {
     httpClient.badCertificateCallback = (cert, host, port) {
       // Cloudflare WorkersのSSL問題を回避
       if (host.contains('workers.dev') || host.contains('cloudflare')) {
-        return true; // 証明書を受け入れる
+        // 開発環境でのみSSL証明書バイパスを許可
+        if (kDebugMode || AppConfig.isDevelopment) {
+          if (kDebugMode) {
+            debugPrint('⚠️ SSL証明書検証をバイパス (開発環境): $host');
+          }
+          return true; // 証明書を受け入れる
+        }
+        // 本番環境では厳格な検証を実行
+        if (kDebugMode) {
+          debugPrint('🔒 SSL証明書検証を実行 (本番環境): $host');
+        }
+        return false;
       }
       return false; // その他のホストは正常な検証を行う
     };
