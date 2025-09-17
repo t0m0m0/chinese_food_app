@@ -304,7 +304,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
   }
 
   /// 直接HotPepper APIにフォールバック（SSL/TLSエラー時）
-  /// 
+  ///
   /// レート制限を考慮し、フォールバックの使用を制限します
   Future<HotpepperSearchResponse> _fallbackToDirectApi(
     double? lat,
