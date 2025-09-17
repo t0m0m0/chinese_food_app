@@ -98,10 +98,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
   HotpepperProxyDatasourceImpl.withSSLBypass({
     String? proxyBaseUrl,
   })  : proxyBaseUrl = _resolveProxyUrl(proxyBaseUrl),
-        super(AppHttpClient(client: SSLBypassHttpClient.create())) {
-    // テスト時のパフォーマンス向上のためログを一時的に無効化
-    // debugPrint('🔧 [HotpepperProxyDatasource] SSL証明書バイパス版で初期化');
-  }
+        super(AppHttpClient(client: SSLBypassHttpClient.create()));
 
   /// プロキシサーバーURLを環境設定に基づいて解決
   static String _resolveProxyUrl(String? providedUrl) {
