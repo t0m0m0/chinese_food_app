@@ -127,7 +127,7 @@ void main() {
       test('should resolve services efficiently', () {
         // Arrange
         container.configure();
-        const iterations = 1000;
+        const iterations = 100; // ログ出力を減らすため反復回数を削減
 
         // Act & Assert
         final stopwatch = Stopwatch()..start();
@@ -139,14 +139,14 @@ void main() {
 
         stopwatch.stop();
 
-        // Should complete 1000 resolutions in reasonable time (< 500ms for CI)
-        expect(stopwatch.elapsedMilliseconds, lessThan(500));
+        // Should complete 100 resolutions in reasonable time (< 100ms for CI)
+        expect(stopwatch.elapsedMilliseconds, lessThan(100));
       });
 
       test('should handle concurrent access correctly', () async {
         // Arrange
         container.configure();
-        const concurrentRequests = 100;
+        const concurrentRequests = 10; // ログ出力を減らすため並行数を削減
 
         // Act
         final futures = List.generate(concurrentRequests, (_) async {

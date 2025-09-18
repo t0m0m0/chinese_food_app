@@ -62,13 +62,20 @@ void main() {
 
     group('Production Safety', () {
       test('should block test operations in production-like environment', () {
-        // Note: テストでは実際の本番環境フラグをシミュレートできないが、
-        // コードの構造を確認することでセキュリティを保証
+        // Note: このテストは本番環境での動作をテストする
+        // 本番環境では、テスト用メソッドの実行が拒否される
 
-        // Arrange & Act & Assert
-        expect(() => AppConfig.setTestApiKey('test_key'), returnsNormally);
-        expect(() => AppConfig.clearTestApiKey(), returnsNormally);
-        expect(() => AppConfig.resetInitialization(), returnsNormally);
+        if (AppConfig.isProduction) {
+          // 本番環境では例外が投げられることを期待
+          expect(() => AppConfig.setTestApiKey('test_key'), throwsStateError);
+          expect(() => AppConfig.clearTestApiKey(), throwsStateError);
+          expect(() => AppConfig.resetInitialization(), throwsStateError);
+        } else {
+          // 開発環境では正常に動作することを期待
+          expect(() => AppConfig.setTestApiKey('test_key'), returnsNormally);
+          expect(() => AppConfig.clearTestApiKey(), returnsNormally);
+          expect(() => AppConfig.resetInitialization(), returnsNormally);
+        }
       });
     });
 
@@ -123,6 +130,13 @@ void main() {
     group('Initialization Metrics', () {
       test('should complete initialization with performance tracking',
           () async {
+        // 本番環境では初期化リセットができないため、スキップ
+        if (AppConfig.isProduction) {
+          // 本番環境では初期化リセットが拒否されることを確認
+          expect(() => AppConfig.resetInitialization(), throwsStateError);
+          return;
+        }
+
         // Arrange
         AppConfig.resetInitialization();
 
