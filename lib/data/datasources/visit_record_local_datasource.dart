@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import '../../core/database/schema/app_database.dart';
 import '../../domain/entities/visit_record.dart' as entities;
+import '../../core/types/result.dart';
+import '../../core/exceptions/base_exception.dart';
 
 /// 訪問記録データのローカルデータソースインターフェース
 abstract class VisitRecordLocalDatasource {
@@ -21,6 +23,28 @@ abstract class VisitRecordLocalDatasource {
 
   /// 訪問記録を削除
   Future<void> deleteVisitRecord(String id);
+
+  // Result<T>パターンに対応したメソッド群
+  /// Result<T>版: 訪問記録を挿入
+  Future<Result<void>> insertVisitRecordResult(
+      entities.VisitRecord visitRecord);
+
+  /// Result<T>版: IDで訪問記録を取得
+  Future<Result<entities.VisitRecord?>> getVisitRecordByIdResult(String id);
+
+  /// Result<T>版: 全訪問記録を取得
+  Future<Result<List<entities.VisitRecord>>> getAllVisitRecordsResult();
+
+  /// Result<T>版: 店舗IDで訪問記録を取得
+  Future<Result<List<entities.VisitRecord>>> getVisitRecordsByStoreIdResult(
+      String storeId);
+
+  /// Result<T>版: 訪問記録を更新
+  Future<Result<void>> updateVisitRecordResult(
+      entities.VisitRecord visitRecord);
+
+  /// Result<T>版: 訪問記録を削除
+  Future<Result<void>> deleteVisitRecordResult(String id);
 }
 
 /// 訪問記録データのローカルデータソース実装
@@ -104,5 +128,94 @@ class VisitRecordLocalDatasourceImpl implements VisitRecordLocalDatasource {
       memo: record.memo.isEmpty ? null : record.memo,
       createdAt: DateTime.parse(record.createdAt),
     );
+  }
+
+  // Result<T>パターン実装
+  @override
+  Future<Result<void>> insertVisitRecordResult(
+      entities.VisitRecord visitRecord) async {
+    try {
+      await insertVisitRecord(visitRecord);
+      return const Success(null);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to insert visit record: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during visit record insertion: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<entities.VisitRecord?>> getVisitRecordByIdResult(
+      String id) async {
+    try {
+      final visitRecord = await getVisitRecordById(id);
+      return Success(visitRecord);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to get visit record by id: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during visit record retrieval: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<List<entities.VisitRecord>>> getAllVisitRecordsResult() async {
+    try {
+      final visitRecords = await getAllVisitRecords();
+      return Success(visitRecords);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to get all visit records: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during visit records retrieval: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<List<entities.VisitRecord>>> getVisitRecordsByStoreIdResult(
+      String storeId) async {
+    try {
+      final visitRecords = await getVisitRecordsByStoreId(storeId);
+      return Success(visitRecords);
+    } on Exception catch (e) {
+      return Failure(BaseException(
+          'Failed to get visit records by store id: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during visit records retrieval by store id: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateVisitRecordResult(
+      entities.VisitRecord visitRecord) async {
+    try {
+      await updateVisitRecord(visitRecord);
+      return const Success(null);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to update visit record: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during visit record update: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteVisitRecordResult(String id) async {
+    try {
+      await deleteVisitRecord(id);
+      return const Success(null);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to delete visit record: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during visit record deletion: ${e.toString()}'));
+    }
   }
 }

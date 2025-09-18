@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 import '../../core/database/schema/app_database.dart';
 import '../../domain/entities/store.dart' as entities;
 import '../../core/constants/error_messages.dart';
+import '../../core/types/result.dart';
+import '../../core/exceptions/base_exception.dart';
 
 /// 店舗データのローカルデータソースインターフェース
 abstract class StoreLocalDatasource {
@@ -45,6 +47,26 @@ abstract class StoreLocalDatasource {
     required int page,
     required int pageSize,
   });
+
+  // Result<T>パターンに対応したメソッド群
+  /// Result<T>版: 店舗を挿入
+  Future<Result<void>> insertStoreResult(entities.Store store);
+
+  /// Result<T>版: IDで店舗を取得
+  Future<Result<entities.Store?>> getStoreByIdResult(String id);
+
+  /// Result<T>版: 全店舗を取得
+  Future<Result<List<entities.Store>>> getAllStoresResult();
+
+  /// Result<T>版: 店舗を更新
+  Future<Result<void>> updateStoreResult(entities.Store store);
+
+  /// Result<T>版: 店舗を削除
+  Future<Result<void>> deleteStoreResult(String id);
+
+  /// Result<T>版: ステータスで店舗を検索
+  Future<Result<List<entities.Store>>> getStoresByStatusResult(
+      entities.StoreStatus status);
 }
 
 /// 店舗データのローカルデータソース実装
@@ -283,5 +305,88 @@ class StoreLocalDatasourceImpl implements StoreLocalDatasource {
       memo: store.memo.isEmpty ? null : store.memo,
       createdAt: DateTime.parse(store.createdAt),
     );
+  }
+
+  // Result<T>パターン実装
+  @override
+  Future<Result<void>> insertStoreResult(entities.Store store) async {
+    try {
+      await insertStore(store);
+      return const Success(null);
+    } on Exception catch (e) {
+      return Failure(BaseException('Failed to insert store: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during store insertion: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<entities.Store?>> getStoreByIdResult(String id) async {
+    try {
+      final store = await getStoreById(id);
+      return Success(store);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to get store by id: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during store retrieval: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<List<entities.Store>>> getAllStoresResult() async {
+    try {
+      final stores = await getAllStores();
+      return Success(stores);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to get all stores: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during stores retrieval: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateStoreResult(entities.Store store) async {
+    try {
+      await updateStore(store);
+      return const Success(null);
+    } on Exception catch (e) {
+      return Failure(BaseException('Failed to update store: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during store update: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteStoreResult(String id) async {
+    try {
+      await deleteStore(id);
+      return const Success(null);
+    } on Exception catch (e) {
+      return Failure(BaseException('Failed to delete store: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during store deletion: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Result<List<entities.Store>>> getStoresByStatusResult(
+      entities.StoreStatus status) async {
+    try {
+      final stores = await getStoresByStatus(status);
+      return Success(stores);
+    } on Exception catch (e) {
+      return Failure(
+          BaseException('Failed to get stores by status: ${e.toString()}'));
+    } catch (e) {
+      return Failure(BaseException(
+          'Unexpected error during stores retrieval by status: ${e.toString()}'));
+    }
   }
 }
