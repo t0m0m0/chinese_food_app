@@ -24,26 +24,26 @@ abstract class VisitRecordLocalDatasource {
   /// 訪問記録を削除
   Future<void> deleteVisitRecord(String id);
 
-  // Result<T>パターンに対応したメソッド群
-  /// Result<T>版: 訪問記録を挿入
+  // Result&lt;T&gt;パターンに対応したメソッド群
+  /// Result&lt;T&gt;版: 訪問記録を挿入
   Future<Result<void>> insertVisitRecordResult(
       entities.VisitRecord visitRecord);
 
-  /// Result<T>版: IDで訪問記録を取得
+  /// Result&lt;T&gt;版: IDで訪問記録を取得
   Future<Result<entities.VisitRecord?>> getVisitRecordByIdResult(String id);
 
-  /// Result<T>版: 全訪問記録を取得
+  /// Result&lt;T&gt;版: 全訪問記録を取得
   Future<Result<List<entities.VisitRecord>>> getAllVisitRecordsResult();
 
-  /// Result<T>版: 店舗IDで訪問記録を取得
+  /// Result&lt;T&gt;版: 店舗IDで訪問記録を取得
   Future<Result<List<entities.VisitRecord>>> getVisitRecordsByStoreIdResult(
       String storeId);
 
-  /// Result<T>版: 訪問記録を更新
+  /// Result&lt;T&gt;版: 訪問記録を更新
   Future<Result<void>> updateVisitRecordResult(
       entities.VisitRecord visitRecord);
 
-  /// Result<T>版: 訪問記録を削除
+  /// Result&lt;T&gt;版: 訪問記録を削除
   Future<Result<void>> deleteVisitRecordResult(String id);
 }
 

@@ -27,26 +27,26 @@ abstract class PhotoLocalDatasource {
   /// 写真を削除
   Future<void> deletePhoto(String id);
 
-  // Result<T>パターンに対応したメソッド群
-  /// Result<T>版: 写真を挿入
+  // Result&lt;T&gt;パターンに対応したメソッド群
+  /// Result&lt;T&gt;版: 写真を挿入
   Future<Result<void>> insertPhotoResult(entities.Photo photo);
 
-  /// Result<T>版: IDで写真を取得
+  /// Result&lt;T&gt;版: IDで写真を取得
   Future<Result<entities.Photo?>> getPhotoByIdResult(String id);
 
-  /// Result<T>版: 全写真を取得
+  /// Result&lt;T&gt;版: 全写真を取得
   Future<Result<List<entities.Photo>>> getAllPhotosResult();
 
-  /// Result<T>版: 店舗IDで写真を取得
+  /// Result&lt;T&gt;版: 店舗IDで写真を取得
   Future<Result<List<entities.Photo>>> getPhotosByStoreIdResult(String storeId);
 
-  /// Result<T>版: 訪問記録IDで写真を取得
+  /// Result&lt;T&gt;版: 訪問記録IDで写真を取得
   Future<Result<List<entities.Photo>>> getPhotosByVisitIdResult(String visitId);
 
-  /// Result<T>版: 写真を更新
+  /// Result&lt;T&gt;版: 写真を更新
   Future<Result<void>> updatePhotoResult(entities.Photo photo);
 
-  /// Result<T>版: 写真を削除
+  /// Result&lt;T&gt;版: 写真を削除
   Future<Result<void>> deletePhotoResult(String id);
 }
 

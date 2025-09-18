@@ -48,23 +48,23 @@ abstract class StoreLocalDatasource {
     required int pageSize,
   });
 
-  // Result<T>パターンに対応したメソッド群
-  /// Result<T>版: 店舗を挿入
+  // Result&lt;T&gt;パターンに対応したメソッド群
+  /// Result&lt;T&gt;版: 店舗を挿入
   Future<Result<void>> insertStoreResult(entities.Store store);
 
-  /// Result<T>版: IDで店舗を取得
+  /// Result&lt;T&gt;版: IDで店舗を取得
   Future<Result<entities.Store?>> getStoreByIdResult(String id);
 
-  /// Result<T>版: 全店舗を取得
+  /// Result&lt;T&gt;版: 全店舗を取得
   Future<Result<List<entities.Store>>> getAllStoresResult();
 
-  /// Result<T>版: 店舗を更新
+  /// Result&lt;T&gt;版: 店舗を更新
   Future<Result<void>> updateStoreResult(entities.Store store);
 
-  /// Result<T>版: 店舗を削除
+  /// Result&lt;T&gt;版: 店舗を削除
   Future<Result<void>> deleteStoreResult(String id);
 
-  /// Result<T>版: ステータスで店舗を検索
+  /// Result&lt;T&gt;版: ステータスで店舗を検索
   Future<Result<List<entities.Store>>> getStoresByStatusResult(
       entities.StoreStatus status);
 }
