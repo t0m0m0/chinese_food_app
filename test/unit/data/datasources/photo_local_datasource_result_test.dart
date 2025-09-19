@@ -3,16 +3,199 @@ import 'package:chinese_food_app/core/database/schema/app_database.dart'
     hide Store, VisitRecord, Photo;
 import 'package:chinese_food_app/core/types/result.dart';
 import 'package:chinese_food_app/data/datasources/photo_local_datasource.dart';
+import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
+import 'package:chinese_food_app/data/datasources/visit_record_local_datasource.dart';
 import 'package:chinese_food_app/domain/entities/photo.dart';
+import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/visit_record.dart';
 import '../../../helpers/test_database_factory.dart';
+
+/// テスト用訪問記録データを作成
+Future<void> createTestVisitRecords(
+    VisitRecordLocalDatasourceImpl visitRecordDatasource) async {
+  final testVisitRecords = [
+    VisitRecord(
+      id: 'visit_789',
+      storeId: 'store_456',
+      visitedAt: DateTime.now().subtract(const Duration(days: 1)),
+      menu: 'テストメニュー789',
+      memo: 'テスト訪問記録',
+      createdAt: DateTime.now(),
+    ),
+    VisitRecord(
+      id: 'visit_333',
+      storeId: 'store_222',
+      visitedAt: DateTime.now().subtract(const Duration(days: 2)),
+      menu: 'テストメニュー333',
+      memo: 'テスト訪問記録333',
+      createdAt: DateTime.now(),
+    ),
+    VisitRecord(
+      id: 'visit_123',
+      storeId: 'store_result_test',
+      visitedAt: DateTime.now().subtract(const Duration(days: 3)),
+      menu: 'テストメニュー123',
+      memo: 'テスト訪問記録123',
+      createdAt: DateTime.now(),
+    ),
+    VisitRecord(
+      id: 'visit_result_test',
+      storeId: 'store_888',
+      visitedAt: DateTime.now().subtract(const Duration(days: 4)),
+      menu: 'テストメニューResult',
+      memo: 'テスト訪問記録Result',
+      createdAt: DateTime.now(),
+    ),
+    VisitRecord(
+      id: 'visit_updated',
+      storeId: 'store_update',
+      visitedAt: DateTime.now().subtract(const Duration(days: 5)),
+      menu: '更新用メニュー',
+      memo: '更新用訪問記録',
+      createdAt: DateTime.now(),
+    ),
+    VisitRecord(
+      id: 'other_visit',
+      storeId: 'store_888',
+      visitedAt: DateTime.now().subtract(const Duration(days: 6)),
+      menu: 'その他メニュー',
+      memo: 'その他訪問記録',
+      createdAt: DateTime.now(),
+    ),
+  ];
+
+  for (final visitRecord in testVisitRecords) {
+    await visitRecordDatasource.insertVisitRecord(visitRecord);
+  }
+}
+
+/// テスト用店舗データを作成
+Future<void> createTestStores(StoreLocalDatasourceImpl storeDatasource) async {
+  final testStores = [
+    Store(
+      id: 'store_123',
+      name: 'テスト店舗123',
+      address: '東京都渋谷区',
+      lat: 35.6580339,
+      lng: 139.7016358,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_456',
+      name: 'テスト店舗456',
+      address: '東京都新宿区',
+      lat: 35.6812362,
+      lng: 139.7649361,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_111',
+      name: 'テスト店舗111',
+      address: '東京都世田谷区',
+      lat: 35.6464311,
+      lng: 139.6532341,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_222',
+      name: 'テスト店舗222',
+      address: '東京都品川区',
+      lat: 35.6284713,
+      lng: 139.7387843,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_result_test',
+      name: 'テスト店舗Result',
+      address: '東京都中野区',
+      lat: 35.7090259,
+      lng: 139.6634618,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'other_store',
+      name: 'その他店舗',
+      address: '東京都杉並区',
+      lat: 35.7000694,
+      lng: 139.6365002,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_888',
+      name: 'テスト店舗888',
+      address: '東京都豊島区',
+      lat: 35.7295351,
+      lng: 139.7156468,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_999',
+      name: 'テスト店舗999',
+      address: '東京都文京区',
+      lat: 35.7081104,
+      lng: 139.7586547,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_update',
+      name: '更新用店舗',
+      address: '東京都台東区',
+      lat: 35.7120783,
+      lng: 139.7762711,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_delete',
+      name: '削除用店舗',
+      address: '東京都墨田区',
+      lat: 35.7101046,
+      lng: 139.8107201,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+  ];
+
+  for (final store in testStores) {
+    await storeDatasource.insertStore(store);
+  }
+}
 
 void main() {
   late AppDatabase database;
   late PhotoLocalDatasourceImpl datasource;
+  late StoreLocalDatasourceImpl storeDatasource;
+  late VisitRecordLocalDatasourceImpl visitRecordDatasource;
 
-  setUp(() {
+  setUp(() async {
     database = TestDatabaseFactory.createTestDatabase();
     datasource = PhotoLocalDatasourceImpl(database);
+    storeDatasource = StoreLocalDatasourceImpl(database);
+    visitRecordDatasource = VisitRecordLocalDatasourceImpl(database);
+
+    // テスト用店舗データを事前作成（Foreign Key制約対応）
+    await createTestStores(storeDatasource);
+
+    // テスト用訪問記録データを事前作成（Foreign Key制約対応）
+    await createTestVisitRecords(visitRecordDatasource);
   });
 
   tearDown(() async {

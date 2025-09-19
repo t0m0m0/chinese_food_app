@@ -3,16 +3,113 @@ import 'package:chinese_food_app/core/database/schema/app_database.dart'
     hide Store, VisitRecord;
 import 'package:chinese_food_app/core/types/result.dart';
 import 'package:chinese_food_app/data/datasources/visit_record_local_datasource.dart';
+import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
 import 'package:chinese_food_app/domain/entities/visit_record.dart';
+import 'package:chinese_food_app/domain/entities/store.dart';
 import '../../../helpers/test_database_factory.dart';
+
+/// テスト用店舗データを作成
+Future<void> createTestStores(StoreLocalDatasourceImpl storeDatasource) async {
+  final testStores = [
+    Store(
+      id: 'store_123',
+      name: 'テスト店舗123',
+      address: '東京都渋谷区',
+      lat: 35.6580339,
+      lng: 139.7016358,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_456',
+      name: 'テスト店舗456',
+      address: '東京都新宿区',
+      lat: 35.6812362,
+      lng: 139.7649361,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_789',
+      name: 'テスト店舗789',
+      address: '東京都世田谷区',
+      lat: 35.6464311,
+      lng: 139.6532341,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_101',
+      name: 'テスト店舗101',
+      address: '東京都品川区',
+      lat: 35.6284713,
+      lng: 139.7387843,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_result_test',
+      name: 'テスト店舗Result',
+      address: '東京都中野区',
+      lat: 35.7090259,
+      lng: 139.6634618,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'other_store',
+      name: 'その他店舗',
+      address: '東京都杉並区',
+      lat: 35.7000694,
+      lng: 139.6365002,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_update',
+      name: '更新用店舗',
+      address: '東京都豊島区',
+      lat: 35.7295351,
+      lng: 139.7156468,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+    Store(
+      id: 'store_delete',
+      name: '削除用店舗',
+      address: '東京都文京区',
+      lat: 35.7081104,
+      lng: 139.7586547,
+      status: StoreStatus.wantToGo,
+      memo: '',
+      createdAt: DateTime.now(),
+    ),
+  ];
+
+  for (final store in testStores) {
+    await storeDatasource.insertStore(store);
+  }
+}
 
 void main() {
   late AppDatabase database;
   late VisitRecordLocalDatasourceImpl datasource;
+  late StoreLocalDatasourceImpl storeDatasource;
 
-  setUp(() {
+  setUp(() async {
     database = TestDatabaseFactory.createTestDatabase();
     datasource = VisitRecordLocalDatasourceImpl(database);
+    storeDatasource = StoreLocalDatasourceImpl(database);
+
+    // テスト用店舗データを事前作成（Foreign Key制約対応）
+    await createTestStores(storeDatasource);
   });
 
   tearDown(() async {
