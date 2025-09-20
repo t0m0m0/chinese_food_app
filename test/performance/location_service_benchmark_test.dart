@@ -17,25 +17,56 @@ import 'dart:io';
 /// - タイムアウト調整
 /// - 環境依存テストの安定化
 
+/// CI環境検出用の環境変数キー
+const _ciEnvironmentKeys = ['CI', 'GITHUB_ACTIONS', 'FLUTTER_TEST'];
+
 /// CI環境を検出する関数
+///
+/// 複数のCI環境変数をチェックして、CI環境での実行を判定する。
+/// 新しいCI環境の対応は [_ciEnvironmentKeys] に追加することで容易に拡張可能。
 bool get isRunningInCI {
-  return Platform.environment['CI'] == 'true' ||
-      Platform.environment['GITHUB_ACTIONS'] == 'true' ||
-      Platform.environment['FLUTTER_TEST'] == 'true';
+  return _ciEnvironmentKeys.any((key) => Platform.environment[key] == 'true');
 }
 
 /// CI環境に応じた閾値調整
+///
+/// CI環境では共有リソースや仮想化環境の影響でパフォーマンスが不安定になるため、
+/// 適切な閾値調整を行い、テストの安定性を確保する。
 class PerformanceThresholds {
-  static const _ciMultiplier = 3.0; // CI環境では3倍緩和
+  /// CI環境でのリソース制限を考慮した閾値緩和倍率
+  ///
+  /// 値の根拠:
+  /// - CI環境での実測値に基づく安全マージン
+  /// - GitHub Actions等の共有環境での性能変動を考慮
+  /// - 過度に緩くしすぎない適切なバランス
+  static const _ciMultiplier = 3.0;
 
+  /// CI環境での要求緩和率
+  ///
+  /// パフォーマンス改善率などの相対的な指標について、
+  /// CI環境の不安定性を考慮して要求水準を調整する。
+  static const _ciRatioMultiplier = 0.7;
+
+  /// 応答時間の閾値を環境に応じて調整
+  ///
+  /// [baseMs] ローカル環境での基準値（ミリ秒）
+  /// 戻り値: CI環境では [_ciMultiplier] 倍に緩和された値
   static int responseTimeThreshold(int baseMs) =>
       isRunningInCI ? (baseMs * _ciMultiplier).round() : baseMs;
 
+  /// メモリ使用量の閾値を環境に応じて調整
+  ///
+  /// [baseMB] ローカル環境での基準値（MB）
+  /// 戻り値: CI環境では [_ciMultiplier] 倍に緩和された値
   static double memoryThreshold(double baseMB) =>
       isRunningInCI ? baseMB * _ciMultiplier : baseMB;
 
+  /// パフォーマンス比率の閾値を環境に応じて調整
+  ///
+  /// [baseRatio] ローカル環境での基準値（0.0-1.0）
+  /// 戻り値: CI環境では [_ciRatioMultiplier] 倍に緩和された値
   static double ratioThreshold(double baseRatio) =>
-      isRunningInCI ? baseRatio * 0.7 : baseRatio; // CI環境では要求を緩和
+      isRunningInCI ? baseRatio * _ciRatioMultiplier : baseRatio;
 }
 
 class MockSlowLocationService implements LocationService {
