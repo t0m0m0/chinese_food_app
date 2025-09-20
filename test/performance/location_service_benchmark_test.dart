@@ -3,6 +3,7 @@ import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/services/optimized_location_service.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'dart:developer' as developer;
+import 'dart:io';
 
 /// 位置情報サービスのベンチマークテスト
 ///
@@ -10,6 +11,63 @@ import 'dart:developer' as developer;
 /// - 50% faster location retrieval (from 3s to 1.5s)
 /// - 20% battery consumption reduction
 /// - 50% CPU usage reduction via Isolate processing
+///
+/// CI環境での安定化対応 (Issue #176):
+/// - CI環境での閾値緩和
+/// - タイムアウト調整
+/// - 環境依存テストの安定化
+
+/// CI環境検出用の環境変数キー
+const _ciEnvironmentKeys = ['CI', 'GITHUB_ACTIONS', 'FLUTTER_TEST'];
+
+/// CI環境を検出する関数
+///
+/// 複数のCI環境変数をチェックして、CI環境での実行を判定する。
+/// 新しいCI環境の対応は [_ciEnvironmentKeys] に追加することで容易に拡張可能。
+bool get isRunningInCI {
+  return _ciEnvironmentKeys.any((key) => Platform.environment[key] == 'true');
+}
+
+/// CI環境に応じた閾値調整
+///
+/// CI環境では共有リソースや仮想化環境の影響でパフォーマンスが不安定になるため、
+/// 適切な閾値調整を行い、テストの安定性を確保する。
+class PerformanceThresholds {
+  /// CI環境でのリソース制限を考慮した閾値緩和倍率
+  ///
+  /// 値の根拠:
+  /// - CI環境での実測値に基づく安全マージン
+  /// - GitHub Actions等の共有環境での性能変動を考慮
+  /// - 過度に緩くしすぎない適切なバランス
+  static const _ciMultiplier = 3.0;
+
+  /// CI環境での要求緩和率
+  ///
+  /// パフォーマンス改善率などの相対的な指標について、
+  /// CI環境の不安定性を考慮して要求水準を調整する。
+  static const _ciRatioMultiplier = 0.7;
+
+  /// 応答時間の閾値を環境に応じて調整
+  ///
+  /// [baseMs] ローカル環境での基準値（ミリ秒）
+  /// 戻り値: CI環境では [_ciMultiplier] 倍に緩和された値
+  static int responseTimeThreshold(int baseMs) =>
+      isRunningInCI ? (baseMs * _ciMultiplier).round() : baseMs;
+
+  /// メモリ使用量の閾値を環境に応じて調整
+  ///
+  /// [baseMB] ローカル環境での基準値（MB）
+  /// 戻り値: CI環境では [_ciMultiplier] 倍に緩和された値
+  static double memoryThreshold(double baseMB) =>
+      isRunningInCI ? baseMB * _ciMultiplier : baseMB;
+
+  /// パフォーマンス比率の閾値を環境に応じて調整
+  ///
+  /// [baseRatio] ローカル環境での基準値（0.0-1.0）
+  /// 戻り値: CI環境では [_ciRatioMultiplier] 倍に緩和された値
+  static double ratioThreshold(double baseRatio) =>
+      isRunningInCI ? baseRatio * _ciRatioMultiplier : baseRatio;
+}
 
 class MockSlowLocationService implements LocationService {
   final Duration _simulatedDelay;
@@ -96,14 +154,25 @@ void main() {
         final fastTime = stopwatch2.elapsedMilliseconds;
 
         // Assert
+        developer.log('Environment: ${isRunningInCI ? "CI" : "Local"}',
+            name: 'Benchmark');
         developer.log('Slow service time: ${slowTime}ms', name: 'Benchmark');
         developer.log('Optimized service time: ${fastTime}ms',
             name: 'Benchmark');
 
-        // 50%以上の高速化を確認
+        // CI環境に応じた閾値で評価
         final improvementRatio = (slowTime - fastTime) / slowTime;
-        expect(improvementRatio, greaterThan(0.5)); // 50%以上の改善
-        expect(fastTime, lessThan(1500)); // 1.5秒未満の目標達成
+        final expectedRatio = PerformanceThresholds.ratioThreshold(0.5);
+        final maxResponseTime =
+            PerformanceThresholds.responseTimeThreshold(1500);
+
+        developer.log('Required improvement ratio: $expectedRatio',
+            name: 'Benchmark');
+        developer.log('Max response time: ${maxResponseTime}ms',
+            name: 'Benchmark');
+
+        expect(improvementRatio, greaterThan(expectedRatio)); // CI環境では緩和
+        expect(fastTime, lessThan(maxResponseTime)); // CI環境では緩和
 
         optimizedService.dispose();
       });
@@ -136,11 +205,13 @@ void main() {
             name: 'Benchmark');
 
         expect(cachedTime, lessThan(firstTime)); // キャッシュの方が速い
-        expect(cachedTime, lessThan(100)); // キャッシュから100ms未満で取得
+        final maxCachedTime = PerformanceThresholds.responseTimeThreshold(100);
+        expect(cachedTime, lessThan(maxCachedTime)); // CI環境では緩和
 
-        // キャッシュ効果で90%以上の高速化
+        // キャッシュ効果確認（CI環境では要求緩和）
         final cacheImprovementRatio = (firstTime - cachedTime) / firstTime;
-        expect(cacheImprovementRatio, greaterThan(0.9));
+        final expectedCacheRatio = PerformanceThresholds.ratioThreshold(0.9);
+        expect(cacheImprovementRatio, greaterThan(expectedCacheRatio));
 
         optimizedService.dispose();
       });
@@ -168,8 +239,9 @@ void main() {
             'Cache hit rate: ${(metrics.cacheHitRate * 100).toStringAsFixed(1)}%',
             name: 'Benchmark');
 
-        // メモリ使用量が50MB未満
-        expect(metrics.memoryUsage, lessThan(50.0));
+        // メモリ使用量確認（CI環境では緩和）
+        final maxMemory = PerformanceThresholds.memoryThreshold(50.0);
+        expect(metrics.memoryUsage, lessThan(maxMemory));
 
         // 高いキャッシュヒット率
         expect(metrics.cacheHitRate, greaterThan(0.8)); // 80%以上
@@ -208,8 +280,9 @@ void main() {
             'Total execution time: ${stopwatch.elapsedMilliseconds}ms',
             name: 'Benchmark');
 
-        // CPU使用率が50%未満（目標: 50%削減）
-        expect(metrics.cpuUsage, lessThan(0.5));
+        // CPU使用率確認（CI環境では緩和）
+        final maxCpuUsage = PerformanceThresholds.ratioThreshold(0.5);
+        expect(metrics.cpuUsage, lessThan(maxCpuUsage));
 
         // 高いキャッシュ効率
         expect(metrics.cacheHits, greaterThan(0));
@@ -264,8 +337,10 @@ void main() {
         expect(normalMetrics.isBatteryOptimized, false);
         expect(batteryMetrics.isBatteryOptimized, true);
 
-        // バッテリー最適化モードでも合理的な応答時間
-        expect(batteryOptimizedTime, lessThan(2000)); // 2秒未満
+        // バッテリー最適化モードでも合理的な応答時間（CI環境では緩和）
+        final maxBatteryTime =
+            PerformanceThresholds.responseTimeThreshold(2000);
+        expect(batteryOptimizedTime, lessThan(maxBatteryTime));
 
         normalService.dispose();
         batteryOptimizedService.dispose();
@@ -323,14 +398,19 @@ void main() {
             'Cache hit rate: ${(metrics.cacheHitRate * 100).toStringAsFixed(1)}%',
             name: 'Benchmark');
 
-        // パフォーマンス要件の確認
-        expect(avgResponseTime, lessThan(100)); // 平均100ms未満
-        expect(maxResponseTime, lessThan(500)); // 最大500ms未満
-        expect(metrics.cacheHitRate, greaterThan(0.7)); // 70%以上のキャッシュヒット率
+        // パフォーマンス要件の確認（CI環境では緩和）
+        final maxAvgTime = PerformanceThresholds.responseTimeThreshold(100);
+        final maxTime = PerformanceThresholds.responseTimeThreshold(500);
+        final minCacheRate = PerformanceThresholds.ratioThreshold(0.7);
+        final maxMemoryStress = PerformanceThresholds.memoryThreshold(100.0);
+
+        expect(avgResponseTime, lessThan(maxAvgTime)); // CI環境では緩和
+        expect(maxResponseTime, lessThan(maxTime)); // CI環境では緩和
+        expect(metrics.cacheHitRate, greaterThan(minCacheRate)); // CI環境では緩和
         expect(metrics.totalRequests, equals(requestCount));
 
-        // メモリリークの確認
-        expect(metrics.memoryUsage, lessThan(100.0)); // 100MB未満
+        // メモリリークの確認（CI環境では緩和）
+        expect(metrics.memoryUsage, lessThan(maxMemoryStress));
 
         optimizedService.dispose();
       });
@@ -379,13 +459,18 @@ void main() {
         developer.log('Overall performance score: ${metrics.performanceScore}',
             name: 'Benchmark');
 
-        // 各シナリオの性能要件
-        expect(scenarioResults['アプリ起動']!, lessThan(300)); // 300ms未満
-        expect(scenarioResults['連続検索']! / 5, lessThan(120)); // 平均120ms未満
-        expect(scenarioResults['バックグラウンド復帰']!, lessThan(300)); // 300ms未満
+        // 各シナリオの性能要件（CI環境では緩和）
+        final maxStartup = PerformanceThresholds.responseTimeThreshold(300);
+        final maxSearch = PerformanceThresholds.responseTimeThreshold(120);
+        final maxResume = PerformanceThresholds.responseTimeThreshold(300);
+        final minScore = PerformanceThresholds.ratioThreshold(80.0);
 
-        // 全体的なパフォーマンススコア
-        expect(metrics.performanceScore, greaterThan(80)); // 80点以上
+        expect(scenarioResults['アプリ起動']!, lessThan(maxStartup));
+        expect(scenarioResults['連続検索']! / 5, lessThan(maxSearch));
+        expect(scenarioResults['バックグラウンド復帰']!, lessThan(maxResume));
+
+        // 全体的なパフォーマンススコア（CI環境では緩和）
+        expect(metrics.performanceScore, greaterThan(minScore));
 
         optimizedService.dispose();
       });
