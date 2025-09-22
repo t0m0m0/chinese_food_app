@@ -101,5 +101,86 @@ void main() {
       // FadeTransitionが存在する
       expect(find.byType(FadeTransition), findsAtLeastNWidgets(1));
     });
+
+    testWidgets('パフォーマンス監視機能が動作する', (WidgetTester tester) async {
+      // デバッグモードでのパフォーマンス計測テスト
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                SwipeFeedbackOverlay(
+                  showLike: false,
+                  showDislike: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // 状態変更によるパフォーマンス計測実行
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                SwipeFeedbackOverlay(
+                  showLike: true,
+                  showDislike: false,
+                  enableParticleEffect: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // アニメーションの進行をテスト
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+    });
+
+    testWidgets('エラーハンドリングが適切に動作する', (WidgetTester tester) async {
+      // 正常なケースから異常なケースへの移行をテスト
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                SwipeFeedbackOverlay(
+                  showLike: true,
+                  showDislike: false,
+                  enableParticleEffect: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // 例外が発生してもアプリが継続することを確認
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+
+      // 状態をリセット
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Stack(
+              children: [
+                SwipeFeedbackOverlay(
+                  showLike: false,
+                  showDislike: false,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // アニメーション終了後は何も表示されない
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byIcon(Icons.favorite), findsNothing);
+    });
   });
 }

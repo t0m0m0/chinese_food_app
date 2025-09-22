@@ -3,15 +3,22 @@ import '../../domain/entities/store.dart';
 import 'cached_store_image.dart';
 
 /// マッチングアプリ風のスワイプ可能なカードウィジェット
+/// Swipeable card widget with dating app-style UI
 ///
 /// Material Design 3準拠で、店舗情報を魅力的に表示し、
 /// スワイプやタップ操作に対応したカードを提供します。
+/// Displays store information attractively with Material Design 3 compliance,
+/// supporting swipe and tap interactions.
 ///
-/// ## 特徴
+/// ## 特徴 / Features
 /// - HotpepperAPIからの追加情報（ジャンル・予算）を自動表示
+///   Auto-display additional info (genre/budget) from HotpepperAPI
 /// - 将来のStoreエンティティ拡張に対応
+///   Future-ready for Store entity extensions
 /// - パフォーマンス最適化済み（RepaintBoundary）
+///   Performance optimized with RepaintBoundary
 /// - アクセシビリティ完全対応
+///   Full accessibility support
 class SwipeCardWidget extends StatelessWidget {
   final Store store;
   final VoidCallback? onTap;
@@ -49,7 +56,10 @@ class SwipeCardWidget extends StatelessWidget {
 
     return Semantics(
       label: '${store.name}の店舗カード',
+      hint: '${store.address}にある中華料理店。スワイプまたはタップして詳細を確認できます',
       button: true,
+      value: genre != null ? 'ジャンル: $genre' : '中華料理',
+      increasedValue: budget != null ? '予算: $budget' : '',
       child: RepaintBoundary(
         child: Card(
           elevation: 8,

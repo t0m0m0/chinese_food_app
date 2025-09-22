@@ -37,7 +37,9 @@ class SwipeActionButtons extends StatelessWidget {
           RepaintBoundary(
             child: Semantics(
               label: '興味なし',
+              hint: '左スワイプと同じ効果。興味がない店舗として記録されます',
               button: true,
+              excludeSemantics: !enabled,
               child: FloatingActionButton(
                 onPressed: enabled ? _handleDislike : null,
                 // Material Design 3準拠のカラーテーマ
@@ -63,7 +65,9 @@ class SwipeActionButtons extends StatelessWidget {
           RepaintBoundary(
             child: Semantics(
               label: '行きたい',
+              hint: '右スワイプと同じ効果。行きたい店舗として記録されます',
               button: true,
+              excludeSemantics: !enabled,
               child: FloatingActionButton(
                 onPressed: enabled ? _handleLike : null,
                 // Material Design 3準拠のカラーテーマ

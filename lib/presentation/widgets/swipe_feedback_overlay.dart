@@ -1,16 +1,20 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// スワイプ操作のフィードバックを表示するオーバーレイウィジェット
+/// Overlay widget that displays swipe operation feedback
 ///
 /// 右スワイプ（行きたい）や左スワイプ（興味なし）の際に
 /// リッチなアニメーション付きフィードバックを提供します。
+/// Provides rich animated feedback for right swipe (want to go)
+/// and left swipe (not interested) actions.
 ///
-/// ## アニメーション効果
-/// - スケール変化（エラスティック）
-/// - フェード効果
-/// - ハートパーティクル（行きたい時）
-/// - バウンス効果
+/// ## アニメーション効果 / Animation Effects
+/// - スケール変化（エラスティック） / Scale transition (elastic)
+/// - フェード効果 / Fade effects
+/// - ハートパーティクル（行きたい時） / Heart particles (when liked)
+/// - バウンス効果 / Bounce effects
 class SwipeFeedbackOverlay extends StatefulWidget {
   final bool showLike;
   final bool showDislike;
@@ -44,6 +48,11 @@ class _SwipeFeedbackOverlayState extends State<SwipeFeedbackOverlay>
   @override
   void initState() {
     super.initState();
+
+    // パフォーマンス計測開始 / Start performance measurement
+    if (kDebugMode) {
+      debugPrint('🎭 SwipeFeedbackOverlay: アニメーション初期化開始');
+    }
 
     _scaleController = AnimationController(
       duration: widget.animationDuration,
@@ -104,22 +113,67 @@ class _SwipeFeedbackOverlayState extends State<SwipeFeedbackOverlay>
   void didUpdateWidget(SwipeFeedbackOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // パフォーマンス計測：アニメーション開始時刻記録
+    final stopwatch = kDebugMode ? (Stopwatch()..start()) : null;
+
     // スワイプ操作検出時のアニメーション開始
     if (widget.showLike || widget.showDislike) {
-      _scaleController.forward();
-      _fadeController.forward();
-      _bounceController.forward();
+      try {
+        _scaleController.forward();
+        _fadeController.forward();
+        _bounceController.forward();
 
-      // 「行きたい」時のみパーティクル効果を有効化
-      if (widget.enableParticleEffect && widget.showLike) {
-        _particleController.forward();
+        // 「行きたい」時のみパーティクル効果を有効化
+        if (widget.enableParticleEffect && widget.showLike) {
+          _particleController.forward();
+        }
+
+        // デバッグ：アニメーション開始ログ
+        if (kDebugMode) {
+          debugPrint(
+              '🎬 SwipeFeedbackOverlay: アニメーション開始 ${widget.showLike ? "LIKE" : "DISLIKE"}');
+          debugPrint('   - スケール: ${_scaleController.status}');
+          debugPrint('   - フェード: ${_fadeController.status}');
+          debugPrint('   - バウンス: ${_bounceController.status}');
+          if (widget.enableParticleEffect && widget.showLike) {
+            debugPrint('   - パーティクル: ${_particleController.status}');
+          }
+        }
+      } catch (e, stackTrace) {
+        if (kDebugMode) {
+          debugPrint('❌ SwipeFeedbackOverlay: アニメーション開始エラー');
+          debugPrint('エラー: $e');
+          debugPrint('スタックトレース: $stackTrace');
+        }
       }
     } else {
-      // フィードバック非表示時はすべてのアニメーションを逆再生
-      _scaleController.reverse();
-      _fadeController.reverse();
-      _bounceController.reverse();
-      _particleController.reverse();
+      try {
+        // フィードバック非表示時はすべてのアニメーションを逆再生
+        _scaleController.reverse();
+        _fadeController.reverse();
+        _bounceController.reverse();
+        _particleController.reverse();
+
+        if (kDebugMode) {
+          debugPrint('🔄 SwipeFeedbackOverlay: アニメーション終了・逆再生');
+        }
+      } catch (e, stackTrace) {
+        if (kDebugMode) {
+          debugPrint('❌ SwipeFeedbackOverlay: アニメーション終了エラー');
+          debugPrint('エラー: $e');
+          debugPrint('スタックトレース: $stackTrace');
+        }
+      }
+    }
+
+    // パフォーマンス計測結果出力
+    if (kDebugMode && stopwatch != null) {
+      stopwatch.stop();
+      if (stopwatch.elapsedMicroseconds > 1000) {
+        // 1ms以上の場合のみログ
+        debugPrint(
+            '⚡ SwipeFeedbackOverlay: アニメーション開始処理時間 ${stopwatch.elapsedMicroseconds}μs');
+      }
     }
   }
 

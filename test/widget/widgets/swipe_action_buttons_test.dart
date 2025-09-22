@@ -129,5 +129,90 @@ void main() {
       expect(find.bySemanticsLabel('興味なし'), findsOneWidget);
       expect(find.bySemanticsLabel('行きたい'), findsOneWidget);
     });
+
+    testWidgets('拡張されたアクセシビリティ機能が動作する', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SwipeActionButtons(
+              onDislike: () {},
+              onLike: () {},
+              enabled: false, // 無効状態でのアクセシビリティテスト
+            ),
+          ),
+        ),
+      );
+
+      // Semanticsウィジェットが存在する
+      expect(find.byType(Semantics), findsAtLeastNWidgets(2));
+
+      // 無効状態でもラベルは存在する
+      expect(find.bySemanticsLabel('興味なし'), findsOneWidget);
+      expect(find.bySemanticsLabel('行きたい'), findsOneWidget);
+    });
+
+    testWidgets('ハプティックフィードバック機能が動作する', (WidgetTester tester) async {
+      bool dislikePressed = false;
+      bool likePressed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SwipeActionButtons(
+              onDislike: () => dislikePressed = true,
+              onLike: () => likePressed = true,
+              enableHapticFeedback: true,
+            ),
+          ),
+        ),
+      );
+
+      // ハプティックフィードバック有効時のボタン動作
+      await tester.tap(find.byIcon(Icons.thumb_down));
+      await tester.pump();
+      expect(dislikePressed, isTrue);
+
+      await tester.tap(find.byIcon(Icons.favorite));
+      await tester.pump();
+      expect(likePressed, isTrue);
+    });
+
+    testWidgets('ハプティックフィードバック無効化が動作する', (WidgetTester tester) async {
+      bool dislikePressed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SwipeActionButtons(
+              onDislike: () => dislikePressed = true,
+              onLike: () {},
+              enableHapticFeedback: false, // ハプティックフィードバック無効
+            ),
+          ),
+        ),
+      );
+
+      // ハプティックフィードバック無効でもボタンは動作する
+      await tester.tap(find.byIcon(Icons.thumb_down));
+      await tester.pump();
+      expect(dislikePressed, isTrue);
+    });
+
+    testWidgets('パフォーマンス最適化のRepaintBoundaryが適用される',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SwipeActionButtons(
+              onDislike: () {},
+              onLike: () {},
+            ),
+          ),
+        ),
+      );
+
+      // RepaintBoundaryが複数存在する（各ボタン + 全体）
+      expect(find.byType(RepaintBoundary), findsAtLeastNWidgets(3));
+    });
   });
 }
