@@ -13,6 +13,7 @@ void main() {
                 SwipeFeedbackOverlay(
                   showLike: true,
                   showDislike: false,
+                  enableParticleEffect: false, // テスト用にパーティクル効果を無効化
                 ),
               ],
             ),
@@ -20,7 +21,7 @@ void main() {
         ),
       );
 
-      // 「行きたい」アイコンが表示される
+      // 「行きたい」アイコンが表示される（パーティクル効果無効なので1つのみ）
       expect(find.byIcon(Icons.favorite), findsOneWidget);
       expect(find.text('行きたい'), findsOneWidget);
 
@@ -86,6 +87,7 @@ void main() {
                 SwipeFeedbackOverlay(
                   showLike: true,
                   showDislike: false,
+                  enableParticleEffect: false, // テスト用にパーティクル効果を無効化
                 ),
               ],
             ),
