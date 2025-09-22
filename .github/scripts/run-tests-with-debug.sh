@@ -69,6 +69,9 @@ run_test_safe "test/unit/presentation/providers/" "プロバイダーテスト" 
 # 8. その他の単体テスト
 run_test_safe "test/unit/core/utils/" "ユーティリティテスト" 60
 
+# 9. パフォーマンステスト（CI環境対応済み）
+run_test_safe "test/performance/" "パフォーマンステスト（CI環境最適化）" 300
+
 echo "=== 統合テスト（条件付き実行） ==="
 # 統合テストは時間がかかるため、軽量なもののみ実行
 if [ -f "test/core/di/di_container_test.dart" ]; then
