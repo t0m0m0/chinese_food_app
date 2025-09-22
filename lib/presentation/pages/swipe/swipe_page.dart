@@ -10,7 +10,9 @@ import '../../../domain/entities/store.dart';
 import '../../../domain/entities/location.dart';
 import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
-import '../../widgets/cached_store_image.dart';
+import '../../widgets/swipe_card_widget.dart';
+import '../../widgets/swipe_action_buttons.dart';
+import '../../widgets/swipe_feedback_overlay.dart';
 import '../../widgets/distance_selector_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
@@ -27,6 +29,10 @@ class _SwipePageState extends State<SwipePage> {
   bool _isGettingLocation = false;
   String? _locationError;
   int _selectedRange = SearchConfig.defaultRange;
+
+  // スワイプフィードバック用状態
+  bool _showLikeFeedback = false;
+  bool _showDislikeFeedback = false;
 
   @override
   void initState() {
@@ -166,9 +172,11 @@ class _SwipePageState extends State<SwipePage> {
 
       if (direction == CardSwiperDirection.right) {
         // 右スワイプ → 「行きたい」
+        _showSwipeFeedback(true);
         _updateStoreStatus(store, StoreStatus.wantToGo);
       } else if (direction == CardSwiperDirection.left) {
         // 左スワイプ → 「興味なし」
+        _showSwipeFeedback(false);
         _updateStoreStatus(store, StoreStatus.bad);
       }
 
@@ -201,6 +209,43 @@ class _SwipePageState extends State<SwipePage> {
       }
     }
     return true;
+  }
+
+  /// 手動「興味なし」ボタンアクション
+  void _onManualDislike() {
+    if (_availableStores.isNotEmpty) {
+      controller.swipe(CardSwiperDirection.left);
+    }
+  }
+
+  /// 手動「行きたい」ボタンアクション
+  void _onManualLike() {
+    if (_availableStores.isNotEmpty) {
+      controller.swipe(CardSwiperDirection.right);
+    }
+  }
+
+  /// フィードバック表示を管理
+  void _showSwipeFeedback(bool isLike) {
+    setState(() {
+      if (isLike) {
+        _showLikeFeedback = true;
+        _showDislikeFeedback = false;
+      } else {
+        _showLikeFeedback = false;
+        _showDislikeFeedback = true;
+      }
+    });
+
+    // 1秒後にフィードバックを隠す
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      if (mounted) {
+        setState(() {
+          _showLikeFeedback = false;
+          _showDislikeFeedback = false;
+        });
+      }
+    });
   }
 
   Future<void> _updateStoreStatus(Store store, StoreStatus status) async {
@@ -273,118 +318,6 @@ class _SwipePageState extends State<SwipePage> {
           ),
         ],
       ),
-    );
-  }
-
-  /// 店舗情報を表示するカードウィジェットを構築
-  ///
-  /// Material Design 3準拠のデザインで、店舗名、住所、
-  /// アイコンを美しいカードレイアウトで表示します。
-  ///
-  /// [store] 表示する店舗データ
-  /// 戻り値: Material Design 3準拠のCardウィジェット
-  Widget _buildStoreCard(Store store) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return RepaintBoundary(
-      child: Card(
-        elevation: 4,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StoreDetailPage(store: store),
-              ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colorScheme.surfaceContainerLow,
-                  colorScheme.surfaceContainerHigh,
-                ],
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 店舗画像表示（パフォーマンス最適化済み）
-                RepaintBoundary(
-                  child: CachedStoreImage(
-                    imageUrl: store.imageUrl,
-                    width: 100,
-                    height: 100,
-                    borderRadius: 50, // 円形にするため幅/高さの半分
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  store.name,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 16,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        store.address,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'タップで詳細を表示',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ), // RepaintBoundaryの閉じ括弧
     );
   }
 
@@ -583,44 +516,68 @@ class _SwipePageState extends State<SwipePage> {
                                 // CardSwiper初期化防護: 競合状態による cardsCount=0 防止
                                 // アトミック参照により堅牢性確保（Issue #130根本対応）
                                 child: hasStores
-                                    ? CardSwiper(
-                                        controller: controller,
-                                        cardsCount: currentStores.length,
-                                        numberOfCardsDisplayed:
-                                            math.min(currentStores.length, 3),
-                                        onSwipe: _onSwipe,
-                                        cardBuilder: (context,
-                                            index,
-                                            percentThresholdX,
-                                            percentThresholdY) {
-                                          // IndexOutOfRangeエラーを防ぐための安全チェック
-                                          if (index < 0 ||
-                                              index >= currentStores.length) {
-                                            debugPrint(
-                                                '⚠️ CardSwiper index out of range: $index, available: ${currentStores.length}');
-                                            return Container(
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    colorScheme.errorContainer,
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  'カードの読み込みエラー',
-                                                  style: theme
-                                                      .textTheme.bodyMedium
-                                                      ?.copyWith(
+                                    ? Stack(
+                                        children: [
+                                          CardSwiper(
+                                            controller: controller,
+                                            cardsCount: currentStores.length,
+                                            numberOfCardsDisplayed: math.min(
+                                                currentStores.length, 3),
+                                            onSwipe: _onSwipe,
+                                            cardBuilder: (context,
+                                                index,
+                                                percentThresholdX,
+                                                percentThresholdY) {
+                                              // IndexOutOfRangeエラーを防ぐための安全チェック
+                                              if (index < 0 ||
+                                                  index >=
+                                                      currentStores.length) {
+                                                debugPrint(
+                                                    '⚠️ CardSwiper index out of range: $index, available: ${currentStores.length}');
+                                                return Container(
+                                                  decoration: BoxDecoration(
                                                     color: colorScheme
-                                                        .onErrorContainer,
+                                                        .errorContainer,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
                                                   ),
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                          return _buildStoreCard(
-                                              currentStores[index]);
-                                        },
+                                                  child: Center(
+                                                    child: Text(
+                                                      'カードの読み込みエラー',
+                                                      style: theme
+                                                          .textTheme.bodyMedium
+                                                          ?.copyWith(
+                                                        color: colorScheme
+                                                            .onErrorContainer,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                              return SwipeCardWidget(
+                                                store: currentStores[index],
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          StoreDetailPage(
+                                                              store:
+                                                                  currentStores[
+                                                                      index]),
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                          // スワイプフィードバックオーバーレイ
+                                          SwipeFeedbackOverlay(
+                                            showLike: _showLikeFeedback,
+                                            showDislike: _showDislikeFeedback,
+                                          ),
+                                        ],
                                       )
                                     // フォールバック: 極端な競合状態での安全なUI表示
                                     // （理論上発生しないが、Web環境での予期しない状態変化に対応）
@@ -630,6 +587,15 @@ class _SwipePageState extends State<SwipePage> {
                             );
                     },
                   ),
+          ),
+          // 手動操作ボタン
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SwipeActionButtons(
+              onDislike: _onManualDislike,
+              onLike: _onManualLike,
+              enabled: _availableStores.isNotEmpty && !_isGettingLocation,
+            ),
           ),
         ],
       ),
