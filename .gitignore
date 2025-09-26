@@ -37,6 +37,7 @@ _*cacheMaxAge
 .pub-cache/
 .pub/
 /build/
+ios/build/
 
 # Symbolication related
 app.*.symbols
@@ -86,3 +87,4 @@ coverage/
 # Platform-specific dependency locks
 ios/Podfile.lock
 macos/Podfile
+ios/Flutter/Generated.xcconfig
