@@ -2,6 +2,23 @@ import 'package:flutter/material.dart';
 
 /// 検索フィルター設定ウィジェット
 class SearchFilterWidget extends StatelessWidget {
+  /// 検索範囲の選択肢とラベルのマッピング
+  static const Map<int, String> _rangeLabels = {
+    1: '300m',
+    2: '500m',
+    3: '1000m',
+    4: '2000m',
+    5: '3000m',
+  };
+
+  /// 検索範囲の説明
+  static const Map<int, String> _rangeDescriptions = {
+    1: '最寄り（300m圏内）',
+    2: '近場（500m圏内）',
+    3: '徒歩圏内（1000m圏内）',
+    4: '少し遠め（2000m圏内）',
+    5: '広範囲（3000m圏内）',
+  };
   final int searchRange;
   final int resultCount;
   final void Function(int) onRangeChanged;
@@ -54,25 +71,21 @@ class SearchFilterWidget extends StatelessWidget {
   }
 
   Widget _buildRangeSelector(ColorScheme colorScheme) {
-    final ranges = [
-      (1, '300m'),
-      (2, '500m'),
-      (3, '1000m'),
-      (4, '2000m'),
-      (5, '3000m'),
-    ];
-
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: ranges.map((range) {
-        final isSelected = searchRange == range.$1;
+      children: _rangeLabels.entries.map((entry) {
+        final rangeValue = entry.key;
+        final label = entry.value;
+        final isSelected = searchRange == rangeValue;
+
         return FilterChip(
-          label: Text(range.$2),
+          label: Text(label),
+          tooltip: _rangeDescriptions[rangeValue],
           selected: isSelected,
           onSelected: (selected) {
             if (selected) {
-              onRangeChanged(range.$1);
+              onRangeChanged(rangeValue);
             }
           },
           selectedColor: colorScheme.primaryContainer,
@@ -93,7 +106,7 @@ class SearchFilterWidget extends StatelessWidget {
               style: theme.textTheme.bodySmall,
             ),
             Text(
-              '${resultCount}件',
+              '$resultCount件',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.primary,

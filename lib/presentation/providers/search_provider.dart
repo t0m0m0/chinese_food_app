@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:developer' as developer;
 import '../../core/constants/string_constants.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/services/location_service.dart';
@@ -6,6 +7,16 @@ import './store_provider.dart';
 
 /// 検索画面の状態管理とビジネスロジックを担当するProvider
 class SearchProvider extends ChangeNotifier {
+  /// 検索範囲の制限値
+  static const int _minSearchRange = 1;
+  static const int _maxSearchRange = 5;
+  static const int _defaultSearchRange = 3;
+
+  /// 結果数の制限値
+  static const int _minResultCount = 1;
+  static const int _maxResultCount = 100;
+  static const int _defaultResultCount = 10;
+
   final StoreProvider storeProvider;
   final LocationService locationService;
 
@@ -23,8 +34,8 @@ class SearchProvider extends ChangeNotifier {
   bool _hasSearched = false;
 
   // 検索フィルター設定
-  int _searchRange = 3; // 1:300m, 2:500m, 3:1000m, 4:2000m, 5:3000m
-  int _resultCount = 10; // 結果数制限
+  int _searchRange = _defaultSearchRange;
+  int _resultCount = _defaultResultCount;
 
   // ゲッター
   bool get isLoading => _isLoading;
@@ -44,16 +55,36 @@ class SearchProvider extends ChangeNotifier {
 
   // 検索フィルター設定メソッド
   void setSearchRange(int range) {
-    if (range >= 1 && range <= 5) {
+    if (range >= _minSearchRange && range <= _maxSearchRange) {
       _searchRange = range;
       notifyListeners();
+    } else {
+      // 無効な値の場合、ログに記録（将来的にユーザー通知を追加可能）
+      if (kDebugMode) {
+        developer.log(
+          'Invalid search range value: $range. '
+          'Valid range is $_minSearchRange to $_maxSearchRange.',
+          name: 'SearchProvider',
+          level: 900, // Warning level
+        );
+      }
     }
   }
 
   void setResultCount(int count) {
-    if (count >= 1 && count <= 100) {
+    if (count >= _minResultCount && count <= _maxResultCount) {
       _resultCount = count;
       notifyListeners();
+    } else {
+      // 無効な値の場合、ログに記録（将来的にユーザー通知を追加可能）
+      if (kDebugMode) {
+        developer.log(
+          'Invalid result count value: $count. '
+          'Valid range is $_minResultCount to $_maxResultCount.',
+          name: 'SearchProvider',
+          level: 900, // Warning level
+        );
+      }
     }
   }
 
