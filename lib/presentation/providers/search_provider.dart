@@ -22,6 +22,10 @@ class SearchProvider extends ChangeNotifier {
   bool _useCurrentLocation = true;
   bool _hasSearched = false;
 
+  // 検索フィルター設定
+  int _searchRange = 3; // 1:300m, 2:500m, 3:1000m, 4:2000m, 5:3000m
+  int _resultCount = 10; // 結果数制限
+
   // ゲッター
   bool get isLoading => _isLoading;
   bool get isGettingLocation => _isGettingLocation;
@@ -29,11 +33,28 @@ class SearchProvider extends ChangeNotifier {
   List<Store> get searchResults => _searchResults;
   bool get useCurrentLocation => _useCurrentLocation;
   bool get hasSearched => _hasSearched;
+  int get searchRange => _searchRange;
+  int get resultCount => _resultCount;
 
   // 検索モード切り替え
   void setUseCurrentLocation(bool value) {
     _useCurrentLocation = value;
     notifyListeners();
+  }
+
+  // 検索フィルター設定メソッド
+  void setSearchRange(int range) {
+    if (range >= 1 && range <= 5) {
+      _searchRange = range;
+      notifyListeners();
+    }
+  }
+
+  void setResultCount(int count) {
+    if (count >= 1 && count <= 100) {
+      _resultCount = count;
+      notifyListeners();
+    }
   }
 
   // エラーメッセージのフォーマット
@@ -65,10 +86,12 @@ class SearchProvider extends ChangeNotifier {
 
     try {
       if (address != null && address.isNotEmpty) {
-        // 住所での検索
+        // 住所での検索（フィルター設定適用）
         await storeProvider.loadNewStoresFromApi(
           address: address,
           keyword: StringConstants.defaultSearchKeyword,
+          range: _searchRange,
+          count: _resultCount,
         );
         _searchResults = List<Store>.from(storeProvider.searchResults);
       }
@@ -98,11 +121,13 @@ class SearchProvider extends ChangeNotifier {
       _isGettingLocation = false;
       notifyListeners();
 
-      // 位置情報を使ってAPI検索
+      // 位置情報を使ってAPI検索（フィルター設定適用）
       await storeProvider.loadNewStoresFromApi(
         lat: location.latitude,
         lng: location.longitude,
         keyword: StringConstants.defaultSearchKeyword,
+        range: _searchRange,
+        count: _resultCount,
       );
       _searchResults = List<Store>.from(storeProvider.searchResults);
 
