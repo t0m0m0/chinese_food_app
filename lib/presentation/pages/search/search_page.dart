@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_settings/app_settings.dart';
 import '../../../core/constants/string_constants.dart';
+import '../../../core/config/ui_config.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/duplicate_store_checker.dart';
 import '../../../domain/entities/store.dart';
@@ -10,6 +11,7 @@ import '../../providers/store_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../widgets/cached_store_image.dart';
 import '../../widgets/api_attribution_widget.dart';
+import '../../widgets/search_filter_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
@@ -22,6 +24,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final _searchController = TextEditingController();
   late SearchProvider _searchProvider;
+  bool _showFilters = false;
 
   @override
   void initState() {
@@ -124,11 +127,33 @@ class _SearchPageState extends State<SearchPage> {
         body: Column(
           children: [
             _buildSearchForm(),
+            if (_showFilters) _buildSearchFilter(),
             const Divider(),
             Expanded(child: _buildSearchResults()),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSearchFilter() {
+    return Selector<SearchProvider, ({int searchRange, int resultCount})>(
+      selector: (context, provider) => (
+        searchRange: provider.searchRange,
+        resultCount: provider.resultCount,
+      ),
+      builder: (context, state, child) {
+        return SearchFilterWidget(
+          searchRange: state.searchRange,
+          resultCount: state.resultCount,
+          onRangeChanged: (range) {
+            _searchProvider.setSearchRange(range);
+          },
+          onCountChanged: (count) {
+            _searchProvider.setResultCount(count);
+          },
+        );
+      },
     );
   }
 
@@ -182,23 +207,40 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: (state.isLoading || state.isGettingLocation)
-                      ? null
-                      : _performSearch,
-                  icon: (state.isLoading || state.isGettingLocation)
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.search),
-                  label: Text((state.isGettingLocation || state.isLoading)
-                      ? (state.isGettingLocation ? '現在地取得中...' : '検索中...')
-                      : StringConstants.searchButtonLabel),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: (state.isLoading || state.isGettingLocation)
+                          ? null
+                          : _performSearch,
+                      icon: (state.isLoading || state.isGettingLocation)
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.search),
+                      label: Text((state.isGettingLocation || state.isLoading)
+                          ? (state.isGettingLocation ? '現在地取得中...' : '検索中...')
+                          : StringConstants.searchButtonLabel),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _showFilters = !_showFilters;
+                      });
+                    },
+                    icon: Icon(_showFilters
+                        ? Icons.filter_list_off
+                        : Icons.filter_list),
+                    tooltip: _showFilters
+                        ? UiConfig.getSearchFilterLabel('filterHide')
+                        : UiConfig.getSearchFilterLabel('filterShow'),
+                  ),
+                ],
               ),
             ],
           ),

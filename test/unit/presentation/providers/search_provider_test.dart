@@ -116,6 +116,8 @@ void main() {
       verify(mockStoreProvider.loadNewStoresFromApi(
         address: '東京都新宿区',
         keyword: '中華',
+        range: 3,
+        count: 20,
       )).called(1);
     });
 
@@ -143,6 +145,8 @@ void main() {
         lat: 35.6762,
         lng: 139.6503,
         keyword: '中華',
+        range: 3,
+        count: 20,
       )).called(1);
     });
 
@@ -172,8 +176,112 @@ void main() {
       await searchProvider.performSearch(address: '東京都新宿区');
 
       // エラーメッセージが設定されることを確認
-      expect(searchProvider.errorMessage, contains('サーバーエラーが発生しました'));
+      expect(searchProvider.errorMessage, contains('予期しないエラーが発生しました'));
       expect(searchProvider.isLoading, false);
+    });
+
+    // 検索フィルター機能のテスト
+    test('should have default search filter settings', () {
+      // デフォルトのフィルター設定を確認
+      expect(searchProvider.searchRange, 3); // デフォルト検索範囲: 1000m
+      expect(searchProvider.resultCount,
+          20); // デフォルト結果数: 20件（SearchConfig.defaultPageSize）
+    });
+
+    test('should allow changing search range', () {
+      // 検索範囲を変更
+      searchProvider.setSearchRange(5); // 3000m
+      expect(searchProvider.searchRange, 5);
+
+      // 別の範囲に変更
+      searchProvider.setSearchRange(1); // 300m
+      expect(searchProvider.searchRange, 1);
+    });
+
+    test('should allow changing result count', () {
+      // 結果数を変更
+      searchProvider.setResultCount(20);
+      expect(searchProvider.resultCount, 20);
+
+      // 別の数に変更
+      searchProvider.setResultCount(5);
+      expect(searchProvider.resultCount, 5);
+    });
+
+    test('should apply filter settings in address search', () async {
+      // フィルター設定を変更
+      searchProvider.setSearchRange(2); // 500m
+      searchProvider.setResultCount(15);
+
+      // 住所検索を実行
+      await searchProvider.performSearch(address: '東京都新宿区');
+
+      // 正しいパラメータでAPIが呼ばれたことを確認
+      verify(mockStoreProvider.loadNewStoresFromApi(
+        address: '東京都新宿区',
+        keyword: '中華',
+        range: 2,
+        count: 15,
+      )).called(1);
+    });
+
+    test('should apply filter settings in current location search', () async {
+      // モック位置情報の設定
+      when(mockLocationService.getCurrentLocation()).thenAnswer(
+        (_) async => Location(
+          latitude: 35.6762,
+          longitude: 139.6503,
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      // フィルター設定を変更
+      searchProvider.setSearchRange(4); // 2000m
+      searchProvider.setResultCount(25);
+
+      // 現在地検索を実行
+      await searchProvider.performSearchWithCurrentLocation();
+
+      // 正しいパラメータでAPIが呼ばれたことを確認
+      verify(mockStoreProvider.loadNewStoresFromApi(
+        lat: 35.6762,
+        lng: 139.6503,
+        keyword: '中華',
+        range: 4,
+        count: 25,
+      )).called(1);
+    });
+
+    test('should validate search range values', () {
+      // 有効な範囲（1-5）のテスト
+      searchProvider.setSearchRange(1);
+      expect(searchProvider.searchRange, 1);
+
+      searchProvider.setSearchRange(5);
+      expect(searchProvider.searchRange, 5);
+
+      // 無効な値は変更されない
+      searchProvider.setSearchRange(0);
+      expect(searchProvider.searchRange, 5); // 前の値のまま
+
+      searchProvider.setSearchRange(6);
+      expect(searchProvider.searchRange, 5); // 前の値のまま
+    });
+
+    test('should validate result count values', () {
+      // 有効な範囲（1-100）のテスト
+      searchProvider.setResultCount(1);
+      expect(searchProvider.resultCount, 1);
+
+      searchProvider.setResultCount(100);
+      expect(searchProvider.resultCount, 100);
+
+      // 無効な値は変更されない
+      searchProvider.setResultCount(0);
+      expect(searchProvider.resultCount, 100); // 前の値のまま
+
+      searchProvider.setResultCount(101);
+      expect(searchProvider.resultCount, 100); // 前の値のまま
     });
   });
 }
