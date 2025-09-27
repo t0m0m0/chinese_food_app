@@ -116,6 +116,8 @@ void main() {
       verify(mockStoreProvider.loadNewStoresFromApi(
         address: '東京都新宿区',
         keyword: '中華',
+        range: 3,
+        count: 20,
       )).called(1);
     });
 
@@ -143,6 +145,8 @@ void main() {
         lat: 35.6762,
         lng: 139.6503,
         keyword: '中華',
+        range: 3,
+        count: 20,
       )).called(1);
     });
 
@@ -172,7 +176,7 @@ void main() {
       await searchProvider.performSearch(address: '東京都新宿区');
 
       // エラーメッセージが設定されることを確認
-      expect(searchProvider.errorMessage, contains('サーバーエラーが発生しました'));
+      expect(searchProvider.errorMessage, contains('予期しないエラーが発生しました'));
       expect(searchProvider.isLoading, false);
     });
 
@@ -180,7 +184,8 @@ void main() {
     test('should have default search filter settings', () {
       // デフォルトのフィルター設定を確認
       expect(searchProvider.searchRange, 3); // デフォルト検索範囲: 1000m
-      expect(searchProvider.resultCount, 10); // デフォルト結果数: 10件
+      expect(searchProvider.resultCount,
+          20); // デフォルト結果数: 20件（SearchConfig.defaultPageSize）
     });
 
     test('should allow changing search range', () {

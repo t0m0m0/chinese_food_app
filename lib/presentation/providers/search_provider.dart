@@ -1,21 +1,22 @@
 import 'package:flutter/foundation.dart';
 import 'dart:developer' as developer;
 import '../../core/constants/string_constants.dart';
+import '../../core/config/search_config.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/services/location_service.dart';
 import './store_provider.dart';
 
 /// 検索画面の状態管理とビジネスロジックを担当するProvider
 class SearchProvider extends ChangeNotifier {
-  /// 検索範囲の制限値
+  /// 検索範囲の制限値（SearchConfigから取得）
   static const int _minSearchRange = 1;
   static const int _maxSearchRange = 5;
-  static const int _defaultSearchRange = 3;
+  static const int _defaultSearchRange = SearchConfig.defaultRange;
 
-  /// 結果数の制限値
-  static const int _minResultCount = 1;
-  static const int _maxResultCount = 100;
-  static const int _defaultResultCount = 10;
+  /// 結果数の制限値（SearchConfigから取得）
+  static const int _minResultCount = SearchConfig.minCount;
+  static const int _maxResultCount = SearchConfig.maxCount;
+  static const int _defaultResultCount = SearchConfig.defaultPageSize;
 
   final StoreProvider storeProvider;
   final LocationService locationService;
@@ -55,7 +56,7 @@ class SearchProvider extends ChangeNotifier {
 
   // 検索フィルター設定メソッド
   void setSearchRange(int range) {
-    if (range >= _minSearchRange && range <= _maxSearchRange) {
+    if (SearchConfig.isValidRange(range)) {
       _searchRange = range;
       notifyListeners();
     } else {
@@ -72,7 +73,7 @@ class SearchProvider extends ChangeNotifier {
   }
 
   void setResultCount(int count) {
-    if (count >= _minResultCount && count <= _maxResultCount) {
+    if (SearchConfig.isValidCount(count)) {
       _resultCount = count;
       notifyListeners();
     } else {

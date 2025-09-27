@@ -58,6 +58,14 @@ class UiConfig {
   /// 地図設定
   static const double mapZoom = 15.0; // 地図のデフォルトズームレベル
 
+  /// UI文字列（国際化対応基盤）
+  static const Map<String, String> searchFilterLabels = {
+    'searchRange': '検索範囲',
+    'resultCount': '結果数',
+    'filterShow': 'フィルターを表示',
+    'filterHide': 'フィルターを隠す',
+  };
+
   /// 色設定
   static const Color primaryColor = Color(0xFF2196F3);
   static const Color secondaryColor = Color(0xFFFF9800);
@@ -110,6 +118,11 @@ class UiConfig {
     return zoom >= 1.0 && zoom <= 20.0;
   }
 
+  /// UI文字列を取得（国際化対応基盤）
+  static String getSearchFilterLabel(String key) {
+    return searchFilterLabels[key] ?? key;
+  }
+
   /// デバッグ情報を取得
   static Map<String, dynamic> get debugInfo {
     return {
@@ -157,6 +170,7 @@ class UiConfig {
       'textColor': textColor.toString(),
       'subtitleColor': subtitleColor.toString(),
       'dividerColor': dividerColor.toString(),
+      'searchFilterLabels': searchFilterLabels,
     };
   }
 }

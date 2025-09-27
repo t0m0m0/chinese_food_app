@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_settings/app_settings.dart';
 import '../../../core/constants/string_constants.dart';
+import '../../../core/config/ui_config.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/duplicate_store_checker.dart';
 import '../../../domain/entities/store.dart';
@@ -235,7 +236,9 @@ class _SearchPageState extends State<SearchPage> {
                     icon: Icon(_showFilters
                         ? Icons.filter_list_off
                         : Icons.filter_list),
-                    tooltip: _showFilters ? 'フィルターを隠す' : 'フィルターを表示',
+                    tooltip: _showFilters
+                        ? UiConfig.getSearchFilterLabel('filterHide')
+                        : UiConfig.getSearchFilterLabel('filterShow'),
                   ),
                 ],
               ),

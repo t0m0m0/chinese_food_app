@@ -1,24 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../core/config/search_config.dart';
+import '../../core/config/ui_config.dart';
 
 /// 検索フィルター設定ウィジェット
 class SearchFilterWidget extends StatelessWidget {
-  /// 検索範囲の選択肢とラベルのマッピング
-  static const Map<int, String> _rangeLabels = {
-    1: '300m',
-    2: '500m',
-    3: '1000m',
-    4: '2000m',
-    5: '3000m',
-  };
-
-  /// 検索範囲の説明
-  static const Map<int, String> _rangeDescriptions = {
-    1: '最寄り（300m圏内）',
-    2: '近場（500m圏内）',
-    3: '徒歩圏内（1000m圏内）',
-    4: '少し遠め（2000m圏内）',
-    5: '広範囲（3000m圏内）',
-  };
   final int searchRange;
   final int resultCount;
   final void Function(int) onRangeChanged;
@@ -46,7 +31,7 @@ class SearchFilterWidget extends StatelessWidget {
           children: [
             // 検索範囲設定
             Text(
-              '検索範囲',
+              UiConfig.getSearchFilterLabel('searchRange'),
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -57,7 +42,7 @@ class SearchFilterWidget extends StatelessWidget {
 
             // 結果数設定
             Text(
-              '結果数',
+              UiConfig.getSearchFilterLabel('resultCount'),
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -74,14 +59,14 @@ class SearchFilterWidget extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: _rangeLabels.entries.map((entry) {
+      children: SearchConfig.rangeLabels.entries.map((entry) {
         final rangeValue = entry.key;
         final label = entry.value;
         final isSelected = searchRange == rangeValue;
 
         return FilterChip(
           label: Text(label),
-          tooltip: _rangeDescriptions[rangeValue],
+          tooltip: SearchConfig.getRangeDescription(rangeValue),
           selected: isSelected,
           onSelected: (selected) {
             if (selected) {
@@ -102,7 +87,7 @@ class SearchFilterWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '1件',
+              '${SearchConfig.minCount}件',
               style: theme.textTheme.bodySmall,
             ),
             Text(
@@ -113,16 +98,16 @@ class SearchFilterWidget extends StatelessWidget {
               ),
             ),
             Text(
-              '100件',
+              '${SearchConfig.maxCount}件',
               style: theme.textTheme.bodySmall,
             ),
           ],
         ),
         Slider(
           value: resultCount.toDouble(),
-          min: 1,
-          max: 100,
-          divisions: 99,
+          min: SearchConfig.minCount.toDouble(),
+          max: SearchConfig.maxCount.toDouble(),
+          divisions: SearchConfig.maxCount - SearchConfig.minCount,
           onChanged: (value) {
             onCountChanged(value.round());
           },

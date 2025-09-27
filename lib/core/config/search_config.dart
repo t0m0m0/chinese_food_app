@@ -16,6 +16,24 @@ class SearchConfig {
     5: 3000,
   };
 
+  /// 検索範囲のラベル表示（UI用）
+  static const Map<int, String> rangeLabels = {
+    1: '300m',
+    2: '500m',
+    3: '1000m',
+    4: '2000m',
+    5: '3000m',
+  };
+
+  /// 検索範囲の説明文（ツールチップ用）
+  static const Map<int, String> rangeDescriptions = {
+    1: '最寄り（300m圏内）',
+    2: '近場（500m圏内）',
+    3: '徒歩圏内（1000m圏内）',
+    4: '少し遠め（2000m圏内）',
+    5: '広範囲（3000m圏内）',
+  };
+
   /// 検索結果の取得件数設定
   static const int minCount = 1;
   static const int maxCount = 100;
@@ -88,6 +106,16 @@ class SearchConfig {
     return rangeToMeters[range];
   }
 
+  /// 検索範囲のラベルを取得
+  static String? getRangeLabel(int range) {
+    return rangeLabels[range];
+  }
+
+  /// 検索範囲の説明を取得
+  static String? getRangeDescription(int range) {
+    return rangeDescriptions[range];
+  }
+
   /// メートルを検索範囲に変換
   static int? meterToRange(int meter) {
     for (final entry in rangeToMeters.entries) {
@@ -116,6 +144,8 @@ class SearchConfig {
       'defaultCount': defaultCount,
       'defaultStart': defaultStart,
       'rangeToMeters': rangeToMeters,
+      'rangeLabels': rangeLabels,
+      'rangeDescriptions': rangeDescriptions,
       'minCount': minCount,
       'maxCount': maxCount,
       'defaultPageSize': defaultPageSize,
