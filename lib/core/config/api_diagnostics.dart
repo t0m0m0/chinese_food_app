@@ -68,8 +68,35 @@ class ApiDiagnosticsResult {
 
 /// API設定の診断ユーティリティ
 class ApiDiagnostics {
+  static ApiDiagnosticsResult? _cachedResult;
+  static DateTime? _lastDiagnosticTime;
+  static const Duration _cacheExpiry = Duration(minutes: 5);
+
+  /// キャッシュされた結果が有効かどうかを確認
+  static bool _isResultCached() {
+    if (_cachedResult == null || _lastDiagnosticTime == null) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    return now.difference(_lastDiagnosticTime!) < _cacheExpiry;
+  }
+
   /// 包括的なAPI設定診断を実行
-  static Future<ApiDiagnosticsResult> getComprehensiveDiagnostics() async {
+  static Future<ApiDiagnosticsResult> getComprehensiveDiagnostics({
+    bool forceRefresh = false,
+  }) async {
+    // キャッシュされた結果があり、強制更新でない場合はキャッシュを返す
+    if (!forceRefresh && _isResultCached()) {
+      developer.log('🔍 キャッシュされた診断結果を使用', name: 'ApiDiagnostics');
+      return _cachedResult!;
+    }
+
+    return await _performDiagnostics();
+  }
+
+  /// 実際の診断処理を実行
+  static Future<ApiDiagnosticsResult> _performDiagnostics() async {
     developer.log('🔍 API設定診断を開始', name: 'ApiDiagnostics');
 
     final timestamp = DateTime.now();
@@ -120,6 +147,10 @@ class ApiDiagnostics {
 
     developer.log('🔍 診断完了: ${isConfigValid ? "正常" : "問題あり"}',
         name: 'ApiDiagnostics');
+
+    // 結果をキャッシュ
+    _cachedResult = result;
+    _lastDiagnosticTime = DateTime.now();
 
     return result;
   }
@@ -177,8 +208,16 @@ class ApiDiagnostics {
   }
 
   /// 簡易診断（ログ出力付き）
-  static Future<void> logDiagnostics() async {
-    final diagnostics = await getComprehensiveDiagnostics();
+  static Future<void> logDiagnostics({bool forceRefresh = false}) async {
+    final diagnostics =
+        await getComprehensiveDiagnostics(forceRefresh: forceRefresh);
     developer.log(diagnostics.toString(), name: 'ApiDiagnostics');
+  }
+
+  /// 診断キャッシュをクリア
+  static void clearCache() {
+    _cachedResult = null;
+    _lastDiagnosticTime = null;
+    developer.log('🔍 診断キャッシュをクリアしました', name: 'ApiDiagnostics');
   }
 }

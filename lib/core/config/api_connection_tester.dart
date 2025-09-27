@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:chinese_food_app/core/config/app_config.dart';
@@ -43,15 +44,17 @@ class ApiConnectionTester {
   static final _httpClient = AppHttpClient();
 
   /// 基本的な接続テスト
-  static Future<ApiConnectionTestResult> testBasicConnectivity() async {
+  static Future<ApiConnectionTestResult> testBasicConnectivity({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
     final stopwatch = Stopwatch()..start();
 
     try {
       developer.log('🔍 基本接続テストを開始', name: 'ApiConnectionTester');
 
-      // DNS解決テスト
-      final addresses =
-          await InternetAddress.lookup('webservice.recruit.co.jp');
+      // DNS解決テスト（タイムアウト付き）
+      final addresses = await InternetAddress.lookup('webservice.recruit.co.jp')
+          .timeout(timeout);
       if (addresses.isEmpty) {
         throw Exception('DNS解決に失敗しました');
       }
@@ -66,6 +69,15 @@ class ApiConnectionTester {
           'dns_resolved': true,
           'ip_addresses': addresses.map((a) => a.address).toList(),
         },
+      );
+    } on TimeoutException {
+      stopwatch.stop();
+
+      return ApiConnectionTestResult(
+        testType: 'basic_connectivity',
+        isSuccessful: false,
+        errorMessage: 'DNS解決がタイムアウトしました (${timeout.inSeconds}秒)',
+        duration: stopwatch.elapsed,
       );
     } catch (e) {
       stopwatch.stop();
@@ -163,7 +175,9 @@ class ApiConnectionTester {
   }
 
   /// HotPepper API実際の通信テスト（オプション）
-  static Future<ApiConnectionTestResult> testActualApiCall() async {
+  static Future<ApiConnectionTestResult> testActualApiCall({
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
     final stopwatch = Stopwatch()..start();
 
     try {
@@ -175,7 +189,7 @@ class ApiConnectionTester {
         throw Exception('実際のAPIキーが必要です（テスト用キーは使用不可）');
       }
 
-      // 最小限のリクエストでAPI接続テスト
+      // 最小限のリクエストでAPI接続テスト（タイムアウト付き）
       final url = 'https://webservice.recruit.co.jp/hotpepper/gourmet/v1/';
       final response = await _httpClient.get(
         url,
@@ -185,7 +199,7 @@ class ApiConnectionTester {
           'count': '1',
           'keyword': '中華',
         },
-      );
+      ).timeout(timeout);
 
       final isSuccess = response.isSuccess;
       if (!isSuccess) {
@@ -203,6 +217,15 @@ class ApiConnectionTester {
           'api_accessible': true,
         },
       );
+    } on TimeoutException {
+      stopwatch.stop();
+
+      return ApiConnectionTestResult(
+        testType: 'actual_api_call',
+        isSuccessful: false,
+        errorMessage: 'API呼び出しがタイムアウトしました (${timeout.inSeconds}秒)',
+        duration: stopwatch.elapsed,
+      );
     } catch (e) {
       stopwatch.stop();
 
@@ -218,19 +241,21 @@ class ApiConnectionTester {
   /// 包括的なテスト実行
   static Future<List<ApiConnectionTestResult>> runComprehensiveTest({
     bool includeActualApiCall = false,
+    Duration connectivityTimeout = const Duration(seconds: 10),
+    Duration apiCallTimeout = const Duration(seconds: 15),
   }) async {
     developer.log('🔍 包括的API接続テストを開始', name: 'ApiConnectionTester');
 
     final results = <ApiConnectionTestResult>[];
 
     // 基本テスト
-    results.add(await testBasicConnectivity());
+    results.add(await testBasicConnectivity(timeout: connectivityTimeout));
     results.add(await testApiKeyValidation());
     results.add(await testConfigValidation());
 
     // 実際のAPI呼び出しテスト（オプション）
     if (includeActualApiCall) {
-      results.add(await testActualApiCall());
+      results.add(await testActualApiCall(timeout: apiCallTimeout));
     }
 
     final successCount = results.where((r) => r.isSuccessful).length;
