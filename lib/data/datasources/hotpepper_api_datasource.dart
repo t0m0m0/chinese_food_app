@@ -108,10 +108,9 @@ class HotpepperApiDatasourceImpl extends BaseApiService
 
   /// APIキーの取得と存在確認
   Future<String> _getApiKey() async {
+    // AppConfigの初期化を確実に実行
     if (!AppConfig.isInitialized) {
-      throw ApiException(
-        'AppConfigが初期化されていません。main()でAppConfig.initialize()を呼び出してください。',
-      );
+      await AppConfig.initialize();
     }
 
     // セキュアモードではAPIキー直接呼び出しを禁止
@@ -121,10 +120,10 @@ class HotpepperApiDatasourceImpl extends BaseApiService
       );
     }
 
-    final apiKey = AppConfig.api.hotpepperApiKey;
-    final hasValidApiKeys = await AppConfig.hasHotpepperApiKeyAsync;
+    // 非同期でAPIキーを取得
+    final apiKey = await AppConfig.hotpepperApiKey;
 
-    if (!hasValidApiKeys || apiKey.isEmpty) {
+    if (apiKey == null || apiKey.isEmpty) {
       throw ApiException(
         'HotPepper APIキーが設定されていません。HOTPEPPER_API_KEY環境変数を設定してください。',
       );

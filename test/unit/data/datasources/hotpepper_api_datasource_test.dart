@@ -182,6 +182,9 @@ void main() {
       });
     });
   });
+
+  // Issue #185: APIキー取得問題のテスト
+  _testApiKeyRetrievalIssues();
 }
 
 // Mock HTTP Client for testing
@@ -227,4 +230,62 @@ class GetRequest {
   final Map<String, String>? queryParameters;
 
   GetRequest(this.path, this.headers, this.queryParameters);
+}
+
+// APIキー取得の問題を再現するテスト
+void _testApiKeyRetrievalIssues() {
+  group('API Key Retrieval Issues (Issue #185)', () {
+    test('should properly retrieve API key asynchronously', () async {
+      // 実際のdatasourceで非同期APIキー取得をテスト
+      final realDatasource = HotpepperApiDatasourceImpl(MockAppHttpClient());
+
+      // テスト用APIキーを設定
+      TestEnvSetup.setTestApiKey('HOTPEPPER_API_KEY', 'valid_test_key_123');
+
+      // APIキー取得が正常に動作することを確認
+      try {
+        await realDatasource.searchStores(lat: 35.6762, lng: 139.6503);
+        // 例外が投げられなければAPIキー取得は成功
+      } catch (e) {
+        // APIキー関連のエラーでないことを確認
+        expect(e, isNot(isA<ApiException>()), reason: 'APIキー取得で失敗してはいけない');
+      }
+    });
+
+    test('should throw proper error when API key is not available', () async {
+      final realDatasource = HotpepperApiDatasourceImpl(MockAppHttpClient());
+
+      // APIキーをクリア
+      TestEnvSetup.clearTestApiKey('HOTPEPPER_API_KEY');
+
+      // APIキーが無い場合のエラーを確認
+      await expectLater(
+        () => realDatasource.searchStores(lat: 35.6762, lng: 139.6503),
+        throwsA(isA<ApiException>().having(
+          (e) => e.message,
+          'message',
+          contains('HotPepper APIキーが設定されていません'),
+        )),
+      );
+    });
+
+    test('should handle secure mode properly', () async {
+      final realDatasource = HotpepperApiDatasourceImpl(MockAppHttpClient());
+
+      // セキュアモードでの動作確認はSecurityConfigのテストで確認済み
+      // ここでは基本的な動作のみ確認
+      TestEnvSetup.setTestApiKey('HOTPEPPER_API_KEY', 'test_key_secure');
+
+      try {
+        await realDatasource.searchStores(lat: 35.6762, lng: 139.6503);
+      } catch (e) {
+        // セキュアモード関連のエラーでない限り、APIキー取得は成功すべき
+        if (e is ApiException && e.message.contains('セキュアモード')) {
+          // セキュアモードエラーは予期された動作
+        } else {
+          fail('予期しないエラー: $e');
+        }
+      }
+    });
+  });
 }
