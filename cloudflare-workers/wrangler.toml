@@ -1,16 +1,17 @@
 # Cloudflare Workers設定ファイル
 name = "chinese-food-app-proxy"
-main = "src/worker.js"
+main = "src/worker-simple.js"
 compatibility_date = "2024-01-01"
 
 # 環境変数（本番環境用）
 # 実際のAPIキーはCloudflareダッシュボードで設定
 [vars]
+USE_MOCK_RESPONSE = "true"
 # HOTPEPPER_API_KEY = "your_actual_api_key_here"  # この行はコメントアウト
 
 # 開発環境設定
 [env.development]
-vars = { ENVIRONMENT = "development" }
+vars = { ENVIRONMENT = "development", USE_MOCK_RESPONSE = "true" }
 
 # 本番環境設定
 [env.production]
