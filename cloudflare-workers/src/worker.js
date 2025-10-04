@@ -110,9 +110,40 @@ async function handleHotpepperSearch(request, env, corsHeaders) {
 
     // HotPepper API呼び出し
     console.log('🌐 [Worker] Calling HotPepper API...');
-    const hotpepperResponse = await callHotpepperApi({
-      lat, lng, address, keyword, range, count, start
-    }, env.HOTPEPPER_API_KEY);
+    let hotpepperResponse;
+    
+    // 開発中はテスト用のモックレスポンスを使用（API問題を回避）
+    if (env.USE_MOCK_RESPONSE === 'true') {
+      console.log('🧪 [Worker] Using mock response for testing');
+      hotpepperResponse = {
+        results: {
+          shop: [
+            {
+              id: 'mock_001',
+              name: 'テスト中華店',
+              address: '東京都新宿区西新宿1-1-1',
+              lat: '35.6812',
+              lng: '139.7671',
+              genre: { name: '中華料理' },
+              budget: { name: '～1000円' },
+              access: 'JR新宿駅徒歩5分',
+              catch: 'テスト用の中華料理店',
+              urls: { pc: 'http://example.com', mobile: 'http://m.example.com' },
+              photo: { mobile: { l: 'http://example.com/photo.jpg' } },
+              open: '11:00',
+              close: '22:00'
+            }
+          ],
+          results_available: 1,
+          results_returned: 1,
+          results_start: 1
+        }
+      };
+    } else {
+      hotpepperResponse = await callHotpepperApi({
+        lat, lng, address, keyword, range, count, start
+      }, env.HOTPEPPER_API_KEY);
+    }
     console.log('✅ [Worker] HotPepper API response received');
 
     // レスポンス変換
@@ -221,35 +252,105 @@ async function callHotpepperApi(params, apiKey) {
 
 /**
  * HotPepper APIレスポンスの変換
+ * アプリ側のHotpepperStoreModel.fromJsonと完全互換な構造で変換
  */
 function transformHotpepperResponse(hotpepperResponse) {
-  const { results } = hotpepperResponse;
+  try {
+    console.log('🔄 [Worker] Raw HotPepper response type:', typeof hotpepperResponse);
+    console.log('🔄 [Worker] Raw HotPepper response keys:', Object.keys(hotpepperResponse || {}));
+    
+    if (!hotpepperResponse || !hotpepperResponse.results) {
+      throw new Error('Invalid HotPepper API response structure');
+    }
+    
+    const { results } = hotpepperResponse;
+    console.log('📋 [Worker] Results keys:', Object.keys(results || {}));
 
-  // エラーレスポンスの場合
-  if (results.error) {
-    throw new Error(`HotPepper API error: ${results.error[0].message}`);
+    // エラーレスポンスの場合
+    if (results.error) {
+      console.error('❌ [Worker] HotPepper API error:', results.error);
+      throw new Error(`HotPepper API error: ${results.error[0].message}`);
+    }
+
+    console.log('📊 [Worker] Results available:', results.results_available);
+    console.log('📊 [Worker] Results returned:', results.results_returned);
+    console.log('📊 [Worker] Results start:', results.results_start);
+    console.log('📊 [Worker] Shop count:', (results.shop || []).length);
+
+    // 店舗データの変換 - アプリ側の期待構造と完全一致
+    const shops = (results.shop || []).map((shop, index) => {
+      try {
+        console.log(`🏪 [Worker] Processing shop ${index}:`, shop?.name || 'Unknown');
+        return {
+          id: shop?.id || '',
+          name: shop?.name || '',
+          address: shop?.address || '',
+          lat: shop?.lat || null,  // 文字列のまま（アプリ側でdouble.tryParse）
+          lng: shop?.lng || null,  // 文字列のまま（アプリ側でdouble.tryParse）
+          
+          // アプリ側が期待するオブジェクト構造を維持
+          genre: shop?.genre ? { name: shop.genre.name || null } : null,
+          budget: shop?.budget ? { name: shop.budget.name || null } : null,
+          
+          access: shop?.access || null,
+          catch: shop?.catch || null,  // catch_ではなくcatch
+          
+          // URLsオブジェクト構造を維持（安全なアクセス）
+          urls: shop?.urls ? {
+            pc: shop.urls.pc || null,
+            mobile: shop.urls.mobile || null
+          } : null,
+          
+          // photoオブジェクト構造を維持（安全なアクセス）
+          photo: shop?.photo ? {
+            mobile: shop.photo.mobile ? {
+              l: shop.photo.mobile.l || null
+            } : null
+          } : null,
+          
+          open: shop?.open || null,
+          close: shop?.close || null,
+        };
+      } catch (shopError) {
+        console.error(`❌ [Worker] Error processing shop ${index}:`, shopError);
+        // 最小限のデータを返す
+        return {
+          id: shop?.id || `error_${index}`,
+          name: shop?.name || 'Error parsing shop',
+          address: shop?.address || '',
+          lat: null,
+          lng: null,
+          genre: null,
+          budget: null,
+          access: null,
+          catch: null,
+          urls: null,
+          photo: null,
+          open: null,
+          close: null,
+        };
+      }
+    });
+
+    // HotPepper API互換の構造でレスポンスを作成
+    const finalResponse = {
+      results: {
+        shop: shops,
+        results_available: parseInt(results.results_available?.toString() || '0') || 0,
+        results_returned: parseInt(results.results_returned?.toString() || '0') || 0,
+        results_start: parseInt(results.results_start?.toString() || '1') || 1,
+      }
+    };
+    
+    console.log('✅ [Worker] Final response prepared with', shops ? shops.length : 0, 'shops');
+    
+    return finalResponse;
+    
+  } catch (transformError) {
+    console.error('❌ [Worker] Error in transformHotpepperResponse:', transformError);
+    console.error('📍 [Worker] Transform error stack:', transformError.stack);
+    throw transformError;
   }
-
-  // 店舗データの変換
-  const shops = (results.shop || []).map(shop => ({
-    id: shop.id,
-    name: shop.name,
-    address: shop.address,
-    lat: parseFloat(shop.lat),
-    lng: parseFloat(shop.lng),
-    genre: shop.genre?.name || null,
-    budget: shop.budget?.average || null,
-    access: shop.access || null,
-    catch_: shop.catch || null,
-    photo: shop.photo?.pc?.l || null,
-  }));
-
-  return {
-    shops,
-    resultsAvailable: parseInt(results.results_available) || 0,
-    resultsReturned: parseInt(results.results_returned) || 0,
-    resultsStart: parseInt(results.results_start) || 1,
-  };
 }
 
 /**
