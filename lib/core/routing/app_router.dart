@@ -18,25 +18,37 @@ class AppRouter {
       onRetry: () => context.go('/swipe'),
     ),
     routes: [
-      ShellRoute(
-        builder: (context, state, child) {
-          return ShellPage(child: child);
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return ShellPage(child: navigationShell);
         },
-        routes: [
-          GoRoute(
-            path: '/swipe',
-            name: 'swipe',
-            builder: (context, state) => const SwipePage(),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/swipe',
+                name: 'swipe',
+                builder: (context, state) => const SwipePage(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/search',
-            name: 'search',
-            builder: (context, state) => const SearchPage(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/search',
+                name: 'search',
+                builder: (context, state) => const SearchPage(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/my-menu',
-            name: 'my-menu',
-            builder: (context, state) => const MyMenuPage(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/my-menu',
+                name: 'my-menu',
+                builder: (context, state) => const MyMenuPage(),
+              ),
+            ],
           ),
         ],
       ),
