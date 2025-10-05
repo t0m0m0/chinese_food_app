@@ -142,18 +142,9 @@ class _SwipePageState extends State<SwipePage> {
     final swipeStores = storeProvider.swipeStores; // スワイプ専用リストを使用
     final availableStores = swipeStores; // swipeStoresは既にstatus==nullでフィルタ済み
 
-    debugPrint('🎴 _updateAvailableStores() 実行 (スワイプ専用):');
-    debugPrint('  🎯 スワイプ用店舗数: ${availableStores.length}件');
-
-    if (availableStores.isNotEmpty) {
-      debugPrint('  📋 スワイプ用店舗はすべて未設定ステータス（現在地周辺のみ）');
-    }
-
     setState(() {
       _availableStores = availableStores;
     });
-
-    debugPrint('  ✅ _availableStoresに設定完了: ${_availableStores.length}件');
   }
 
   /// プルトゥリフレッシュで新しい店舗データを取得
@@ -182,23 +173,14 @@ class _SwipePageState extends State<SwipePage> {
 
       // カード残り枚数チェック - API呼び出しを制限
       final remainingCards = _availableStores.length - (previousIndex + 1);
-      debugPrint(
-          '🃏 カード残り枚数: $remainingCards件 (previousIndex: $previousIndex)');
-
       // 残り2枚以下の場合、スワイプ用店舗の追加取得を検討
       if (remainingCards <= 2) {
         final storeProvider =
             Provider.of<StoreProvider>(context, listen: false);
         final swipeStoresCount = storeProvider.swipeStores.length;
 
-        debugPrint(
-            '⚠️ カード残り少数警告: 残り$remainingCards枚, スワイプ用店舗数: $swipeStoresCount件');
-
-        // スワイプ用店舗が10件以上ある場合は追加API呼び出しを抑制
-        if (swipeStoresCount >= 10) {
-          debugPrint('🚫 API呼び出し抑制: 十分なスワイプ用店舗データが存在');
-        } else {
-          debugPrint('📡 新規API呼び出し許可: スワイプ用データが不足している');
+        // スワイプ用店舗が10件未満の場合のみ追加取得
+        if (swipeStoresCount < 10) {
           // Future.microtaskを使用して現在のbuild cycleの後でAPI呼び出し
           Future.microtask(() {
             if (mounted) {
@@ -253,12 +235,8 @@ class _SwipePageState extends State<SwipePage> {
 
     try {
       await storeProvider.updateStoreStatus(store.id, status);
-      debugPrint('店舗 ${store.name} のステータスを ${status.value} に更新');
-
       // Consumer<StoreProvider>が自動的に更新を処理するため、手動更新は不要
     } catch (e) {
-      debugPrint('店舗ステータス更新エラー: $e');
-
       if (mounted) {
         // Issue #111 修正: より詳細なエラー情報とリカバリー機能を提供
         ScaffoldMessenger.of(context).showSnackBar(

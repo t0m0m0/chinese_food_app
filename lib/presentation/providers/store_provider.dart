@@ -80,9 +80,13 @@ class StoreProvider extends ChangeNotifier {
           .where((store) => store.id != storeId)
           .toList();
       _stateManager.updateSwipeStores(updatedSwipeStores);
+
+      // UIに変更を通知
+      notifyListeners();
     } catch (e) {
       _stateManager.setError(
           ErrorMessages.getStoreMessage('store_status_update_failed'));
+      notifyListeners();
     }
   }
 
