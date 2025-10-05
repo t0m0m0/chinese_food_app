@@ -138,31 +138,36 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     // パラメータ検証
     _validateParameters(lat, lng, address, range, count, start);
 
-    // プロキシサーバーへのリクエストボディ構築
-    final requestBody = {
-      'lat': lat,
-      'lng': lng,
-      'address': address,
-      'keyword': keyword,
-      'range': range,
-      'count': count,
-      'start': start,
+    // クエリパラメータ構築（GETメソッド対応）
+    final queryParams = <String, String>{
+      if (lat != null) 'lat': lat.toString(),
+      if (lng != null) 'lng': lng.toString(),
+      if (address != null && address.isNotEmpty) 'address': address,
+      if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
+      'range': range.toString(),
+      'count': count.toString(),
+      'start': start.toString(),
     };
 
     if (kDebugMode) {
-      debugPrint('📤 リクエストボディ: ${requestBody.toString()}');
+      debugPrint('📤 クエリパラメータ: ${queryParams.toString()}');
     }
 
+    // URIの構築
+    final uri =
+        Uri.parse('$proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}')
+            .replace(queryParameters: queryParams);
+
     try {
-      // プロキシサーバー経由でAPIリクエスト実行
+      // プロキシサーバー経由でAPIリクエスト実行（GETメソッド）
       if (kDebugMode) {
-        debugPrint('🚀 プロキシサーバーにリクエスト送信中...');
+        debugPrint('🚀 プロキシサーバーにGETリクエスト送信中...');
+        debugPrint('🔗 URL: $uri');
       }
-      final response = await postAndParse<HotpepperSearchResponse>(
-        '$proxyBaseUrl${HotpepperProxyConstants.searchEndpoint}',
+      final response = await getAndParse<HotpepperSearchResponse>(
+        uri.toString(),
         (json) =>
             HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
-        body: requestBody,
         headers: _buildHeaders(),
       );
       if (kDebugMode) {
