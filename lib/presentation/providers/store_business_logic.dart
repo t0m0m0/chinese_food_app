@@ -42,6 +42,10 @@ class StoreBusinessLogic {
   }
 
   /// API から新しい店舗を検索して取得
+  ///
+  /// 検索結果は重複チェックせず、そのまま返す
+  /// （検索画面では同じ店舗でも毎回表示すべき）
+  /// データベースへの保存も行わない（検索は表示のみ）
   Future<List<Store>> loadNewStoresFromApi({
     double? lat,
     double? lng,
@@ -59,23 +63,8 @@ class StoreBusinessLogic {
       count: count,
     );
 
-    // 重複チェック：既存店舗と同じIDまたは同じ位置の店舗は除外
-    final existingIds = _stores.map((store) => store.id).toSet();
-    final existingLocations =
-        _stores.map((store) => '${store.lat}_${store.lng}').toSet();
-    final newStores = apiStores.where((store) {
-      final locationKey = '${store.lat}_${store.lng}';
-      return !existingIds.contains(store.id) &&
-          !existingLocations.contains(locationKey);
-    }).toList();
-
-    // 新しい店舗をローカルに追加
-    for (final store in newStores) {
-      await _repository.insertStore(store);
-      _stores.add(store);
-    }
-
-    return newStores;
+    // 検索結果はそのまま返す（重複チェック不要、DB保存も不要）
+    return apiStores;
   }
 
   /// スワイプ画面用の店舗取得（ステータス未設定の店舗のみ）

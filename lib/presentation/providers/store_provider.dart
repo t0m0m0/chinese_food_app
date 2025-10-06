@@ -124,7 +124,7 @@ class StoreProvider extends ChangeNotifier {
       _stateManager.setLoading(true);
       _stateManager.clearError();
 
-      await _businessLogic.loadNewStoresFromApi(
+      final newStores = await _businessLogic.loadNewStoresFromApi(
         lat: lat,
         lng: lng,
         address: address,
@@ -133,6 +133,7 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
 
+      _stateManager.updateSearchResults(newStores);
       _stateManager.setLoading(false);
       // 新規店舗取得後、キャッシュクリアとUIに変更を通知
       _cacheManager.clearCache();
