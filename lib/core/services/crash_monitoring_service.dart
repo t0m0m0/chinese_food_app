@@ -106,13 +106,6 @@ class CrashMonitoringService {
       }
 
       // ログ記録（本番環境ではCrashlyticsに送信）
-      // 将来的にはlogRecordをCrashlyticsに送信
-      // final logRecord = LogRecord(
-      //   message: message,
-      //   level: level,
-      //   metadata: metadata ?? {},
-      //   timestamp: DateTime.now(),
-      // );
 
       // テスト環境では常に失敗を返す
       return Failure(BaseException('テスト環境ではログメッセージを送信できません'));
