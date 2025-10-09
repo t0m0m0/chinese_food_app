@@ -21,7 +21,7 @@ void main() {
 
   group('StoreRepositoryImpl - searchStoresFromApi', () {
     final testHotpepperStores = [
-      HotpepperStoreModel(
+      const HotpepperStoreModel(
         id: 'api-store-1',
         name: 'API中華料理店1',
         address: '東京都渋谷区1-1-1',
@@ -30,7 +30,7 @@ void main() {
         photo: 'https://example.com/photo1.jpg',
         catch_: 'おすすめの中華料理店',
       ),
-      HotpepperStoreModel(
+      const HotpepperStoreModel(
         id: 'api-store-2',
         name: 'API中華料理店2',
         address: '東京都新宿区2-2-2',
@@ -167,7 +167,7 @@ void main() {
 
     test('should handle empty API response', () async {
       // Arrange
-      final emptyResponse = HotpepperSearchResponse(
+      final emptyResponse = const HotpepperSearchResponse(
         shops: [],
         resultsAvailable: 0,
         resultsReturned: 0,
