@@ -90,6 +90,29 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
+  /// Saves a swiped store with status
+  ///
+  /// スワイプ画面専用。新規店舗の場合はinsert、既存店舗の場合はupdateを行う
+  Future<void> saveSwipedStore(Store store, StoreStatus status) async {
+    try {
+      _stateManager.clearError();
+      await _businessLogic.saveSwipedStore(store, status);
+      _cacheManager.clearCache();
+
+      // スワイプリストから削除
+      final updatedSwipeStores =
+          _stateManager.swipeStores.where((s) => s.id != store.id).toList();
+      _stateManager.updateSwipeStores(updatedSwipeStores);
+
+      // UIに変更を通知
+      notifyListeners();
+    } catch (e) {
+      _stateManager.setError(
+          ErrorMessages.getStoreMessage('store_status_update_failed'));
+      notifyListeners();
+    }
+  }
+
   Future<void> addStore(Store store) async {
     try {
       _stateManager.clearError();
@@ -124,7 +147,7 @@ class StoreProvider extends ChangeNotifier {
       _stateManager.setLoading(true);
       _stateManager.clearError();
 
-      await _businessLogic.loadNewStoresFromApi(
+      final newStores = await _businessLogic.loadNewStoresFromApi(
         lat: lat,
         lng: lng,
         address: address,
@@ -133,6 +156,7 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
 
+      _stateManager.updateSearchResults(newStores);
       _stateManager.setLoading(false);
       // 新規店舗取得後、キャッシュクリアとUIに変更を通知
       _cacheManager.clearCache();

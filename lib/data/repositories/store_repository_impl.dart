@@ -38,6 +38,7 @@ class StoreRepositoryImpl implements StoreRepository {
       );
 
       // API結果をDomainエンティティに変換
+      // 重要: ステータスはnullで保存（ユーザーがスワイプで決定する）
       return response.shops.map((hotpepperStore) {
         return Store(
           id: hotpepperStore.id,
@@ -46,7 +47,7 @@ class StoreRepositoryImpl implements StoreRepository {
           lat: hotpepperStore.lat ?? 0.0,
           lng: hotpepperStore.lng ?? 0.0,
           imageUrl: hotpepperStore.photo, // 画像URLを追加
-          status: StoreStatus.wantToGo, // API検索結果はデフォルトで「行きたい」
+          status: null, // スワイプ前はステータスなし
           memo: hotpepperStore.catch_,
           createdAt: DateTime.now(),
         );

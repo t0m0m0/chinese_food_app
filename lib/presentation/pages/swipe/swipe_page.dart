@@ -234,7 +234,8 @@ class _SwipePageState extends State<SwipePage> {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
     try {
-      await storeProvider.updateStoreStatus(store.id, status);
+      // スワイプ画面専用: 新規店舗でも既存店舗でも適切にDB保存
+      await storeProvider.saveSwipedStore(store, status);
       // Consumer<StoreProvider>が自動的に更新を処理するため、手動更新は不要
     } catch (e) {
       if (mounted) {
