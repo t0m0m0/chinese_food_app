@@ -753,6 +753,23 @@ class MockStoreProvider extends _i1.Mock implements _i22.StoreProvider {
       ) as _i10.Future<void>);
 
   @override
+  _i10.Future<void> saveSwipedStore(
+    _i15.Store? store,
+    _i15.StoreStatus? status,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #saveSwipedStore,
+          [
+            store,
+            status,
+          ],
+        ),
+        returnValue: _i10.Future<void>.value(),
+        returnValueForMissingStub: _i10.Future<void>.value(),
+      ) as _i10.Future<void>);
+
+  @override
   _i10.Future<void> addStore(_i15.Store? store) => (super.noSuchMethod(
         Invocation.method(
           #addStore,
@@ -978,6 +995,50 @@ class MockHotpepperProxyDatasource extends _i1.Mock
           ),
         )),
       ) as _i10.Future<_i6.HotpepperSearchResponse>);
+
+  @override
+  _i10.Future<_i17.Result<_i6.HotpepperSearchResponse>> searchStoresResult({
+    double? lat,
+    double? lng,
+    String? address,
+    String? keyword,
+    int? range = 3,
+    int? count = 20,
+    int? start = 1,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #searchStoresResult,
+          [],
+          {
+            #lat: lat,
+            #lng: lng,
+            #address: address,
+            #keyword: keyword,
+            #range: range,
+            #count: count,
+            #start: start,
+          },
+        ),
+        returnValue:
+            _i10.Future<_i17.Result<_i6.HotpepperSearchResponse>>.value(
+                _i18.dummyValue<_i17.Result<_i6.HotpepperSearchResponse>>(
+          this,
+          Invocation.method(
+            #searchStoresResult,
+            [],
+            {
+              #lat: lat,
+              #lng: lng,
+              #address: address,
+              #keyword: keyword,
+              #range: range,
+              #count: count,
+              #start: start,
+            },
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<_i6.HotpepperSearchResponse>>);
 }
 
 /// A class which mocks [StoreLocalDatasource].
@@ -1115,6 +1176,109 @@ class MockStoreLocalDatasource extends _i1.Mock
         ),
         returnValue: _i10.Future<List<_i15.Store>>.value(<_i15.Store>[]),
       ) as _i10.Future<List<_i15.Store>>);
+
+  @override
+  _i10.Future<_i17.Result<void>> insertStoreResult(_i15.Store? store) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #insertStoreResult,
+          [store],
+        ),
+        returnValue: _i10.Future<_i17.Result<void>>.value(
+            _i18.dummyValue<_i17.Result<void>>(
+          this,
+          Invocation.method(
+            #insertStoreResult,
+            [store],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<void>>);
+
+  @override
+  _i10.Future<_i17.Result<_i15.Store?>> getStoreByIdResult(String? id) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getStoreByIdResult,
+          [id],
+        ),
+        returnValue: _i10.Future<_i17.Result<_i15.Store?>>.value(
+            _i18.dummyValue<_i17.Result<_i15.Store?>>(
+          this,
+          Invocation.method(
+            #getStoreByIdResult,
+            [id],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<_i15.Store?>>);
+
+  @override
+  _i10.Future<_i17.Result<List<_i15.Store>>> getAllStoresResult() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getAllStoresResult,
+          [],
+        ),
+        returnValue: _i10.Future<_i17.Result<List<_i15.Store>>>.value(
+            _i18.dummyValue<_i17.Result<List<_i15.Store>>>(
+          this,
+          Invocation.method(
+            #getAllStoresResult,
+            [],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<List<_i15.Store>>>);
+
+  @override
+  _i10.Future<_i17.Result<void>> updateStoreResult(_i15.Store? store) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updateStoreResult,
+          [store],
+        ),
+        returnValue: _i10.Future<_i17.Result<void>>.value(
+            _i18.dummyValue<_i17.Result<void>>(
+          this,
+          Invocation.method(
+            #updateStoreResult,
+            [store],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<void>>);
+
+  @override
+  _i10.Future<_i17.Result<void>> deleteStoreResult(String? id) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #deleteStoreResult,
+          [id],
+        ),
+        returnValue: _i10.Future<_i17.Result<void>>.value(
+            _i18.dummyValue<_i17.Result<void>>(
+          this,
+          Invocation.method(
+            #deleteStoreResult,
+            [id],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<void>>);
+
+  @override
+  _i10.Future<_i17.Result<List<_i15.Store>>> getStoresByStatusResult(
+          _i15.StoreStatus? status) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getStoresByStatusResult,
+          [status],
+        ),
+        returnValue: _i10.Future<_i17.Result<List<_i15.Store>>>.value(
+            _i18.dummyValue<_i17.Result<List<_i15.Store>>>(
+          this,
+          Invocation.method(
+            #getStoresByStatusResult,
+            [status],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<List<_i15.Store>>>);
 }
 
 /// A class which mocks [PhotoLocalDatasource].
@@ -1193,6 +1357,127 @@ class MockPhotoLocalDatasource extends _i1.Mock
         returnValue: _i10.Future<void>.value(),
         returnValueForMissingStub: _i10.Future<void>.value(),
       ) as _i10.Future<void>);
+
+  @override
+  _i10.Future<_i17.Result<void>> insertPhotoResult(_i21.Photo? photo) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #insertPhotoResult,
+          [photo],
+        ),
+        returnValue: _i10.Future<_i17.Result<void>>.value(
+            _i18.dummyValue<_i17.Result<void>>(
+          this,
+          Invocation.method(
+            #insertPhotoResult,
+            [photo],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<void>>);
+
+  @override
+  _i10.Future<_i17.Result<_i21.Photo?>> getPhotoByIdResult(String? id) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getPhotoByIdResult,
+          [id],
+        ),
+        returnValue: _i10.Future<_i17.Result<_i21.Photo?>>.value(
+            _i18.dummyValue<_i17.Result<_i21.Photo?>>(
+          this,
+          Invocation.method(
+            #getPhotoByIdResult,
+            [id],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<_i21.Photo?>>);
+
+  @override
+  _i10.Future<_i17.Result<List<_i21.Photo>>> getAllPhotosResult() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getAllPhotosResult,
+          [],
+        ),
+        returnValue: _i10.Future<_i17.Result<List<_i21.Photo>>>.value(
+            _i18.dummyValue<_i17.Result<List<_i21.Photo>>>(
+          this,
+          Invocation.method(
+            #getAllPhotosResult,
+            [],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<List<_i21.Photo>>>);
+
+  @override
+  _i10.Future<_i17.Result<List<_i21.Photo>>> getPhotosByStoreIdResult(
+          String? storeId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getPhotosByStoreIdResult,
+          [storeId],
+        ),
+        returnValue: _i10.Future<_i17.Result<List<_i21.Photo>>>.value(
+            _i18.dummyValue<_i17.Result<List<_i21.Photo>>>(
+          this,
+          Invocation.method(
+            #getPhotosByStoreIdResult,
+            [storeId],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<List<_i21.Photo>>>);
+
+  @override
+  _i10.Future<_i17.Result<List<_i21.Photo>>> getPhotosByVisitIdResult(
+          String? visitId) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #getPhotosByVisitIdResult,
+          [visitId],
+        ),
+        returnValue: _i10.Future<_i17.Result<List<_i21.Photo>>>.value(
+            _i18.dummyValue<_i17.Result<List<_i21.Photo>>>(
+          this,
+          Invocation.method(
+            #getPhotosByVisitIdResult,
+            [visitId],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<List<_i21.Photo>>>);
+
+  @override
+  _i10.Future<_i17.Result<void>> updatePhotoResult(_i21.Photo? photo) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #updatePhotoResult,
+          [photo],
+        ),
+        returnValue: _i10.Future<_i17.Result<void>>.value(
+            _i18.dummyValue<_i17.Result<void>>(
+          this,
+          Invocation.method(
+            #updatePhotoResult,
+            [photo],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<void>>);
+
+  @override
+  _i10.Future<_i17.Result<void>> deletePhotoResult(String? id) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #deletePhotoResult,
+          [id],
+        ),
+        returnValue: _i10.Future<_i17.Result<void>>.value(
+            _i18.dummyValue<_i17.Result<void>>(
+          this,
+          Invocation.method(
+            #deletePhotoResult,
+            [id],
+          ),
+        )),
+      ) as _i10.Future<_i17.Result<void>>);
 }
 
 /// A class which mocks [AppHttpClient].
