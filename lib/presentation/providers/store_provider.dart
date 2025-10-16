@@ -41,8 +41,10 @@ class StoreProvider extends ChangeNotifier {
   List<Store> get stores => _businessLogic.allStores;
 
   // Delegated getters from CacheManager
-  List<Store> get wantToGoStores =>
-      _cacheManager.getWantToGoStores(_businessLogic.allStores);
+  List<Store> get wantToGoStores {
+    return _cacheManager.getWantToGoStores(_businessLogic.allStores);
+  }
+
   List<Store> get visitedStores =>
       _cacheManager.getVisitedStores(_businessLogic.allStores);
   List<Store> get badStores =>
@@ -178,6 +180,9 @@ class StoreProvider extends ChangeNotifier {
       _stateManager.setLoading(true);
       _stateManager.clearError();
 
+      // スワイプ前にDBから最新の店舗リストを読み込む
+      await _businessLogic.loadStores();
+
       final swipeStores = await _businessLogic.loadSwipeStores(
         lat: lat,
         lng: lng,
@@ -194,6 +199,10 @@ class StoreProvider extends ChangeNotifier {
       } else {
         _stateManager.clearInfoMessage();
       }
+
+      // キャッシュをクリアしてマイメニューのデータも更新
+      _cacheManager.clearCache();
+      notifyListeners();
 
       _stateManager.setLoading(false);
     } catch (e) {

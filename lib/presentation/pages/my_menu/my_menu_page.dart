@@ -12,25 +12,53 @@ class MyMenuPage extends StatefulWidget {
   State<MyMenuPage> createState() => _MyMenuPageState();
 }
 
-class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
+class _MyMenuPageState extends State<MyMenuPage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addObserver(this);
 
-    // 店舗データは事前初期化済みのため、利用可能な店舗リストを更新
+    // タブ切り替え時にデータを再読み込み
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        _loadStoresData();
+      }
+    });
+
+    // 初回表示時に店舗データをDBから読み込み
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // キャッシュをリフレッシュして最新状態を反映
-      Provider.of<StoreProvider>(context, listen: false).refreshCache();
+      _loadStoresData();
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
+  }
+
+  // アプリのライフサイクル変化を監視（画面が前面に来た時にデータ再読み込み）
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadStoresData();
+    }
+  }
+
+  void _loadStoresData() {
+    if (mounted) {
+      // ビルド完了後に非同期でデータ読み込み
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Provider.of<StoreProvider>(context, listen: false).loadStores();
+        }
+      });
+    }
   }
 
   @override
@@ -61,26 +89,9 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
           ],
         ),
       ),
-      body: Selector<
-          StoreProvider,
-          ({
-            bool isLoading,
-            String? error,
-            String? infoMessage,
-            List<Store> wantToGoStores,
-            List<Store> visitedStores,
-            List<Store> badStores
-          })>(
-        selector: (context, provider) => (
-          isLoading: provider.isLoading,
-          error: provider.error,
-          infoMessage: provider.infoMessage,
-          wantToGoStores: provider.wantToGoStores,
-          visitedStores: provider.visitedStores,
-          badStores: provider.badStores,
-        ),
-        builder: (context, state, child) {
-          if (state.isLoading) {
+      body: Consumer<StoreProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -93,7 +104,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
             );
           }
 
-          if (state.error != null) {
+          if (provider.error != null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -112,7 +123,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    state.error!,
+                    provider.error!,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium,
                   ),
@@ -132,48 +143,14 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
             );
           }
 
-          // 情報メッセージ表示
-          if (state.infoMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 64,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'お知らせ',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.infoMessage!,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Provider.of<StoreProvider>(context, listen: false)
-                          .clearError(); // 情報メッセージもクリア
-                    },
-                    child: const Text('了解'),
-                  ),
-                ],
-              ),
-            );
-          }
+          // マイメニュー画面では情報メッセージを表示しない
+          // （infoMessageはスワイプ画面専用のAPI検索結果メッセージ）
 
           return TabBarView(
             controller: _tabController,
             children: [
               _buildStoreList(
-                stores: state.wantToGoStores,
+                stores: provider.wantToGoStores,
                 emptyMessage: 'まだ「行きたい」店舗がありません',
                 emptySubMessage: 'スワイプ画面で気になる店舗を右スワイプしてみましょう',
                 emptyIcon: Icons.favorite_border,
@@ -181,7 +158,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                 colorScheme: colorScheme,
               ),
               _buildStoreList(
-                stores: state.visitedStores,
+                stores: provider.visitedStores,
                 emptyMessage: 'まだ訪問した店舗がありません',
                 emptySubMessage: '店舗を訪問したらステータスを更新しましょう',
                 emptyIcon: Icons.check_circle_outline,
@@ -189,7 +166,7 @@ class _MyMenuPageState extends State<MyMenuPage> with TickerProviderStateMixin {
                 colorScheme: colorScheme,
               ),
               _buildStoreList(
-                stores: state.badStores,
+                stores: provider.badStores,
                 emptyMessage: '「興味なし」の店舗はありません',
                 emptySubMessage: '興味のない店舗はここに表示されます',
                 emptyIcon: Icons.block_outlined,

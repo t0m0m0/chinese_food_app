@@ -80,6 +80,11 @@ class FakeStoreProvider extends ChangeNotifier implements StoreProvider {
     // Mock implementation
   }
 
+  @override
+  Future<void> loadStores() async {
+    // Mock implementation - do nothing in tests
+  }
+
   // 他の必要なメソッドのスタブ実装
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

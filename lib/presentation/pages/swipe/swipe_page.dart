@@ -64,8 +64,6 @@ class _SwipePageState extends State<SwipePage> {
 
     // 店舗を再読み込み
     await _loadStoresWithLocation();
-
-    // 検索範囲変更成功 - DistanceSelectorWidgetの表示変更で十分
   }
 
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする

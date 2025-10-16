@@ -61,6 +61,9 @@ class StoreBusinessLogic {
       final index = _stores.indexWhere((s) => s.id == store.id);
       if (index != -1) {
         _stores[index] = storeWithStatus;
+      } else {
+        // メモリ内にない場合は追加
+        _stores.add(storeWithStatus);
       }
     }
   }
