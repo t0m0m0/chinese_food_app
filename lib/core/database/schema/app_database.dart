@@ -21,7 +21,7 @@ class Stores extends Table {
   RealColumn get lat => real()();
   RealColumn get lng => real()();
   TextColumn get imageUrl => text().nullable()();
-  TextColumn get status => text()();
+  TextColumn get status => text().nullable()(); // nullable に変更
   TextColumn get memo => text().withDefault(const Constant(''))();
   TextColumn get createdAt => text()();
 
@@ -64,7 +64,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -91,6 +91,74 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (Migrator m, int from, int to) async {
           if (from == 1 && to == 2) {
             await m.addColumn(stores, stores.imageUrl);
+          }
+          if (from == 2 && to == 3) {
+            // statusカラムをnullableに変更するためテーブルを再作成
+            await customStatement('''
+              CREATE TABLE stores_new (
+                id TEXT NOT NULL PRIMARY KEY,
+                name TEXT NOT NULL,
+                address TEXT NOT NULL,
+                lat REAL NOT NULL,
+                lng REAL NOT NULL,
+                image_url TEXT,
+                status TEXT,
+                memo TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL
+              );
+            ''');
+
+            await customStatement('''
+              INSERT INTO stores_new
+              SELECT id, name, address, lat, lng, image_url, status, memo, created_at
+              FROM stores;
+            ''');
+
+            await customStatement('DROP TABLE stores;');
+            await customStatement('ALTER TABLE stores_new RENAME TO stores;');
+
+            // インデックスを再作成
+            await customStatement(
+                'CREATE INDEX idx_stores_lat_lng ON stores (lat, lng);');
+            await customStatement(
+                'CREATE INDEX idx_stores_status ON stores (status);');
+            await customStatement(
+                'CREATE INDEX idx_stores_created_at ON stores (created_at);');
+          }
+          if (from == 1 && to == 3) {
+            // v1からv3への直接マイグレーション
+            await m.addColumn(stores, stores.imageUrl);
+            // statusカラムをnullableに変更
+            await customStatement('''
+              CREATE TABLE stores_new (
+                id TEXT NOT NULL PRIMARY KEY,
+                name TEXT NOT NULL,
+                address TEXT NOT NULL,
+                lat REAL NOT NULL,
+                lng REAL NOT NULL,
+                image_url TEXT,
+                status TEXT,
+                memo TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL
+              );
+            ''');
+
+            await customStatement('''
+              INSERT INTO stores_new
+              SELECT id, name, address, lat, lng, image_url, status, memo, created_at
+              FROM stores;
+            ''');
+
+            await customStatement('DROP TABLE stores;');
+            await customStatement('ALTER TABLE stores_new RENAME TO stores;');
+
+            // インデックスを再作成
+            await customStatement(
+                'CREATE INDEX idx_stores_lat_lng ON stores (lat, lng);');
+            await customStatement(
+                'CREATE INDEX idx_stores_status ON stores (status);');
+            await customStatement(
+                'CREATE INDEX idx_stores_created_at ON stores (created_at);');
           }
         },
         beforeOpen: (details) async {

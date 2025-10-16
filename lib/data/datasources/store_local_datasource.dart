@@ -283,7 +283,9 @@ class StoreLocalDatasourceImpl implements StoreLocalDatasource {
       lat: Value(store.lat),
       lng: Value(store.lng),
       imageUrl: Value(store.imageUrl),
-      status: Value(store.status?.value ?? 'want_to_go'),
+      status: store.status != null
+          ? Value(store.status!.value)
+          : const Value.absent(),
       memo: Value(store.memo ?? ''),
       createdAt: Value(store.createdAt.toIso8601String()),
     );
@@ -298,10 +300,12 @@ class StoreLocalDatasourceImpl implements StoreLocalDatasource {
       lat: store.lat,
       lng: store.lng,
       imageUrl: store.imageUrl,
-      status: entities.StoreStatus.values.firstWhere(
-        (s) => s.value == store.status,
-        orElse: () => entities.StoreStatus.wantToGo,
-      ),
+      status: store.status != null
+          ? entities.StoreStatus.values.firstWhere(
+              (s) => s.value == store.status,
+              orElse: () => entities.StoreStatus.wantToGo,
+            )
+          : null, // statusがnullの場合はnullを返す
       memo: store.memo.isEmpty ? null : store.memo,
       createdAt: DateTime.parse(store.createdAt),
     );
