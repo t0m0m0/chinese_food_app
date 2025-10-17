@@ -41,8 +41,10 @@ class StoreProvider extends ChangeNotifier {
   List<Store> get stores => _businessLogic.allStores;
 
   // Delegated getters from CacheManager
-  List<Store> get wantToGoStores =>
-      _cacheManager.getWantToGoStores(_businessLogic.allStores);
+  List<Store> get wantToGoStores {
+    return _cacheManager.getWantToGoStores(_businessLogic.allStores);
+  }
+
   List<Store> get visitedStores =>
       _cacheManager.getVisitedStores(_businessLogic.allStores);
   List<Store> get badStores =>
@@ -59,7 +61,11 @@ class StoreProvider extends ChangeNotifier {
       await _businessLogic.loadStores();
 
       _stateManager.setLoading(false);
-      // 店舗データ読み込み後、キャッシュクリアとUIに変更を通知
+
+      // キャッシュクリア戦略:
+      // DBから店舗データを再読み込みした後は、フィルタリング済みのキャッシュを
+      // クリアしてUIに最新データを反映する必要がある。
+      // これにより、マイメニュー画面が常に最新のDB状態を表示できる。
       _cacheManager.clearCache();
       notifyListeners();
     } catch (e) {
@@ -79,6 +85,29 @@ class StoreProvider extends ChangeNotifier {
       final updatedSwipeStores = _stateManager.swipeStores
           .where((store) => store.id != storeId)
           .toList();
+      _stateManager.updateSwipeStores(updatedSwipeStores);
+
+      // UIに変更を通知
+      notifyListeners();
+    } catch (e) {
+      _stateManager.setError(
+          ErrorMessages.getStoreMessage('store_status_update_failed'));
+      notifyListeners();
+    }
+  }
+
+  /// Saves a swiped store with status
+  ///
+  /// スワイプ画面専用。新規店舗の場合はinsert、既存店舗の場合はupdateを行う
+  Future<void> saveSwipedStore(Store store, StoreStatus status) async {
+    try {
+      _stateManager.clearError();
+      await _businessLogic.saveSwipedStore(store, status);
+      _cacheManager.clearCache();
+
+      // スワイプリストから削除
+      final updatedSwipeStores =
+          _stateManager.swipeStores.where((s) => s.id != store.id).toList();
       _stateManager.updateSwipeStores(updatedSwipeStores);
 
       // UIに変更を通知
@@ -124,7 +153,7 @@ class StoreProvider extends ChangeNotifier {
       _stateManager.setLoading(true);
       _stateManager.clearError();
 
-      await _businessLogic.loadNewStoresFromApi(
+      final newStores = await _businessLogic.loadNewStoresFromApi(
         lat: lat,
         lng: lng,
         address: address,
@@ -133,6 +162,7 @@ class StoreProvider extends ChangeNotifier {
         count: count,
       );
 
+      _stateManager.updateSearchResults(newStores);
       _stateManager.setLoading(false);
       // 新規店舗取得後、キャッシュクリアとUIに変更を通知
       _cacheManager.clearCache();
@@ -154,6 +184,9 @@ class StoreProvider extends ChangeNotifier {
       _stateManager.setLoading(true);
       _stateManager.clearError();
 
+      // スワイプ前にDBから最新の店舗リストを読み込む
+      await _businessLogic.loadStores();
+
       final swipeStores = await _businessLogic.loadSwipeStores(
         lat: lat,
         lng: lng,
@@ -170,6 +203,13 @@ class StoreProvider extends ChangeNotifier {
       } else {
         _stateManager.clearInfoMessage();
       }
+
+      // キャッシュクリア戦略:
+      // 距離変更でAPI検索を実行した後、DBデータが変更されている可能性があるため
+      // キャッシュをクリアする。これにより、マイメニュー画面が最新のDB状態を
+      // 反映する（距離変更によって店舗が消えないようにするため重要）。
+      _cacheManager.clearCache();
+      notifyListeners();
 
       _stateManager.setLoading(false);
     } catch (e) {

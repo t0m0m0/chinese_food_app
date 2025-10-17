@@ -50,7 +50,7 @@ void main() {
     test('should validate current schema version', () async {
       // TDD: Red - 現在のスキーマバージョンが正しいことを確認
       final version = await migrationManager.getCurrentSchemaVersion();
-      expect(version, equals(2));
+      expect(version, equals(3));
     });
 
     test('should create all required indexes', () async {

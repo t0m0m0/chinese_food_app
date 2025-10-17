@@ -43,8 +43,8 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
-      'status', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      'status', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _memoMeta = const VerificationMeta('memo');
   @override
   late final GeneratedColumn<String> memo = GeneratedColumn<String>(
@@ -107,8 +107,6 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
     if (data.containsKey('status')) {
       context.handle(_statusMeta,
           status.isAcceptableOrUnknown(data['status']!, _statusMeta));
-    } else if (isInserting) {
-      context.missing(_statusMeta);
     }
     if (data.containsKey('memo')) {
       context.handle(
@@ -142,7 +140,7 @@ class $StoresTable extends Stores with TableInfo<$StoresTable, Store> {
       imageUrl: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}image_url']),
       status: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}status']),
       memo: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}memo'])!,
       createdAt: attachedDatabase.typeMapping
@@ -163,7 +161,7 @@ class Store extends DataClass implements Insertable<Store> {
   final double lat;
   final double lng;
   final String? imageUrl;
-  final String status;
+  final String? status;
   final String memo;
   final String createdAt;
   const Store(
@@ -173,7 +171,7 @@ class Store extends DataClass implements Insertable<Store> {
       required this.lat,
       required this.lng,
       this.imageUrl,
-      required this.status,
+      this.status,
       required this.memo,
       required this.createdAt});
   @override
@@ -187,7 +185,9 @@ class Store extends DataClass implements Insertable<Store> {
     if (!nullToAbsent || imageUrl != null) {
       map['image_url'] = Variable<String>(imageUrl);
     }
-    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || status != null) {
+      map['status'] = Variable<String>(status);
+    }
     map['memo'] = Variable<String>(memo);
     map['created_at'] = Variable<String>(createdAt);
     return map;
@@ -203,7 +203,8 @@ class Store extends DataClass implements Insertable<Store> {
       imageUrl: imageUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(imageUrl),
-      status: Value(status),
+      status:
+          status == null && nullToAbsent ? const Value.absent() : Value(status),
       memo: Value(memo),
       createdAt: Value(createdAt),
     );
@@ -219,7 +220,7 @@ class Store extends DataClass implements Insertable<Store> {
       lat: serializer.fromJson<double>(json['lat']),
       lng: serializer.fromJson<double>(json['lng']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
-      status: serializer.fromJson<String>(json['status']),
+      status: serializer.fromJson<String?>(json['status']),
       memo: serializer.fromJson<String>(json['memo']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
@@ -234,7 +235,7 @@ class Store extends DataClass implements Insertable<Store> {
       'lat': serializer.toJson<double>(lat),
       'lng': serializer.toJson<double>(lng),
       'imageUrl': serializer.toJson<String?>(imageUrl),
-      'status': serializer.toJson<String>(status),
+      'status': serializer.toJson<String?>(status),
       'memo': serializer.toJson<String>(memo),
       'createdAt': serializer.toJson<String>(createdAt),
     };
@@ -247,7 +248,7 @@ class Store extends DataClass implements Insertable<Store> {
           double? lat,
           double? lng,
           Value<String?> imageUrl = const Value.absent(),
-          String? status,
+          Value<String?> status = const Value.absent(),
           String? memo,
           String? createdAt}) =>
       Store(
@@ -257,7 +258,7 @@ class Store extends DataClass implements Insertable<Store> {
         lat: lat ?? this.lat,
         lng: lng ?? this.lng,
         imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
-        status: status ?? this.status,
+        status: status.present ? status.value : this.status,
         memo: memo ?? this.memo,
         createdAt: createdAt ?? this.createdAt,
       );
@@ -316,7 +317,7 @@ class StoresCompanion extends UpdateCompanion<Store> {
   final Value<double> lat;
   final Value<double> lng;
   final Value<String?> imageUrl;
-  final Value<String> status;
+  final Value<String?> status;
   final Value<String> memo;
   final Value<String> createdAt;
   final Value<int> rowid;
@@ -339,7 +340,7 @@ class StoresCompanion extends UpdateCompanion<Store> {
     required double lat,
     required double lng,
     this.imageUrl = const Value.absent(),
-    required String status,
+    this.status = const Value.absent(),
     this.memo = const Value.absent(),
     required String createdAt,
     this.rowid = const Value.absent(),
@@ -348,7 +349,6 @@ class StoresCompanion extends UpdateCompanion<Store> {
         address = Value(address),
         lat = Value(lat),
         lng = Value(lng),
-        status = Value(status),
         createdAt = Value(createdAt);
   static Insertable<Store> custom({
     Expression<String>? id,
@@ -383,7 +383,7 @@ class StoresCompanion extends UpdateCompanion<Store> {
       Value<double>? lat,
       Value<double>? lng,
       Value<String?>? imageUrl,
-      Value<String>? status,
+      Value<String?>? status,
       Value<String>? memo,
       Value<String>? createdAt,
       Value<int>? rowid}) {
@@ -1164,7 +1164,7 @@ typedef $$StoresTableCreateCompanionBuilder = StoresCompanion Function({
   required double lat,
   required double lng,
   Value<String?> imageUrl,
-  required String status,
+  Value<String?> status,
   Value<String> memo,
   required String createdAt,
   Value<int> rowid,
@@ -1176,7 +1176,7 @@ typedef $$StoresTableUpdateCompanionBuilder = StoresCompanion Function({
   Value<double> lat,
   Value<double> lng,
   Value<String?> imageUrl,
-  Value<String> status,
+  Value<String?> status,
   Value<String> memo,
   Value<String> createdAt,
   Value<int> rowid,
@@ -1440,7 +1440,7 @@ class $$StoresTableTableManager extends RootTableManager<
             Value<double> lat = const Value.absent(),
             Value<double> lng = const Value.absent(),
             Value<String?> imageUrl = const Value.absent(),
-            Value<String> status = const Value.absent(),
+            Value<String?> status = const Value.absent(),
             Value<String> memo = const Value.absent(),
             Value<String> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -1464,7 +1464,7 @@ class $$StoresTableTableManager extends RootTableManager<
             required double lat,
             required double lng,
             Value<String?> imageUrl = const Value.absent(),
-            required String status,
+            Value<String?> status = const Value.absent(),
             Value<String> memo = const Value.absent(),
             required String createdAt,
             Value<int> rowid = const Value.absent(),
