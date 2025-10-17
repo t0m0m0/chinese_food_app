@@ -61,7 +61,11 @@ class StoreProvider extends ChangeNotifier {
       await _businessLogic.loadStores();
 
       _stateManager.setLoading(false);
-      // 店舗データ読み込み後、キャッシュクリアとUIに変更を通知
+
+      // キャッシュクリア戦略:
+      // DBから店舗データを再読み込みした後は、フィルタリング済みのキャッシュを
+      // クリアしてUIに最新データを反映する必要がある。
+      // これにより、マイメニュー画面が常に最新のDB状態を表示できる。
       _cacheManager.clearCache();
       notifyListeners();
     } catch (e) {
@@ -200,7 +204,10 @@ class StoreProvider extends ChangeNotifier {
         _stateManager.clearInfoMessage();
       }
 
-      // キャッシュをクリアしてマイメニューのデータも更新
+      // キャッシュクリア戦略:
+      // 距離変更でAPI検索を実行した後、DBデータが変更されている可能性があるため
+      // キャッシュをクリアする。これにより、マイメニュー画面が最新のDB状態を
+      // 反映する（距離変更によって店舗が消えないようにするため重要）。
       _cacheManager.clearCache();
       notifyListeners();
 
