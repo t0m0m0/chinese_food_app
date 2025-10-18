@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart';
 
 import '../entities/visit_record.dart';
 import '../entities/store.dart';
@@ -45,9 +46,17 @@ class AddVisitRecordUsecase {
         final existingStore = await _storeRepository.getStoreById(storeId);
         if (existingStore == null) {
           // 店舗が存在しない場合は自動的に保存
+          // デバッグログ: 保存しようとしている店舗情報
+          debugPrint(
+              'DEBUG: Saving store - id: ${store.id}, name: ${store.name}, status: ${store.status}, memo: ${store.memo}');
           await _storeRepository.insertStore(store);
+          debugPrint('DEBUG: Store saved successfully');
+        } else {
+          debugPrint('DEBUG: Store already exists - id: $storeId');
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
+        debugPrint('DEBUG: Store save failed - Error: $e');
+        debugPrint('DEBUG: StackTrace: $stackTrace');
         throw Exception('店舗の自動保存に失敗しました: $e');
       }
     }
@@ -62,8 +71,14 @@ class AddVisitRecordUsecase {
     );
 
     try {
-      return await _visitRecordRepository.insertVisitRecord(visitRecord);
-    } catch (e) {
+      debugPrint('DEBUG: Saving visit record - storeId: $storeId, menu: $menu');
+      final result =
+          await _visitRecordRepository.insertVisitRecord(visitRecord);
+      debugPrint('DEBUG: Visit record saved successfully');
+      return result;
+    } catch (e, stackTrace) {
+      debugPrint('DEBUG: Visit record save failed - Error: $e');
+      debugPrint('DEBUG: StackTrace: $stackTrace');
       throw Exception('訪問記録の保存に失敗しました: $e');
     }
   }
