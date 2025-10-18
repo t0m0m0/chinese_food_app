@@ -13,16 +13,11 @@ class MockOnAddVisitRecord extends Mock {
   void call();
 }
 
-class MockOnShowMap extends Mock {
-  void call();
-}
-
 void main() {
   group('StoreActionWidget Tests', () {
     late Store testStore;
     late MockOnStatusChanged mockOnStatusChanged;
     late MockOnAddVisitRecord mockOnAddVisitRecord;
-    late MockOnShowMap mockOnShowMap;
 
     setUp(() {
       testStore = Store(
@@ -38,7 +33,6 @@ void main() {
 
       mockOnStatusChanged = MockOnStatusChanged();
       mockOnAddVisitRecord = MockOnAddVisitRecord();
-      mockOnShowMap = MockOnShowMap();
     });
 
     testWidgets('should display status change section', (tester) async {
@@ -50,7 +44,6 @@ void main() {
               store: testStore,
               onStatusChanged: mockOnStatusChanged.call,
               onAddVisitRecord: mockOnAddVisitRecord.call,
-              onShowMap: mockOnShowMap.call,
             ),
           ),
         ),
@@ -63,7 +56,7 @@ void main() {
       expect(find.text('興味なし'), findsOneWidget);
     });
 
-    testWidgets('should display action buttons', (tester) async {
+    testWidgets('should display visit record button', (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -72,7 +65,6 @@ void main() {
               store: testStore,
               onStatusChanged: mockOnStatusChanged.call,
               onAddVisitRecord: mockOnAddVisitRecord.call,
-              onShowMap: mockOnShowMap.call,
             ),
           ),
         ),
@@ -80,9 +72,26 @@ void main() {
 
       // Assert
       expect(find.text('訪問記録を追加'), findsOneWidget);
-      expect(find.text('地図で表示'), findsOneWidget);
       expect(find.byIcon(Icons.add), findsOneWidget);
-      expect(find.byIcon(Icons.map), findsOneWidget);
+    });
+
+    testWidgets('should not display map button', (tester) async {
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StoreActionWidget(
+              store: testStore,
+              onStatusChanged: mockOnStatusChanged.call,
+              onAddVisitRecord: mockOnAddVisitRecord.call,
+            ),
+          ),
+        ),
+      );
+
+      // Assert - Map button should not be displayed
+      expect(find.text('地図で表示'), findsNothing);
+      expect(find.byIcon(Icons.map), findsNothing);
     });
 
     testWidgets('should highlight current status correctly', (tester) async {
@@ -94,7 +103,6 @@ void main() {
               store: testStore,
               onStatusChanged: mockOnStatusChanged.call,
               onAddVisitRecord: mockOnAddVisitRecord.call,
-              onShowMap: mockOnShowMap.call,
             ),
           ),
         ),
@@ -122,7 +130,6 @@ void main() {
               store: testStore,
               onStatusChanged: mockOnStatusChanged.call,
               onAddVisitRecord: mockOnAddVisitRecord.call,
-              onShowMap: mockOnShowMap.call,
             ),
           ),
         ),
@@ -147,7 +154,6 @@ void main() {
               store: testStore,
               onStatusChanged: mockOnStatusChanged.call,
               onAddVisitRecord: mockOnAddVisitRecord.call,
-              onShowMap: mockOnShowMap.call,
             ),
           ),
         ),
@@ -159,30 +165,6 @@ void main() {
 
       // Assert
       verify(mockOnAddVisitRecord.call()).called(1);
-    });
-
-    testWidgets('should call onShowMap when map button is tapped',
-        (tester) async {
-      // Act
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: StoreActionWidget(
-              store: testStore,
-              onStatusChanged: mockOnStatusChanged.call,
-              onAddVisitRecord: mockOnAddVisitRecord.call,
-              onShowMap: mockOnShowMap.call,
-            ),
-          ),
-        ),
-      );
-
-      // Tap on map button
-      await tester.tap(find.text('地図で表示'));
-      await tester.pumpAndSettle();
-
-      // Assert
-      verify(mockOnShowMap.call()).called(1);
     });
   });
 }

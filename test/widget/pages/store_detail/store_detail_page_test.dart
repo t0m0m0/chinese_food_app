@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/presentation/pages/store_detail/store_detail_page.dart';
+import 'package:chinese_food_app/presentation/widgets/webview_map_widget.dart';
 
 void main() {
   group('StoreDetailPage Widget Tests', () {
@@ -99,7 +100,6 @@ void main() {
 
       // アクションボタンが存在することを確認
       expect(find.text('訪問記録を追加'), findsOneWidget);
-      expect(find.text('地図で表示'), findsOneWidget);
     });
 
     testWidgets('should show current status as selected', (tester) async {
@@ -129,8 +129,7 @@ void main() {
       expect(find.text('行った'), findsWidgets);
     });
 
-    testWidgets('should show map dialog when map button is tapped',
-        (tester) async {
+    testWidgets('should display WebViewMapWidget in the page', (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -138,28 +137,11 @@ void main() {
         ),
       );
 
-      // Scroll to make the map button visible
-      await tester.scrollUntilVisible(
-        find.text('地図で表示'),
-        500.0,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      // Find and tap the map button
-      final mapButton = find.text('地図で表示');
-      expect(mapButton, findsOneWidget);
-
-      await tester.tap(mapButton);
-      await tester.pumpAndSettle();
-
-      // Assert - Map dialog should be displayed
-      expect(find.byType(Dialog), findsOneWidget);
-      expect(find.text('テスト中華料理店'), findsWidgets); // Store name in dialog title
-      expect(find.byIcon(Icons.close), findsOneWidget); // Close button
+      // Assert - WebViewMapWidget should be present in the page
+      expect(find.byType(WebViewMapWidget), findsOneWidget);
     });
 
-    testWidgets('should close map dialog when close button is tapped',
-        (tester) async {
+    testWidgets('should not display "地図で表示" button', (tester) async {
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -167,22 +149,8 @@ void main() {
         ),
       );
 
-      // Scroll to make the map button visible and tap it
-      await tester.scrollUntilVisible(
-        find.text('地図で表示'),
-        500.0,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.text('地図で表示'));
-      await tester.pumpAndSettle();
-      expect(find.byType(Dialog), findsOneWidget);
-
-      // Close dialog
-      await tester.tap(find.byIcon(Icons.close));
-      await tester.pumpAndSettle();
-
-      // Assert - Dialog should be closed
-      expect(find.byType(Dialog), findsNothing);
+      // Assert - "地図で表示" button should not be present
+      expect(find.text('地図で表示'), findsNothing);
     });
   });
 }

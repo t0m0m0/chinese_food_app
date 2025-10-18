@@ -38,7 +38,17 @@ class StoreDetailPage extends StatelessWidget {
               onStatusChanged: (newStatus) =>
                   _updateStoreStatus(context, newStatus),
               onAddVisitRecord: () => _navigateToVisitRecordForm(context),
-              onShowMap: () => _showMap(context),
+            ),
+            // 地図を常時表示
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                height: 250,
+                child: WebViewMapWidget(
+                  store: store,
+                  useOpenStreetMap: true,
+                ),
+              ),
             ),
           ],
         ),
@@ -72,37 +82,5 @@ class StoreDetailPage extends StatelessWidget {
 
   void _navigateToVisitRecordForm(BuildContext context) {
     context.pushNamed('visit-record-form', extra: store);
-  }
-
-  void _showMap(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: SizedBox(
-          height: 400.0,
-          width: double.maxFinite,
-          child: Column(
-            children: [
-              AppBar(
-                title: Text(store.name),
-                automaticallyImplyLeading: false,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: WebViewMapWidget(
-                  store: store,
-                  useOpenStreetMap: true,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
