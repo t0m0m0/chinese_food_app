@@ -173,6 +173,7 @@ class AppDIContainer implements DIContainerInterface {
     _serviceContainer.register<AddVisitRecordUsecase>(() {
       return AddVisitRecordUsecase(
         _serviceContainer.resolve<VisitRecordRepository>(),
+        _serviceContainer.resolve<StoreRepositoryImpl>(),
       );
     });
 
