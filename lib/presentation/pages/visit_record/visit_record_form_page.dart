@@ -193,6 +193,7 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
       );
 
       await addVisitRecordUsecase.call(
+        store: widget.store, // Store オブジェクトを渡して自動保存を有効化
         storeId: widget.store.id,
         visitedAt: _selectedDate,
         menu: _menuController.text.trim(),
