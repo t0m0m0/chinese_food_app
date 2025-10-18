@@ -149,5 +149,59 @@ void main() {
       expect(savedVisit, isNotNull);
       expect(savedVisit!.storeId, equals(store.id));
     });
+
+    test('should work correctly when store parameter is null', () async {
+      // 🔴 Red: storeパラメータがnullの場合でも正常に動作する（後方互換性）
+      // Arrange: 事前に店舗を保存
+      final store = entities.Store(
+        id: 'store_2',
+        name: 'テスト中華料理店2',
+        address: '東京都目黒区',
+        lat: 35.6436,
+        lng: 139.6983,
+        imageUrl: 'https://example.com/image2.jpg',
+        status: entities.StoreStatus.wantToGo,
+        memo: '',
+        createdAt: DateTime.now(),
+      );
+      await storeDatasource.insertStore(store);
+
+      // Act: storeパラメータをnullで訪問記録を追加
+      final visitedAt = DateTime.now();
+      final result = await usecase.call(
+        store: null, // storeパラメータをnullで呼び出し
+        storeId: store.id,
+        visitedAt: visitedAt,
+        menu: 'エビチリ',
+        memo: 'プリプリで美味しい',
+      );
+
+      // Assert: 訪問記録が正常に作成されたことを確認
+      expect(result.storeId, equals(store.id));
+      expect(result.menu, equals('エビチリ'));
+      expect(result.memo, equals('プリプリで美味しい'));
+    });
+
+    test(
+        'should throw exception with clear message when visit record insertion fails',
+        () async {
+      // 🔴 Red: 訪問記録の保存に失敗した場合、明確なエラーメッセージを含む例外をスローする
+      // Arrange: 存在しないstoreIdを使用（Foreign Key制約違反を引き起こす）
+
+      // Act & Assert: 明確なエラーメッセージを含む例外がスローされることを期待
+      expect(
+        () async => await usecase.call(
+          store: null,
+          storeId: 'non_existent_store_id',
+          visitedAt: DateTime.now(),
+          menu: 'チャーハン',
+          memo: 'テスト',
+        ),
+        throwsA(
+          predicate(
+              (e) => e is Exception && e.toString().contains('訪問記録の保存に失敗しました')),
+        ),
+      );
+    });
   });
 }

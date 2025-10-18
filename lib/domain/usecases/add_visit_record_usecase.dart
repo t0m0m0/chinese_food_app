@@ -41,10 +41,14 @@ class AddVisitRecordUsecase {
   }) async {
     // 店舗が渡された場合、ローカルDBに存在するか確認
     if (store != null) {
-      final existingStore = await _storeRepository.getStoreById(storeId);
-      if (existingStore == null) {
-        // 店舗が存在しない場合は自動的に保存
-        await _storeRepository.insertStore(store);
+      try {
+        final existingStore = await _storeRepository.getStoreById(storeId);
+        if (existingStore == null) {
+          // 店舗が存在しない場合は自動的に保存
+          await _storeRepository.insertStore(store);
+        }
+      } catch (e) {
+        throw Exception('店舗の自動保存に失敗しました: $e');
       }
     }
 
@@ -57,6 +61,10 @@ class AddVisitRecordUsecase {
       createdAt: DateTime.now(),
     );
 
-    return await _visitRecordRepository.insertVisitRecord(visitRecord);
+    try {
+      return await _visitRecordRepository.insertVisitRecord(visitRecord);
+    } catch (e) {
+      throw Exception('訪問記録の保存に失敗しました: $e');
+    }
   }
 }
