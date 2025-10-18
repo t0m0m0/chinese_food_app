@@ -7,13 +7,11 @@ class StoreActionWidget extends StatelessWidget {
     required this.store,
     required this.onStatusChanged,
     required this.onAddVisitRecord,
-    required this.onShowMap,
   });
 
   final Store store;
   final Function(StoreStatus) onStatusChanged;
   final VoidCallback onAddVisitRecord;
-  final VoidCallback onShowMap;
 
   @override
   Widget build(BuildContext context) {
@@ -152,40 +150,20 @@ class StoreActionWidget extends StatelessWidget {
       BuildContext context, ThemeData theme, ColorScheme colorScheme) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: Semantics(
-              label: '${store.name}の訪問記録を追加',
-              button: true,
-              child: FilledButton.icon(
-                onPressed: onAddVisitRecord,
-                icon: const Icon(Icons.add),
-                label: const Text('訪問記録を追加'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
+      child: SizedBox(
+        width: double.infinity,
+        child: Semantics(
+          label: '${store.name}の訪問記録を追加',
+          button: true,
+          child: FilledButton.icon(
+            onPressed: onAddVisitRecord,
+            icon: const Icon(Icons.add),
+            label: const Text('訪問記録を追加'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
             ),
           ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: Semantics(
-              label: '${store.name}の場所を地図で表示',
-              button: true,
-              child: OutlinedButton.icon(
-                onPressed: onShowMap,
-                icon: const Icon(Icons.map),
-                label: const Text('地図で表示'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
