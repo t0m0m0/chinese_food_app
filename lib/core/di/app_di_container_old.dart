@@ -69,6 +69,12 @@ class AppDIContainer implements DIContainerInterface {
   }
 
   @override
+  AddVisitRecordUsecase getAddVisitRecordUsecase() {
+    _ensureConfigured();
+    return _serviceContainer.resolve<AddVisitRecordUsecase>();
+  }
+
+  @override
   void registerTestProvider(StoreProvider provider) {
     _serviceContainer.register<StoreProvider>(() => provider);
   }
@@ -173,6 +179,7 @@ class AppDIContainer implements DIContainerInterface {
     _serviceContainer.register<AddVisitRecordUsecase>(() {
       return AddVisitRecordUsecase(
         _serviceContainer.resolve<VisitRecordRepository>(),
+        _serviceContainer.resolve<StoreRepositoryImpl>(),
       );
     });
 
