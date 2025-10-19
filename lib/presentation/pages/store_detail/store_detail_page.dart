@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -48,6 +49,11 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
         });
       }
     } catch (e) {
+      developer.log(
+        'Failed to load visit records for store ${widget.store.id}',
+        name: 'StoreDetailPage',
+        error: e,
+      );
       if (mounted) {
         setState(() {
           _isLoadingVisitRecords = false;

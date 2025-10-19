@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
@@ -452,6 +453,11 @@ class _MyMenuPageState extends State<MyMenuPage>
       final visitRecords = await _getVisitRecordsUsecase.call(storeId);
       return visitRecords.length;
     } catch (e) {
+      developer.log(
+        'Failed to get visit count for store $storeId',
+        name: 'MyMenuPage',
+        error: e,
+      );
       return 0;
     }
   }
