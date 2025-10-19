@@ -3,6 +3,7 @@ import '../service_container.dart';
 import '../base_service_registrator.dart';
 import '../../../presentation/providers/store_provider.dart';
 import '../../../domain/services/location_service.dart';
+import '../../../domain/usecases/add_visit_record_usecase.dart';
 
 /// Test environment specific DI container
 ///
@@ -48,6 +49,12 @@ class TestDIContainer implements DIContainerInterface {
   LocationService getLocationService() {
     _ensureConfigured();
     return _serviceContainer.resolve<LocationService>();
+  }
+
+  @override
+  AddVisitRecordUsecase getAddVisitRecordUsecase() {
+    _ensureConfigured();
+    return _serviceContainer.resolve<AddVisitRecordUsecase>();
   }
 
   @override

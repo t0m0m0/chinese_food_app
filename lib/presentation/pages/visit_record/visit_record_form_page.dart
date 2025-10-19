@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/utils/error_message_helper.dart';
+import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
-import '../../../domain/usecases/add_visit_record_usecase.dart';
 
 class VisitRecordFormPage extends StatefulWidget {
   final Store store;
@@ -187,10 +187,13 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
     });
 
     try {
-      final addVisitRecordUsecase = Provider.of<AddVisitRecordUsecase>(
+      // DIコンテナから直接AddVisitRecordUsecaseを取得
+      final container = Provider.of<DIContainerInterface>(
         context,
         listen: false,
       );
+
+      final addVisitRecordUsecase = container.getAddVisitRecordUsecase();
 
       await addVisitRecordUsecase.call(
         store: widget.store, // Store オブジェクトを渡して自動保存を有効化
