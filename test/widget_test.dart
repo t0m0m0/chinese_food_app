@@ -14,6 +14,7 @@ import 'package:chinese_food_app/domain/services/location_service.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/usecases/add_visit_record_usecase.dart';
+import 'package:chinese_food_app/domain/usecases/get_visit_records_by_store_id_usecase.dart';
 import 'package:chinese_food_app/core/di/di_container_interface.dart';
 
 void main() {
@@ -280,6 +281,11 @@ class MockDIContainer implements DIContainerInterface {
 
   @override
   AddVisitRecordUsecase getAddVisitRecordUsecase() {
+    throw UnimplementedError('Mock implementation not needed for this test');
+  }
+
+  @override
+  GetVisitRecordsByStoreIdUsecase getGetVisitRecordsByStoreIdUsecase() {
     throw UnimplementedError('Mock implementation not needed for this test');
   }
 

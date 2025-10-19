@@ -1,7 +1,10 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
+import '../../../core/di/app_di_container.dart';
 import '../../../domain/entities/store.dart';
+import '../../../domain/usecases/get_visit_records_by_store_id_usecase.dart';
 import '../../providers/store_provider.dart';
 import '../store_detail/store_detail_page.dart';
 
@@ -15,11 +18,14 @@ class MyMenuPage extends StatefulWidget {
 class _MyMenuPageState extends State<MyMenuPage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
+  late GetVisitRecordsByStoreIdUsecase _getVisitRecordsUsecase;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _getVisitRecordsUsecase =
+        AppDIContainer().getGetVisitRecordsByStoreIdUsecase();
     WidgetsBinding.instance.addObserver(this);
 
     // タブ切り替え時にデータを再読み込み
@@ -300,6 +306,36 @@ class _MyMenuPageState extends State<MyMenuPage>
                             ),
                           ],
                         ),
+                        // 訪問済み店舗の場合、訪問回数を表示
+                        if (store.status == StoreStatus.visited) ...[
+                          const SizedBox(height: 4),
+                          FutureBuilder<int>(
+                            future: _getVisitCount(store.id),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData && snapshot.data! > 0) {
+                                return Row(
+                                  children: [
+                                    Icon(
+                                      Icons.event,
+                                      size: 16,
+                                      color: colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '${snapshot.data}回訪問',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -409,6 +445,21 @@ class _MyMenuPageState extends State<MyMenuPage>
 
   String _formatDate(DateTime date) {
     return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+  }
+
+  /// 店舗の訪問回数を取得
+  Future<int> _getVisitCount(String storeId) async {
+    try {
+      final visitRecords = await _getVisitRecordsUsecase.call(storeId);
+      return visitRecords.length;
+    } catch (e) {
+      developer.log(
+        'Failed to get visit count for store $storeId',
+        name: 'MyMenuPage',
+        error: e,
+      );
+      return 0;
+    }
   }
 
   Future<void> _updateStoreStatus(String storeId, StoreStatus newStatus) async {
