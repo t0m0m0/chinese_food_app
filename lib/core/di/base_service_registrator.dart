@@ -61,7 +61,7 @@ abstract class BaseServiceRegistrator {
 
     serviceContainer.register<VisitRecordRepository>(() {
       return VisitRecordRepositoryImpl(
-        serviceContainer.resolve<VisitRecordLocalDatasourceImpl>(),
+        serviceContainer.resolve<VisitRecordLocalDatasource>(),
       );
     });
 
