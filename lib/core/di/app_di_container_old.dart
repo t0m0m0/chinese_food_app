@@ -75,6 +75,12 @@ class AppDIContainer implements DIContainerInterface {
   }
 
   @override
+  GetVisitRecordsByStoreIdUsecase getGetVisitRecordsByStoreIdUsecase() {
+    _ensureConfigured();
+    return _serviceContainer.resolve<GetVisitRecordsByStoreIdUsecase>();
+  }
+
+  @override
   void registerTestProvider(StoreProvider provider) {
     _serviceContainer.register<StoreProvider>(() => provider);
   }
