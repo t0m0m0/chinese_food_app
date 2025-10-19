@@ -5,6 +5,7 @@ import 'di_container_factory.dart';
 import '../../presentation/providers/store_provider.dart';
 import '../../domain/services/location_service.dart';
 import '../../domain/usecases/add_visit_record_usecase.dart';
+import '../../domain/usecases/get_visit_records_by_store_id_usecase.dart';
 
 /// Refactored AppDIContainer using DIContainerFactory internally
 ///
@@ -61,6 +62,12 @@ class AppDIContainer implements DIContainerInterface {
   AddVisitRecordUsecase getAddVisitRecordUsecase() {
     _ensureConfigured();
     return _delegate!.getAddVisitRecordUsecase();
+  }
+
+  @override
+  GetVisitRecordsByStoreIdUsecase getGetVisitRecordsByStoreIdUsecase() {
+    _ensureConfigured();
+    return _delegate!.getGetVisitRecordsByStoreIdUsecase();
   }
 
   @override

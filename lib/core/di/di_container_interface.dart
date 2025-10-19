@@ -1,6 +1,7 @@
 import '../../presentation/providers/store_provider.dart';
 import '../../domain/services/location_service.dart';
 import '../../domain/usecases/add_visit_record_usecase.dart';
+import '../../domain/usecases/get_visit_records_by_store_id_usecase.dart';
 
 /// Environment types for dependency injection configuration
 enum Environment {
@@ -58,6 +59,11 @@ abstract class DIContainerInterface {
   ///
   /// Throws [DIContainerException] if not configured
   AddVisitRecordUsecase getAddVisitRecordUsecase();
+
+  /// Get configured GetVisitRecordsByStoreIdUsecase instance
+  ///
+  /// Throws [DIContainerException] if not configured
+  GetVisitRecordsByStoreIdUsecase getGetVisitRecordsByStoreIdUsecase();
 
   /// Register a test StoreProvider (for testing purposes)
   void registerTestProvider(StoreProvider provider);
