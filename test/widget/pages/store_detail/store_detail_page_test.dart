@@ -1,12 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:provider/provider.dart';
+import 'package:chinese_food_app/core/di/di_container_interface.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/visit_record.dart';
+import 'package:chinese_food_app/domain/usecases/get_visit_records_by_store_id_usecase.dart';
 import 'package:chinese_food_app/presentation/pages/store_detail/store_detail_page.dart';
+import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/presentation/widgets/webview_map_widget.dart';
 
+import 'store_detail_page_test.mocks.dart';
+
+@GenerateMocks([
+  DIContainerInterface,
+  GetVisitRecordsByStoreIdUsecase,
+  StoreProvider,
+])
 void main() {
   group('StoreDetailPage Widget Tests', () {
     late Store testStore;
+    late MockDIContainerInterface mockContainer;
+    late MockGetVisitRecordsByStoreIdUsecase mockGetVisitRecordsUsecase;
+    late MockStoreProvider mockStoreProvider;
 
     setUp(() {
       testStore = Store(
@@ -19,15 +36,34 @@ void main() {
         memo: 'テスト用のメモ',
         createdAt: DateTime(2024, 1, 1),
       );
+
+      // モックの初期化
+      mockContainer = MockDIContainerInterface();
+      mockGetVisitRecordsUsecase = MockGetVisitRecordsByStoreIdUsecase();
+      mockStoreProvider = MockStoreProvider();
+
+      // モックの振る舞いを設定
+      when(mockContainer.getGetVisitRecordsByStoreIdUsecase())
+          .thenReturn(mockGetVisitRecordsUsecase);
+      when(mockGetVisitRecordsUsecase.call(any))
+          .thenAnswer((_) async => <VisitRecord>[]);
     });
 
     testWidgets('should display store basic information', (tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: testStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert
       expect(find.text('テスト中華料理店'), findsOneWidget);
@@ -38,10 +74,18 @@ void main() {
     testWidgets('should display status change buttons', (tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: testStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert - ステータス変更セクションの存在を確認
       expect(find.text('ステータス変更'), findsOneWidget);
@@ -53,10 +97,18 @@ void main() {
     testWidgets('should show app bar with store name', (tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: testStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert
       expect(find.byType(AppBar), findsOneWidget);
@@ -67,10 +119,18 @@ void main() {
         (tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: testStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert - ステータスボタンが存在し、タップ可能であることを確認
       final wantToGoButton = find.text('行きたい').last;
@@ -90,10 +150,18 @@ void main() {
         (tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: testStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert - ステータス変更セクションが存在することを確認
       expect(find.text('ステータス変更'), findsOneWidget);
@@ -117,10 +185,18 @@ void main() {
 
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: visitedStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: visitedStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert - 現在のステータスが選択されて表示されることを確認
       expect(find.text('行った'), findsWidgets);
@@ -132,10 +208,18 @@ void main() {
     testWidgets('should display WebViewMapWidget in the page', (tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: testStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert - WebViewMapWidget should be present in the page
       expect(find.byType(WebViewMapWidget), findsOneWidget);
@@ -144,10 +228,18 @@ void main() {
     testWidgets('should not display "地図で表示" button', (tester) async {
       // Act
       await tester.pumpWidget(
-        MaterialApp(
-          home: StoreDetailPage(store: testStore),
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert - "地図で表示" button should not be present
       expect(find.text('地図で表示'), findsNothing);

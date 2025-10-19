@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
-import '../../../core/di/app_di_container.dart';
+import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/usecases/get_visit_records_by_store_id_usecase.dart';
 import '../../providers/store_provider.dart';
@@ -19,13 +19,12 @@ class _MyMenuPageState extends State<MyMenuPage>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
   late GetVisitRecordsByStoreIdUsecase _getVisitRecordsUsecase;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _getVisitRecordsUsecase =
-        AppDIContainer().getGetVisitRecordsByStoreIdUsecase();
     WidgetsBinding.instance.addObserver(this);
 
     // タブ切り替え時にデータを再読み込み
@@ -34,11 +33,23 @@ class _MyMenuPageState extends State<MyMenuPage>
         _loadStoresData();
       }
     });
+  }
 
-    // 初回表示時に店舗データをDBから読み込み
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadStoresData();
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      // Provider経由で設定済みのDIContainerを取得
+      final container =
+          Provider.of<DIContainerInterface>(context, listen: false);
+      _getVisitRecordsUsecase = container.getGetVisitRecordsByStoreIdUsecase();
+      _isInitialized = true;
+
+      // 初回表示時に店舗データをDBから読み込み
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadStoresData();
+      });
+    }
   }
 
   @override
