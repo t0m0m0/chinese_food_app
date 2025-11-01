@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 
+import 'package:chinese_food_app/core/di/di_container_interface.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/domain/entities/visit_record.dart';
+import 'package:chinese_food_app/domain/usecases/get_visit_records_by_store_id_usecase.dart';
 import 'package:chinese_food_app/presentation/pages/my_menu/my_menu_page.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
+
+import 'my_menu_page_test.mocks.dart';
+
+@GenerateMocks([
+  DIContainerInterface,
+  GetVisitRecordsByStoreIdUsecase,
+])
 
 /// FakeStoreProvider for testing
 class FakeStoreProvider extends ChangeNotifier implements StoreProvider {
@@ -93,16 +105,29 @@ class FakeStoreProvider extends ChangeNotifier implements StoreProvider {
 void main() {
   group('MyMenuPage Widget Tests', () {
     late FakeStoreProvider fakeStoreProvider;
+    late MockDIContainerInterface mockContainer;
+    late MockGetVisitRecordsByStoreIdUsecase mockGetVisitRecordsUsecase;
 
     setUp(() {
       fakeStoreProvider = FakeStoreProvider();
+      mockContainer = MockDIContainerInterface();
+      mockGetVisitRecordsUsecase = MockGetVisitRecordsByStoreIdUsecase();
+
+      // モックの振る舞いを設定
+      when(mockContainer.getGetVisitRecordsByStoreIdUsecase())
+          .thenReturn(mockGetVisitRecordsUsecase);
+      when(mockGetVisitRecordsUsecase.call(any))
+          .thenAnswer((_) async => <VisitRecord>[]);
     });
 
     Widget createWidgetUnderTest() {
-      return MaterialApp(
-        home: ChangeNotifierProvider<StoreProvider>.value(
-          value: fakeStoreProvider,
-          child: const MyMenuPage(),
+      return MultiProvider(
+        providers: [
+          Provider<DIContainerInterface>.value(value: mockContainer),
+          ChangeNotifierProvider<StoreProvider>.value(value: fakeStoreProvider),
+        ],
+        child: const MaterialApp(
+          home: MyMenuPage(),
         ),
       );
     }

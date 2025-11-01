@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/utils/error_message_helper.dart';
-import '../../../core/di/app_di_container.dart';
+import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/entities/visit_record.dart';
 import '../../../domain/usecases/get_visit_records_by_store_id_usecase.dart';
@@ -30,13 +30,19 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
   late GetVisitRecordsByStoreIdUsecase _getVisitRecordsUsecase;
   List<VisitRecord> _visitRecords = [];
   bool _isLoadingVisitRecords = true;
+  bool _isInitialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _getVisitRecordsUsecase =
-        AppDIContainer().getGetVisitRecordsByStoreIdUsecase();
-    _loadVisitRecords();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      // Provider経由で設定済みのDIContainerを取得
+      final container =
+          Provider.of<DIContainerInterface>(context, listen: false);
+      _getVisitRecordsUsecase = container.getGetVisitRecordsByStoreIdUsecase();
+      _loadVisitRecords();
+      _isInitialized = true;
+    }
   }
 
   Future<void> _loadVisitRecords() async {
