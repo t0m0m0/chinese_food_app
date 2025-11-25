@@ -141,7 +141,8 @@ void main() {
       final savedStore = await storeDatasource.getStoreById(store.id);
       expect(savedStore, isNotNull);
       expect(savedStore!.name, equals('APIから取得した店舗'));
-      expect(savedStore.status, isNull); // ステータスはnullのまま
+      // 訪問記録を追加したので、ステータスは自動的に visited に変更される
+      expect(savedStore.status, equals(entities.StoreStatus.visited));
 
       // 訪問記録がデータベースに保存されたことを確認
       final savedVisit =
@@ -180,6 +181,10 @@ void main() {
       expect(result.storeId, equals(store.id));
       expect(result.menu, equals('エビチリ'));
       expect(result.memo, equals('プリプリで美味しい'));
+
+      // 訪問記録を追加したので、ステータスは自動的に visited に変更される
+      final updatedStore = await storeDatasource.getStoreById(store.id);
+      expect(updatedStore!.status, equals(entities.StoreStatus.visited));
     });
 
     test(
@@ -202,6 +207,108 @@ void main() {
               (e) => e is Exception && e.toString().contains('訪問記録の保存に失敗しました')),
         ),
       );
+    });
+
+    test(
+        'should automatically change status to visited when adding visit record to want_to_go store',
+        () async {
+      // 🔴 Red: 「行きたい」店舗に訪問記録を追加したら、自動的にステータスを「行った」に変更
+      // Arrange: ステータスが wantToGo の店舗を保存
+      final store = entities.Store(
+        id: 'store_want_to_go',
+        name: 'これから行く中華料理店',
+        address: '東京都港区',
+        lat: 35.6585,
+        lng: 139.7454,
+        imageUrl: 'https://example.com/image.jpg',
+        status: entities.StoreStatus.wantToGo,
+        memo: '',
+        createdAt: DateTime.now(),
+      );
+      await storeDatasource.insertStore(store);
+
+      // Act: 訪問記録を追加
+      final visitedAt = DateTime.now();
+      await usecase.call(
+        store: store,
+        storeId: store.id,
+        visitedAt: visitedAt,
+        menu: 'チャーハン',
+        memo: '美味しかった',
+      );
+
+      // Assert: ステータスが自動的に visited に変更されたことを確認
+      final updatedStore = await storeDatasource.getStoreById(store.id);
+      expect(updatedStore, isNotNull);
+      expect(updatedStore!.status, equals(entities.StoreStatus.visited));
+    });
+
+    test(
+        'should automatically change status to visited when adding visit record to bad store',
+        () async {
+      // 🔴 Red: 「興味なし」店舗に訪問記録を追加したら、自動的にステータスを「行った」に変更
+      // Arrange: ステータスが bad の店舗を保存
+      final store = entities.Store(
+        id: 'store_bad',
+        name: '興味なかった中華料理店',
+        address: '東京都品川区',
+        lat: 35.6092,
+        lng: 139.7301,
+        imageUrl: 'https://example.com/image.jpg',
+        status: entities.StoreStatus.bad,
+        memo: '',
+        createdAt: DateTime.now(),
+      );
+      await storeDatasource.insertStore(store);
+
+      // Act: 訪問記録を追加
+      final visitedAt = DateTime.now();
+      await usecase.call(
+        store: store,
+        storeId: store.id,
+        visitedAt: visitedAt,
+        menu: '餃子定食',
+        memo: '意外と美味しかった',
+      );
+
+      // Assert: ステータスが自動的に visited に変更されたことを確認
+      final updatedStore = await storeDatasource.getStoreById(store.id);
+      expect(updatedStore, isNotNull);
+      expect(updatedStore!.status, equals(entities.StoreStatus.visited));
+    });
+
+    test(
+        'should not change status when adding visit record to already visited store',
+        () async {
+      // 🔴 Red: すでに「行った」店舗に訪問記録を追加しても、ステータスは visited のまま（2回目以降の訪問）
+      // Arrange: ステータスが visited の店舗を保存
+      final store = entities.Store(
+        id: 'store_visited',
+        name: 'すでに行った中華料理店',
+        address: '東京都中央区',
+        lat: 35.6762,
+        lng: 139.7654,
+        imageUrl: 'https://example.com/image.jpg',
+        status: entities.StoreStatus.visited,
+        memo: '前回も美味しかった',
+        createdAt: DateTime.now(),
+      );
+      await storeDatasource.insertStore(store);
+
+      // Act: 2回目の訪問記録を追加
+      final visitedAt = DateTime.now();
+      await usecase.call(
+        store: store,
+        storeId: store.id,
+        visitedAt: visitedAt,
+        menu: '麻婆豆腐',
+        memo: '今回も美味しい',
+      );
+
+      // Assert: ステータスは visited のまま（変更なし）
+      final updatedStore = await storeDatasource.getStoreById(store.id);
+      expect(updatedStore, isNotNull);
+      expect(updatedStore!.status, equals(entities.StoreStatus.visited));
     });
   });
 }

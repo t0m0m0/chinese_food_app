@@ -75,11 +75,45 @@ class AddVisitRecordUsecase {
       final result =
           await _visitRecordRepository.insertVisitRecord(visitRecord);
       debugPrint('DEBUG: Visit record saved successfully');
+
+      // 訪問記録を追加したら、ステータスを自動的に visited に変更
+      await _updateStoreStatusToVisited(storeId);
+
       return result;
     } catch (e, stackTrace) {
       debugPrint('DEBUG: Visit record save failed - Error: $e');
       debugPrint('DEBUG: StackTrace: $stackTrace');
       throw Exception('訪問記録の保存に失敗しました: $e');
+    }
+  }
+
+  /// 店舗のステータスを visited に更新（すでに visited の場合は何もしない）
+  Future<void> _updateStoreStatusToVisited(String storeId) async {
+    try {
+      final currentStore = await _storeRepository.getStoreById(storeId);
+      if (currentStore != null && currentStore.status != StoreStatus.visited) {
+        debugPrint(
+            'DEBUG: Updating store status to visited - id: $storeId, current status: ${currentStore.status}');
+        final updatedStore = Store(
+          id: currentStore.id,
+          name: currentStore.name,
+          address: currentStore.address,
+          lat: currentStore.lat,
+          lng: currentStore.lng,
+          imageUrl: currentStore.imageUrl,
+          status: StoreStatus.visited,
+          memo: currentStore.memo,
+          createdAt: currentStore.createdAt,
+        );
+        await _storeRepository.updateStore(updatedStore);
+        debugPrint('DEBUG: Store status updated to visited successfully');
+      } else if (currentStore?.status == StoreStatus.visited) {
+        debugPrint(
+            'DEBUG: Store status is already visited - id: $storeId, no update needed');
+      }
+    } catch (e) {
+      // ステータス更新失敗時も訪問記録は保存済みなので、エラーをログに記録するのみ
+      debugPrint('DEBUG: Failed to update store status to visited: $e');
     }
   }
 }
