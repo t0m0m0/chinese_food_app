@@ -42,19 +42,19 @@ class SwipeActionButtons extends StatelessWidget {
               excludeSemantics: !enabled,
               child: FloatingActionButton(
                 onPressed: enabled ? _handleDislike : null,
-                // Material Design 3準拠のカラーテーマ
+                // Material Design 3準拠のカラーテーマ - オレンジ色を使用
                 backgroundColor: enabled
-                    ? colorScheme.errorContainer
+                    ? Colors.orange.shade100
                     : colorScheme.surfaceContainerHighest,
                 foregroundColor: enabled
-                    ? colorScheme.onErrorContainer
+                    ? Colors.orange.shade700
                     : colorScheme.onSurfaceVariant,
                 // Hero animation競合回避のための一意タグ
                 heroTag: 'dislike_button',
                 // 有効/無効状態による視覚的フィードバック
                 elevation: enabled ? 6 : 2,
                 child: const Icon(
-                  Icons.thumb_down,
+                  Icons.block,
                   size: 28,
                 ),
               ),
@@ -70,12 +70,12 @@ class SwipeActionButtons extends StatelessWidget {
               excludeSemantics: !enabled,
               child: FloatingActionButton(
                 onPressed: enabled ? _handleLike : null,
-                // Material Design 3準拠のカラーテーマ
+                // Material Design 3準拠のカラーテーマ - 赤色を使用
                 backgroundColor: enabled
-                    ? colorScheme.primaryContainer
+                    ? Colors.red.shade100
                     : colorScheme.surfaceContainerHighest,
                 foregroundColor: enabled
-                    ? colorScheme.onPrimaryContainer
+                    ? Colors.red.shade700
                     : colorScheme.onSurfaceVariant,
                 // Hero animation競合回避のための一意タグ
                 heroTag: 'like_button',

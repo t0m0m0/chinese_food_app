@@ -17,7 +17,7 @@ void main() {
       );
 
       // 両方のボタンが表示される
-      expect(find.byIcon(Icons.thumb_down), findsOneWidget);
+      expect(find.byIcon(Icons.block), findsOneWidget);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
     });
 
@@ -37,7 +37,7 @@ void main() {
       );
 
       // 興味なしボタンをタップ
-      await tester.tap(find.byIcon(Icons.thumb_down));
+      await tester.tap(find.byIcon(Icons.block));
       await tester.pump();
 
       expect(dislikePressed, isTrue);
@@ -84,7 +84,7 @@ void main() {
       );
 
       // 無効状態でボタンをタップ
-      await tester.tap(find.byIcon(Icons.thumb_down));
+      await tester.tap(find.byIcon(Icons.block));
       await tester.tap(find.byIcon(Icons.favorite));
       await tester.pump();
 
@@ -168,7 +168,7 @@ void main() {
       );
 
       // ハプティックフィードバック有効時のボタン動作
-      await tester.tap(find.byIcon(Icons.thumb_down));
+      await tester.tap(find.byIcon(Icons.block));
       await tester.pump();
       expect(dislikePressed, isTrue);
 
@@ -193,7 +193,7 @@ void main() {
       );
 
       // ハプティックフィードバック無効でもボタンは動作する
-      await tester.tap(find.byIcon(Icons.thumb_down));
+      await tester.tap(find.byIcon(Icons.block));
       await tester.pump();
       expect(dislikePressed, isTrue);
     });

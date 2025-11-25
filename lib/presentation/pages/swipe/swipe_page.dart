@@ -329,16 +329,16 @@ class _SwipePageState extends State<SwipePage> {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.thumb_down,
-                        color: colorScheme.error,
+                      const Icon(
+                        Icons.block,
+                        color: Colors.orange,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '← 興味なし',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.error,
+                          color: Colors.orange,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -349,14 +349,14 @@ class _SwipePageState extends State<SwipePage> {
                       Text(
                         '→ 行きたい',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.primary,
+                          color: Colors.red,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Icon(
+                      const Icon(
                         Icons.favorite,
-                        color: colorScheme.primary,
+                        color: Colors.red,
                         size: 20,
                       ),
                     ],

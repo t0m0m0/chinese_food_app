@@ -220,9 +220,7 @@ class _SwipeFeedbackOverlayState extends State<SwipeFeedbackOverlay>
                         child: Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: widget.showLike
-                                ? colorScheme.primary
-                                : colorScheme.error,
+                            color: widget.showLike ? Colors.red : Colors.orange,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -236,13 +234,9 @@ class _SwipeFeedbackOverlayState extends State<SwipeFeedbackOverlay>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                widget.showLike
-                                    ? Icons.favorite
-                                    : Icons.thumb_down,
+                                widget.showLike ? Icons.favorite : Icons.block,
                                 size: 64,
-                                color: widget.showLike
-                                    ? colorScheme.onPrimary
-                                    : colorScheme.onError,
+                                color: Colors.white,
                               ),
                               const SizedBox(height: 12),
                               Text(
@@ -298,7 +292,7 @@ class _SwipeFeedbackOverlayState extends State<SwipeFeedbackOverlay>
                   scale: 0.5 + (_particleAnimation.value * 0.5),
                   child: Icon(
                     Icons.favorite,
-                    color: Colors.pink.withValues(alpha: 0.8),
+                    color: Colors.red.withValues(alpha: 0.8),
                     size: 24,
                   ),
                 ),
