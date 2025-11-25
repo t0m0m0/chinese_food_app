@@ -55,7 +55,7 @@ class StoreActionWidget extends StatelessWidget {
                         '行きたい',
                         Icons.favorite,
                         StoreStatus.wantToGo,
-                        colorScheme.primary,
+                        Colors.red,
                         theme,
                         colorScheme,
                       ),
