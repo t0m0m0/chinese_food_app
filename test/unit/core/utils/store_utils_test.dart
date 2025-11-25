@@ -15,13 +15,13 @@ void main() {
     });
 
     group('getStatusColor', () {
-      test('should return primary color for wantToGo status', () {
+      test('should return red color for wantToGo status', () {
         // Act
         final result =
             StoreUtils.getStatusColor(StoreStatus.wantToGo, colorScheme);
 
         // Assert
-        expect(result, colorScheme.primary);
+        expect(result, Colors.red);
       });
 
       test('should return green color for visited status', () {

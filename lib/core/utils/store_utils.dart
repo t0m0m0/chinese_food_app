@@ -9,7 +9,7 @@ class StoreUtils {
   static Color getStatusColor(StoreStatus? status, ColorScheme colorScheme) {
     switch (status) {
       case StoreStatus.wantToGo:
-        return colorScheme.primary;
+        return Colors.red;
       case StoreStatus.visited:
         return Colors.green;
       case StoreStatus.bad:

@@ -27,10 +27,11 @@ class _MyMenuPageState extends State<MyMenuPage>
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addObserver(this);
 
-    // タブ切り替え時にデータを再読み込み
+    // タブ切り替え時にデータを再読み込み & UI更新
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         _loadStoresData();
+        setState(() {}); // タブ色を更新するため
       }
     });
   }
@@ -90,6 +91,9 @@ class _MyMenuPageState extends State<MyMenuPage>
         backgroundColor: colorScheme.surfaceContainerHighest,
         bottom: TabBar(
           controller: _tabController,
+          indicatorColor: _getTabIndicatorColor(),
+          labelColor: _getTabIndicatorColor(),
+          unselectedLabelColor: colorScheme.onSurfaceVariant,
           tabs: const [
             Tab(
               icon: Icon(Icons.favorite),
@@ -431,7 +435,7 @@ class _MyMenuPageState extends State<MyMenuPage>
   Color _getStatusColor(StoreStatus? status, ColorScheme colorScheme) {
     switch (status) {
       case StoreStatus.wantToGo:
-        return colorScheme.primary;
+        return Colors.red;
       case StoreStatus.visited:
         return Colors.green;
       case StoreStatus.bad:
@@ -456,6 +460,20 @@ class _MyMenuPageState extends State<MyMenuPage>
 
   String _formatDate(DateTime date) {
     return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+  }
+
+  /// 現在選択されているタブに応じたインジケーター色を返す
+  Color _getTabIndicatorColor() {
+    switch (_tabController.index) {
+      case 0: // 行きたい
+        return Colors.red;
+      case 1: // 行った
+        return Colors.green;
+      case 2: // 興味なし
+        return Colors.orange;
+      default:
+        return Colors.red;
+    }
   }
 
   /// 店舗の訪問回数を取得

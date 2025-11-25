@@ -47,7 +47,7 @@ void main() {
       );
 
       // 「興味なし」アイコンが表示される
-      expect(find.byIcon(Icons.thumb_down), findsOneWidget);
+      expect(find.byIcon(Icons.block), findsOneWidget);
       expect(find.text('興味なし'), findsOneWidget);
 
       // 「行きたい」アイコンは表示されない

@@ -485,7 +485,7 @@ class _SearchPageState extends State<SearchPage> {
     final colorScheme = Theme.of(context).colorScheme;
     switch (status) {
       case StoreStatus.wantToGo:
-        return colorScheme.primary;
+        return Colors.red;
       case StoreStatus.visited:
         return Colors.green;
       case StoreStatus.bad:

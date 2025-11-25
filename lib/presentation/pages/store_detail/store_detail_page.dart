@@ -72,6 +72,12 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final storeProvider = Provider.of<StoreProvider>(context);
+
+    // StoreProviderから最新の店舗情報を取得
+    // ステータス変更時にUIを即座に更新するため
+    final currentStore = storeProvider.stores
+        .firstWhere((s) => s.id == widget.store.id, orElse: () => widget.store);
 
     return Scaffold(
       appBar: AppBar(
@@ -82,12 +88,12 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            StoreHeaderWidget(store: widget.store),
-            StoreInfoWidget(store: widget.store),
+            StoreHeaderWidget(store: currentStore),
+            StoreInfoWidget(store: currentStore),
             StoreActionWidget(
-              store: widget.store,
+              store: currentStore,
               onStatusChanged: (newStatus) =>
-                  _updateStoreStatus(context, newStatus),
+                  _updateStoreStatus(context, currentStore, newStatus),
               onAddVisitRecord: () => _navigateToVisitRecordForm(context),
             ),
             // 地図を常時表示
@@ -96,7 +102,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
               child: SizedBox(
                 height: 250,
                 child: WebViewMapWidget(
-                  store: widget.store,
+                  store: currentStore,
                   useOpenStreetMap: true,
                 ),
               ),
@@ -109,7 +115,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
               )
             else
               VisitRecordsSectionWidget(
-                storeId: widget.store.id,
+                storeId: currentStore.id,
                 visitRecords: _visitRecords,
               ),
           ],
@@ -119,13 +125,13 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
   }
 
   Future<void> _updateStoreStatus(
-      BuildContext context, StoreStatus newStatus) async {
-    if (widget.store.status == newStatus) return;
+      BuildContext context, Store currentStore, StoreStatus newStatus) async {
+    if (currentStore.status == newStatus) return;
 
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
     try {
-      await storeProvider.updateStoreStatus(widget.store.id, newStatus);
+      await storeProvider.updateStoreStatus(currentStore.id, newStatus);
 
       // ステータス更新成功 - UI表示の変化で十分なためスナックバー削除
     } catch (e) {
