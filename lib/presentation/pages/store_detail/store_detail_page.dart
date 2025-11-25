@@ -93,7 +93,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
             StoreActionWidget(
               store: currentStore,
               onStatusChanged: (newStatus) =>
-                  _updateStoreStatus(context, newStatus),
+                  _updateStoreStatus(context, currentStore, newStatus),
               onAddVisitRecord: () => _navigateToVisitRecordForm(context),
             ),
             // 地図を常時表示
@@ -125,13 +125,13 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
   }
 
   Future<void> _updateStoreStatus(
-      BuildContext context, StoreStatus newStatus) async {
-    if (widget.store.status == newStatus) return;
+      BuildContext context, Store currentStore, StoreStatus newStatus) async {
+    if (currentStore.status == newStatus) return;
 
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
     try {
-      await storeProvider.updateStoreStatus(widget.store.id, newStatus);
+      await storeProvider.updateStoreStatus(currentStore.id, newStatus);
 
       // ステータス更新成功 - UI表示の変化で十分なためスナックバー削除
     } catch (e) {

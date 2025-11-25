@@ -364,21 +364,9 @@ void main() {
 
     testWidgets('should update UI when status is changed successfully',
         (tester) async {
-      // Arrange
-      final updatedStore = Store(
-        id: testStore.id,
-        name: testStore.name,
-        address: testStore.address,
-        lat: testStore.lat,
-        lng: testStore.lng,
-        status: StoreStatus.visited, // Changed from wantToGo to visited
-        memo: testStore.memo,
-        createdAt: testStore.createdAt,
-      );
-
+      // Arrange - Start with testStore (wantToGo status)
       when(mockStoreProvider.updateStoreStatus(any, any))
           .thenAnswer((_) async => {});
-      when(mockStoreProvider.stores).thenReturn([updatedStore]);
 
       // Act
       await tester.pumpWidget(
@@ -395,6 +383,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // Create updated store with visited status
+      final updatedStore = Store(
+        id: testStore.id,
+        name: testStore.name,
+        address: testStore.address,
+        lat: testStore.lat,
+        lng: testStore.lng,
+        status: StoreStatus.visited, // Changed from wantToGo to visited
+        memo: testStore.memo,
+        createdAt: testStore.createdAt,
+      );
+
+      // Update mock to return updated store after status change
+      when(mockStoreProvider.stores).thenReturn([updatedStore]);
+
       // Find InkWell containing the "visited" status button and scroll to it
       final visitedButtonFinder = find.ancestor(
         of: find.text('行った').last,
@@ -408,13 +411,80 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert - UI should reflect the new status (visited button should be selected)
-      // The visited button should have a selected visual state after the update
       verify(mockStoreProvider.updateStoreStatus(
               testStore.id, StoreStatus.visited))
           .called(1);
 
       // StoreActionWidget should show visited status as selected
       // This will be verified by the widget rebuilding with the updated store from provider
+    });
+
+    testWidgets(
+        'should allow status change from bad to wantToGo (regression test)',
+        (tester) async {
+      // Arrange - Create a store with 'bad' status
+      final badStore = Store(
+        id: 'bad-store',
+        name: 'テスト中華料理店',
+        address: '東京都渋谷区テスト1-1-1',
+        lat: 35.6581,
+        lng: 139.7414,
+        status: StoreStatus.bad,
+        memo: 'テスト用のメモ',
+        createdAt: DateTime(2024, 1, 1),
+      );
+
+      final updatedStore = Store(
+        id: badStore.id,
+        name: badStore.name,
+        address: badStore.address,
+        lat: badStore.lat,
+        lng: badStore.lng,
+        status: StoreStatus.wantToGo, // Changed from bad to wantToGo
+        memo: badStore.memo,
+        createdAt: badStore.createdAt,
+      );
+
+      when(mockStoreProvider.updateStoreStatus(any, any))
+          .thenAnswer((_) async => {});
+      when(mockStoreProvider.stores).thenReturn([badStore]);
+      when(mockGetVisitRecordsUsecase.call(badStore.id))
+          .thenAnswer((_) async => <VisitRecord>[]);
+
+      // Act
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: badStore),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Update mock to return updated store after status change
+      when(mockStoreProvider.stores).thenReturn([updatedStore]);
+
+      // Find InkWell containing the "wantToGo" status button and scroll to it
+      final wantToGoButtonFinder = find.ancestor(
+        of: find.text('行きたい').last,
+        matching: find.byType(InkWell),
+      );
+      await tester.ensureVisible(wantToGoButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Tap the "wantToGo" status button
+      await tester.tap(wantToGoButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Assert - updateStoreStatus should be called
+      verify(mockStoreProvider.updateStoreStatus(
+              badStore.id, StoreStatus.wantToGo))
+          .called(1);
     });
   });
 }
