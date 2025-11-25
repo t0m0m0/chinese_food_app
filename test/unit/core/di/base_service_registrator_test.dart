@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/drift.dart' hide isNotNull;
 import 'package:drift/native.dart';
 
-import 'package:chinese_food_app/core/di/base_service_registrator.dart';
 import 'package:chinese_food_app/core/database/schema/app_database.dart';
 
 void main() {
