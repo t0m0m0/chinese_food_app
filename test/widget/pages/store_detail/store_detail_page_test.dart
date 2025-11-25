@@ -244,5 +244,120 @@ void main() {
       // Assert - "地図で表示" button should not be present
       expect(find.text('地図で表示'), findsNothing);
     });
+
+    testWidgets('should call updateStoreStatus when status button is tapped',
+        (tester) async {
+      // Arrange
+      when(mockStoreProvider.updateStoreStatus(any, any))
+          .thenAnswer((_) async => {});
+
+      // Act
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find InkWell containing the "visited" status button and scroll to it
+      final visitedButtonFinder = find.ancestor(
+        of: find.text('行った').last,
+        matching: find.byType(InkWell),
+      );
+      await tester.ensureVisible(visitedButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Tap the "visited" status button
+      await tester.tap(visitedButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Assert - updateStoreStatus should be called with correct parameters
+      verify(mockStoreProvider.updateStoreStatus(
+              testStore.id, StoreStatus.visited))
+          .called(1);
+    });
+
+    testWidgets(
+        'should not call updateStoreStatus when current status is tapped',
+        (tester) async {
+      // Arrange
+      when(mockStoreProvider.updateStoreStatus(any, any))
+          .thenAnswer((_) async => {});
+
+      // Act
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find InkWell containing the current "wantToGo" status button
+      final wantToGoButtonFinder = find.ancestor(
+        of: find.text('行きたい').last,
+        matching: find.byType(InkWell),
+      );
+      await tester.ensureVisible(wantToGoButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Tap the current "wantToGo" status button
+      await tester.tap(wantToGoButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Assert - updateStoreStatus should NOT be called
+      verifyNever(mockStoreProvider.updateStoreStatus(any, any));
+    });
+
+    testWidgets('should show error snackbar when status update fails',
+        (tester) async {
+      // Arrange
+      when(mockStoreProvider.updateStoreStatus(any, any))
+          .thenThrow(Exception('Update failed'));
+
+      // Act
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<DIContainerInterface>.value(value: mockContainer),
+            ChangeNotifierProvider<StoreProvider>.value(
+                value: mockStoreProvider),
+          ],
+          child: MaterialApp(
+            home: StoreDetailPage(store: testStore),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find InkWell containing the "visited" status button and scroll to it
+      final visitedButtonFinder = find.ancestor(
+        of: find.text('行った').last,
+        matching: find.byType(InkWell),
+      );
+      await tester.ensureVisible(visitedButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Tap the "visited" status button
+      await tester.tap(visitedButtonFinder);
+      await tester.pump(); // Trigger the error
+
+      // Assert - Error snackbar should be displayed
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('店舗のステータス更新に失敗しました'), findsOneWidget);
+    });
   });
 }
