@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import 'dart:developer' as developer;
 
 import 'service_container.dart';
@@ -228,13 +230,52 @@ abstract class BaseServiceRegistrator {
       );
       return DatabaseConnection(NativeDatabase.memory());
     } else {
-      // Issue #111 緊急修正: ファイルアクセス問題を回避するためインメモリDBを使用
-      DIErrorHandler.handleConfigurationWarning(
-        platform,
-        'ファイルアクセス問題のためインメモリデータベースを使用',
-        recommendation: 'Issue #113でpath_providerによる永続化実装予定',
-      );
-      return DatabaseConnection(NativeDatabase.memory());
+      // Issue #200 修正: path_providerを使用した永続化パス実装
+      try {
+        // 同期的にデータベースを開くために、アプリケーションディレクトリを取得する
+        // Note: この処理は非同期だが、NativeDatabaseはバックグラウンドで開くため問題ない
+        return _createPersistentDatabaseConnection(platform);
+      } catch (e) {
+        final exception = e is Exception ? e : Exception(e.toString());
+        DIErrorHandler.handleDatabaseError(
+          platform,
+          '永続化データベース初期化',
+          exception,
+          recoveryHint: 'アプリを再起動してください',
+        );
+        // フォールバック: インメモリデータベース
+        return DatabaseConnection(NativeDatabase.memory());
+      }
     }
+  }
+
+  /// 永続化データベース接続を作成
+  static DatabaseConnection _createPersistentDatabaseConnection(
+      String platform) {
+    // Issue #200: LazyDatabaseを使用して非同期でパスを解決
+    // LazyDatabaseは初回アクセス時に非同期でデータベースを開く
+    const dbFileName = 'app_db.sqlite';
+
+    DIErrorHandler.logSuccessfulOperation(
+      'データベース接続',
+      '永続化データベースを使用: $dbFileName',
+      isVerbose: true,
+    );
+
+    return DatabaseConnection(
+      LazyDatabase(() async {
+        // 非同期でアプリケーションドキュメントディレクトリを取得
+        final directory = await getApplicationDocumentsDirectory();
+        final dbPath = '${directory.path}/$dbFileName';
+
+        developer.log(
+          'Database path resolved: $dbPath',
+          name: 'DI',
+        );
+
+        // 永続化されたデータベースファイルを開く
+        return NativeDatabase.createInBackground(File(dbPath));
+      }),
+    );
   }
 }
