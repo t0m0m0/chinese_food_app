@@ -149,9 +149,17 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
   }
 
   void _navigateToVisitRecordForm(BuildContext context) async {
+    // Providerを非同期処理前に取得
+    final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+
     // 訪問記録追加後に戻ってきたら、訪問記録を再読み込み
     await context.pushNamed('visit-record-form', extra: widget.store);
-    // 画面に戻ってきた時に訪問記録を再読み込み
-    _loadVisitRecords();
+
+    // 画面に戻ってきた時に訪問記録とStoreProviderの店舗リストを再読み込み
+    // これにより、訪問記録追加時の自動ステータス変更がUIに即座に反映される
+    if (mounted) {
+      await storeProvider.loadStores();
+      _loadVisitRecords();
+    }
   }
 }
