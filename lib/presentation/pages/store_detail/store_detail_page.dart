@@ -72,6 +72,12 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final storeProvider = Provider.of<StoreProvider>(context);
+
+    // StoreProviderから最新の店舗情報を取得
+    // ステータス変更時にUIを即座に更新するため
+    final currentStore = storeProvider.stores
+        .firstWhere((s) => s.id == widget.store.id, orElse: () => widget.store);
 
     return Scaffold(
       appBar: AppBar(
@@ -82,10 +88,10 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            StoreHeaderWidget(store: widget.store),
-            StoreInfoWidget(store: widget.store),
+            StoreHeaderWidget(store: currentStore),
+            StoreInfoWidget(store: currentStore),
             StoreActionWidget(
-              store: widget.store,
+              store: currentStore,
               onStatusChanged: (newStatus) =>
                   _updateStoreStatus(context, newStatus),
               onAddVisitRecord: () => _navigateToVisitRecordForm(context),
@@ -96,7 +102,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
               child: SizedBox(
                 height: 250,
                 child: WebViewMapWidget(
-                  store: widget.store,
+                  store: currentStore,
                   useOpenStreetMap: true,
                 ),
               ),
@@ -109,7 +115,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
               )
             else
               VisitRecordsSectionWidget(
-                storeId: widget.store.id,
+                storeId: currentStore.id,
                 visitRecords: _visitRecords,
               ),
           ],
