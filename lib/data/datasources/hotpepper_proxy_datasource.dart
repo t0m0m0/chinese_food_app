@@ -180,12 +180,39 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
             '🚫 NetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
       }
 
+      // SSL/TLSエラーの場合は、より具体的なメッセージを提供
+      if (e.message.contains('Handshake') || e.message.contains('SSL')) {
+        if (kDebugMode) {
+          debugPrint('🔒 SSL/TLS接続エラー検出');
+        }
+        throw ApiException(
+          'プロキシサーバーへの安全な接続に失敗しました。\n'
+          'ネットワーク環境を確認してください。\n'
+          'Secure connection to proxy server failed.\n'
+          'Please check your network environment.',
+          statusCode: e.statusCode,
+        );
+      }
+
       // プロキシサーバーのエラーレスポンスを適切なエラーに変換
       throw _handleProxyException(e);
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('❌ 予期しないエラー発生: $e');
         debugPrint('📍 スタックトレース: $stackTrace');
+      }
+
+      // SSL/TLSエラーの場合は、より具体的なメッセージを提供
+      if (e.toString().contains('Handshake') || e.toString().contains('SSL')) {
+        if (kDebugMode) {
+          debugPrint('🔒 予期しないSSL/TLS接続エラー検出');
+        }
+        throw ApiException(
+          'プロキシサーバーへの安全な接続に失敗しました。\n'
+          'ネットワーク環境を確認してください。\n'
+          'Secure connection to proxy server failed.\n'
+          'Please check your network environment.',
+        );
       }
 
       throw ApiException('Proxy server request failed: ${e.toString()}');

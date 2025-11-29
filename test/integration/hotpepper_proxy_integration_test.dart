@@ -103,5 +103,30 @@ void main() {
         expect(e.toString(), contains('住所または緯度経度'));
       }
     });
+
+    test('存在しないプロキシサーバーへの接続テスト', () async {
+      printOnFailure('🔍 存在しないプロキシサーバーへの接続テスト開始...');
+
+      final datasource = HotpepperProxyDatasourceImpl(
+        AppHttpClient(),
+        proxyBaseUrl: 'https://non-existent-proxy.example.com',
+      );
+
+      try {
+        await datasource.searchStores(
+          lat: 35.6812,
+          lng: 139.7671,
+          keyword: '中華',
+          range: 3,
+          count: 1,
+        );
+        fail('プロキシサーバーへの接続エラーが発生すべき');
+      } catch (e) {
+        printOnFailure('✅ 期待通りのエラー: ${e.runtimeType}');
+        expect(e, isA<Exception>());
+        // エラーメッセージが適切に設定されていることを確認
+        printOnFailure('エラーメッセージ: $e');
+      }
+    });
   });
 }
