@@ -180,30 +180,12 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
             '🚫 NetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
       }
 
-      // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
-      if (e.message.contains('Handshake') || e.message.contains('SSL')) {
-        if (kDebugMode) {
-          debugPrint('🔄 SSL/TLSエラーのため直接HotPepper APIにフォールバック');
-        }
-        return await _fallbackToDirectApi(
-            lat, lng, address, keyword, range, count, start);
-      }
-
       // プロキシサーバーのエラーレスポンスを適切なエラーに変換
       throw _handleProxyException(e);
     } catch (e, stackTrace) {
       if (kDebugMode) {
         debugPrint('❌ 予期しないエラー発生: $e');
         debugPrint('📍 スタックトレース: $stackTrace');
-      }
-
-      // SSL/TLS エラーの場合は直接HotPepper APIにフォールバック
-      if (e.toString().contains('Handshake') || e.toString().contains('SSL')) {
-        if (kDebugMode) {
-          debugPrint('🔄 予期しないSSLエラーのため直接HotPepper APIにフォールバック');
-        }
-        return await _fallbackToDirectApi(
-            lat, lng, address, keyword, range, count, start);
       }
 
       throw ApiException('Proxy server request failed: ${e.toString()}');
@@ -306,78 +288,6 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       'Accept': HotpepperProxyConstants.acceptJson,
       ...ApiConfig.commonHeaders,
     };
-  }
-
-  /// 直接HotPepper APIにフォールバック（SSL/TLSエラー時）
-  ///
-  /// レート制限を考慮し、フォールバックの使用を制限します
-  Future<HotpepperSearchResponse> _fallbackToDirectApi(
-    double? lat,
-    double? lng,
-    String? address,
-    String? keyword,
-    int range,
-    int count,
-    int start,
-  ) async {
-    if (kDebugMode) {
-      debugPrint('📡 直接HotPepper API呼び出し開始');
-    }
-
-    final apiKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    if (apiKey.isEmpty) {
-      if (kDebugMode) {
-        debugPrint('❌ HotPepper APIキーが設定されていません');
-      }
-      throw ApiException('API key not configured for fallback');
-    }
-
-    // レート制限チェック: HotPepper APIは1秒間5リクエストまで
-    // フォールバック時は控えめに使用（1秒間1リクエスト相当）
-    await Future.delayed(const Duration(milliseconds: 1000));
-
-    // HotPepper API URL構築
-    final apiUrl = Uri.parse(EnvironmentConfig.hotpepperApiUrl);
-    final queryParams = <String, String>{
-      'key': apiKey,
-      'format': 'json',
-      'keyword': keyword ?? '中華',
-      'range': range.toString(),
-      'count': count.toString(),
-      'start': start.toString(),
-    };
-
-    // 位置情報パラメータ
-    if (lat != null && lng != null) {
-      queryParams['lat'] = lat.toString();
-      queryParams['lng'] = lng.toString();
-    }
-    if (address != null && address.isNotEmpty) {
-      queryParams['address'] = address;
-    }
-
-    final requestUrl = apiUrl.replace(queryParameters: queryParams);
-    if (kDebugMode) {
-      debugPrint('📍 直接API URL: $requestUrl');
-    }
-
-    try {
-      final response = await getAndParse<HotpepperSearchResponse>(
-        requestUrl.toString(),
-        (json) =>
-            HotpepperSearchResponse.fromJson(json as Map<String, dynamic>),
-        headers: {'User-Agent': 'MachiApp/1.0.0'},
-      );
-      if (kDebugMode) {
-        debugPrint('✅ 直接HotPepper APIからレスポンス取得成功: ${response.shops.length}件');
-      }
-      return response;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ 直接HotPepper API呼び出しも失敗: $e');
-      }
-      throw ApiException('Both proxy and direct API failed: ${e.toString()}');
-    }
   }
 
   /// プロキシサーバーのエラーレスポンスを適切なApiExceptionに変換
