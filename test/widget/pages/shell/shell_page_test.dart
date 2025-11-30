@@ -27,6 +27,7 @@ void main() {
     Widget createApp() {
       return MultiProvider(
         providers: [
+          Provider<DIContainerInterface>.value(value: container),
           ChangeNotifierProvider.value(value: container.getStoreProvider()),
           Provider<LocationService>.value(
               value: container.getLocationService()),
