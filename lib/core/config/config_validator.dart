@@ -105,7 +105,6 @@ class ConfigValidator {
     // HotPepper APIキー検証は削除（プロキシ経由でAPI呼び出しを行うため）
   }
 
-
   /// 設定が有効かどうかを判定
   static bool get isConfigurationValid {
     return validateConfiguration().isEmpty;
