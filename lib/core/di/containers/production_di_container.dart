@@ -79,8 +79,8 @@ class ProductionDIContainer implements DIContainerInterface {
 
   /// Register services specific to production environment
   void _registerProductionServices() {
-    // Register production API datasource
-    BaseServiceRegistrator.registerProductionApiDatasource(_serviceContainer);
+    // プロキシサーバー経由でのみAPI呼び出しを行うため、
+    // HotpepperApiDatasourceの登録は不要
 
     // Register common services
     BaseServiceRegistrator.registerCommonServices(_serviceContainer);

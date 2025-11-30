@@ -4,23 +4,21 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i10;
-import 'dart:convert' as _i29;
+import 'dart:convert' as _i28;
 import 'dart:io' as _i12;
-import 'dart:typed_data' as _i30;
+import 'dart:typed_data' as _i29;
 import 'dart:ui' as _i23;
 
 import 'package:chinese_food_app/core/network/api_response.dart' as _i7;
-import 'package:chinese_food_app/core/network/app_http_client.dart' as _i28;
+import 'package:chinese_food_app/core/network/app_http_client.dart' as _i27;
 import 'package:chinese_food_app/core/services/photo_service.dart' as _i11;
 import 'package:chinese_food_app/core/types/result.dart' as _i17;
-import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart'
-    as _i24;
 import 'package:chinese_food_app/data/datasources/hotpepper_proxy_datasource.dart'
-    as _i25;
+    as _i24;
 import 'package:chinese_food_app/data/datasources/photo_local_datasource.dart'
-    as _i27;
-import 'package:chinese_food_app/data/datasources/store_local_datasource.dart'
     as _i26;
+import 'package:chinese_food_app/data/datasources/store_local_datasource.dart'
+    as _i25;
 import 'package:chinese_food_app/data/models/hotpepper_store_model.dart' as _i6;
 import 'package:chinese_food_app/data/services/geolocator_location_service.dart'
     as _i13;
@@ -891,64 +889,11 @@ class MockStoreProvider extends _i1.Mock implements _i22.StoreProvider {
       );
 }
 
-/// A class which mocks [HotpepperApiDatasource].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockHotpepperApiDatasource extends _i1.Mock
-    implements _i24.HotpepperApiDatasource {
-  MockHotpepperApiDatasource() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  _i10.Future<_i6.HotpepperSearchResponse> searchStores({
-    double? lat,
-    double? lng,
-    String? address,
-    String? keyword,
-    int? range = 3,
-    int? count = 20,
-    int? start = 1,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #searchStores,
-          [],
-          {
-            #lat: lat,
-            #lng: lng,
-            #address: address,
-            #keyword: keyword,
-            #range: range,
-            #count: count,
-            #start: start,
-          },
-        ),
-        returnValue: _i10.Future<_i6.HotpepperSearchResponse>.value(
-            _FakeHotpepperSearchResponse_4(
-          this,
-          Invocation.method(
-            #searchStores,
-            [],
-            {
-              #lat: lat,
-              #lng: lng,
-              #address: address,
-              #keyword: keyword,
-              #range: range,
-              #count: count,
-              #start: start,
-            },
-          ),
-        )),
-      ) as _i10.Future<_i6.HotpepperSearchResponse>);
-}
-
 /// A class which mocks [HotpepperProxyDatasource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockHotpepperProxyDatasource extends _i1.Mock
-    implements _i25.HotpepperProxyDatasource {
+    implements _i24.HotpepperProxyDatasource {
   MockHotpepperProxyDatasource() {
     _i1.throwOnMissingStub(this);
   }
@@ -1045,7 +990,7 @@ class MockHotpepperProxyDatasource extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockStoreLocalDatasource extends _i1.Mock
-    implements _i26.StoreLocalDatasource {
+    implements _i25.StoreLocalDatasource {
   MockStoreLocalDatasource() {
     _i1.throwOnMissingStub(this);
   }
@@ -1285,7 +1230,7 @@ class MockStoreLocalDatasource extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPhotoLocalDatasource extends _i1.Mock
-    implements _i27.PhotoLocalDatasource {
+    implements _i26.PhotoLocalDatasource {
   MockPhotoLocalDatasource() {
     _i1.throwOnMissingStub(this);
   }
@@ -1483,7 +1428,7 @@ class MockPhotoLocalDatasource extends _i1.Mock
 /// A class which mocks [AppHttpClient].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAppHttpClient extends _i1.Mock implements _i28.AppHttpClient {
+class MockAppHttpClient extends _i1.Mock implements _i27.AppHttpClient {
   MockAppHttpClient() {
     _i1.throwOnMissingStub(this);
   }
@@ -1695,7 +1640,7 @@ class MockClient extends _i1.Mock implements _i8.Client {
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
-    _i29.Encoding? encoding,
+    _i28.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -1726,7 +1671,7 @@ class MockClient extends _i1.Mock implements _i8.Client {
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
-    _i29.Encoding? encoding,
+    _i28.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -1757,7 +1702,7 @@ class MockClient extends _i1.Mock implements _i8.Client {
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
-    _i29.Encoding? encoding,
+    _i28.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -1788,7 +1733,7 @@ class MockClient extends _i1.Mock implements _i8.Client {
     Uri? url, {
     Map<String, String>? headers,
     Object? body,
-    _i29.Encoding? encoding,
+    _i28.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -1836,7 +1781,7 @@ class MockClient extends _i1.Mock implements _i8.Client {
       ) as _i10.Future<String>);
 
   @override
-  _i10.Future<_i30.Uint8List> readBytes(
+  _i10.Future<_i29.Uint8List> readBytes(
     Uri? url, {
     Map<String, String>? headers,
   }) =>
@@ -1846,8 +1791,8 @@ class MockClient extends _i1.Mock implements _i8.Client {
           [url],
           {#headers: headers},
         ),
-        returnValue: _i10.Future<_i30.Uint8List>.value(_i30.Uint8List(0)),
-      ) as _i10.Future<_i30.Uint8List>);
+        returnValue: _i10.Future<_i29.Uint8List>.value(_i29.Uint8List(0)),
+      ) as _i10.Future<_i29.Uint8List>);
 
   @override
   _i10.Future<_i8.StreamedResponse> send(_i8.BaseRequest? request) =>

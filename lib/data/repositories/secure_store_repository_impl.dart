@@ -1,23 +1,17 @@
-import '../../core/config/proxy_config.dart';
-import '../../core/utils/app_logger.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
-import '../datasources/hotpepper_api_datasource.dart';
 import '../datasources/hotpepper_proxy_datasource.dart';
 import '../datasources/store_local_datasource.dart';
 
 /// セキュア版Store Repository の実装クラス
 ///
-/// プロキシサーバー経由でのAPI呼び出しを優先し、
-/// フォールバック機能も提供するセキュアなリポジトリ実装
+/// プロキシサーバー経由でのAPI呼び出しを行うセキュアなリポジトリ実装
 class SecureStoreRepositoryImpl implements StoreRepository {
   final HotpepperProxyDatasource proxyDatasource;
-  final HotpepperApiDatasource fallbackDatasource;
   final StoreLocalDatasource localDatasource;
 
   SecureStoreRepositoryImpl({
     required this.proxyDatasource,
-    required this.fallbackDatasource,
     required this.localDatasource,
   });
 
@@ -32,53 +26,18 @@ class SecureStoreRepositoryImpl implements StoreRepository {
     int start = 1,
   }) async {
     try {
-      // プロキシサーバーが有効な場合は優先して使用
-      if (ProxyConfig.enabled) {
-        try {
-          final response = await proxyDatasource.searchStores(
-            lat: lat,
-            lng: lng,
-            address: address,
-            keyword: keyword,
-            range: range,
-            count: count,
-            start: start,
-          );
+      // プロキシサーバー経由でのみAPI呼び出しを行う
+      final response = await proxyDatasource.searchStores(
+        lat: lat,
+        lng: lng,
+        address: address,
+        keyword: keyword,
+        range: range,
+        count: count,
+        start: start,
+      );
 
-          return _convertToStoreEntities(response.shops);
-        } catch (proxyError) {
-          // プロキシサーバーが利用できない場合はフォールバック
-          AppLogger.proxyFallback(
-            'プロキシサーバーが利用できないため、直接API呼び出しに切り替えます',
-            originalError: proxyError,
-          );
-
-          final response = await fallbackDatasource.searchStores(
-            lat: lat,
-            lng: lng,
-            address: address,
-            keyword: keyword,
-            range: range,
-            count: count,
-            start: start,
-          );
-
-          return _convertToStoreEntities(response.shops);
-        }
-      } else {
-        // プロキシサーバーが無効な場合は直接API呼び出し
-        final response = await fallbackDatasource.searchStores(
-          lat: lat,
-          lng: lng,
-          address: address,
-          keyword: keyword,
-          range: range,
-          count: count,
-          start: start,
-        );
-
-        return _convertToStoreEntities(response.shops);
-      }
+      return _convertToStoreEntities(response.shops);
     } catch (e) {
       rethrow; // Usecaseレイヤーでハンドリング
     }

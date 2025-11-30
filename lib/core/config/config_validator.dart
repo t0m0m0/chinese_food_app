@@ -5,7 +5,6 @@ import 'environment_config.dart';
 import 'location_config.dart';
 import 'search_config.dart';
 import 'ui_config.dart';
-import 'api_key_constants.dart';
 
 /// 設定検証クラス
 class ConfigValidator {
@@ -50,25 +49,15 @@ class ConfigValidator {
   }
 
   /// APIキーの存在を検証
+  /// プロキシサーバー経由でAPI呼び出しを行うため、HotPepper APIキーは不要
   static void _validateApiKeys(List<String> errors) {
-    final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-    if (hotpepperKey.isEmpty) {
-      errors.add(
-        'HotPepper API キーが設定されていません (環境: ${EnvironmentConfig.current.name})',
-      );
-    }
+    // HotPepper APIキー検証は削除（プロキシ経由でAPI呼び出しを行うため）
   }
 
   /// APIキーの形式を検証
+  /// プロキシサーバー経由でAPI呼び出しを行うため、HotPepper APIキーの形式検証は不要
   static void _validateApiKeyFormats(List<String> errors) {
-    final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-
-    if (hotpepperKey.isNotEmpty && !_isValidHotpepperApiKey(hotpepperKey)) {
-      errors.add(
-        '${ApiKeyConstants.hotpepperApiKeyFormatError} (${ApiKeyConstants.hotpepperApiKeyFormatRequirement})',
-      );
-    }
-
+    // HotPepper APIキー形式検証は削除（プロキシ経由でAPI呼び出しを行うため）
     // Google Maps APIキーの形式チェックは削除（WebView実装により不要）
   }
 
@@ -93,64 +82,27 @@ class ConfigValidator {
   }
 
   /// 本番環境の設定を検証
+  /// プロキシサーバー経由でAPI呼び出しを行うため、HotPepper APIキーは不要
   static void _validateProductionConfig(List<String> errors) {
-    // 本番環境では厳密な検証を実施
-    final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
-
-    if (hotpepperKey.isEmpty) {
-      errors.add(
-          '${ApiKeyConstants.productionEnv}環境: ${ApiKeyConstants.hotpepperApiKeyField} ${ApiKeyConstants.hotpepperApiKeyMissingError}');
-    }
+    // HotPepper APIキー検証は削除（プロキシ経由でAPI呼び出しを行うため）
   }
 
   /// ステージング環境の設定を検証
+  /// プロキシサーバー経由でAPI呼び出しを行うため、HotPepper APIキーは不要
   static void _validateStagingConfig(List<String> errors) {
-    final hotpepperKey = EnvironmentConfig.hotpepperApiKey;
-
-    if (hotpepperKey.isEmpty) {
-      errors.add(
-          '${ApiKeyConstants.stagingEnv}環境: ${ApiKeyConstants.hotpepperApiKeyField} ${ApiKeyConstants.hotpepperApiKeyMissingError}');
-    }
+    // HotPepper APIキー検証は削除（プロキシ経由でAPI呼び出しを行うため）
   }
 
   /// 開発環境の設定を検証
+  /// プロキシサーバー経由でAPI呼び出しを行うため、HotPepper APIキーは不要
   static void _validateDevelopmentConfig(List<String> errors) {
-    // 開発環境では警告レベルの検証
-    final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-
-    if (hotpepperKey.isEmpty) {
-      errors.add(
-          '${ApiKeyConstants.developmentEnv}環境: HotPepper API キー${ApiKeyConstants.hotpepperApiKeyMissingError}（機能制限あり）');
-    }
+    // HotPepper APIキー検証は削除（プロキシ経由でAPI呼び出しを行うため）
   }
 
   /// テスト環境の設定を検証
+  /// プロキシサーバー経由でAPI呼び出しを行うため、HotPepper APIキーは不要
   static void _validateTestConfig(List<String> errors) {
-    // テスト環境では最小限の検証のみ
-    // ダミーAPIキーが設定されていれば問題なし
-    final hotpepperKey = EnvironmentConfig.effectiveHotpepperApiKey;
-
-    // テスト環境ではAPIキーが設定されていればOK（実際の形式は問わない）
-    // ダミーキーでもテストには支障がない
-    if (hotpepperKey.isEmpty) {
-      errors.add(
-          '${ApiKeyConstants.testEnv}環境: HotPepper API キー${ApiKeyConstants.hotpepperApiKeyMissingError}（テスト実行に影響なし）');
-    }
-  }
-
-  /// HotPepper API キーの形式を検証
-  static bool _isValidHotpepperApiKey(String apiKey) {
-    // HotPepper API キーの基本的な形式チェック
-    // - 最低16文字
-    // - 英数字のみ
-    if (apiKey.length < ApiKeyConstants.hotpepperApiKeyMinLength) {
-      return false;
-    }
-    if (!RegExp(ApiKeyConstants.hotpepperApiKeyPattern).hasMatch(apiKey)) {
-      return false;
-    }
-
-    return true;
+    // HotPepper APIキー検証は削除（プロキシ経由でAPI呼び出しを行うため）
   }
 
   /// 設定が有効かどうかを判定

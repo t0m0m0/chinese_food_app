@@ -3,7 +3,6 @@ import 'package:chinese_food_app/core/constants/log_constants.dart';
 import 'package:chinese_food_app/core/di/di_error_handler.dart';
 import 'package:chinese_food_app/core/di/base_service_registrator.dart';
 import 'package:chinese_food_app/core/di/service_container.dart';
-import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
 
 void main() {
   group('DI System Improvements Tests', () {
@@ -77,29 +76,8 @@ void main() {
         container.dispose();
       });
 
-      test('should register development API datasource with smart detection',
-          () {
-        // 開発環境では環境設定に応じてAPIかMockを自動選択
-        BaseServiceRegistrator.registerDevelopmentApiDatasource(container);
-
-        final datasource = container.resolve<HotpepperApiDatasource>();
-        // APIキーが設定されていればHotpepperApiDatasourceImpl、未設定ならMock
-        expect(datasource, isA<HotpepperApiDatasource>());
-      });
-
-      test('should register test API datasource correctly', () {
-        BaseServiceRegistrator.registerTestApiDatasource(container);
-
-        final datasource = container.resolve<HotpepperApiDatasource>();
-        expect(datasource, isA<MockHotpepperApiDatasource>());
-      });
-
-      test('should register production API datasource correctly', () {
-        BaseServiceRegistrator.registerProductionApiDatasource(container);
-
-        final datasource = container.resolve<HotpepperApiDatasource>();
-        expect(datasource, isA<HotpepperApiDatasourceImpl>());
-      });
+      // HotpepperApiDatasource関連のテストは削除
+      // プロキシサーバー経由でのみAPI呼び出しを行うため不要
 
       test('should create database connections without errors', () {
         // Database connectionの作成がエラーなく動作することを確認

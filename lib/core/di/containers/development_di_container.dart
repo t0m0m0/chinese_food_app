@@ -77,8 +77,8 @@ class DevelopmentDIContainer implements DIContainerInterface {
 
   /// Register services specific to development environment
   void _registerDevelopmentServices() {
-    // Register development API datasource
-    BaseServiceRegistrator.registerDevelopmentApiDatasource(_serviceContainer);
+    // プロキシサーバー経由でのみAPI呼び出しを行うため、
+    // HotpepperApiDatasourceの登録は不要
 
     // Register common services
     BaseServiceRegistrator.registerCommonServices(_serviceContainer);

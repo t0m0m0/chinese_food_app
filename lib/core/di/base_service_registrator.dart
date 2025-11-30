@@ -9,8 +9,6 @@ import 'service_container.dart';
 import '../config/environment_config.dart' as env_config;
 import 'di_error_handler.dart';
 import '../database/schema/app_database.dart';
-import '../network/app_http_client.dart';
-import '../../data/datasources/hotpepper_api_datasource.dart';
 import '../../data/datasources/hotpepper_proxy_datasource.dart';
 import '../../data/datasources/store_local_datasource.dart';
 import '../../data/datasources/visit_record_local_datasource.dart';
@@ -95,61 +93,8 @@ abstract class BaseServiceRegistrator {
     );
   }
 
-  /// Register production-specific API datasource
-  static void registerProductionApiDatasource(
-      ServiceContainer serviceContainer) {
-    serviceContainer.register<HotpepperApiDatasource>(() {
-      developer.log('Using real HotPepper API datasource (production)',
-          name: 'DI');
-      return HotpepperApiDatasourceImpl(AppHttpClient());
-    });
-  }
-
-  /// Register development-specific API datasource with automatic fallback
-  static void registerDevelopmentApiDatasource(
-      ServiceContainer serviceContainer) {
-    serviceContainer.register<HotpepperApiDatasource>(() {
-      return _createDevelopmentApiDatasource();
-    });
-  }
-
-  /// Create API datasource for development with smart environment detection
-  static HotpepperApiDatasource _createDevelopmentApiDatasource() {
-    try {
-      // Check if API key is available in environment configuration
-      final apiKey = env_config.EnvironmentConfig.hotpepperApiKey;
-      final apiKeyStatus = apiKey.isNotEmpty ? '設定済み' : '未設定';
-
-      if (apiKey.isNotEmpty) {
-        DIErrorHandler.logSuccessfulOperation(
-          'API設定確認',
-          '実際のHotPepperApiDatasourceImplを使用 (開発環境)',
-        );
-        return HotpepperApiDatasourceImpl(AppHttpClient());
-      } else {
-        DIErrorHandler.handleApiConfigurationError(
-          'development',
-          apiKeyStatus,
-          null, // Warning level (no error)
-        );
-        return MockHotpepperApiDatasource();
-      }
-    } catch (e) {
-      DIErrorHandler.handleApiConfigurationError(
-        'development',
-        'エラー発生',
-        e is Exception ? e : Exception(e.toString()),
-      );
-      return MockHotpepperApiDatasource();
-    }
-  }
-
-  /// Register test-specific mock services
-  static void registerTestApiDatasource(ServiceContainer serviceContainer) {
-    serviceContainer.register<HotpepperApiDatasource>(
-      () => MockHotpepperApiDatasource(),
-    );
-  }
+  // HotpepperApiDatasource関連のメソッドは削除
+  // プロキシサーバー経由でのみAPI呼び出しを行うため不要
 
   /// Register HotpepperProxyDatasource for secure API communication via Cloudflare Workers
   static void registerHotpepperProxyDatasource(
