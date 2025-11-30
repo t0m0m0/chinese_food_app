@@ -68,7 +68,6 @@ import 'package:chinese_food_app/presentation/providers/store_provider.dart';
   StoreProvider,
 
   // Data Sources
-  HotpepperApiDatasource,
   HotpepperProxyDatasource,
   StoreLocalDatasource,
   PhotoLocalDatasource,
