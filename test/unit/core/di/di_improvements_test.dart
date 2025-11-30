@@ -3,7 +3,6 @@ import 'package:chinese_food_app/core/constants/log_constants.dart';
 import 'package:chinese_food_app/core/di/di_error_handler.dart';
 import 'package:chinese_food_app/core/di/base_service_registrator.dart';
 import 'package:chinese_food_app/core/di/service_container.dart';
-import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
 
 void main() {
   group('DI System Improvements Tests', () {

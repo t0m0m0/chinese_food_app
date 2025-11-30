@@ -3,7 +3,6 @@ import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 
 // Local imports
-import 'package:chinese_food_app/data/datasources/hotpepper_api_datasource.dart';
 import 'package:chinese_food_app/data/datasources/hotpepper_proxy_datasource.dart';
 import 'package:chinese_food_app/data/datasources/store_local_datasource.dart';
 import 'package:chinese_food_app/data/datasources/photo_local_datasource.dart';
