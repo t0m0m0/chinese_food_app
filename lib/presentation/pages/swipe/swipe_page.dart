@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/search_config.dart';
@@ -304,9 +305,21 @@ class _SwipePageState extends State<SwipePage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: const Text('スワイプ'),
+        title: Text(
+          'スワイプ',
+          style: AppTheme.headlineMedium.copyWith(
+            color: AppTheme.textPrimary,
+          ),
+        ),
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: AppTheme.backgroundGradient,
+          ),
+        ),
+        elevation: 0,
       ),
       body: Column(
         children: [

@@ -53,6 +53,7 @@ dependencies:
   flutter_card_swiper: ^7.0.2
   cached_network_image: ^3.4.1
   image_picker: ^1.1.2
+  google_fonts: ^6.2.1
   
   # 状態管理
   provider: ^6.1.1

@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
@@ -85,26 +86,42 @@ class _MyMenuPageState extends State<MyMenuPage>
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: const Text('マイメニュー'),
+        title: Text(
+          'マイメニュー',
+          style: AppTheme.headlineMedium.copyWith(
+            color: AppTheme.textPrimary,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: colorScheme.surfaceContainerHighest,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: AppTheme.backgroundGradient,
+          ),
+        ),
+        elevation: 0,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: _getTabIndicatorColor(),
+          indicatorWeight: 3,
           labelColor: _getTabIndicatorColor(),
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
+          unselectedLabelColor: AppTheme.textTertiary,
+          labelStyle: AppTheme.labelLarge.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+          unselectedLabelStyle: AppTheme.labelMedium,
           tabs: const [
             Tab(
-              icon: Icon(Icons.favorite),
+              icon: Icon(Icons.favorite_rounded),
               text: '行きたい',
             ),
             Tab(
-              icon: Icon(Icons.check_circle),
+              icon: Icon(Icons.check_circle_rounded),
               text: '行った',
             ),
             Tab(
-              icon: Icon(Icons.block),
+              icon: Icon(Icons.block_rounded),
               text: '興味なし',
             ),
           ],

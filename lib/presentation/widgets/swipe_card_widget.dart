@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_theme.dart';
 import '../../domain/entities/store.dart';
 import 'cached_store_image.dart';
 
@@ -61,42 +62,45 @@ class SwipeCardWidget extends StatelessWidget {
       value: genre != null ? 'ジャンル: $genre' : '中華料理',
       increasedValue: budget != null ? '予算: $budget' : '',
       child: RepaintBoundary(
-        child: Card(
-          elevation: 8,
-          clipBehavior: Clip.antiAlias,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppTheme.softShadow,
           ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: onTap,
-            child: Container(
-              width: width,
-              height: height,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    colorScheme.surface,
-                    colorScheme.surfaceContainerLow,
-                  ],
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(24),
+              onTap: onTap,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: AppTheme.cardGradient,
+                  border: Border.all(
+                    color: AppTheme.accentBeige,
+                    width: 1,
+                  ),
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 店舗画像部分（上半分）
-                  Expanded(
-                    flex: 3,
-                    child: _buildImageSection(colorScheme),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 店舗画像部分（上半分）
+                      Expanded(
+                        flex: 3,
+                        child: _buildImageSection(colorScheme),
+                      ),
+                      // 店舗情報部分（下半分）
+                      Expanded(
+                        flex: 2,
+                        child: _buildInfoSection(theme, colorScheme),
+                      ),
+                    ],
                   ),
-                  // 店舗情報部分（下半分）
-                  Expanded(
-                    flex: 2,
-                    child: _buildInfoSection(theme, colorScheme),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -112,22 +116,45 @@ class SwipeCardWidget extends StatelessWidget {
       children: [
         // 店舗画像（エラーハンドリング付き）
         _buildImageWithErrorHandling(colorScheme),
-        // グラデーションオーバーレイ（文字の可読性向上）
+        // レトロフューチャーなグラデーションオーバーレイ
         if (enableGradientOverlay)
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
-              height: 60,
+              height: 80,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.3),
+                    AppTheme.primaryRed.withValues(alpha: 0.15),
+                    AppTheme.textPrimary.withValues(alpha: 0.6),
                   ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
+              ),
+            ),
+          ),
+        // 右上に装飾的なアクセント
+        if (enableGradientOverlay)
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: AppTheme.primaryGradient,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: AppTheme.glowEffect(AppTheme.primaryRed),
+              ),
+              child: Text(
+                '町中華',
+                style: AppTheme.labelSmall.copyWith(
+                  color: AppTheme.surfaceWhite,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -138,39 +165,63 @@ class SwipeCardWidget extends StatelessWidget {
 
   /// 店舗情報セクションを構築
   Widget _buildInfoSection(ThemeData theme, ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppTheme.accentCream.withValues(alpha: 0.3),
+            AppTheme.surfaceWhite,
+          ],
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 店舗名
-          Text(
-            store.name,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onSurface,
+          // 店舗名（太字・大きめ）
+          Flexible(
+            child: Text(
+              store.name,
+              style: AppTheme.titleLarge.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 8),
 
-          // 住所とアクセス情報
+          // 住所とアクセス情報（アイコン改善）
           Row(
             children: [
-              Icon(
-                Icons.location_on,
-                size: 16,
-                color: colorScheme.onSurfaceVariant,
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryRed.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.location_on_rounded,
+                  size: 14,
+                  color: AppTheme.primaryRed,
+                ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   store.address,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                    height: 1.3,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -231,7 +282,7 @@ class SwipeCardWidget extends StatelessWidget {
     );
   }
 
-  /// 個別チップウィジェットを構築
+  /// 個別チップウィジェットを構築（レトロフューチャースタイル）
   Widget _buildChip({
     required String text,
     required Color backgroundColor,
@@ -239,16 +290,35 @@ class SwipeCardWidget extends StatelessWidget {
     required ThemeData theme,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [
+            backgroundColor,
+            backgroundColor.withValues(alpha: 0.7),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: textColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: backgroundColor.withValues(alpha: 0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Text(
         text,
-        style: theme.textTheme.bodySmall?.copyWith(
+        style: AppTheme.labelSmall.copyWith(
           color: textColor,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
