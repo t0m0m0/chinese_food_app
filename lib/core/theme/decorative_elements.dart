@@ -53,7 +53,7 @@ class DecorativeElements {
   static Widget gyozaIcon({
     double size = 40,
   }) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
       child: Center(
@@ -69,7 +69,7 @@ class DecorativeElements {
   static Widget friedRiceIcon({
     double size = 40,
   }) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
       child: Center(
@@ -85,7 +85,7 @@ class DecorativeElements {
   static Widget wokIcon({
     double size = 40,
   }) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
       child: Center(
@@ -101,7 +101,7 @@ class DecorativeElements {
   static Widget beerIcon({
     double size = 40,
   }) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
       child: Center(
