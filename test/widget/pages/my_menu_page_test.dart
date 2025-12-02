@@ -195,7 +195,7 @@ void main() {
 
       // Assert
       expect(find.text('まだ「行きたい」店舗がありません'), findsOneWidget);
-      expect(find.text('スワイプ画面で気になる店舗を右スワイプしてみましょう'), findsOneWidget);
+      expect(find.text('「見つける」画面で気になる店舗を右スワイプしてみましょう'), findsOneWidget);
     });
 
     testWidgets('should display store cards when stores are available',

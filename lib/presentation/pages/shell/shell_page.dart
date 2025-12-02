@@ -19,8 +19,8 @@ class ShellPage extends StatelessWidget {
         onTap: (index) => child.goBranch(index),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.swipe),
-            label: 'スワイプ',
+            icon: Icon(Icons.explore),
+            label: '見つける',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),

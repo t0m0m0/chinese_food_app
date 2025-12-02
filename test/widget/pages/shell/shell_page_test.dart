@@ -58,7 +58,7 @@ void main() {
 
         // BottomNavigationBar内のテキストのみを検索
         final bottomNavBar = find.byType(BottomNavigationBar);
-        expect(find.descendant(of: bottomNavBar, matching: find.text('スワイプ')),
+        expect(find.descendant(of: bottomNavBar, matching: find.text('見つける')),
             findsOneWidget);
         expect(find.descendant(of: bottomNavBar, matching: find.text('検索')),
             findsOneWidget);
@@ -217,9 +217,9 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          // スワイプタブをタップ
+          // 見つけるタブをタップ
           final swipeTab =
-              find.descendant(of: bottomNavBar, matching: find.text('スワイプ'));
+              find.descendant(of: bottomNavBar, matching: find.text('見つける'));
           await tester.tap(swipeTab);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
@@ -332,7 +332,7 @@ void main() {
           expect(bottomNavBar, findsOneWidget);
 
           // ナビゲーションアイテムのテキストが表示されることを確認
-          expect(find.descendant(of: bottomNavBar, matching: find.text('スワイプ')),
+          expect(find.descendant(of: bottomNavBar, matching: find.text('見つける')),
               findsOneWidget);
           expect(find.descendant(of: bottomNavBar, matching: find.text('検索')),
               findsOneWidget);

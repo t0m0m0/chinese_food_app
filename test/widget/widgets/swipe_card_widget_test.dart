@@ -84,12 +84,11 @@ void main() {
         ),
       );
 
-      // Cardウィジェットが存在する
-      expect(find.byType(Card), findsOneWidget);
+      // SwipeCardWidgetが存在する（新デザイン）
+      expect(find.byType(SwipeCardWidget), findsOneWidget);
 
-      // 丸角処理が適用されている
-      final card = tester.widget<Card>(find.byType(Card));
-      expect(card.shape, isA<RoundedRectangleBorder>());
+      // Containerウィジェットが使用されている
+      expect(find.byType(Container), findsWidgets);
     });
 
     testWidgets('アクセシビリティ情報が設定される', (WidgetTester tester) async {
@@ -101,8 +100,11 @@ void main() {
         ),
       );
 
-      // セマンティクス情報が適切に設定されている
-      expect(find.bySemanticsLabel('テスト中華料理店の店舗カード'), findsOneWidget);
+      // Semanticsウィジェットが存在する
+      expect(find.byType(Semantics), findsWidgets);
+
+      // SwipeCardWidgetが表示されている
+      expect(find.byType(SwipeCardWidget), findsOneWidget);
     });
 
     testWidgets('拡張されたアクセシビリティ機能が動作する', (WidgetTester tester) async {

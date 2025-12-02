@@ -7,6 +7,7 @@ import 'core/config/ui_config.dart';
 import 'core/di/app_di_container.dart';
 import 'core/di/di_container_interface.dart';
 import 'core/routing/app_router.dart';
+import 'core/theme/app_theme.dart';
 import 'presentation/providers/store_provider.dart';
 import 'domain/services/location_service.dart';
 
@@ -305,10 +306,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp.router(
         title: UiConfig.appName,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.lightTheme,
         routerConfig: AppRouter.router,
       ),
     );

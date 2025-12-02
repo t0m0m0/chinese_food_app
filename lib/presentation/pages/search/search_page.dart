@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:app_settings/app_settings.dart';
 import '../../../core/constants/string_constants.dart';
 import '../../../core/config/ui_config.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/duplicate_store_checker.dart';
 import '../../../domain/entities/store.dart';
@@ -120,15 +122,39 @@ class _SearchPageState extends State<SearchPage> {
     return ChangeNotifierProvider<SearchProvider>.value(
       value: _searchProvider,
       child: Scaffold(
+        extendBodyBehindAppBar: false,
+        backgroundColor: AppTheme.backgroundLight,
         appBar: AppBar(
-          title: const Text('検索'),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DecorativeElements.lanternDecoration(
+                  size: 30, color: AppTheme.primaryRed),
+              const SizedBox(width: 12),
+              Text(
+                '検索',
+                style: AppTheme.headlineMedium.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              DecorativeElements.lanternDecoration(
+                  size: 30, color: AppTheme.secondaryYellow),
+            ],
+          ),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: AppTheme.backgroundGradient,
+            ),
+          ),
+          elevation: 0,
+          iconTheme: const IconThemeData(color: AppTheme.primaryRed),
         ),
         body: Column(
           children: [
             _buildSearchForm(),
             if (_showFilters) _buildSearchFilter(),
-            const Divider(),
+            Divider(color: AppTheme.accentBeige.withValues(alpha: 0.5)),
             Expanded(child: _buildSearchResults()),
           ],
         ),
