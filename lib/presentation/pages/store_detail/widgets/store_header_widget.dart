@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/store_utils.dart';
 import '../../../../domain/entities/store.dart';
 
@@ -18,14 +19,13 @@ class StoreHeaderWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colorScheme.primaryContainer,
-            colorScheme.primaryContainer.withValues(alpha: 0.7),
-          ],
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceWhite,
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.accentBeige,
+            width: 1,
+          ),
         ),
       ),
       child: Column(
@@ -55,7 +55,7 @@ class StoreHeaderWidget extends StatelessWidget {
                       store.name,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: colorScheme.onPrimaryContainer,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
