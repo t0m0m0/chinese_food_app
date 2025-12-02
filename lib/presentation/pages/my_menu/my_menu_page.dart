@@ -200,7 +200,7 @@ class _MyMenuPageState extends State<MyMenuPage>
               _buildStoreList(
                 stores: provider.wantToGoStores,
                 emptyMessage: 'まだ「行きたい」店舗がありません',
-                emptySubMessage: 'スワイプ画面で気になる店舗を右スワイプしてみましょう',
+                emptySubMessage: '「見つける」画面で気になる店舗を右スワイプしてみましょう',
                 emptyIcon: Icons.favorite_border,
                 theme: theme,
                 colorScheme: colorScheme,
