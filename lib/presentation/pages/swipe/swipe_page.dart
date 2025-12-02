@@ -4,6 +4,7 @@ import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/search_config.dart';
@@ -321,273 +322,277 @@ class _SwipePageState extends State<SwipePage> {
         ),
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          // 距離設定UI
-          DistanceSelectorWidget(
-            selectedRange: _selectedRange,
-            onChanged: _onDistanceChanged,
-          ),
-          // スワイプ操作説明
-          RepaintBoundary(
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.block,
-                        color: Colors.orange,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '← 興味なし',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.orange,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        '→ 行きたい',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.favorite,
-                        color: Colors.red,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+      body: DecorativeElements.foodPatternBackground(
+        opacity: 0.03,
+        child: Column(
+          children: [
+            // 距離設定UI
+            DistanceSelectorWidget(
+              selectedRange: _selectedRange,
+              onChanged: _onDistanceChanged,
             ),
-          ),
-          Expanded(
-            child: _isGettingLocation
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+            // スワイプ操作説明
+            RepaintBoundary(
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Row(
                       children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('現在地を取得中...'),
+                        const Icon(
+                          Icons.block,
+                          color: Colors.orange,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '← 興味なし',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.orange,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
                     ),
-                  )
-                : Selector<
-                    StoreProvider,
-                    ({
-                      bool isLoading,
-                      String? error,
-                      String? infoMessage,
-                      List<Store> stores
-                    })>(
-                    selector: (context, provider) => (
-                      isLoading: provider.isLoading,
-                      error: provider.error,
-                      infoMessage: provider.infoMessage,
-                      stores: provider.stores,
-                    ),
-                    builder: (context, state, child) {
-                      // API読み込み中の表示
-                      if (state.isLoading) {
-                        return const Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text('新しい店舗を読み込み中...'),
-                            ],
+                    Row(
+                      children: [
+                        Text(
+                          '→ 行きたい',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
                           ),
-                        );
-                      }
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.favorite,
+                          color: Colors.red,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: _isGettingLocation
+                  ? const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text('現在地を取得中...'),
+                        ],
+                      ),
+                    )
+                  : Selector<
+                      StoreProvider,
+                      ({
+                        bool isLoading,
+                        String? error,
+                        String? infoMessage,
+                        List<Store> stores
+                      })>(
+                      selector: (context, provider) => (
+                        isLoading: provider.isLoading,
+                        error: provider.error,
+                        infoMessage: provider.infoMessage,
+                        stores: provider.stores,
+                      ),
+                      builder: (context, state, child) {
+                        // API読み込み中の表示
+                        if (state.isLoading) {
+                          return const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(),
+                                SizedBox(height: 16),
+                                Text('新しい店舗を読み込み中...'),
+                              ],
+                            ),
+                          );
+                        }
 
-                      // エラー表示
-                      final errorMessage = state.error ?? _locationError;
-                      if (errorMessage != null) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: colorScheme.error,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'エラーが発生しました',
-                                style: theme.textTheme.titleLarge?.copyWith(
+                        // エラー表示
+                        final errorMessage = state.error ?? _locationError;
+                        if (errorMessage != null) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 64,
                                   color: colorScheme.error,
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                errorMessage,
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Provider.of<StoreProvider>(context,
-                                          listen: false)
-                                      .clearError();
-                                  setState(() {
-                                    _locationError = null;
-                                  });
-                                  _loadStoresFromProvider();
-                                },
-                                child: const Text('再試行'),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
+                                const SizedBox(height: 16),
+                                Text(
+                                  'エラーが発生しました',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    color: colorScheme.error,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  errorMessage,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Provider.of<StoreProvider>(context,
+                                            listen: false)
+                                        .clearError();
+                                    setState(() {
+                                      _locationError = null;
+                                    });
+                                    _loadStoresFromProvider();
+                                  },
+                                  child: const Text('再試行'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
 
-                      // 情報メッセージ表示（検索結果0件など）
-                      if (state.infoMessage != null) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                size: 64,
-                                color: colorScheme.primary,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                '検索結果',
-                                style: theme.textTheme.titleLarge?.copyWith(
+                        // 情報メッセージ表示（検索結果0件など）
+                        if (state.infoMessage != null) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 64,
                                   color: colorScheme.primary,
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                state.infoMessage!,
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                          ),
-                        );
-                      }
+                                const SizedBox(height: 16),
+                                Text(
+                                  '検索結果',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    color: colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  state.infoMessage!,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          );
+                        }
 
-                      // スワイプ可能な店舗の表示制御（競合状態防止）
-                      // アトミックな参照により一貫性を保証
-                      final currentStores = List<Store>.from(_availableStores);
-                      final hasStores = currentStores.isNotEmpty;
+                        // スワイプ可能な店舗の表示制御（競合状態防止）
+                        // アトミックな参照により一貫性を保証
+                        final currentStores =
+                            List<Store>.from(_availableStores);
+                        final hasStores = currentStores.isNotEmpty;
 
-                      return !hasStores
-                          ? _buildEmptyStoreMessage(theme, colorScheme)
-                          : RefreshIndicator(
-                              onRefresh: _refreshStores,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                // CardSwiper初期化防護: 競合状態による cardsCount=0 防止
-                                // アトミック参照により堅牢性確保（Issue #130根本対応）
-                                child: hasStores
-                                    ? Stack(
-                                        children: [
-                                          CardSwiper(
-                                            controller: controller,
-                                            cardsCount: currentStores.length,
-                                            numberOfCardsDisplayed: math.min(
-                                                currentStores.length, 3),
-                                            onSwipe: _onSwipe,
-                                            cardBuilder: (context,
-                                                index,
-                                                percentThresholdX,
-                                                percentThresholdY) {
-                                              // IndexOutOfRangeエラーを防ぐための安全チェック
-                                              if (index < 0 ||
-                                                  index >=
-                                                      currentStores.length) {
-                                                debugPrint(
-                                                    '⚠️ CardSwiper index out of range: $index, available: ${currentStores.length}');
-                                                return Container(
-                                                  decoration: BoxDecoration(
-                                                    color: colorScheme
-                                                        .errorContainer,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            16),
-                                                  ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      'カードの読み込みエラー',
-                                                      style: theme
-                                                          .textTheme.bodyMedium
-                                                          ?.copyWith(
-                                                        color: colorScheme
-                                                            .onErrorContainer,
+                        return !hasStores
+                            ? _buildEmptyStoreMessage(theme, colorScheme)
+                            : RefreshIndicator(
+                                onRefresh: _refreshStores,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  // CardSwiper初期化防護: 競合状態による cardsCount=0 防止
+                                  // アトミック参照により堅牢性確保（Issue #130根本対応）
+                                  child: hasStores
+                                      ? Stack(
+                                          children: [
+                                            CardSwiper(
+                                              controller: controller,
+                                              cardsCount: currentStores.length,
+                                              numberOfCardsDisplayed: math.min(
+                                                  currentStores.length, 3),
+                                              onSwipe: _onSwipe,
+                                              cardBuilder: (context,
+                                                  index,
+                                                  percentThresholdX,
+                                                  percentThresholdY) {
+                                                // IndexOutOfRangeエラーを防ぐための安全チェック
+                                                if (index < 0 ||
+                                                    index >=
+                                                        currentStores.length) {
+                                                  debugPrint(
+                                                      '⚠️ CardSwiper index out of range: $index, available: ${currentStores.length}');
+                                                  return Container(
+                                                    decoration: BoxDecoration(
+                                                      color: colorScheme
+                                                          .errorContainer,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              16),
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        'カードの読み込みエラー',
+                                                        style: theme.textTheme
+                                                            .bodyMedium
+                                                            ?.copyWith(
+                                                          color: colorScheme
+                                                              .onErrorContainer,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                );
-                                              }
-                                              return SwipeCardWidget(
-                                                store: currentStores[index],
-                                                onTap: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          StoreDetailPage(
-                                                              store:
-                                                                  currentStores[
-                                                                      index]),
-                                                    ),
                                                   );
-                                                },
-                                              );
-                                            },
-                                          ),
-                                          // スワイプフィードバックオーバーレイ
-                                          SwipeFeedbackOverlay(
-                                            showLike: _showLikeFeedback,
-                                            showDislike: _showDislikeFeedback,
-                                          ),
-                                        ],
-                                      )
-                                    // フォールバック: 極端な競合状態での安全なUI表示
-                                    // （理論上発生しないが、Web環境での予期しない状態変化に対応）
-                                    : _buildEmptyStoreMessage(
-                                        theme, colorScheme),
-                              ),
-                            );
-                    },
-                  ),
-          ),
-          // 手動操作ボタン
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SwipeActionButtons(
-              onDislike: _onManualDislike,
-              onLike: _onManualLike,
-              enabled: _availableStores.isNotEmpty && !_isGettingLocation,
+                                                }
+                                                return SwipeCardWidget(
+                                                  store: currentStores[index],
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            StoreDetailPage(
+                                                                store:
+                                                                    currentStores[
+                                                                        index]),
+                                                      ),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                            // スワイプフィードバックオーバーレイ
+                                            SwipeFeedbackOverlay(
+                                              showLike: _showLikeFeedback,
+                                              showDislike: _showDislikeFeedback,
+                                            ),
+                                          ],
+                                        )
+                                      // フォールバック: 極端な競合状態での安全なUI表示
+                                      // （理論上発生しないが、Web環境での予期しない状態変化に対応）
+                                      : _buildEmptyStoreMessage(
+                                          theme, colorScheme),
+                                ),
+                              );
+                      },
+                    ),
             ),
-          ),
-        ],
+            // 手動操作ボタン
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SwipeActionButtons(
+                onDislike: _onManualDislike,
+                onLike: _onManualLike,
+                enabled: _availableStores.isNotEmpty && !_isGettingLocation,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

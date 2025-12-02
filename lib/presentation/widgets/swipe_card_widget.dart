@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/decorative_elements.dart';
 import '../../domain/entities/store.dart';
 import 'cached_store_image.dart';
 
@@ -85,18 +86,41 @@ class SwipeCardWidget extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      // 店舗画像部分（上半分）
-                      Expanded(
-                        flex: 3,
-                        child: _buildImageSection(colorScheme),
+                      // メインコンテンツ
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 店舗画像部分（上半分）
+                          Expanded(
+                            flex: 3,
+                            child: _buildImageSection(colorScheme),
+                          ),
+                          // 店舗情報部分（下半分）
+                          Expanded(
+                            flex: 2,
+                            child: _buildInfoSection(theme, colorScheme),
+                          ),
+                        ],
                       ),
-                      // 店舗情報部分（下半分）
-                      Expanded(
-                        flex: 2,
-                        child: _buildInfoSection(theme, colorScheme),
+                      // 左上のコーナー装飾
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        child: DecorativeElements.cornerDecorationTopLeft(
+                          size: 30,
+                          color: AppTheme.primaryRed,
+                        ),
+                      ),
+                      // 右下に小さな餃子装飾
+                      Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: Opacity(
+                          opacity: 0.15,
+                          child: DecorativeElements.gyozaIcon(size: 24),
+                        ),
                       ),
                     ],
                   ),
@@ -166,12 +190,12 @@ class SwipeCardWidget extends StatelessWidget {
   /// 店舗情報セクションを構築
   Widget _buildInfoSection(ThemeData theme, ColorScheme colorScheme) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppTheme.accentCream.withValues(alpha: 0.3),
+            AppTheme.surfaceWhite,
             AppTheme.surfaceWhite,
           ],
         ),
@@ -181,7 +205,7 @@ class SwipeCardWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 店舗名（太字・大きめ）
+          // 店舗名（太字・大きめ・高コントラスト）
           Flexible(
             child: Text(
               store.name,

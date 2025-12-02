@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
@@ -88,11 +89,20 @@ class _MyMenuPageState extends State<MyMenuPage>
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: Text(
-          'マイメニュー',
-          style: AppTheme.headlineMedium.copyWith(
-            color: AppTheme.textPrimary,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DecorativeElements.ramenBowl(size: 30, color: AppTheme.primaryRed),
+            const SizedBox(width: 12),
+            Text(
+              'マイメニュー',
+              style: AppTheme.headlineMedium.copyWith(
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            DecorativeElements.gyozaIcon(size: 30),
+          ],
         ),
         centerTitle: true,
         flexibleSpace: Container(
