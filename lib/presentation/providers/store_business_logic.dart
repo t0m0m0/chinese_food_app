@@ -180,15 +180,24 @@ class StoreBusinessLogic {
     }) existingStoreMaps,
   ) {
     final locationKey = _createLocationKey(apiStore.lat, apiStore.lng);
-    final existingStatusById = existingStoreMaps.byId[apiStore.id];
-    final existingStatusByLocation = existingStoreMaps.byLocation[locationKey];
 
-    // 既存店舗の場合、ステータスがnullならスワイプ可能
-    if (existingStatusById != null) {
-      return false; // ステータスあり → スワイプ済み → 除外
+    // IDベースのチェック: キーが存在し、かつステータスがnullでない場合に除外
+    if (existingStoreMaps.byId.containsKey(apiStore.id)) {
+      final existingStatusById = existingStoreMaps.byId[apiStore.id];
+      if (existingStatusById != null) {
+        return false; // ステータスあり → スワイプ済み → 除外
+      }
+      // ステータスがnullの場合は続行（スワイプ可能）
     }
-    if (existingStatusByLocation != null) {
-      return false; // ステータスあり → スワイプ済み → 除外
+
+    // 位置ベースのチェック: キーが存在し、かつステータスがnullでない場合に除外
+    if (existingStoreMaps.byLocation.containsKey(locationKey)) {
+      final existingStatusByLocation =
+          existingStoreMaps.byLocation[locationKey];
+      if (existingStatusByLocation != null) {
+        return false; // ステータスあり → スワイプ済み → 除外
+      }
+      // ステータスがnullの場合は続行（スワイプ可能）
     }
 
     // 新規店舗、または既存でステータスnullの場合 → スワイプ可能
