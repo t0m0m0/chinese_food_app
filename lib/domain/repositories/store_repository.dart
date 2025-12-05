@@ -7,6 +7,7 @@ abstract class StoreRepository {
   Future<void> insertStore(Store store);
   Future<void> updateStore(Store store);
   Future<void> deleteStore(String id);
+  Future<void> deleteAllStores(); // データベース全削除（デバッグ用）
   Future<List<Store>> searchStores(String query);
 
   Future<List<Store>> searchStoresFromApi({

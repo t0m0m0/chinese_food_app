@@ -113,6 +113,17 @@ class StoreRepositoryImpl implements StoreRepository {
   }
 
   @override
+  Future<void> deleteAllStores() async {
+    try {
+      await localDatasource.deleteAllStores();
+      debugPrint('[Repository] 🗑️ 全店舗データを削除しました');
+    } catch (e) {
+      debugPrint('[Repository] ❌ 全店舗削除エラー: $e');
+      throw Exception('全店舗の削除に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
   Future<Store?> getStoreById(String storeId) async {
     try {
       return await localDatasource.getStoreById(storeId);

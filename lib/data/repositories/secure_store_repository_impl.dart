@@ -124,6 +124,15 @@ class SecureStoreRepositoryImpl implements StoreRepository {
     }
   }
 
+  @override
+  Future<void> deleteAllStores() async {
+    try {
+      await localDatasource.deleteAllStores();
+    } catch (e) {
+      throw Exception('全店舗の削除に失敗しました: ${e.toString()}');
+    }
+  }
+
   /// 店舗が存在するかチェック
   Future<bool> isStoreExists(String storeId) async {
     try {

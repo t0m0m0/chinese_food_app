@@ -285,6 +285,9 @@ class FakeStoreRepository implements StoreRepository {
       _stores.removeWhere((s) => s.id == storeId);
 
   @override
+  Future<void> deleteAllStores() async => _stores.clear();
+
+  @override
   Future<Store?> getStoreById(String storeId) async {
     try {
       return _stores.firstWhere((s) => s.id == storeId);
