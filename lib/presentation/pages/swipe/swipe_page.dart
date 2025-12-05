@@ -36,6 +36,11 @@ class _SwipePageState extends State<SwipePage> {
   bool _showLikeFeedback = false;
   bool _showDislikeFeedback = false;
 
+  // ページネーション用状態
+  int _currentPage = 1;
+  double? _lastLat;
+  double? _lastLng;
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +96,11 @@ class _SwipePageState extends State<SwipePage> {
       // 現在位置を取得
       final location = await locationService.getCurrentLocation();
 
+      // 位置情報を保存（ページネーション用）
+      _lastLat = location.latitude;
+      _lastLng = location.longitude;
+      _currentPage = 1; // 新規読み込み時はページをリセット
+
       // 位置情報を使ってスワイプ画面専用API検索
       await storeProvider.loadSwipeStores(
         lat: location.latitude,
@@ -105,6 +115,10 @@ class _SwipePageState extends State<SwipePage> {
       });
 
       // フォールバック: デフォルト位置でスワイプ画面専用検索
+      _lastLat = ApiConstants.defaultLatitude;
+      _lastLng = ApiConstants.defaultLongitude;
+      _currentPage = 1;
+
       await storeProvider.loadSwipeStores(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
@@ -120,6 +134,10 @@ class _SwipePageState extends State<SwipePage> {
       });
 
       // フォールバック: デフォルト位置でスワイプ画面専用検索
+      _lastLat = ApiConstants.defaultLatitude;
+      _lastLng = ApiConstants.defaultLongitude;
+      _currentPage = 1;
+
       await storeProvider.loadSwipeStores(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
@@ -171,23 +189,39 @@ class _SwipePageState extends State<SwipePage> {
         _updateStoreStatus(store, StoreStatus.bad);
       }
 
-      // カード残り枚数チェック - API呼び出しを制限
+      // 自動ページネーション: 残り10枚以下になったら次ページを取得
       final remainingCards = _availableStores.length - (previousIndex + 1);
-      // 残り2枚以下の場合、スワイプ用店舗の追加取得を検討
-      if (remainingCards <= 2) {
-        final storeProvider =
-            Provider.of<StoreProvider>(context, listen: false);
-        final swipeStoresCount = storeProvider.swipeStores.length;
+      if (remainingCards <= 10 && _lastLat != null && _lastLng != null) {
+        debugPrint('[SwipePage] 📄 残り$remainingCards枚 → 次ページ取得開始');
 
-        // スワイプ用店舗が10件未満の場合のみ追加取得
-        if (swipeStoresCount < 10) {
-          // Future.microtaskを使用して現在のbuild cycleの後でAPI呼び出し
-          Future.microtask(() {
+        // Future.microtaskを使用して現在のbuild cycleの後でAPI呼び出し
+        Future.microtask(() async {
+          if (mounted) {
+            final storeProvider =
+                Provider.of<StoreProvider>(context, listen: false);
+
+            // 次ページを計算
+            _currentPage++;
+            final nextStart =
+                (_currentPage - 1) * ApiConstants.defaultStoreCount + 1;
+
+            debugPrint(
+                '[SwipePage] 📄 ページ$_currentPage (start=$nextStart) を取得');
+
+            await storeProvider.loadMoreSwipeStores(
+              lat: _lastLat!,
+              lng: _lastLng!,
+              range: _selectedRange,
+              count: ApiConstants.defaultStoreCount,
+              start: nextStart,
+            );
+
+            // スワイプリストが更新されたらUIを更新
             if (mounted) {
-              _loadStoresWithLocation();
+              _updateAvailableStores();
             }
-          });
-        }
+          }
+        });
       }
     }
     return true;

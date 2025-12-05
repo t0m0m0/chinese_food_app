@@ -625,4 +625,155 @@ void main() {
       // 4. マイメニューに表示される
     });
   });
+
+  group('StoreBusinessLogic - pagination', () {
+    final page1Stores = List.generate(
+      100,
+      (i) => Store(
+        id: 'page1-store-$i',
+        name: 'ページ1店舗$i',
+        address: '東京都港区$i-$i-$i',
+        lat: 35.6590 + (i * 0.0001),
+        lng: 139.7460 + (i * 0.0001),
+        status: null,
+        createdAt: DateTime.now(),
+      ),
+    );
+
+    final page2Stores = List.generate(
+      100,
+      (i) => Store(
+        id: 'page2-store-$i',
+        name: 'ページ2店舗$i',
+        address: '東京都渋谷区$i-$i-$i',
+        lat: 35.6700 + (i * 0.0001),
+        lng: 139.7000 + (i * 0.0001),
+        status: null,
+        createdAt: DateTime.now(),
+      ),
+    );
+
+    test('should load first page with start=1 by default', () async {
+      // Arrange
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 1,
+      )).thenAnswer((_) async => page1Stores);
+
+      // Act
+      final result = await businessLogic.loadSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 3,
+        count: 100,
+      );
+
+      // Assert
+      expect(result, hasLength(100));
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 1,
+      )).called(1);
+    });
+
+    test('should load next page with start parameter', () async {
+      // Arrange
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 101,
+      )).thenAnswer((_) async => page2Stores);
+
+      // Act
+      final result = await businessLogic.loadMoreSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 3,
+        count: 100,
+        start: 101,
+      );
+
+      // Assert
+      expect(result, hasLength(100));
+      expect(result.first.id, equals('page2-store-0'));
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 101,
+      )).called(1);
+    });
+
+    test('should filter out already-swiped stores from next page', () async {
+      // Arrange - ページ1の一部の店舗が既にスワイプ済み
+      final swipedStores = [
+        page2Stores[0].copyWith(status: StoreStatus.wantToGo),
+        page2Stores[1].copyWith(status: StoreStatus.bad),
+      ];
+
+      when(mockRepository.getAllStores()).thenAnswer((_) async => swipedStores);
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: 101,
+      )).thenAnswer((_) async => page2Stores);
+
+      // まず既存店舗をロード
+      await businessLogic.loadStores();
+
+      // Act
+      final result = await businessLogic.loadMoreSwipeStores(
+        lat: 35.6700,
+        lng: 139.7000,
+        range: 3,
+        count: 100,
+        start: 101,
+      );
+
+      // Assert - スワイプ済み2件が除外されて98件
+      expect(result.length, lessThanOrEqualTo(98));
+      expect(result.any((s) => s.id == 'page2-store-0'), false);
+      expect(result.any((s) => s.id == 'page2-store-1'), false);
+    });
+
+    test('should handle empty next page response', () async {
+      // Arrange - 次ページが空（全店舗取得済み）
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: anyNamed('start'),
+      )).thenAnswer((_) async => []);
+
+      // Act
+      final result = await businessLogic.loadMoreSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 3,
+        count: 100,
+        start: 201,
+      );
+
+      // Assert
+      expect(result, isEmpty);
+    });
+  });
 }

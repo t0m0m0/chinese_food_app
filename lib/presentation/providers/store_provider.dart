@@ -233,6 +233,60 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
+  /// スワイプ画面用の追加店舗取得（ページネーション）
+  ///
+  /// 次ページの店舗を取得し、既存のスワイプリストに追加する
+  bool _isLoadingMore = false;
+
+  Future<void> loadMoreSwipeStores({
+    required double lat,
+    required double lng,
+    int range = 3,
+    int count = 20,
+    required int start,
+  }) async {
+    // 重複読み込み防止
+    if (_isLoadingMore) {
+      debugPrint('[StoreProvider] 📄 追加読み込み中のため、スキップ');
+      return;
+    }
+
+    try {
+      _isLoadingMore = true;
+      debugPrint('[StoreProvider] 📄 追加店舗取得開始: start=$start');
+
+      // DB最新状態を確保（スワイプ済み店舗を正しく除外するため）
+      await _businessLogic.loadStores();
+
+      final moreStores = await _businessLogic.loadMoreSwipeStores(
+        lat: lat,
+        lng: lng,
+        range: range,
+        count: count,
+        start: start,
+      );
+
+      if (moreStores.isNotEmpty) {
+        // 既存のスワイプリストに追加
+        final updatedSwipeStores = [
+          ..._stateManager.swipeStores,
+          ...moreStores
+        ];
+        _stateManager.updateSwipeStores(updatedSwipeStores);
+        debugPrint(
+            '[StoreProvider] 📄 追加店舗${moreStores.length}件を取得 (合計: ${updatedSwipeStores.length}件)');
+        notifyListeners();
+      } else {
+        debugPrint('[StoreProvider] 📄 次ページは空でした');
+      }
+    } catch (e) {
+      debugPrint('[StoreProvider] ❌ 追加店舗取得エラー: $e');
+      // エラーは静かに処理（ユーザー体験を妨げない）
+    } finally {
+      _isLoadingMore = false;
+    }
+  }
+
   // Database error recovery functionality
   Future<bool> tryRecoverFromDatabaseError() async {
     try {

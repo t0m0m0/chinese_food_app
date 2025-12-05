@@ -127,7 +127,8 @@ class StoreBusinessLogic {
     int range = 3,
     int count = 20,
   }) async {
-    final apiStores = await _fetchStoresFromApi(lat, lng, range, count);
+    final apiStores =
+        await _fetchStoresFromApi(lat, lng, range, count, start: 1);
 
     // デバッグ: APIから取得した店舗リスト
     debugPrint('[SwipeStores] 🔍 APIから取得した店舗数: ${apiStores.length}');
@@ -160,19 +161,47 @@ class StoreBusinessLogic {
     return filteredStores;
   }
 
+  /// スワイプ画面用の追加店舗取得（ページネーション）
+  ///
+  /// 次ページの店舗を取得し、ステータス未設定の店舗のみをフィルタリングして返す
+  Future<List<Store>> loadMoreSwipeStores({
+    required double lat,
+    required double lng,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    final apiStores =
+        await _fetchStoresFromApi(lat, lng, range, count, start: start);
+
+    // デバッグ: APIから取得した追加店舗リスト
+    debugPrint('[SwipeStores] 📄 ページ$start: APIから取得した店舗数: ${apiStores.length}');
+
+    final existingStoreMaps = _buildExistingStoreMaps();
+    final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
+
+    // デバッグ: フィルタリング後の追加店舗リスト
+    debugPrint(
+        '[SwipeStores] 📄 ページ$start: フィルタリング後の店舗数: ${filteredStores.length}');
+
+    return filteredStores;
+  }
+
   /// Fetches stores from API with specified parameters
   Future<List<Store>> _fetchStoresFromApi(
     double lat,
     double lng,
     int range,
-    int count,
-  ) async {
+    int count, {
+    int start = 1,
+  }) async {
     return await _repository.searchStoresFromApi(
       lat: lat,
       lng: lng,
       keyword: StringConstants.apiKeywordParameter,
       range: range,
       count: count,
+      start: start,
     );
   }
 

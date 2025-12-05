@@ -24,7 +24,6 @@ class DecorativeElements {
   /// ラーメンどんぶりアイコン
   static Widget ramenBowl({
     double size = 50,
-    Color? color,
   }) {
     return Container(
       width: size,
@@ -34,10 +33,6 @@ class DecorativeElements {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            color ?? AppTheme.secondaryYellow,
-            (color ?? AppTheme.secondaryYellow).withValues(alpha: 0.7),
-          ],
         ),
       ),
       child: Center(
