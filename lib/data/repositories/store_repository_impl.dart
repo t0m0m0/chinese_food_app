@@ -1,4 +1,4 @@
-import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
@@ -29,9 +29,8 @@ class StoreRepositoryImpl implements StoreRepository {
     int start = 1,
   }) async {
     try {
-      developer.log(
-          '📡 API呼び出し開始 - lat: $lat, lng: $lng, address: $address, keyword: $keyword',
-          name: 'Repository');
+      debugPrint(
+          '📡 API呼び出し開始 - lat: $lat, lng: $lng, address: $address, keyword: $keyword');
 
       final response = await apiDatasource.searchStores(
         lat: lat,
@@ -43,8 +42,7 @@ class StoreRepositoryImpl implements StoreRepository {
         start: start,
       );
 
-      developer.log('📡 API応答受信 - 店舗数: ${response.shops.length}',
-          name: 'Repository');
+      debugPrint('[Repository] 📡 API応答受信 - 店舗数: ${response.shops.length}');
 
       // API結果をDomainエンティティに変換
       // 重要: ステータスはnullで保存（ユーザーがスワイプで決定する）
@@ -62,19 +60,18 @@ class StoreRepositoryImpl implements StoreRepository {
         );
       }).toList();
 
-      developer.log('📡 エンティティ変換完了 - 変換後店舗数: ${stores.length}',
-          name: 'Repository');
+      debugPrint('[Repository] 📡 エンティティ変換完了 - 変換後店舗数: ${stores.length}');
       for (var i = 0; i < stores.length && i < 5; i++) {
-        developer.log('  [$i] ${stores[i].name} (${stores[i].address})',
-            name: 'Repository');
+        debugPrint(
+            '[Repository]   [$i] ${stores[i].name} (${stores[i].address})');
       }
       if (stores.length > 5) {
-        developer.log('  ... 他 ${stores.length - 5}件', name: 'Repository');
+        debugPrint('[Repository]   ... 他 ${stores.length - 5}件');
       }
 
       return stores;
     } catch (e) {
-      developer.log('❌ API呼び出しエラー: $e', name: 'Repository', error: e);
+      debugPrint('[Repository] ❌ API呼び出しエラー: $e');
       rethrow; // Usecaseレイヤーでハンドリング
     }
   }
