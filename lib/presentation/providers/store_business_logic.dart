@@ -88,6 +88,10 @@ class StoreBusinessLogic {
     int range = 3,
     int count = 10,
   }) async {
+    developer.log(
+        '🔍 検索開始 - lat: $lat, lng: $lng, address: $address, keyword: $keyword, range: $range, count: $count',
+        name: 'SearchAPI');
+
     final apiStores = await _repository.searchStoresFromApi(
       lat: lat,
       lng: lng,
@@ -96,6 +100,12 @@ class StoreBusinessLogic {
       range: range,
       count: count,
     );
+
+    developer.log('🔍 検索結果: ${apiStores.length}件', name: 'SearchAPI');
+    for (var i = 0; i < apiStores.length; i++) {
+      developer.log('  [$i] ${apiStores[i].name} (ID: ${apiStores[i].id})',
+          name: 'SearchAPI');
+    }
 
     // 検索結果はそのまま返す（重複チェック不要、DB保存も不要）
     return apiStores;

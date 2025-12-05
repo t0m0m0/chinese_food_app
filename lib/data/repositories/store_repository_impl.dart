@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../datasources/hotpepper_proxy_datasource.dart';
@@ -27,6 +29,10 @@ class StoreRepositoryImpl implements StoreRepository {
     int start = 1,
   }) async {
     try {
+      developer.log(
+          '📡 API呼び出し開始 - lat: $lat, lng: $lng, address: $address, keyword: $keyword',
+          name: 'Repository');
+
       final response = await apiDatasource.searchStores(
         lat: lat,
         lng: lng,
@@ -37,9 +43,12 @@ class StoreRepositoryImpl implements StoreRepository {
         start: start,
       );
 
+      developer.log('📡 API応答受信 - 店舗数: ${response.shops.length}',
+          name: 'Repository');
+
       // API結果をDomainエンティティに変換
       // 重要: ステータスはnullで保存（ユーザーがスワイプで決定する）
-      return response.shops.map((hotpepperStore) {
+      final stores = response.shops.map((hotpepperStore) {
         return Store(
           id: hotpepperStore.id,
           name: hotpepperStore.name,
@@ -52,7 +61,20 @@ class StoreRepositoryImpl implements StoreRepository {
           createdAt: DateTime.now(),
         );
       }).toList();
+
+      developer.log('📡 エンティティ変換完了 - 変換後店舗数: ${stores.length}',
+          name: 'Repository');
+      for (var i = 0; i < stores.length && i < 5; i++) {
+        developer.log('  [$i] ${stores[i].name} (${stores[i].address})',
+            name: 'Repository');
+      }
+      if (stores.length > 5) {
+        developer.log('  ... 他 ${stores.length - 5}件', name: 'Repository');
+      }
+
+      return stores;
     } catch (e) {
+      developer.log('❌ API呼び出しエラー: $e', name: 'Repository', error: e);
       rethrow; // Usecaseレイヤーでハンドリング
     }
   }
