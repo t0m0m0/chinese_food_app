@@ -7,7 +7,7 @@ class ApiConstants {
   static const double defaultLongitude = 139.7006;
 
   /// API検索のデフォルト設定
-  static const int defaultStoreCount = 50; // スワイプ画面で十分な店舗数を取得
+  static const int defaultStoreCount = 100; // HotPepper API上限まで取得
   static const String defaultKeyword = '中華';
   static const int defaultRange = 3; // 1000m
 
