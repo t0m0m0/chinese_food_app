@@ -75,6 +75,13 @@ class StoreBusinessLogic {
     _stores.add(store);
   }
 
+  /// 全店舗を削除（デバッグ用）
+  Future<void> deleteAllStores() async {
+    await _repository.deleteAllStores();
+    _stores.clear();
+    debugPrint('[StoreBusinessLogic] 🗑️ 全店舗データを削除しました');
+  }
+
   /// API から新しい店舗を検索して取得
   ///
   /// 検索結果は重複チェックせず、そのまま返す

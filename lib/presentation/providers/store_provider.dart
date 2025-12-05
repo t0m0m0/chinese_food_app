@@ -131,6 +131,20 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
+  /// 全店舗を削除（デバッグ用）
+  Future<void> deleteAllStores() async {
+    try {
+      _stateManager.clearError();
+      await _businessLogic.deleteAllStores();
+      // 削除後、キャッシュクリアとUIに変更を通知
+      _cacheManager.clearCache();
+      notifyListeners();
+    } catch (e) {
+      _stateManager
+          .setError(ErrorMessages.getStoreMessage('store_delete_failed'));
+    }
+  }
+
   void clearError() {
     _stateManager.clearError();
   }

@@ -12,6 +12,7 @@ import 'presentation/providers/store_provider.dart';
 import 'domain/services/location_service.dart';
 
 import 'core/debug/crash_handler.dart';
+import 'core/debug/debug_commands.dart';
 
 /// Google Maps SDKの安全な初期化を管理するサービス
 class GoogleMapsInitializer {
@@ -223,6 +224,13 @@ Future<void> main() async {
 
   // StoreProviderを取得し、必要なデータで事前初期化
   final StoreProvider storeProvider = container.getStoreProvider();
+
+  // デバッグコマンドを初期化（開発環境のみ）
+  if (!_isTestEnvironment()) {
+    DebugCommands.initialize(storeProvider);
+    debugPrint('🔧 デバッグコマンドが初期化されました');
+    debugPrint('   使用例: await DebugCommands.deleteAllStores();');
+  }
 
   try {
     // アプリ起動時の店舗データ初期化を実行
