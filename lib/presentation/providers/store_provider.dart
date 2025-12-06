@@ -5,6 +5,7 @@ import '../../domain/services/location_service.dart';
 import '../../core/constants/error_messages.dart';
 import '../../core/constants/info_messages.dart';
 import '../../core/constants/string_constants.dart';
+import '../../core/constants/debug_constants.dart';
 import 'store_state_manager.dart';
 import 'store_cache_manager.dart';
 import 'store_business_logic.dart';
@@ -247,13 +248,17 @@ class StoreProvider extends ChangeNotifier {
   }) async {
     // 重複読み込み防止
     if (_isLoadingMore) {
-      debugPrint('[StoreProvider] 📄 追加読み込み中のため、スキップ');
+      if (DebugConstants.enableStoreProviderLog) {
+        debugPrint('[StoreProvider] 📄 追加読み込み中のため、スキップ');
+      }
       return;
     }
 
     try {
       _isLoadingMore = true;
-      debugPrint('[StoreProvider] 📄 追加店舗取得開始: start=$start');
+      if (DebugConstants.enableStoreProviderLog) {
+        debugPrint('[StoreProvider] 📄 追加店舗取得開始');
+      }
 
       // DB最新状態を確保（スワイプ済み店舗を正しく除外するため）
       await _businessLogic.loadStores();
@@ -273,14 +278,20 @@ class StoreProvider extends ChangeNotifier {
           ...moreStores
         ];
         _stateManager.updateSwipeStores(updatedSwipeStores);
-        debugPrint(
-            '[StoreProvider] 📄 追加店舗${moreStores.length}件を取得 (合計: ${updatedSwipeStores.length}件)');
+        if (DebugConstants.enableStoreProviderLog) {
+          debugPrint(
+              '[StoreProvider] 📄 追加店舗${moreStores.length}件を取得 (合計: ${updatedSwipeStores.length}件)');
+        }
         notifyListeners();
       } else {
-        debugPrint('[StoreProvider] 📄 次ページは空でした');
+        if (DebugConstants.enableStoreProviderLog) {
+          debugPrint('[StoreProvider] 📄 次ページは空でした');
+        }
       }
     } catch (e) {
-      debugPrint('[StoreProvider] ❌ 追加店舗取得エラー: $e');
+      if (DebugConstants.enableStoreProviderLog) {
+        debugPrint('[StoreProvider] ❌ 追加店舗取得エラー: $e');
+      }
       // エラーは静かに処理（ユーザー体験を妨げない）
     } finally {
       _isLoadingMore = false;

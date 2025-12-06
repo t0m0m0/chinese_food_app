@@ -189,11 +189,11 @@ class _SwipePageState extends State<SwipePage> {
         _updateStoreStatus(store, StoreStatus.bad);
       }
 
-      // 自動ページネーション: 残り10枚以下になったら次ページを取得
+      // 自動ページネーション: 閾値以下になったら次ページを取得
       final remainingCards = _availableStores.length - (previousIndex + 1);
-      if (remainingCards <= 10 && _lastLat != null && _lastLng != null) {
-        debugPrint('[SwipePage] 📄 残り$remainingCards枚 → 次ページ取得開始');
-
+      if (remainingCards <= ApiConstants.paginationThreshold &&
+          _lastLat != null &&
+          _lastLng != null) {
         // Future.microtaskを使用して現在のbuild cycleの後でAPI呼び出し
         Future.microtask(() async {
           if (mounted) {
@@ -204,9 +204,6 @@ class _SwipePageState extends State<SwipePage> {
             _currentPage++;
             final nextStart =
                 (_currentPage - 1) * ApiConstants.defaultStoreCount + 1;
-
-            debugPrint(
-                '[SwipePage] 📄 ページ$_currentPage (start=$nextStart) を取得');
 
             await storeProvider.loadMoreSwipeStores(
               lat: _lastLat!,

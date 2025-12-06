@@ -4,6 +4,7 @@ import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../../domain/services/location_service.dart';
 import '../../core/constants/string_constants.dart';
+import '../../core/constants/debug_constants.dart';
 
 class StoreBusinessLogic {
   final StoreRepository _repository;
@@ -95,8 +96,10 @@ class StoreBusinessLogic {
     int range = 3,
     int count = 10,
   }) async {
-    debugPrint(
-        '[SearchAPI] 🔍 検索開始 - lat: $lat, lng: $lng, address: $address, keyword: $keyword, range: $range, count: $count');
+    if (DebugConstants.enableApiLog) {
+      debugPrint(
+          '[SearchAPI] 🔍 検索開始 - lat: $lat, lng: $lng, range: $range, count: $count');
+    }
 
     final apiStores = await _repository.searchStoresFromApi(
       lat: lat,
@@ -107,10 +110,8 @@ class StoreBusinessLogic {
       count: count,
     );
 
-    debugPrint('[SearchAPI] 🔍 検索結果: ${apiStores.length}件');
-    for (var i = 0; i < apiStores.length; i++) {
-      debugPrint(
-          '[SearchAPI]   [$i] ${apiStores[i].name} (ID: ${apiStores[i].id})');
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SearchAPI] 🔍 検索結果: ${apiStores.length}件');
     }
 
     // 検索結果はそのまま返す（重複チェック不要、DB保存も不要）
@@ -130,32 +131,24 @@ class StoreBusinessLogic {
     final apiStores =
         await _fetchStoresFromApi(lat, lng, range, count, start: 1);
 
-    // デバッグ: APIから取得した店舗リスト
-    debugPrint('[SwipeStores] 🔍 APIから取得した店舗数: ${apiStores.length}');
-    for (var i = 0; i < apiStores.length; i++) {
-      debugPrint(
-          '[SwipeStores]   [$i] ${apiStores[i].name} (ID: ${apiStores[i].id})');
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 APIから取得した店舗数: ${apiStores.length}');
     }
 
     final existingStoreMaps = _buildExistingStoreMaps();
 
-    // デバッグ: 既存店舗マップの内容
-    debugPrint('[SwipeStores] 🔍 DB内の既存店舗数: ${_stores.length}');
-    debugPrint('[SwipeStores]   - ID別マップサイズ: ${existingStoreMaps.byId.length}');
-    debugPrint(
-        '[SwipeStores]   - 位置別マップサイズ: ${existingStoreMaps.byLocation.length}');
-    for (final entry in existingStoreMaps.byId.entries) {
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 DB内の既存店舗数: ${_stores.length}');
       debugPrint(
-          '[SwipeStores]     ID: ${entry.key} -> Status: ${entry.value}');
+          '[SwipeStores]   - ID別マップサイズ: ${existingStoreMaps.byId.length}');
+      debugPrint(
+          '[SwipeStores]   - 位置別マップサイズ: ${existingStoreMaps.byLocation.length}');
     }
 
     final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
 
-    // デバッグ: フィルタリング後の店舗リスト
-    debugPrint('[SwipeStores] 🔍 フィルタリング後の店舗数: ${filteredStores.length}');
-    for (var i = 0; i < filteredStores.length; i++) {
-      debugPrint(
-          '  [$i] ${filteredStores[i].name} (ID: ${filteredStores[i].id})');
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 フィルタリング後の店舗数: ${filteredStores.length}');
     }
 
     return filteredStores;
@@ -174,15 +167,16 @@ class StoreBusinessLogic {
     final apiStores =
         await _fetchStoresFromApi(lat, lng, range, count, start: start);
 
-    // デバッグ: APIから取得した追加店舗リスト
-    debugPrint('[SwipeStores] 📄 ページ$start: APIから取得した店舗数: ${apiStores.length}');
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 📄 ページ取得: ${apiStores.length}件');
+    }
 
     final existingStoreMaps = _buildExistingStoreMaps();
     final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
 
-    // デバッグ: フィルタリング後の追加店舗リスト
-    debugPrint(
-        '[SwipeStores] 📄 ページ$start: フィルタリング後の店舗数: ${filteredStores.length}');
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 📄 フィルタリング後: ${filteredStores.length}件');
+    }
 
     return filteredStores;
   }
@@ -256,42 +250,35 @@ class StoreBusinessLogic {
   ) {
     final locationKey = _createLocationKey(apiStore.lat, apiStore.lng);
 
-    debugPrint(
-        '[SwipeFilter]   🔎 チェック中: ${apiStore.name} (ID: ${apiStore.id})');
-
     // IDベースのチェック: キーが存在し、かつステータスがnullでない場合に除外
     if (existingStoreMaps.byId.containsKey(apiStore.id)) {
       final existingStatusById = existingStoreMaps.byId[apiStore.id];
-      debugPrint('    - DB内にID存在: ${apiStore.id}, Status: $existingStatusById');
       if (existingStatusById != null) {
-        debugPrint('[SwipeFilter]     ❌ 除外: ステータスあり ($existingStatusById)');
+        if (DebugConstants.enableSwipeFilterLog) {
+          debugPrint('[SwipeFilter] 除外: ID存在 & ステータスあり');
+        }
         return false; // ステータスあり → スワイプ済み → 除外
       }
-      debugPrint('[SwipeFilter]     ✓ Status=null → 続行');
       // ステータスがnullの場合は続行（スワイプ可能）
-    } else {
-      debugPrint('[SwipeFilter]     - DB内にID不存在 → 新規店舗の可能性');
     }
 
     // 位置ベースのチェック: キーが存在し、かつステータスがnullでない場合に除外
     if (existingStoreMaps.byLocation.containsKey(locationKey)) {
       final existingStatusByLocation =
           existingStoreMaps.byLocation[locationKey];
-      debugPrint(
-          '    - DB内に位置存在: $locationKey, Status: $existingStatusByLocation');
       if (existingStatusByLocation != null) {
-        debugPrint(
-            '[SwipeFilter]     ❌ 除外: 同じ位置にステータスあり ($existingStatusByLocation)');
+        if (DebugConstants.enableSwipeFilterLog) {
+          debugPrint('[SwipeFilter] 除外: 位置存在 & ステータスあり');
+        }
         return false; // ステータスあり → スワイプ済み → 除外
       }
-      debugPrint('[SwipeFilter]     ✓ Status=null → 続行');
       // ステータスがnullの場合は続行（スワイプ可能）
-    } else {
-      debugPrint('[SwipeFilter]     - DB内に位置不存在');
     }
 
     // 新規店舗、または既存でステータスnullの場合 → スワイプ可能
-    debugPrint('[SwipeFilter]     ✅ 含める: スワイプ可能');
+    if (DebugConstants.enableSwipeFilterLog) {
+      debugPrint('[SwipeFilter] 含める: スワイプ可能');
+    }
     return true;
   }
 
