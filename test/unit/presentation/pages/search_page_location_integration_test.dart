@@ -79,10 +79,7 @@ void main() {
       await tester.tap(tokyoFinder);
       await tester.pumpAndSettle();
 
-      // 検索ボタンをタップ
-      await tester.tap(find.text('中華料理店を検索'));
-      await tester.pumpAndSettle();
-
+      // 都道府県選択時に自動検索が実行される
       // 住所検索が実行されることを確認
       expect(fakeRepository.lastSearchAddress, equals('東京都'));
     });
@@ -127,10 +124,7 @@ void main() {
       await tester.tap(shinjukuFinder);
       await tester.pumpAndSettle();
 
-      // 検索ボタンをタップ
-      await tester.tap(find.text('中華料理店を検索'));
-      await tester.pumpAndSettle();
-
+      // 市区町村選択時に自動検索が実行される
       // 住所検索が実行されることを確認
       expect(fakeRepository.lastSearchAddress, equals('東京都新宿区'));
     });
@@ -153,10 +147,7 @@ void main() {
       await tester.tap(tokyoFinder);
       await tester.pumpAndSettle();
 
-      // 検索ボタンをタップ
-      await tester.tap(find.text('中華料理店を検索'));
-      await tester.pumpAndSettle();
-
+      // 都道府県選択時に自動検索が実行される
       // APIエラーでもUIがクラッシュしないことを確認
       // (エラーハンドリングはStoreProviderレベルで行われる場合がある)
       expect(find.byType(SearchPage), findsOneWidget);

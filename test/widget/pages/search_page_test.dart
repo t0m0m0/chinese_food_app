@@ -111,15 +111,6 @@ void main() {
       expect(find.text('エリアを選択して検索してください'), findsOneWidget);
     });
 
-    testWidgets('should display search button', (tester) async {
-      // when: SearchPageを表示
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // then: 検索ボタンが表示される
-      expect(find.text('中華料理店を検索'), findsOneWidget);
-    });
-
     testWidgets('should show no loading state initially', (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(createTestWidget());
@@ -154,20 +145,6 @@ void main() {
       expect(find.text('関東'), findsOneWidget);
       // ダイアログが開いていることを確認（AlertDialogの存在）
       expect(find.byType(AlertDialog), findsOneWidget);
-    });
-
-    testWidgets('should show snackbar when search without prefecture selected',
-        (tester) async {
-      // when: SearchPageを表示
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // when: 検索ボタンをタップ（都道府県未選択）
-      await tester.tap(find.text('中華料理店を検索'));
-      await tester.pumpAndSettle();
-
-      // then: スナックバーが表示される
-      expect(find.text('都道府県を選択してください'), findsOneWidget);
     });
 
     testWidgets('should select prefecture from dialog', (tester) async {

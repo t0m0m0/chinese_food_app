@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/string_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
@@ -38,16 +37,6 @@ class _SearchPageState extends State<SearchPage> {
   void dispose() {
     _areaSearchProvider.dispose();
     super.dispose();
-  }
-
-  Future<void> _performSearch() async {
-    if (!_areaSearchProvider.canSearch) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('都道府県を選択してください')),
-      );
-      return;
-    }
-    await _areaSearchProvider.performSearch();
   }
 
   @override
@@ -120,26 +109,6 @@ class _SearchPageState extends State<SearchPage> {
 
               // 選択中のエリア表示
               if (state.prefecture != null) _buildSelectedAreaChip(state),
-
-              const SizedBox(height: 16),
-
-              // 検索ボタン
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: state.isLoading ? null : _performSearch,
-                  icon: state.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.search),
-                  label: Text(state.isLoading
-                      ? '検索中...'
-                      : StringConstants.searchButtonLabel),
-                ),
-              ),
             ],
           ),
         );
@@ -411,11 +380,6 @@ class _SearchPageState extends State<SearchPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(state.errorMessage!),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _performSearch,
-                  child: const Text('再試行'),
-                ),
               ],
             ),
           );

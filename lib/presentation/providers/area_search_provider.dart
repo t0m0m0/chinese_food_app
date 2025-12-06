@@ -68,18 +68,24 @@ class AreaSearchProvider extends ChangeNotifier {
     _selectedPrefecture = prefecture;
     _selectedCity = null; // 都道府県が変わったら市区町村をクリア
     notifyListeners();
+    // 都道府県選択時に自動検索
+    performSearch();
   }
 
   /// 市区町村を選択
   void selectCity(City city) {
     _selectedCity = city;
     notifyListeners();
+    // 市区町村選択時に自動検索
+    performSearch();
   }
 
   /// 市区町村をクリア
   void clearCity() {
     _selectedCity = null;
     notifyListeners();
+    // 市区町村クリア時に都道府県で再検索
+    performSearch();
   }
 
   /// 検索範囲を設定
