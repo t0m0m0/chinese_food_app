@@ -148,29 +148,16 @@ class DecorativeElements {
 
   /// 提灯風の装飾円
   static Widget lanternDecoration({
-    double size = 60,
+    double size = 120,
     Color color = AppTheme.primaryRed,
   }) {
-    return Container(
+    return SizedBox(
       width: size,
-      height: size * 1.2,
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          colors: [
-            color,
-            color.withValues(alpha: 0.7),
-            color.withValues(alpha: 0.3),
-          ],
-          stops: const [0.3, 0.7, 1.0],
-        ),
-        borderRadius: BorderRadius.circular(size / 2),
-        boxShadow: AppTheme.glowEffect(color),
-      ),
+      height: size,
       child: Center(
         child: Text(
-          '中',
+          '🀄️',
           style: AppTheme.headlineSmall.copyWith(
-            color: AppTheme.surfaceWhite,
             fontWeight: FontWeight.w900,
             fontSize: size * 0.4,
           ),

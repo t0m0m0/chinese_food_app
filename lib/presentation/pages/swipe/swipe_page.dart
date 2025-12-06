@@ -339,11 +339,20 @@ class _SwipePageState extends State<SwipePage> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: Text(
-          'スワイプ',
-          style: AppTheme.headlineMedium.copyWith(
-            color: AppTheme.textPrimary,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DecorativeElements.beerIcon(size: 30),
+            const SizedBox(width: 12),
+            Text(
+              '見つける',
+              style: AppTheme.headlineMedium.copyWith(
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            DecorativeElements.gyozaIcon(size: 30),
+          ],
         ),
         centerTitle: true,
         flexibleSpace: Container(
