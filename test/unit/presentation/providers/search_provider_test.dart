@@ -15,6 +15,7 @@ class MockStoreProvider extends Mock implements StoreProvider {
     String? keyword = '中華',
     int range = 3,
     int count = 10,
+    int start = 1,
   }) =>
       super.noSuchMethod(
         Invocation.method(#loadNewStoresFromApi, [], {
@@ -24,6 +25,7 @@ class MockStoreProvider extends Mock implements StoreProvider {
           #keyword: keyword,
           #range: range,
           #count: count,
+          #start: start,
         }),
         returnValue: Future<void>.value(),
       );
@@ -118,6 +120,7 @@ void main() {
         keyword: '中華',
         range: 3,
         count: 20,
+        start: 1,
       )).called(1);
     });
 
@@ -147,6 +150,7 @@ void main() {
         keyword: '中華',
         range: 3,
         count: 20,
+        start: 1,
       )).called(1);
     });
 
@@ -222,6 +226,7 @@ void main() {
         keyword: '中華',
         range: 2,
         count: 15,
+        start: 1,
       )).called(1);
     });
 
@@ -249,6 +254,7 @@ void main() {
         keyword: '中華',
         range: 4,
         count: 25,
+        start: 1,
       )).called(1);
     });
 

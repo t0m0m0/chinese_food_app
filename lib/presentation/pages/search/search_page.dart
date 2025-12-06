@@ -25,18 +25,29 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   late AreaSearchProvider _areaSearchProvider;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
     _areaSearchProvider = AreaSearchProvider(storeProvider: storeProvider);
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _areaSearchProvider.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
+      _areaSearchProvider.loadMoreResults();
+    }
   }
 
   @override
@@ -453,11 +464,34 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
             Expanded(
-              child: ListView.builder(
-                itemCount: state.searchResults.length,
-                itemBuilder: (context, index) {
-                  final store = state.searchResults[index];
-                  return _buildStoreCard(store);
+              child: Selector<AreaSearchProvider,
+                  ({bool isLoadingMore, bool hasMoreResults})>(
+                selector: (context, provider) => (
+                  isLoadingMore: provider.isLoadingMore,
+                  hasMoreResults: provider.hasMoreResults,
+                ),
+                builder: (context, paginationState, child) {
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: state.searchResults.length +
+                        (paginationState.hasMoreResults ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index < state.searchResults.length) {
+                        final store = state.searchResults[index];
+                        return _buildStoreCard(store);
+                      } else {
+                        // ローディングインジケーター
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: paginationState.isLoadingMore
+                                ? const CircularProgressIndicator()
+                                : const SizedBox.shrink(),
+                          ),
+                        );
+                      }
+                    },
+                  );
                 },
               ),
             ),

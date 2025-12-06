@@ -384,6 +384,7 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
     String? keyword = '中華',
     int? range = 3,
     int? count = 10,
+    int? start = 1,
   }) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -396,6 +397,7 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
             #keyword: keyword,
             #range: range,
             #count: count,
+            #start: start,
           },
         ),
         returnValue: _i8.Future<void>.value(),
