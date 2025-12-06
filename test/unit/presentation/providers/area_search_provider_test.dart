@@ -304,18 +304,9 @@ void main() {
         expect(provider.searchRange, 3);
       });
 
-      test('should have default result count', () {
-        expect(provider.resultCount, 20);
-      });
-
       test('should update search range', () {
         provider.setSearchRange(5);
         expect(provider.searchRange, 5);
-      });
-
-      test('should update result count', () {
-        provider.setResultCount(50);
-        expect(provider.resultCount, 50);
       });
     });
   });

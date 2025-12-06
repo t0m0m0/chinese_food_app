@@ -33,7 +33,6 @@ class AreaSearchProvider extends ChangeNotifier {
 
   // 検索フィルター
   int _searchRange = SearchConfig.defaultRange;
-  int _resultCount = SearchConfig.defaultPageSize;
 
   // Getters
   Prefecture? get selectedPrefecture => _selectedPrefecture;
@@ -45,7 +44,6 @@ class AreaSearchProvider extends ChangeNotifier {
   bool get hasSearched => _hasSearched;
   bool get hasMoreResults => _hasMoreResults;
   int get searchRange => _searchRange;
-  int get resultCount => _resultCount;
 
   /// 全都道府県リスト
   List<Prefecture> get prefectures => AreaData.prefectures;
@@ -111,14 +109,6 @@ class AreaSearchProvider extends ChangeNotifier {
   void setSearchRange(int range) {
     if (SearchConfig.isValidRange(range)) {
       _searchRange = range;
-      notifyListeners();
-    }
-  }
-
-  /// 検索結果数を設定
-  void setResultCount(int count) {
-    if (SearchConfig.isValidCount(count)) {
-      _resultCount = count;
       notifyListeners();
     }
   }
