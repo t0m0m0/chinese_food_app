@@ -46,6 +46,8 @@ void _assertApiKeyValidationResult(
 
 void main() {
   group('Production API Key Validation', () {
+    // NOTE: プロキシサーバー経由でAPI呼び出しを行うため、HotPepper APIキーは不要になりました
+    // ConfigValidator内のAPIキー検証が削除されているため、これらのテストはスキップします
     setUpAll(() async {
       await TestEnvSetup.initializeTestEnvironment();
     });
@@ -69,7 +71,7 @@ void main() {
       await TestEnvSetup.initializeTestEnvironment();
     });
 
-    group('Production Environment API Key Validation', () {
+    group('Production Environment API Key Validation', skip: 'Proxy server handles API key, validation removed from ConfigValidator', () {
       test(
           'should fail validation when production environment has empty HotPepper API key',
           () async {
@@ -159,7 +161,7 @@ HOTPEPPER_API_KEY=validproductionapikey123456789
       });
     });
 
-    group('Production Environment Security Validation', () {
+    group('Production Environment Security Validation', skip: 'Proxy server handles API key, validation removed from ConfigValidator', () {
       test(
           'should identify production environment as having critical errors when API key is missing',
           () async {
@@ -198,7 +200,7 @@ HOTPEPPER_API_KEY=validproductionapikey123456789
       });
     });
 
-    group('Production API Key Format Validation', () {
+    group('Production API Key Format Validation', skip: 'Proxy server handles API key, validation removed from ConfigValidator', () {
       // パラメータ化テスト用のデータ定義
       final lengthTestCases = [
         // 空のAPIキーの場合は「設定されていません」エラーになる
