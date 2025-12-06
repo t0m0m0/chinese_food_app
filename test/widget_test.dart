@@ -47,7 +47,7 @@ void main() {
     expect(find.byType(BottomNavigationBar), findsOneWidget);
 
     // 基本的なUI要素の存在を確認（重複があっても可）
-    expect(find.text('スワイプ'), findsWidgets);
+    expect(find.text('見つける'), findsWidgets);
     expect(find.text('検索'), findsWidgets);
     expect(find.text('マイメニュー'), findsWidgets);
   });
@@ -171,6 +171,9 @@ class FakeStoreRepository implements StoreRepository {
       _stores.removeWhere((s) => s.id == storeId);
 
   @override
+  Future<void> deleteAllStores() async => _stores.clear();
+
+  @override
   Future<Store?> getStoreById(String storeId) async {
     try {
       return _stores.firstWhere((s) => s.id == storeId);
@@ -221,6 +224,11 @@ class ErrorStoreRepository implements StoreRepository {
   @override
   Future<void> deleteStore(String storeId) async {
     throw Exception('店舗削除エラー');
+  }
+
+  @override
+  Future<void> deleteAllStores() async {
+    throw Exception('全店舗削除エラー');
   }
 
   @override

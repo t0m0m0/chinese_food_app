@@ -16,6 +16,9 @@ abstract class StoreLocalDatasource {
   /// 店舗を削除
   Future<void> deleteStore(String id);
 
+  /// 全店舗を削除（デバッグ用）
+  Future<void> deleteAllStores();
+
   /// IDで店舗を取得
   Future<entities.Store?> getStoreById(String id);
 
@@ -94,6 +97,12 @@ class StoreLocalDatasourceImpl implements StoreLocalDatasource {
     await (_database.delete(_database.stores)
           ..where((tbl) => tbl.id.equals(storeId)))
         .go();
+  }
+
+  @override
+  Future<void> deleteAllStores() async {
+    // WHERE句なしで全削除
+    await _database.delete(_database.stores).go();
   }
 
   @override

@@ -5,6 +5,7 @@ import '../../domain/services/location_service.dart';
 import '../../core/constants/error_messages.dart';
 import '../../core/constants/info_messages.dart';
 import '../../core/constants/string_constants.dart';
+import '../../core/constants/debug_constants.dart';
 import 'store_state_manager.dart';
 import 'store_cache_manager.dart';
 import 'store_business_logic.dart';
@@ -131,6 +132,20 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
+  /// 全店舗を削除（デバッグ用）
+  Future<void> deleteAllStores() async {
+    try {
+      _stateManager.clearError();
+      await _businessLogic.deleteAllStores();
+      // 削除後、キャッシュクリアとUIに変更を通知
+      _cacheManager.clearCache();
+      notifyListeners();
+    } catch (e) {
+      _stateManager
+          .setError(ErrorMessages.getStoreMessage('store_delete_failed'));
+    }
+  }
+
   void clearError() {
     _stateManager.clearError();
   }
@@ -216,6 +231,70 @@ class StoreProvider extends ChangeNotifier {
       _stateManager
           .setError(ErrorMessages.getStoreMessage('location_stores_failed'));
       _stateManager.setLoading(false);
+    }
+  }
+
+  /// スワイプ画面用の追加店舗取得（ページネーション）
+  ///
+  /// 次ページの店舗を取得し、既存のスワイプリストに追加する
+  bool _isLoadingMore = false;
+
+  Future<void> loadMoreSwipeStores({
+    required double lat,
+    required double lng,
+    int range = 3,
+    int count = 20,
+    required int start,
+  }) async {
+    // 重複読み込み防止
+    if (_isLoadingMore) {
+      if (DebugConstants.enableStoreProviderLog) {
+        debugPrint('[StoreProvider] 📄 追加読み込み中のため、スキップ');
+      }
+      return;
+    }
+
+    try {
+      _isLoadingMore = true;
+      if (DebugConstants.enableStoreProviderLog) {
+        debugPrint('[StoreProvider] 📄 追加店舗取得開始');
+      }
+
+      // DB最新状態を確保（スワイプ済み店舗を正しく除外するため）
+      await _businessLogic.loadStores();
+
+      final moreStores = await _businessLogic.loadMoreSwipeStores(
+        lat: lat,
+        lng: lng,
+        range: range,
+        count: count,
+        start: start,
+      );
+
+      if (moreStores.isNotEmpty) {
+        // 既存のスワイプリストに追加
+        final updatedSwipeStores = [
+          ..._stateManager.swipeStores,
+          ...moreStores
+        ];
+        _stateManager.updateSwipeStores(updatedSwipeStores);
+        if (DebugConstants.enableStoreProviderLog) {
+          debugPrint(
+              '[StoreProvider] 📄 追加店舗${moreStores.length}件を取得 (合計: ${updatedSwipeStores.length}件)');
+        }
+        notifyListeners();
+      } else {
+        if (DebugConstants.enableStoreProviderLog) {
+          debugPrint('[StoreProvider] 📄 次ページは空でした');
+        }
+      }
+    } catch (e) {
+      if (DebugConstants.enableStoreProviderLog) {
+        debugPrint('[StoreProvider] ❌ 追加店舗取得エラー: $e');
+      }
+      // エラーは静かに処理（ユーザー体験を妨げない）
+    } finally {
+      _isLoadingMore = false;
     }
   }
 

@@ -129,7 +129,7 @@ class _SearchPageState extends State<SearchPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DecorativeElements.lanternDecoration(
-                  size: 30, color: AppTheme.primaryRed),
+                  size: 50, color: AppTheme.primaryRed),
               const SizedBox(width: 12),
               Text(
                 '検索',
@@ -139,7 +139,7 @@ class _SearchPageState extends State<SearchPage> {
               ),
               const SizedBox(width: 12),
               DecorativeElements.lanternDecoration(
-                  size: 30, color: AppTheme.secondaryYellow),
+                  size: 50, color: AppTheme.secondaryYellow),
             ],
           ),
           flexibleSpace: Container(

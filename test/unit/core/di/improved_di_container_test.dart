@@ -177,6 +177,9 @@ class MockStoreRepository implements StoreRepository {
   Future<void> insertStore(Store store) async {}
 
   @override
+  Future<void> deleteAllStores() async {}
+
+  @override
   Future<List<Store>> searchStoresFromApi({
     double? lat,
     double? lng,

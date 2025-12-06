@@ -92,7 +92,7 @@ class _MyMenuPageState extends State<MyMenuPage>
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DecorativeElements.ramenBowl(size: 30, color: AppTheme.primaryRed),
+            DecorativeElements.ramenBowl(size: 30),
             const SizedBox(width: 12),
             Text(
               'マイメニュー',

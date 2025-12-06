@@ -174,6 +174,12 @@ class FakeStoreRepository implements StoreRepository {
   }
 
   @override
+  Future<void> deleteAllStores() async {
+    _throwIfNeeded();
+    _stores.clear();
+  }
+
+  @override
   Future<List<Store>> searchStores(String query) async {
     _throwIfNeeded();
     return _stores

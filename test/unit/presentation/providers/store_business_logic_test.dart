@@ -389,6 +389,130 @@ void main() {
       // Assert - 何回読み込んでもinsertStoreが呼ばれないことを確認
       verifyNever(mockRepository.insertStore(any));
     });
+
+    test('should include stores with null status in swipe list (issue #216)',
+        () async {
+      // Arrange - DB内にstatus == nullの店舗が既に存在する
+      // 注: 現在のコードでは、この状況は正常に動作する
+      final existingNullStatusStore = Store(
+        id: 'existing-null-status-store',
+        name: '既存のnullステータス店舗',
+        address: '東京都港区3-3-3',
+        lat: 35.6586,
+        lng: 139.7456,
+        status: null, // DBに保存されているがステータスはnull
+        createdAt: DateTime.now(),
+      );
+
+      final apiStores = [
+        existingNullStatusStore, // APIから同じ店舗が返される
+        Store(
+          id: 'new-store',
+          name: '新規店舗',
+          address: '東京都港区4-4-4',
+          lat: 35.6587,
+          lng: 139.7457,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      when(mockRepository.getAllStores())
+          .thenAnswer((_) async => [existingNullStatusStore]);
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+      )).thenAnswer((_) async => apiStores);
+
+      // まず既存店舗をロード
+      await businessLogic.loadStores();
+
+      // Act
+      final result = await businessLogic.loadSwipeStores(
+        lat: 35.6586,
+        lng: 139.7456,
+        range: 3,
+        count: 20,
+      );
+
+      // Assert - status == null の店舗は、DBに既存でもスワイプリストに含まれるべき
+      expect(result.length, 2);
+      expect(result.any((store) => store.id == 'existing-null-status-store'),
+          true);
+      expect(result.any((store) => store.id == 'new-store'), true);
+    });
+
+    test(
+        'should correctly distinguish between non-existent key and null value (issue #216)',
+        () async {
+      // Arrange - より明示的なテストケース
+      final dbStoreWithNullStatus = Store(
+        id: 'db-store-null',
+        name: 'DB内null店舗',
+        address: '東京都港区5-5-5',
+        lat: 35.6588,
+        lng: 139.7458,
+        status: null, // Map内: {'db-store-null': null}
+        createdAt: DateTime.now(),
+      );
+
+      final dbStoreWithStatus = Store(
+        id: 'db-store-visited',
+        name: 'DB内訪問済み店舗',
+        address: '東京都港区6-6-6',
+        lat: 35.6589,
+        lng: 139.7459,
+        status: StoreStatus.visited, // Map内: {'db-store-visited': visited}
+        createdAt: DateTime.now(),
+      );
+
+      final apiStores = [
+        dbStoreWithNullStatus, // Map[id] = null
+        dbStoreWithStatus, // Map[id] = visited
+        Store(
+          id: 'new-store',
+          name: '新規店舗',
+          address: '東京都港区7-7-7',
+          lat: 35.6590,
+          lng: 139.7460,
+          status: null, // Map.containsKey(id) = false
+          createdAt: DateTime.now(),
+        ),
+      ];
+
+      when(mockRepository.getAllStores())
+          .thenAnswer((_) async => [dbStoreWithNullStatus, dbStoreWithStatus]);
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+      )).thenAnswer((_) async => apiStores);
+
+      // まず既存店舗をロード
+      await businessLogic.loadStores();
+
+      // Act
+      final result = await businessLogic.loadSwipeStores(
+        lat: 35.6588,
+        lng: 139.7458,
+        range: 3,
+        count: 20,
+      );
+
+      // Assert
+      // 1. DB内でstatus=nullの店舗 → 含まれるべき (Map[id] = null)
+      // 2. DB内でstatus!=nullの店舗 → 除外されるべき (Map[id] = visited)
+      // 3. 新規店舗 → 含まれるべき (Map.containsKey(id) = false)
+      expect(result.length, 2);
+      expect(result.any((store) => store.id == 'db-store-null'), true);
+      expect(result.any((store) => store.id == 'new-store'), true);
+      expect(result.any((store) => store.id == 'db-store-visited'), false);
+    });
   });
 
   group('StoreBusinessLogic - other operations', () {
@@ -499,6 +623,157 @@ void main() {
       // 2. ユーザーがスワイプ
       // 3. updateStoreStatus() または新しいメソッドでDB保存
       // 4. マイメニューに表示される
+    });
+  });
+
+  group('StoreBusinessLogic - pagination', () {
+    final page1Stores = List.generate(
+      100,
+      (i) => Store(
+        id: 'page1-store-$i',
+        name: 'ページ1店舗$i',
+        address: '東京都港区$i-$i-$i',
+        lat: 35.6590 + (i * 0.0001),
+        lng: 139.7460 + (i * 0.0001),
+        status: null,
+        createdAt: DateTime.now(),
+      ),
+    );
+
+    final page2Stores = List.generate(
+      100,
+      (i) => Store(
+        id: 'page2-store-$i',
+        name: 'ページ2店舗$i',
+        address: '東京都渋谷区$i-$i-$i',
+        lat: 35.6700 + (i * 0.0001),
+        lng: 139.7000 + (i * 0.0001),
+        status: null,
+        createdAt: DateTime.now(),
+      ),
+    );
+
+    test('should load first page with start=1 by default', () async {
+      // Arrange
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 1,
+      )).thenAnswer((_) async => page1Stores);
+
+      // Act
+      final result = await businessLogic.loadSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 3,
+        count: 100,
+      );
+
+      // Assert
+      expect(result, hasLength(100));
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 1,
+      )).called(1);
+    });
+
+    test('should load next page with start parameter', () async {
+      // Arrange
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 101,
+      )).thenAnswer((_) async => page2Stores);
+
+      // Act
+      final result = await businessLogic.loadMoreSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 3,
+        count: 100,
+        start: 101,
+      );
+
+      // Assert
+      expect(result, hasLength(100));
+      expect(result.first.id, equals('page2-store-0'));
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 101,
+      )).called(1);
+    });
+
+    test('should filter out already-swiped stores from next page', () async {
+      // Arrange - ページ1の一部の店舗が既にスワイプ済み
+      final swipedStores = [
+        page2Stores[0].copyWith(status: StoreStatus.wantToGo),
+        page2Stores[1].copyWith(status: StoreStatus.bad),
+      ];
+
+      when(mockRepository.getAllStores()).thenAnswer((_) async => swipedStores);
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: 101,
+      )).thenAnswer((_) async => page2Stores);
+
+      // まず既存店舗をロード
+      await businessLogic.loadStores();
+
+      // Act
+      final result = await businessLogic.loadMoreSwipeStores(
+        lat: 35.6700,
+        lng: 139.7000,
+        range: 3,
+        count: 100,
+        start: 101,
+      );
+
+      // Assert - スワイプ済み2件が除外されて98件
+      expect(result.length, lessThanOrEqualTo(98));
+      expect(result.any((s) => s.id == 'page2-store-0'), false);
+      expect(result.any((s) => s.id == 'page2-store-1'), false);
+    });
+
+    test('should handle empty next page response', () async {
+      // Arrange - 次ページが空（全店舗取得済み）
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: anyNamed('start'),
+      )).thenAnswer((_) async => []);
+
+      // Act
+      final result = await businessLogic.loadMoreSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 3,
+        count: 100,
+        start: 201,
+      );
+
+      // Assert
+      expect(result, isEmpty);
     });
   });
 }

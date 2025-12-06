@@ -7,9 +7,12 @@ class ApiConstants {
   static const double defaultLongitude = 139.7006;
 
   /// API検索のデフォルト設定
-  static const int defaultStoreCount = 10;
+  static const int defaultStoreCount = 100; // HotPepper API上限まで取得
   static const String defaultKeyword = '中華';
   static const int defaultRange = 3; // 1000m
+
+  /// ページネーション設定
+  static const int paginationThreshold = 10; // 次ページ取得のトリガー閾値（残り枚数）
 
   /// 重複チェック用の閾値
   static const double duplicateThreshold = 0.001; // 約110m

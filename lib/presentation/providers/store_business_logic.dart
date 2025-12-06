@@ -1,7 +1,10 @@
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../../domain/services/location_service.dart';
 import '../../core/constants/string_constants.dart';
+import '../../core/constants/debug_constants.dart';
 
 class StoreBusinessLogic {
   final StoreRepository _repository;
@@ -73,6 +76,13 @@ class StoreBusinessLogic {
     _stores.add(store);
   }
 
+  /// 全店舗を削除（デバッグ用）
+  Future<void> deleteAllStores() async {
+    await _repository.deleteAllStores();
+    _stores.clear();
+    debugPrint('[StoreBusinessLogic] 🗑️ 全店舗データを削除しました');
+  }
+
   /// API から新しい店舗を検索して取得
   ///
   /// 検索結果は重複チェックせず、そのまま返す
@@ -86,6 +96,11 @@ class StoreBusinessLogic {
     int range = 3,
     int count = 10,
   }) async {
+    if (DebugConstants.enableApiLog) {
+      debugPrint(
+          '[SearchAPI] 🔍 検索開始 - lat: $lat, lng: $lng, range: $range, count: $count');
+    }
+
     final apiStores = await _repository.searchStoresFromApi(
       lat: lat,
       lng: lng,
@@ -94,6 +109,10 @@ class StoreBusinessLogic {
       range: range,
       count: count,
     );
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SearchAPI] 🔍 検索結果: ${apiStores.length}件');
+    }
 
     // 検索結果はそのまま返す（重複チェック不要、DB保存も不要）
     return apiStores;
@@ -109,9 +128,57 @@ class StoreBusinessLogic {
     int range = 3,
     int count = 20,
   }) async {
-    final apiStores = await _fetchStoresFromApi(lat, lng, range, count);
+    final apiStores =
+        await _fetchStoresFromApi(lat, lng, range, count, start: 1);
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 APIから取得した店舗数: ${apiStores.length}');
+    }
+
     final existingStoreMaps = _buildExistingStoreMaps();
-    return _filterSwipeStores(apiStores, existingStoreMaps);
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 DB内の既存店舗数: ${_stores.length}');
+      debugPrint(
+          '[SwipeStores]   - ID別マップサイズ: ${existingStoreMaps.byId.length}');
+      debugPrint(
+          '[SwipeStores]   - 位置別マップサイズ: ${existingStoreMaps.byLocation.length}');
+    }
+
+    final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 フィルタリング後の店舗数: ${filteredStores.length}');
+    }
+
+    return filteredStores;
+  }
+
+  /// スワイプ画面用の追加店舗取得（ページネーション）
+  ///
+  /// 次ページの店舗を取得し、ステータス未設定の店舗のみをフィルタリングして返す
+  Future<List<Store>> loadMoreSwipeStores({
+    required double lat,
+    required double lng,
+    int range = 3,
+    int count = 20,
+    int start = 1,
+  }) async {
+    final apiStores =
+        await _fetchStoresFromApi(lat, lng, range, count, start: start);
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 📄 ページ取得: ${apiStores.length}件');
+    }
+
+    final existingStoreMaps = _buildExistingStoreMaps();
+    final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 📄 フィルタリング後: ${filteredStores.length}件');
+    }
+
+    return filteredStores;
   }
 
   /// Fetches stores from API with specified parameters
@@ -119,14 +186,16 @@ class StoreBusinessLogic {
     double lat,
     double lng,
     int range,
-    int count,
-  ) async {
+    int count, {
+    int start = 1,
+  }) async {
     return await _repository.searchStoresFromApi(
       lat: lat,
       lng: lng,
       keyword: StringConstants.apiKeywordParameter,
       range: range,
       count: count,
+      start: start,
     );
   }
 
@@ -180,18 +249,36 @@ class StoreBusinessLogic {
     }) existingStoreMaps,
   ) {
     final locationKey = _createLocationKey(apiStore.lat, apiStore.lng);
-    final existingStatusById = existingStoreMaps.byId[apiStore.id];
-    final existingStatusByLocation = existingStoreMaps.byLocation[locationKey];
 
-    // 既存店舗の場合、ステータスがnullならスワイプ可能
-    if (existingStatusById != null) {
-      return false; // ステータスあり → スワイプ済み → 除外
+    // IDベースのチェック: キーが存在し、かつステータスがnullでない場合に除外
+    if (existingStoreMaps.byId.containsKey(apiStore.id)) {
+      final existingStatusById = existingStoreMaps.byId[apiStore.id];
+      if (existingStatusById != null) {
+        if (DebugConstants.enableSwipeFilterLog) {
+          debugPrint('[SwipeFilter] 除外: ID存在 & ステータスあり');
+        }
+        return false; // ステータスあり → スワイプ済み → 除外
+      }
+      // ステータスがnullの場合は続行（スワイプ可能）
     }
-    if (existingStatusByLocation != null) {
-      return false; // ステータスあり → スワイプ済み → 除外
+
+    // 位置ベースのチェック: キーが存在し、かつステータスがnullでない場合に除外
+    if (existingStoreMaps.byLocation.containsKey(locationKey)) {
+      final existingStatusByLocation =
+          existingStoreMaps.byLocation[locationKey];
+      if (existingStatusByLocation != null) {
+        if (DebugConstants.enableSwipeFilterLog) {
+          debugPrint('[SwipeFilter] 除外: 位置存在 & ステータスあり');
+        }
+        return false; // ステータスあり → スワイプ済み → 除外
+      }
+      // ステータスがnullの場合は続行（スワイプ可能）
     }
 
     // 新規店舗、または既存でステータスnullの場合 → スワイプ可能
+    if (DebugConstants.enableSwipeFilterLog) {
+      debugPrint('[SwipeFilter] 含める: スワイプ可能');
+    }
     return true;
   }
 

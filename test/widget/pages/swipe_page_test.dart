@@ -149,7 +149,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // then: スワイプページのタイトルが表示される
-      expect(find.text('スワイプ'), findsOneWidget);
+      expect(find.text('見つける'), findsOneWidget);
       // and: 距離設定UIが表示される
       expect(find.text('検索範囲'), findsOneWidget);
     });

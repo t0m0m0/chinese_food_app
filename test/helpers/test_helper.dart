@@ -30,6 +30,11 @@ class MockStoreRepository implements StoreRepository {
   }
 
   @override
+  Future<void> deleteAllStores() async {
+    _stores.clear();
+  }
+
+  @override
   Future<Store?> getStoreById(String id) async {
     try {
       return _stores.firstWhere((store) => store.id == id);

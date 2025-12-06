@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
+import '../../core/constants/debug_constants.dart';
 import '../datasources/hotpepper_proxy_datasource.dart';
 import '../datasources/store_local_datasource.dart';
 
@@ -27,6 +30,10 @@ class StoreRepositoryImpl implements StoreRepository {
     int start = 1,
   }) async {
     try {
+      if (DebugConstants.enableRepositoryLog) {
+        debugPrint('📡 API呼び出し開始 - range: $range, count: $count');
+      }
+
       final response = await apiDatasource.searchStores(
         lat: lat,
         lng: lng,
@@ -37,9 +44,13 @@ class StoreRepositoryImpl implements StoreRepository {
         start: start,
       );
 
+      if (DebugConstants.enableRepositoryLog) {
+        debugPrint('[Repository] 📡 API応答受信 - 店舗数: ${response.shops.length}');
+      }
+
       // API結果をDomainエンティティに変換
       // 重要: ステータスはnullで保存（ユーザーがスワイプで決定する）
-      return response.shops.map((hotpepperStore) {
+      final stores = response.shops.map((hotpepperStore) {
         return Store(
           id: hotpepperStore.id,
           name: hotpepperStore.name,
@@ -52,7 +63,16 @@ class StoreRepositoryImpl implements StoreRepository {
           createdAt: DateTime.now(),
         );
       }).toList();
+
+      if (DebugConstants.enableRepositoryLog) {
+        debugPrint('[Repository] 📡 エンティティ変換完了 - ${stores.length}件');
+      }
+
+      return stores;
     } catch (e) {
+      if (DebugConstants.enableRepositoryLog) {
+        debugPrint('[Repository] ❌ API呼び出しエラー: $e');
+      }
       rethrow; // Usecaseレイヤーでハンドリング
     }
   }
@@ -90,6 +110,21 @@ class StoreRepositoryImpl implements StoreRepository {
       await localDatasource.deleteStore(storeId);
     } catch (e) {
       throw Exception('店舗の削除に失敗しました: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> deleteAllStores() async {
+    try {
+      await localDatasource.deleteAllStores();
+      if (DebugConstants.enableRepositoryLog) {
+        debugPrint('[Repository] 🗑️ 全店舗データを削除しました');
+      }
+    } catch (e) {
+      if (DebugConstants.enableRepositoryLog) {
+        debugPrint('[Repository] ❌ 全店舗削除エラー: $e');
+      }
+      throw Exception('全店舗の削除に失敗しました: ${e.toString()}');
     }
   }
 
