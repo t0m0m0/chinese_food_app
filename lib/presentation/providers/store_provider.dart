@@ -163,6 +163,7 @@ class StoreProvider extends ChangeNotifier {
     String? keyword = StringConstants.defaultSearchKeyword,
     int range = 3,
     int count = 10,
+    int start = 1,
   }) async {
     try {
       _stateManager.setLoading(true);
@@ -175,6 +176,7 @@ class StoreProvider extends ChangeNotifier {
         keyword: keyword,
         range: range,
         count: count,
+        start: start,
       );
 
       _stateManager.updateSearchResults(newStores);

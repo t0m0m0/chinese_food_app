@@ -48,7 +48,7 @@ void main() {
 
     // 基本的なUI要素の存在を確認（重複があっても可）
     expect(find.text('見つける'), findsWidgets);
-    expect(find.text('検索'), findsWidgets);
+    expect(find.text('エリア'), findsWidgets);
     expect(find.text('マイメニュー'), findsWidgets);
   });
 

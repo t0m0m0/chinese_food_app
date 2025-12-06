@@ -23,8 +23,8 @@ class ShellPage extends StatelessWidget {
             label: '見つける',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: '検索',
+            icon: Icon(Icons.map),
+            label: 'エリア',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.restaurant_menu),
