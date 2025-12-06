@@ -349,6 +349,16 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
       ) as _i8.Future<void>);
 
   @override
+  _i8.Future<void> deleteAllStores() => (super.noSuchMethod(
+        Invocation.method(
+          #deleteAllStores,
+          [],
+        ),
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
+
+  @override
   void clearError() => super.noSuchMethod(
         Invocation.method(
           #clearError,
@@ -408,6 +418,30 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
             #lng: lng,
             #range: range,
             #count: count,
+          },
+        ),
+        returnValue: _i8.Future<void>.value(),
+        returnValueForMissingStub: _i8.Future<void>.value(),
+      ) as _i8.Future<void>);
+
+  @override
+  _i8.Future<void> loadMoreSwipeStores({
+    required double? lat,
+    required double? lng,
+    int? range = 3,
+    int? count = 20,
+    required int? start,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #loadMoreSwipeStores,
+          [],
+          {
+            #lat: lat,
+            #lng: lng,
+            #range: range,
+            #count: count,
+            #start: start,
           },
         ),
         returnValue: _i8.Future<void>.value(),

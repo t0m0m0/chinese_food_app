@@ -394,6 +394,16 @@ class MockStoreRepository extends _i1.Mock implements _i4.StoreRepository {
       ) as _i10.Future<void>);
 
   @override
+  _i10.Future<void> deleteAllStores() => (super.noSuchMethod(
+        Invocation.method(
+          #deleteAllStores,
+          [],
+        ),
+        returnValue: _i10.Future<void>.value(),
+        returnValueForMissingStub: _i10.Future<void>.value(),
+      ) as _i10.Future<void>);
+
+  @override
   _i10.Future<List<_i15.Store>> searchStores(String? query) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -778,6 +788,16 @@ class MockStoreProvider extends _i1.Mock implements _i22.StoreProvider {
       ) as _i10.Future<void>);
 
   @override
+  _i10.Future<void> deleteAllStores() => (super.noSuchMethod(
+        Invocation.method(
+          #deleteAllStores,
+          [],
+        ),
+        returnValue: _i10.Future<void>.value(),
+        returnValueForMissingStub: _i10.Future<void>.value(),
+      ) as _i10.Future<void>);
+
+  @override
   void clearError() => super.noSuchMethod(
         Invocation.method(
           #clearError,
@@ -837,6 +857,30 @@ class MockStoreProvider extends _i1.Mock implements _i22.StoreProvider {
             #lng: lng,
             #range: range,
             #count: count,
+          },
+        ),
+        returnValue: _i10.Future<void>.value(),
+        returnValueForMissingStub: _i10.Future<void>.value(),
+      ) as _i10.Future<void>);
+
+  @override
+  _i10.Future<void> loadMoreSwipeStores({
+    required double? lat,
+    required double? lng,
+    int? range = 3,
+    int? count = 20,
+    required int? start,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #loadMoreSwipeStores,
+          [],
+          {
+            #lat: lat,
+            #lng: lng,
+            #range: range,
+            #count: count,
+            #start: start,
           },
         ),
         returnValue: _i10.Future<void>.value(),
@@ -1020,6 +1064,16 @@ class MockStoreLocalDatasource extends _i1.Mock
         Invocation.method(
           #deleteStore,
           [id],
+        ),
+        returnValue: _i10.Future<void>.value(),
+        returnValueForMissingStub: _i10.Future<void>.value(),
+      ) as _i10.Future<void>);
+
+  @override
+  _i10.Future<void> deleteAllStores() => (super.noSuchMethod(
+        Invocation.method(
+          #deleteAllStores,
+          [],
         ),
         returnValue: _i10.Future<void>.value(),
         returnValueForMissingStub: _i10.Future<void>.value(),
