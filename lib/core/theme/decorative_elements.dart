@@ -25,16 +25,9 @@ class DecorativeElements {
   static Widget ramenBowl({
     double size = 50,
   }) {
-    return Container(
+    return SizedBox(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
       child: Center(
         child: Text(
           '🍜',
