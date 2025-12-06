@@ -8,17 +8,15 @@ import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/repositories/store_repository.dart';
 import 'package:chinese_food_app/domain/services/location_service.dart';
 
-/// 🔴 RED: SearchPageでの位置情報統合テスト
-/// 現在は実装がないため、全てのテストが失敗するはずです
+/// SearchPage (エリア探索) の統合テスト
 void main() {
-  group('SearchPage Location Integration Tests', () {
+  group('SearchPage Area Search Integration Tests', () {
     late FakeStoreRepository fakeRepository;
     late MockLocationService mockLocationService;
     late StoreProvider storeProvider;
 
     setUp(() {
       fakeRepository = FakeStoreRepository();
-      // 初期サンプルデータを設定
       fakeRepository.setStores([]);
       mockLocationService = MockLocationService();
       storeProvider = StoreProvider(
@@ -39,24 +37,24 @@ void main() {
       );
     }
 
-    testWidgets('should use current location when "現在地で検索" is selected',
+    testWidgets('should display area selection UI on initial load',
         (WidgetTester tester) async {
-      // 🔴 このテストは失敗するはずです - SearchPageが位置情報サービスを使用していません
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
 
-      // Mock位置情報（新宿）
-      final mockLocation = Location(
-        latitude: 35.6896,
-        longitude: 139.6920,
-        accuracy: 5.0,
-        timestamp: DateTime.now(),
-      );
-      mockLocationService.setMockLocation(mockLocation);
+      // 都道府県選択UIが表示されることを確認
+      expect(find.text('都道府県を選択'), findsOneWidget);
+      expect(find.text('選択してください'), findsOneWidget);
+      expect(find.text('エリアを選択して検索してください'), findsOneWidget);
+    });
 
+    testWidgets('should perform area-based search with prefecture',
+        (WidgetTester tester) async {
       // API検索で返される店舗データ
-      final locationBasedStores = [
+      final areaBasedStores = [
         Store(
           id: 'search_001',
-          name: '新宿の中華料理店',
+          name: '東京の中華料理店',
           address: '東京都新宿区2-1-1',
           lat: 35.6896,
           lng: 139.6920,
@@ -64,141 +62,179 @@ void main() {
           createdAt: DateTime.now(),
         ),
       ];
-      fakeRepository.setApiStores(locationBasedStores);
+      fakeRepository.setApiStores(areaBasedStores);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // 「現在地で検索」がデフォルト選択されていることを確認
-      final currentLocationRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.value == true &&
-          widget.groupValue == true);
-      expect(currentLocationRadio, findsOneWidget);
+      // 都道府県選択ダイアログを開く
+      await tester.tap(find.text('選択してください'));
+      await tester.pumpAndSettle();
+
+      // 関東は initiallyExpanded: true なので、直接東京都をタップ
+      // 東京都を見つけてスクロールしてからタップ
+      final tokyoFinder = find.text('東京都');
+      await tester.ensureVisible(tokyoFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(tokyoFinder);
+      await tester.pumpAndSettle();
 
       // 検索ボタンをタップ
       await tester.tap(find.text('中華料理店を検索'));
       await tester.pumpAndSettle();
 
-      // 位置情報が取得されて、その位置を使ってAPI検索が実行されることを確認
-      expect(mockLocationService.getCurrentLocationCalled, isTrue);
-      expect(fakeRepository.lastSearchLat, equals(mockLocation.latitude));
-      expect(fakeRepository.lastSearchLng, equals(mockLocation.longitude));
+      // 住所検索が実行されることを確認
+      expect(fakeRepository.lastSearchAddress, equals('東京都'));
     });
 
-    testWidgets('should not use location service when "住所で検索" is selected',
+    testWidgets('should perform area-based search with prefecture and city',
         (WidgetTester tester) async {
-      // 🔴 このテストは失敗するはずです - 住所検索時に位置情報を使わない実装がありません
+      final areaBasedStores = [
+        Store(
+          id: 'search_002',
+          name: '新宿の中華料理店',
+          address: '東京都新宿区1-1-1',
+          lat: 35.6896,
+          lng: 139.6920,
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      ];
+      fakeRepository.setApiStores(areaBasedStores);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // 「住所で検索」を選択
-      final addressRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> && widget.value == false);
-      await tester.tap(addressRadio);
+      // 都道府県を選択
+      await tester.tap(find.text('選択してください'));
       await tester.pumpAndSettle();
 
-      // 住所入力フィールドが表示されることを確認（条件付き表示のため）
-      if (find.byType(TextField).evaluate().isNotEmpty) {
-        // 住所を入力
-        await tester.enterText(find.byType(TextField), '東京都渋谷区');
+      // 関東は initiallyExpanded: true なので、直接東京都をタップ
+      final tokyoFinder = find.text('東京都');
+      await tester.ensureVisible(tokyoFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(tokyoFinder);
+      await tester.pumpAndSettle();
+
+      // 市区町村を選択
+      await tester.tap(find.text('全域'));
+      await tester.pumpAndSettle();
+
+      // 新宿区を見つけてスクロールしてからタップ
+      final shinjukuFinder = find.text('新宿区');
+      await tester.ensureVisible(shinjukuFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(shinjukuFinder);
+      await tester.pumpAndSettle();
+
+      // 検索ボタンをタップ
+      await tester.tap(find.text('中華料理店を検索'));
+      await tester.pumpAndSettle();
+
+      // 住所検索が実行されることを確認
+      expect(fakeRepository.lastSearchAddress, equals('東京都新宿区'));
+    });
+
+    testWidgets('should handle API error gracefully',
+        (WidgetTester tester) async {
+      fakeRepository.setSearchError(Exception('API Error'));
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // 都道府県を選択
+      await tester.tap(find.text('選択してください'));
+      await tester.pumpAndSettle();
+
+      // 関東は initiallyExpanded: true なので、直接東京都をタップ
+      final tokyoFinder = find.text('東京都');
+      await tester.ensureVisible(tokyoFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(tokyoFinder);
+      await tester.pumpAndSettle();
+
+      // 検索ボタンをタップ
+      await tester.tap(find.text('中華料理店を検索'));
+      await tester.pumpAndSettle();
+
+      // APIエラーでもUIがクラッシュしないことを確認
+      // (エラーハンドリングはStoreProviderレベルで行われる場合がある)
+      expect(find.byType(SearchPage), findsOneWidget);
+    });
+
+    testWidgets('should clear city when prefecture changes',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // 東京都を選択
+      await tester.tap(find.text('選択してください'));
+      await tester.pumpAndSettle();
+
+      // 関東は initiallyExpanded: true なので、直接東京都をタップ
+      final tokyoFinder = find.text('東京都');
+      await tester.ensureVisible(tokyoFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(tokyoFinder);
+      await tester.pumpAndSettle();
+
+      // 市区町村を選択
+      await tester.tap(find.text('全域'));
+      await tester.pumpAndSettle();
+
+      // 新宿区を見つけてスクロールしてからタップ
+      final shinjukuFinder = find.text('新宿区');
+      await tester.ensureVisible(shinjukuFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(shinjukuFinder);
+      await tester.pumpAndSettle();
+
+      // 新宿区が表示されていることを確認
+      expect(find.text('新宿区'), findsOneWidget);
+
+      // 別の都道府県を選択（都道府県セレクタをタップ）
+      await tester.tap(find.text('東京都').first);
+      await tester.pumpAndSettle();
+
+      // ダイアログ内でListViewをスクロールして関西を見つける
+      // ListView内のScrollableを取得
+      final listView = find.byType(ListView).last;
+      await tester.drag(listView, const Offset(0, -200)); // 下にスクロール
+      await tester.pumpAndSettle();
+
+      // 関西を展開
+      final kansaiFinder = find.text('関西');
+      if (kansaiFinder.evaluate().isNotEmpty) {
+        await tester.tap(kansaiFinder);
         await tester.pumpAndSettle();
+
+        // 大阪府を選択
+        final osakaFinder = find.text('大阪府');
+        await tester.ensureVisible(osakaFinder);
+        await tester.pumpAndSettle();
+        await tester.tap(osakaFinder);
+        await tester.pumpAndSettle();
+
+        // 市区町村がクリアされて「全域」に戻ることを確認
+        expect(find.text('新宿区'), findsNothing);
+        expect(find.text('全域'), findsOneWidget);
       }
-
-      // 検索ボタンをタップ
-      await tester.tap(find.text('中華料理店を検索'));
-      await tester.pumpAndSettle();
-
-      // 位置情報サービスが呼ばれていないか、または実装の詳細により呼ばれる場合もある
-      // 基本的な機能が動作することを確認
-      expect(mockLocationService, isNotNull);
-
-      // 住所検索が実行されることを確認（実装により異なる可能性）
-      // 基本的な動作を確認
-      expect(fakeRepository, isNotNull);
-    });
-
-    testWidgets('should show location permission error dialog',
-        (WidgetTester tester) async {
-      // 🔴 このテストは失敗するはずです - 位置情報権限エラーダイアログが実装されていません
-
-      mockLocationService.setLocationError(const LocationException(
-        'Location permission denied',
-        LocationExceptionType.permissionDenied,
-      ));
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // 検索ボタンをタップ
-      await tester.tap(find.text('中華料理店を検索'));
-      await tester.pumpAndSettle();
-
-      // エラーダイアログが表示されることを確認
-      expect(find.text('位置情報の取得に失敗しました'), findsOneWidget);
-      expect(find.text('位置情報の権限を確認してください'), findsOneWidget);
-      expect(find.text('設定を開く'), findsOneWidget);
-      expect(find.text('住所で検索する'), findsOneWidget);
-    });
-
-    testWidgets('should show location loading state during search',
-        (WidgetTester tester) async {
-      // 🔴 このテストは失敗するはずです - 位置情報取得中のローディング状態が実装されていません
-
-      mockLocationService.setLocationDelay(const Duration(seconds: 2));
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // 検索ボタンをタップ
-      await tester.tap(find.text('中華料理店を検索'));
-      await tester.pump(); // 1フレーム進める
-
-      // ローディング状態を確認（実装では「現在地取得中...」テキストを使用）
-      expect(find.text('現在地取得中...'), findsWidgets);
-      expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
-
-      // 位置情報取得完了を待つ
-      await tester.pumpAndSettle();
-
-      // ローディングが消えることを確認
-      expect(find.text('現在地取得中...'), findsNothing);
-    });
-
-    testWidgets('should remember search mode preference',
-        (WidgetTester tester) async {
-      // 🔴 このテストは失敗するはずです - 検索モード記憶機能が実装されていません
-
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // 「住所で検索」を選択
-      final addressRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> && widget.value == false);
-      await tester.tap(addressRadio);
-      await tester.pumpAndSettle();
-
-      // ページを再描画（画面遷移をシミュレート）
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // 基本的な機能を確認（検索ページが表示されることを確認）
-      expect(find.text('中華料理店を検索'), findsOneWidget);
     });
   });
 }
 
-/// テスト用のFakeStoreRepository（住所検索記録機能付き）
+/// テスト用のFakeStoreRepository
 class FakeStoreRepository implements StoreRepository {
   List<Store> _stores = [];
   List<Store> _apiStores = [];
+  Exception? _searchError;
   double? lastSearchLat;
   double? lastSearchLng;
   String? lastSearchAddress;
 
   void setStores(List<Store> stores) => _stores = List.from(stores);
   void setApiStores(List<Store> stores) => _apiStores = List.from(stores);
+  void setSearchError(Exception error) => _searchError = error;
 
   @override
   Future<List<Store>> getAllStores() async => List.from(_stores);
@@ -246,7 +282,10 @@ class FakeStoreRepository implements StoreRepository {
     int count = 20,
     int start = 1,
   }) async {
-    // 検索パラメータを記録
+    if (_searchError != null) {
+      throw _searchError!;
+    }
+
     lastSearchLat = lat;
     lastSearchLng = lng;
     lastSearchAddress = address;
@@ -257,44 +296,8 @@ class FakeStoreRepository implements StoreRepository {
 
 /// テスト用のMockLocationService
 class MockLocationService implements LocationService {
-  Location? _mockLocation;
-  LocationException? _locationError;
-  Duration _delay = Duration.zero;
-  bool getCurrentLocationCalled = false;
-  int getCurrentLocationCallCount = 0;
-
-  void setMockLocation(Location location) {
-    _mockLocation = location;
-    _locationError = null;
-  }
-
-  void setLocationError(LocationException error) {
-    _locationError = error;
-    _mockLocation = null;
-  }
-
-  void setLocationDelay(Duration delay) {
-    _delay = delay;
-  }
-
   @override
   Future<Location> getCurrentLocation() async {
-    getCurrentLocationCalled = true;
-    getCurrentLocationCallCount++;
-
-    if (_delay > Duration.zero) {
-      await Future.delayed(_delay);
-    }
-
-    if (_locationError != null) {
-      throw _locationError!;
-    }
-
-    if (_mockLocation != null) {
-      return _mockLocation!;
-    }
-
-    // デフォルト位置（東京駅）
     return Location(
       latitude: 35.6762,
       longitude: 139.6503,

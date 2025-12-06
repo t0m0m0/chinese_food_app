@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/constants/area_data.dart';
-import 'package:chinese_food_app/domain/entities/area.dart';
 
 void main() {
   group('AreaData', () {
@@ -35,7 +34,8 @@ void main() {
         final tokyoCities = AreaData.getCitiesForPrefecture('13');
 
         expect(tokyoCities, isNotEmpty);
-        expect(tokyoCities.every((city) => city.prefectureCode == '13'), isTrue);
+        expect(
+            tokyoCities.every((city) => city.prefectureCode == '13'), isTrue);
       });
 
       test('should return empty list for invalid prefecture code', () {

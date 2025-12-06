@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:app_settings/app_settings.dart';
 import '../../../core/constants/string_constants.dart';
 import '../../../core/config/ui_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/duplicate_store_checker.dart';
+import '../../../core/constants/area_data.dart';
 import '../../../domain/entities/store.dart';
-import '../../../domain/services/location_service.dart';
+import '../../../domain/entities/area.dart';
 import '../../providers/store_provider.dart';
-import '../../providers/search_provider.dart';
+import '../../providers/area_search_provider.dart';
 import '../../widgets/cached_store_image.dart';
 import '../../widgets/api_attribution_widget.dart';
 import '../../widgets/search_filter_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
+/// エリア探索ページ
+///
+/// 都道府県・市区町村の階層選択によるエリア指定検索を提供
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
@@ -24,103 +27,36 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final _searchController = TextEditingController();
-  late SearchProvider _searchProvider;
+  late AreaSearchProvider _areaSearchProvider;
   bool _showFilters = false;
 
   @override
   void initState() {
     super.initState();
-    // SearchProviderを初期化
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
-    final locationService =
-        Provider.of<LocationService>(context, listen: false);
-    _searchProvider = SearchProvider(
-      storeProvider: storeProvider,
-      locationService: locationService,
-    );
+    _areaSearchProvider = AreaSearchProvider(storeProvider: storeProvider);
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _searchProvider.dispose();
+    _areaSearchProvider.dispose();
     super.dispose();
   }
 
   Future<void> _performSearch() async {
-    if (!_searchProvider.useCurrentLocation &&
-        _searchController.text.trim().isEmpty) {
+    if (!_areaSearchProvider.canSearch) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('住所を入力してください')),
+        const SnackBar(content: Text('都道府県を選択してください')),
       );
       return;
     }
-
-    if (_searchProvider.useCurrentLocation) {
-      await _searchProvider.performSearchWithCurrentLocation();
-    } else {
-      await _searchProvider.performSearch(
-          address: _searchController.text.trim());
-    }
-  }
-
-  /// 位置情報エラーダイアログを表示
-  Future<void> _showLocationErrorDialog(String errorMessage) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('位置情報の取得に失敗しました'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('位置情報の権限を確認してください'),
-              const SizedBox(height: 8),
-              Text('エラー: $errorMessage'),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('住所で検索する'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _searchProvider.setUseCurrentLocation(false);
-              },
-            ),
-            TextButton(
-              child: const Text('設定を開く'),
-              onPressed: () async {
-                Navigator.of(context).pop();
-
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                try {
-                  await AppSettings.openAppSettings(
-                    type: AppSettingsType.location,
-                  );
-                } catch (e) {
-                  if (mounted) {
-                    scaffoldMessenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('設定画面を開けませんでした。手動で設定をご確認ください。'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  }
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
+    await _areaSearchProvider.performSearch();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SearchProvider>.value(
-      value: _searchProvider,
+    return ChangeNotifierProvider<AreaSearchProvider>.value(
+      value: _areaSearchProvider,
       child: Scaffold(
         extendBodyBehindAppBar: false,
         backgroundColor: AppTheme.backgroundLight,
@@ -132,7 +68,7 @@ class _SearchPageState extends State<SearchPage> {
                   size: 50, color: AppTheme.primaryRed),
               const SizedBox(width: 12),
               Text(
-                '検索',
+                'エリア',
                 style: AppTheme.headlineMedium.copyWith(
                   color: AppTheme.textPrimary,
                 ),
@@ -152,7 +88,7 @@ class _SearchPageState extends State<SearchPage> {
         ),
         body: Column(
           children: [
-            _buildSearchForm(),
+            _buildAreaSelector(),
             if (_showFilters) _buildSearchFilter(),
             Divider(color: AppTheme.accentBeige.withValues(alpha: 0.5)),
             Expanded(child: _buildSearchResults()),
@@ -162,34 +98,13 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildSearchFilter() {
-    return Selector<SearchProvider, ({int searchRange, int resultCount})>(
+  Widget _buildAreaSelector() {
+    return Selector<AreaSearchProvider,
+        ({Prefecture? prefecture, City? city, bool isLoading})>(
       selector: (context, provider) => (
-        searchRange: provider.searchRange,
-        resultCount: provider.resultCount,
-      ),
-      builder: (context, state, child) {
-        return SearchFilterWidget(
-          searchRange: state.searchRange,
-          resultCount: state.resultCount,
-          onRangeChanged: (range) {
-            _searchProvider.setSearchRange(range);
-          },
-          onCountChanged: (count) {
-            _searchProvider.setResultCount(count);
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildSearchForm() {
-    return Selector<SearchProvider,
-        ({bool useCurrentLocation, bool isLoading, bool isGettingLocation})>(
-      selector: (context, provider) => (
-        useCurrentLocation: provider.useCurrentLocation,
+        prefecture: provider.selectedPrefecture,
+        city: provider.selectedCity,
         isLoading: provider.isLoading,
-        isGettingLocation: provider.isGettingLocation,
       ),
       builder: (context, state, child) {
         return Padding(
@@ -197,58 +112,36 @@ class _SearchPageState extends State<SearchPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: RadioListTile<bool>(
-                      title: const Text('現在地で検索'),
-                      value: true,
-                      groupValue: state.useCurrentLocation,
-                      onChanged: (value) {
-                        _searchProvider.setUseCurrentLocation(true);
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<bool>(
-                      title: const Text('住所で検索'),
-                      value: false,
-                      groupValue: state.useCurrentLocation,
-                      onChanged: (value) {
-                        _searchProvider.setUseCurrentLocation(false);
-                      },
-                    ),
-                  ),
-                ],
-              ),
+              // 都道府県選択
+              _buildPrefectureSelector(state.prefecture),
+              const SizedBox(height: 12),
+
+              // 市区町村選択（都道府県選択後のみ表示）
+              if (state.prefecture != null) ...[
+                _buildCitySelector(state.prefecture!, state.city),
+                const SizedBox(height: 12),
+              ],
+
+              // 選択中のエリア表示
+              if (state.prefecture != null) _buildSelectedAreaChip(state),
+
               const SizedBox(height: 16),
-              if (!state.useCurrentLocation)
-                TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    labelText: '住所を入力',
-                    hintText: '例: 東京都新宿区',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.location_on),
-                  ),
-                ),
-              const SizedBox(height: 16),
+
+              // 検索ボタンとフィルター
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: (state.isLoading || state.isGettingLocation)
-                          ? null
-                          : _performSearch,
-                      icon: (state.isLoading || state.isGettingLocation)
+                      onPressed: state.isLoading ? null : _performSearch,
+                      icon: state.isLoading
                           ? const SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.search),
-                      label: Text((state.isGettingLocation || state.isLoading)
-                          ? (state.isGettingLocation ? '現在地取得中...' : '検索中...')
+                      label: Text(state.isLoading
+                          ? '検索中...'
                           : StringConstants.searchButtonLabel),
                     ),
                   ),
@@ -275,37 +168,265 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  Widget _buildPrefectureSelector(Prefecture? selectedPrefecture) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '都道府県を選択',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => _showPrefectureDialog(),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppTheme.accentBeige),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  selectedPrefecture?.name ?? '選択してください',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: selectedPrefecture != null
+                        ? AppTheme.textPrimary
+                        : AppTheme.textSecondary,
+                  ),
+                ),
+                const Icon(Icons.arrow_drop_down,
+                    color: AppTheme.textSecondary),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCitySelector(Prefecture prefecture, City? selectedCity) {
+    final cities = AreaData.getCitiesForPrefecture(prefecture.code);
+
+    if (cities.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '市区町村を選択（任意）',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => _showCityDialog(prefecture),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppTheme.accentBeige),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  selectedCity?.name ?? '全域',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: selectedCity != null
+                        ? AppTheme.textPrimary
+                        : AppTheme.textSecondary,
+                  ),
+                ),
+                Row(
+                  children: [
+                    if (selectedCity != null)
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: () => _areaSearchProvider.clearCity(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.arrow_drop_down,
+                        color: AppTheme.textSecondary),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectedAreaChip(
+      ({Prefecture? prefecture, City? city, bool isLoading}) state) {
+    final selection = _areaSearchProvider.currentSelection;
+    if (selection == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryRed.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.primaryRed.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.location_on, size: 18, color: AppTheme.primaryRed),
+          const SizedBox(width: 4),
+          Text(
+            '${selection.displayName}の中華料理店',
+            style: const TextStyle(
+              color: AppTheme.primaryRed,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrefectureDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('都道府県を選択'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: ListView.builder(
+            itemCount: AreaData.prefecturesByRegion.length,
+            itemBuilder: (context, index) {
+              final region = AreaData.prefecturesByRegion.keys.elementAt(index);
+              final prefectures = AreaData.prefecturesByRegion[region]!;
+
+              return ExpansionTile(
+                title: Text(
+                  region,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                initiallyExpanded: region == '関東', // 関東をデフォルトで開く
+                children: prefectures.map((prefecture) {
+                  return ListTile(
+                    title: Text(prefecture.name),
+                    dense: true,
+                    onTap: () {
+                      _areaSearchProvider.selectPrefecture(prefecture);
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCityDialog(Prefecture prefecture) {
+    final cities = AreaData.getCitiesForPrefecture(prefecture.code);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('${prefecture.name}の市区町村'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 300,
+          child: ListView(
+            children: [
+              ListTile(
+                title: const Text('全域'),
+                leading: const Icon(Icons.public),
+                dense: true,
+                onTap: () {
+                  _areaSearchProvider.clearCity();
+                  Navigator.pop(context);
+                },
+              ),
+              const Divider(),
+              ...cities.map((city) => ListTile(
+                    title: Text(city.name),
+                    dense: true,
+                    onTap: () {
+                      _areaSearchProvider.selectCity(city);
+                      Navigator.pop(context);
+                    },
+                  )),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchFilter() {
+    return Selector<AreaSearchProvider, ({int searchRange, int resultCount})>(
+      selector: (context, provider) => (
+        searchRange: provider.searchRange,
+        resultCount: provider.resultCount,
+      ),
+      builder: (context, state, child) {
+        return SearchFilterWidget(
+          searchRange: state.searchRange,
+          resultCount: state.resultCount,
+          onRangeChanged: (range) {
+            _areaSearchProvider.setSearchRange(range);
+          },
+          onCountChanged: (count) {
+            _areaSearchProvider.setResultCount(count);
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildSearchResults() {
     return Selector<
-        SearchProvider,
+        AreaSearchProvider,
         ({
-          bool isGettingLocation,
           bool isLoading,
           String? errorMessage,
           List<Store> searchResults,
-          bool hasSearched
+          bool hasSearched,
+          AreaSelection? selection
         })>(
       selector: (context, provider) => (
-        isGettingLocation: provider.isGettingLocation,
         isLoading: provider.isLoading,
         errorMessage: provider.errorMessage,
         searchResults: provider.searchResults,
         hasSearched: provider.hasSearched,
+        selection: provider.currentSelection,
       ),
       builder: (context, state, child) {
-        if (state.isGettingLocation) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('現在地取得中...'),
-              ],
-            ),
-          );
-        }
-
         if (state.isLoading) {
           return const Center(
             child: Column(
@@ -320,13 +441,6 @@ class _SearchPageState extends State<SearchPage> {
         }
 
         if (state.errorMessage != null) {
-          // 位置情報エラーの場合はダイアログを表示
-          if (state.errorMessage!.contains('位置情報')) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showLocationErrorDialog(state.errorMessage!);
-            });
-          }
-
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -354,19 +468,30 @@ class _SearchPageState extends State<SearchPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.search, size: 64, color: Colors.grey),
+                Icon(
+                  state.hasSearched ? Icons.search_off : Icons.map,
+                  size: 64,
+                  color: Colors.grey,
+                ),
                 const SizedBox(height: 16),
                 Text(
-                  state.hasSearched
-                      ? '検索結果が見つかりません'
-                      : StringConstants.noResultsMessage,
+                  state.hasSearched ? '検索結果が見つかりません' : 'エリアを選択して検索してください',
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 if (state.hasSearched) ...[
                   const SizedBox(height: 8),
                   const Text(
-                    '別の住所で検索するか、\n検索範囲を広げてみてください',
+                    '別のエリアで検索するか、\n検索範囲を広げてみてください',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    '出張先や旅行先のエリアを\n選んで中華料理店を探そう',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey),
                   ),
@@ -378,6 +503,33 @@ class _SearchPageState extends State<SearchPage> {
 
         return Column(
           children: [
+            // エリア名を表示
+            if (state.selection != null)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.restaurant, size: 20, color: Colors.grey),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${state.selection!.displayName}の中華料理店',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${state.searchResults.length}件',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             Expanded(
               child: ListView.builder(
                 itemCount: state.searchResults.length,
@@ -464,11 +616,9 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  /// 検索結果の店舗を「行きたい」リストに追加
   Future<void> _addToWantToGo(Store store) async {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
-    // Issue #96: 統一化されたDuplicateStoreCheckerを使用
     final existingStore = storeProvider.stores
         .where((s) => DuplicateStoreChecker.isDuplicate(s, store))
         .firstOrNull;
@@ -488,11 +638,8 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     try {
-      // 検索結果の店舗をステータス付きで追加
       final storeWithStatus = store.copyWith(status: StoreStatus.wantToGo);
       await storeProvider.addStore(storeWithStatus);
-
-      // 店舗追加成功 - ボタンの状態変化で十分なためスナックバー削除
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
