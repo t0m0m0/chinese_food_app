@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/string_constants.dart';
-import '../../../core/config/ui_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
@@ -13,7 +12,6 @@ import '../../providers/store_provider.dart';
 import '../../providers/area_search_provider.dart';
 import '../../widgets/cached_store_image.dart';
 import '../../widgets/api_attribution_widget.dart';
-import '../../widgets/search_filter_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
 /// エリア探索ページ
@@ -28,7 +26,6 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   late AreaSearchProvider _areaSearchProvider;
-  bool _showFilters = false;
 
   @override
   void initState() {
@@ -89,7 +86,6 @@ class _SearchPageState extends State<SearchPage> {
         body: Column(
           children: [
             _buildAreaSelector(),
-            if (_showFilters) _buildSearchFilter(),
             Divider(color: AppTheme.accentBeige.withValues(alpha: 0.5)),
             Expanded(child: _buildSearchResults()),
           ],
@@ -127,39 +123,22 @@ class _SearchPageState extends State<SearchPage> {
 
               const SizedBox(height: 16),
 
-              // 検索ボタンとフィルター
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: state.isLoading ? null : _performSearch,
-                      icon: state.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.search),
-                      label: Text(state.isLoading
-                          ? '検索中...'
-                          : StringConstants.searchButtonLabel),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _showFilters = !_showFilters;
-                      });
-                    },
-                    icon: Icon(_showFilters
-                        ? Icons.filter_list_off
-                        : Icons.filter_list),
-                    tooltip: _showFilters
-                        ? UiConfig.getSearchFilterLabel('filterHide')
-                        : UiConfig.getSearchFilterLabel('filterShow'),
-                  ),
-                ],
+              // 検索ボタン
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: state.isLoading ? null : _performSearch,
+                  icon: state.isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.search),
+                  label: Text(state.isLoading
+                      ? '検索中...'
+                      : StringConstants.searchButtonLabel),
+                ),
               ),
             ],
           ),
@@ -385,27 +364,6 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildSearchFilter() {
-    return Selector<AreaSearchProvider, ({int searchRange, int resultCount})>(
-      selector: (context, provider) => (
-        searchRange: provider.searchRange,
-        resultCount: provider.resultCount,
-      ),
-      builder: (context, state, child) {
-        return SearchFilterWidget(
-          searchRange: state.searchRange,
-          resultCount: state.resultCount,
-          onRangeChanged: (range) {
-            _areaSearchProvider.setSearchRange(range);
-          },
-          onCountChanged: (count) {
-            _areaSearchProvider.setResultCount(count);
-          },
-        );
-      },
     );
   }
 

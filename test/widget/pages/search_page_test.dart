@@ -234,14 +234,5 @@ void main() {
       // then: エリアチップが表示される
       expect(find.text('東京都の中華料理店'), findsOneWidget);
     });
-
-    testWidgets('should have filter toggle button', (tester) async {
-      // when: SearchPageを表示
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // then: フィルターボタンが表示される
-      expect(find.byIcon(Icons.filter_list), findsOneWidget);
-    });
   });
 }
