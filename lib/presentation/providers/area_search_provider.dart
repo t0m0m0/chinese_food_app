@@ -28,7 +28,7 @@ class AreaSearchProvider extends ChangeNotifier {
   // ページネーション
   int _currentPage = 1;
   bool _hasMoreResults = true;
-  static const int _pageSize = 20;
+  static const int _pageSize = SearchConfig.defaultPageSize;
 
   // 検索フィルター
   int _searchRange = SearchConfig.defaultRange;
@@ -146,6 +146,7 @@ class AreaSearchProvider extends ChangeNotifier {
 
   /// 次のページを読み込む
   Future<void> loadMoreResults() async {
+    // Race condition 防止：早期チェックとフラグ即時設定
     if (!canSearch || _isLoadingMore || !_hasMoreResults) {
       return;
     }

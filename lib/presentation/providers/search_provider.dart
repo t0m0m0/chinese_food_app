@@ -38,7 +38,7 @@ class SearchProvider extends ChangeNotifier {
   // ページネーション
   int _currentPage = 1;
   bool _hasMoreResults = true;
-  static const int _pageSize = 20;
+  static const int _pageSize = SearchConfig.defaultPageSize;
 
   // 最後の検索パラメータ（ページネーション用）
   double? _lastSearchLat;
@@ -209,6 +209,7 @@ class SearchProvider extends ChangeNotifier {
 
   // 次のページを読み込む
   Future<void> loadMoreResults() async {
+    // Race condition 防止：早期チェックとフラグ即時設定
     if (_isLoadingMore || !_hasMoreResults) {
       return;
     }
