@@ -453,13 +453,6 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      '${state.searchResults.length}件',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
                   ],
                 ),
               ),
