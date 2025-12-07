@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 
-import '../exceptions/domain_exceptions.dart';
+import '../exceptions/unified_exceptions_export.dart';
 import 'api_response.dart';
 import 'app_http_client.dart';
 
@@ -50,8 +50,7 @@ abstract class BaseApiService {
   /// [queryParameters] - URL query parameters
   ///
   /// Returns parsed data of type [T]
-  /// Throws [ApiException] on API errors
-  /// Throws [NetworkException] on network errors
+  /// Throws [UnifiedNetworkException] on API or network errors
   Future<T> getAndParse<T>(
     String path,
     T Function(dynamic json) parser, {
@@ -83,8 +82,7 @@ abstract class BaseApiService {
   /// [queryParameters] - URL query parameters
   ///
   /// Returns parsed data of type [T]
-  /// Throws [ApiException] on API errors
-  /// Throws [NetworkException] on network errors
+  /// Throws [UnifiedNetworkException] on API or network errors
   Future<T> postAndParse<T>(
     String path,
     T Function(dynamic json) parser, {
@@ -118,8 +116,7 @@ abstract class BaseApiService {
   /// [queryParameters] - URL query parameters
   ///
   /// Returns parsed data of type [T]
-  /// Throws [ApiException] on API errors
-  /// Throws [NetworkException] on network errors
+  /// Throws [UnifiedNetworkException] on API or network errors
   Future<T> putAndParse<T>(
     String path,
     T Function(dynamic json) parser, {
@@ -152,8 +149,7 @@ abstract class BaseApiService {
   /// [queryParameters] - URL query parameters
   ///
   /// Returns parsed data of type [T]
-  /// Throws [ApiException] on API errors
-  /// Throws [NetworkException] on network errors
+  /// Throws [UnifiedNetworkException] on API or network errors
   Future<T> deleteAndParse<T>(
     String path,
     T Function(dynamic json) parser, {
@@ -183,7 +179,7 @@ abstract class BaseApiService {
   /// [queryParameters] - URL query parameters
   ///
   /// Returns raw [ApiResponse]
-  /// Throws [NetworkException] on network errors
+  /// Throws [UnifiedNetworkException] on network errors
   Future<ApiResponse> getRaw(
     String path, {
     Map<String, String>? headers,
@@ -211,7 +207,7 @@ abstract class BaseApiService {
   /// [queryParameters] - URL query parameters
   ///
   /// Returns raw [ApiResponse]
-  /// Throws [NetworkException] on network errors
+  /// Throws [UnifiedNetworkException] on network errors
   Future<ApiResponse> postRaw(
     String path, {
     dynamic body,
@@ -257,14 +253,14 @@ abstract class BaseApiService {
 
       return parser(jsonData);
     } on FormatException catch (e) {
-      throw ApiException(
+      throw UnifiedNetworkException.api(
         'Invalid JSON response: ${e.message}',
         statusCode: response.statusCode,
       );
     } catch (e) {
-      if (e is ApiException) rethrow;
+      if (e is UnifiedNetworkException) rethrow;
 
-      throw ApiException(
+      throw UnifiedNetworkException.api(
         'Response parsing failed: ${e.toString()}',
         statusCode: response.statusCode,
       );
@@ -286,7 +282,7 @@ abstract class BaseApiService {
   /// [json] - JSON object to validate
   /// [requiredFields] - List of required field names
   ///
-  /// Throws [ApiException] if any required field is missing
+  /// Throws [UnifiedNetworkException] if any required field is missing
   void validateRequiredFields(
       Map<String, dynamic> json, List<String> requiredFields) {
     final missingFields = <String>[];
@@ -298,7 +294,7 @@ abstract class BaseApiService {
     }
 
     if (missingFields.isNotEmpty) {
-      throw ApiException(
+      throw UnifiedNetworkException.api(
         'Missing required fields: ${missingFields.join(', ')}',
       );
     }

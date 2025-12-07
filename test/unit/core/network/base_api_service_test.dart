@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/network/base_api_service.dart';
 import 'package:chinese_food_app/core/network/app_http_client.dart';
 import 'package:chinese_food_app/core/network/api_response.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/unified_exceptions_export.dart';
 
 void main() {
   group('BaseApiService', () {
@@ -47,7 +47,7 @@ void main() {
         expect(result, equals('empty'));
       });
 
-      test('should throw ApiException on invalid JSON', () async {
+      test('should throw UnifiedNetworkException on invalid JSON', () async {
         // Arrange
         const invalidJson = '{invalid json}';
         mockHttpClient.stubGet('/invalid',
@@ -56,7 +56,7 @@ void main() {
         // Act & Assert
         await expectLater(
           () => apiService.getAndParse('/invalid', (json) => json),
-          throwsA(isA<ApiException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.message,
             'message',
             contains('Invalid JSON response'),
@@ -64,7 +64,7 @@ void main() {
         );
       });
 
-      test('should throw ApiException on parsing error', () async {
+      test('should throw UnifiedNetworkException on parsing error', () async {
         // Arrange
         const jsonResponse = '{"name": "test"}';
         mockHttpClient.stubGet('/parse-error',
@@ -76,7 +76,7 @@ void main() {
             '/parse-error',
             (json) => throw Exception('Parsing failed'),
           ),
-          throwsA(isA<ApiException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.message,
             'message',
             contains('Response parsing failed'),
@@ -210,7 +210,8 @@ void main() {
         );
       });
 
-      test('should throw ApiException for missing required fields', () {
+      test('should throw UnifiedNetworkException for missing required fields',
+          () {
         // Arrange
         final json = {'name': 'test'};
         final requiredFields = ['name', 'email', 'age'];
@@ -218,7 +219,7 @@ void main() {
         // Act & Assert
         expect(
           () => apiService.validateRequiredFields(json, requiredFields),
-          throwsA(isA<ApiException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.message,
             'message',
             contains('Missing required fields: email, age'),
@@ -333,15 +334,16 @@ void main() {
     });
 
     group('Error Propagation', () {
-      test('should propagate NetworkException from HTTP client', () async {
+      test('should propagate UnifiedNetworkException from HTTP client',
+          () async {
         // Arrange
         mockHttpClient.stubGetError(
-            '/error', NetworkException('Network failed'));
+            '/error', UnifiedNetworkException.connection('Network failed'));
 
         // Act & Assert
         await expectLater(
           () => apiService.getAndParse('/error', (json) => json),
-          throwsA(isA<NetworkException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.message,
             'message',
             equals('Network failed'),
@@ -349,7 +351,7 @@ void main() {
         );
       });
 
-      test('should propagate ApiException from parsing', () async {
+      test('should propagate UnifiedNetworkException from parsing', () async {
         // Arrange
         mockHttpClient.stubGet('/api-error',
             response: ApiResponse.success(data: '{"data": "test"}'));
@@ -358,9 +360,9 @@ void main() {
         await expectLater(
           () => apiService.getAndParse(
             '/api-error',
-            (json) => throw ApiException('Custom parsing error'),
+            (json) => throw UnifiedNetworkException.api('Custom parsing error'),
           ),
-          throwsA(isA<ApiException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.message,
             'message',
             equals('Custom parsing error'),
