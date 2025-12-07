@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../core/config/api_config.dart';
 import '../../core/config/environment_config.dart';
-import '../../core/exceptions/domain_exceptions.dart';
+import '../../core/exceptions/unified_exceptions_export.dart';
 import '../../core/network/base_api_service.dart';
 import '../../core/network/app_http_client.dart';
 import '../../core/network/ssl_bypass_http_client.dart';
@@ -174,10 +174,10 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
         debugPrint('✅ プロキシサーバーからレスポンス取得成功: ${response.shops.length}件');
       }
       return response;
-    } on NetworkException catch (e) {
+    } on UnifiedNetworkException catch (e) {
       if (kDebugMode) {
         debugPrint(
-            '🚫 NetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
+            '🚫 UnifiedNetworkException発生: ${e.message} (ステータス: ${e.statusCode})');
       }
 
       // SSL/TLSエラーの場合は、より具体的なメッセージを提供
@@ -185,7 +185,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
         if (kDebugMode) {
           debugPrint('🔒 SSL/TLS接続エラー検出');
         }
-        throw ApiException(
+        throw UnifiedNetworkException.api(
           'プロキシサーバーへの安全な接続に失敗しました。\n'
           'ネットワーク環境を確認してください。\n'
           'Secure connection to proxy server failed.\n'
@@ -207,7 +207,7 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
         if (kDebugMode) {
           debugPrint('🔒 予期しないSSL/TLS接続エラー検出');
         }
-        throw ApiException(
+        throw UnifiedNetworkException.api(
           'プロキシサーバーへの安全な接続に失敗しました。\n'
           'ネットワーク環境を確認してください。\n'
           'Secure connection to proxy server failed.\n'
@@ -215,7 +215,8 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
         );
       }
 
-      throw ApiException('Proxy server request failed: ${e.toString()}');
+      throw UnifiedNetworkException.api(
+          'Proxy server request failed: ${e.toString()}');
     }
   }
 
@@ -242,11 +243,11 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       return Success(response);
     } on ValidationException catch (e) {
       return Failure(e);
-    } on ApiException catch (e) {
+    } on UnifiedNetworkException catch (e) {
       return Failure(e);
     } catch (e) {
-      return Failure(
-          ApiException('Unexpected proxy server error: ${e.toString()}'));
+      return Failure(UnifiedNetworkException.api(
+          'Unexpected proxy server error: ${e.toString()}'));
     }
   }
 
@@ -317,35 +318,36 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
     };
   }
 
-  /// プロキシサーバーのエラーレスポンスを適切なApiExceptionに変換
-  ApiException _handleProxyException(NetworkException e) {
+  /// プロキシサーバーのエラーレスポンスを適切なUnifiedNetworkExceptionに変換
+  UnifiedNetworkException _handleProxyException(UnifiedNetworkException e) {
     final statusCode = e.statusCode;
 
     if (statusCode == null) {
-      return ApiException('Proxy server network error: ${e.message}');
+      return UnifiedNetworkException.api(
+          'Proxy server network error: ${e.message}');
     }
 
     switch (statusCode) {
       case 400:
-        return ApiException(
+        return UnifiedNetworkException.api(
           '不正なリクエストパラメータ - 検索条件を確認してください\n'
           'Invalid request parameters - Please check search criteria',
           statusCode: statusCode,
         );
       case 403:
-        return ApiException(
+        return UnifiedNetworkException.unauthorized(
           'アクセス拒否 - オリジンが許可されていません\n'
           'Unauthorized access - Origin not allowed',
           statusCode: statusCode,
         );
       case 429:
-        return ApiException(
+        return UnifiedNetworkException.rateLimitExceeded(
           'レート制限エラー - プロキシサーバーへのリクエストが多すぎます\n'
           'Rate limit exceeded - Too many requests to proxy server',
           statusCode: statusCode,
         );
       case 500:
-        return ApiException(
+        return UnifiedNetworkException.http(
           'プロキシサーバー内部エラー - しばらく待ってから再試行してください\n'
           'Proxy server internal error - Please try again later',
           statusCode: statusCode,
@@ -353,13 +355,12 @@ class HotpepperProxyDatasourceImpl extends BaseApiService
       case 502:
       case 503:
       case 504:
-        return ApiException(
+        return UnifiedNetworkException.maintenance(
           'プロキシサーバーまたは上位APIが一時的に利用できません\n'
           'Proxy server or upstream API temporarily unavailable',
-          statusCode: statusCode,
         );
       default:
-        return ApiException(
+        return UnifiedNetworkException.http(
           'プロキシサーバーリクエストが失敗しました（ステータス: $statusCode）\n'
           'Proxy server request failed with status $statusCode: ${e.message}',
           statusCode: statusCode,
@@ -440,7 +441,8 @@ class MockHotpepperProxyDatasource implements HotpepperProxyDatasource {
       );
       return Success(response);
     } catch (e) {
-      return Failure(ApiException('Mock proxy error: ${e.toString()}'));
+      return Failure(
+          UnifiedNetworkException.api('Mock proxy error: ${e.toString()}'));
     }
   }
 }
