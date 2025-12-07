@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
-import '../app_exception.dart';
-import '../domain_exceptions.dart';
+import '../unified_exceptions_export.dart';
 
 /// Result wrapper for operations that may throw exceptions
 class ExceptionResult<T> {
@@ -165,7 +164,7 @@ class ExceptionHandler {
 
   /// Generate user-friendly error messages based on exception type
   String _getUserMessage(BaseException exception) {
-    if (exception is NetworkException) {
+    if (exception is UnifiedNetworkException) {
       return 'ネットワークエラーが発生しました。しばらくしてからお試しください。';
     } else if (exception is ValidationException) {
       return '入力内容に誤りがあります。確認してください。';

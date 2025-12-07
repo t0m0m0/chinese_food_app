@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/exceptions/domain_exceptions.dart';
+import '../../core/exceptions/unified_exceptions_export.dart';
 
 /// Widget for displaying errors in various formats
 class ErrorDisplayWidget extends StatelessWidget {
@@ -39,7 +39,7 @@ class ErrorDisplayWidget extends StatelessWidget {
         title: const Text('エラー'),
         content: Text(message),
         actions: [
-          if (onRetry != null && exception is NetworkException)
+          if (onRetry != null && exception is UnifiedNetworkException)
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();

@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../domain/strategies/location_strategy.dart';
 import '../../domain/entities/location.dart';
 import '../../core/types/result.dart';
-import '../../core/exceptions/domain_exceptions.dart' as domain;
+import '../../core/exceptions/unified_exceptions_export.dart' as domain;
 
 /// Production implementation of LocationStrategy using the Geolocator package
 ///

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
-import '../domain_exceptions.dart';
+import '../unified_exceptions_export.dart';
 import 'exception_handler.dart';
 
 /// Handler for retry logic with configurable retry policies
