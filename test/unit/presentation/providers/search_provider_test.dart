@@ -15,6 +15,7 @@ class MockStoreProvider extends Mock implements StoreProvider {
     String? keyword = '中華',
     int range = 3,
     int count = 10,
+    int start = 1,
   }) =>
       super.noSuchMethod(
         Invocation.method(#loadNewStoresFromApi, [], {
@@ -24,6 +25,7 @@ class MockStoreProvider extends Mock implements StoreProvider {
           #keyword: keyword,
           #range: range,
           #count: count,
+          #start: start,
         }),
         returnValue: Future<void>.value(),
       );
@@ -118,6 +120,7 @@ void main() {
         keyword: '中華',
         range: 3,
         count: 20,
+        start: 1,
       )).called(1);
     });
 
@@ -147,6 +150,7 @@ void main() {
         keyword: '中華',
         range: 3,
         count: 20,
+        start: 1,
       )).called(1);
     });
 
@@ -211,17 +215,18 @@ void main() {
     test('should apply filter settings in address search', () async {
       // フィルター設定を変更
       searchProvider.setSearchRange(2); // 500m
-      searchProvider.setResultCount(15);
+      searchProvider.setResultCount(15); // この値は無限スクロールでは使用されない
 
       // 住所検索を実行
       await searchProvider.performSearch(address: '東京都新宿区');
 
-      // 正しいパラメータでAPIが呼ばれたことを確認
+      // 正しいパラメータでAPIが呼ばれたことを確認（ページサイズ20で固定）
       verify(mockStoreProvider.loadNewStoresFromApi(
         address: '東京都新宿区',
         keyword: '中華',
         range: 2,
-        count: 15,
+        count: 20, // ページサイズ固定
+        start: 1,
       )).called(1);
     });
 
@@ -237,18 +242,19 @@ void main() {
 
       // フィルター設定を変更
       searchProvider.setSearchRange(4); // 2000m
-      searchProvider.setResultCount(25);
+      searchProvider.setResultCount(25); // この値は無限スクロールでは使用されない
 
       // 現在地検索を実行
       await searchProvider.performSearchWithCurrentLocation();
 
-      // 正しいパラメータでAPIが呼ばれたことを確認
+      // 正しいパラメータでAPIが呼ばれたことを確認（ページサイズ20で固定）
       verify(mockStoreProvider.loadNewStoresFromApi(
         lat: 35.6762,
         lng: 139.6503,
         keyword: '中華',
         range: 4,
-        count: 25,
+        count: 20, // ページサイズ固定
+        start: 1,
       )).called(1);
     });
 

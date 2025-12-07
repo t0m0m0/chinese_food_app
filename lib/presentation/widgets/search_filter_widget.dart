@@ -5,16 +5,12 @@ import '../../core/config/ui_config.dart';
 /// 検索フィルター設定ウィジェット
 class SearchFilterWidget extends StatelessWidget {
   final int searchRange;
-  final int resultCount;
   final void Function(int) onRangeChanged;
-  final void Function(int) onCountChanged;
 
   const SearchFilterWidget({
     super.key,
     required this.searchRange,
-    required this.resultCount,
     required this.onRangeChanged,
-    required this.onCountChanged,
   });
 
   @override
@@ -38,17 +34,6 @@ class SearchFilterWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _buildRangeSelector(colorScheme),
-            const SizedBox(height: 24),
-
-            // 結果数設定
-            Text(
-              UiConfig.getSearchFilterLabel('resultCount'),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildCountSlider(theme, colorScheme),
           ],
         ),
       ),
@@ -77,42 +62,6 @@ class SearchFilterWidget extends StatelessWidget {
           checkmarkColor: colorScheme.onPrimaryContainer,
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildCountSlider(ThemeData theme, ColorScheme colorScheme) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${SearchConfig.minCount}件',
-              style: theme.textTheme.bodySmall,
-            ),
-            Text(
-              '$resultCount件',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.primary,
-              ),
-            ),
-            Text(
-              '${SearchConfig.maxCount}件',
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
-        ),
-        Slider(
-          value: resultCount.toDouble(),
-          min: SearchConfig.minCount.toDouble(),
-          max: SearchConfig.maxCount.toDouble(),
-          divisions: SearchConfig.maxCount - SearchConfig.minCount,
-          onChanged: (value) {
-            onCountChanged(value.round());
-          },
-        ),
-      ],
     );
   }
 }

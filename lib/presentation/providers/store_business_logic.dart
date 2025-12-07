@@ -95,10 +95,11 @@ class StoreBusinessLogic {
     String? keyword = StringConstants.defaultSearchKeyword,
     int range = 3,
     int count = 10,
+    int start = 1,
   }) async {
     if (DebugConstants.enableApiLog) {
       debugPrint(
-          '[SearchAPI] 🔍 検索開始 - lat: $lat, lng: $lng, range: $range, count: $count');
+          '[SearchAPI] 🔍 検索開始 - lat: $lat, lng: $lng, range: $range, count: $count, start: $start');
     }
 
     final apiStores = await _repository.searchStoresFromApi(
@@ -108,6 +109,7 @@ class StoreBusinessLogic {
       keyword: keyword,
       range: range,
       count: count,
+      start: start,
     );
 
     if (DebugConstants.enableApiLog) {

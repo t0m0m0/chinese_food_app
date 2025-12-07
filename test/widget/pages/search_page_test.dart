@@ -90,34 +90,25 @@ void main() {
     );
   }
 
-  group('SearchPage', () {
-    testWidgets('should display search form with location toggle',
+  group('SearchPage (Area Search)', () {
+    testWidgets('should display area selection UI', (tester) async {
+      // when: SearchPageを表示
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // then: 都道府県選択UIが表示される
+      expect(find.text('都道府県を選択'), findsOneWidget);
+      expect(find.text('選択してください'), findsOneWidget);
+    });
+
+    testWidgets('should display initial state message for area search',
         (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // then: 検索フォームが表示される（実装がないため失敗するはず）
-      expect(find.text('現在地で検索'), findsOneWidget);
-      expect(find.text('住所で検索'), findsOneWidget);
-    });
-
-    testWidgets('should display initial state message', (tester) async {
-      // when: SearchPageを表示
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
       // then: 初期状態のメッセージが表示される
-      expect(find.text('検索ボタンを押して中華料理店を探しましょう'), findsOneWidget);
-    });
-
-    testWidgets('should display search button', (tester) async {
-      // when: SearchPageを表示
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // then: 検索ボタンが表示される
-      expect(find.text('中華料理店を検索'), findsOneWidget);
+      expect(find.text('エリアを選択して検索してください'), findsOneWidget);
     });
 
     testWidgets('should show no loading state initially', (tester) async {
@@ -129,90 +120,96 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('should have both radio buttons for location selection',
-        (tester) async {
+    testWidgets('should display app bar with "エリア" title', (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // then: 両方のラジオボタンが存在する
-      expect(find.byType(RadioListTile<bool>), findsNWidgets(2));
-
-      // 現在地で検索がデフォルトで選択されている
-      final currentLocationRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.value == true &&
-          widget.groupValue == true);
-      expect(currentLocationRadio, findsOneWidget);
+      // then: AppBarに「エリア」タイトルが表示される
+      expect(find.text('エリア'), findsOneWidget);
     });
 
-    testWidgets(
-        'should allow switching to address search mode by tapping radio button',
+    testWidgets('should show prefecture selection dialog when tapped',
         (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // then: 初期状態では住所入力フィールドが表示されていない
-      expect(find.byType(TextField), findsNothing);
-
-      // when: 「住所で検索」ラジオボタンをタップ
-      final addressRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.title is Text &&
-          (widget.title as Text).data == '住所で検索');
-      expect(addressRadio, findsOneWidget);
-
-      await tester.tap(addressRadio);
+      // when: 都道府県選択エリアをタップ
+      await tester.tap(find.text('選択してください'));
       await tester.pumpAndSettle();
 
-      // then: 住所入力フィールドが表示される
-      expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('住所を入力'), findsOneWidget);
-
-      // then: 住所検索ラジオボタンが選択状態になる
-      final selectedAddressRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.value == false &&
-          widget.groupValue == false);
-      expect(selectedAddressRadio, findsOneWidget);
+      // then: 都道府県選択ダイアログが表示される
+      expect(find.text('都道府県を選択'), findsNWidgets(2)); // 1つはUIラベル、1つはダイアログタイトル
+      // 関東はinitiallyExpanded: trueなので直接見える
+      expect(find.text('関東'), findsOneWidget);
+      // ダイアログが開いていることを確認（AlertDialogの存在）
+      expect(find.byType(AlertDialog), findsOneWidget);
     });
 
-    testWidgets('should allow switching back to current location search mode',
+    testWidgets('should select prefecture from dialog', (tester) async {
+      // when: SearchPageを表示
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // when: 都道府県選択エリアをタップ
+      await tester.tap(find.text('選択してください'));
+      await tester.pumpAndSettle();
+
+      // 関東はinitiallyExpanded: trueなので直接東京都をタップ
+      // when: 東京都を選択（スクロールしてから）
+      final tokyoFinder = find.text('東京都');
+      await tester.ensureVisible(tokyoFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(tokyoFinder);
+      await tester.pumpAndSettle();
+
+      // then: 東京都が選択される
+      expect(find.text('東京都'), findsOneWidget);
+      expect(find.text('選択してください'), findsNothing);
+    });
+
+    testWidgets('should show city selector after prefecture selection',
         (tester) async {
       // when: SearchPageを表示
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // when: 「住所で検索」ラジオボタンをタップして住所検索モードに切り替え
-      final addressRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.title is Text &&
-          (widget.title as Text).data == '住所で検索');
-      await tester.tap(addressRadio);
+      // when: 都道府県選択エリアをタップ
+      await tester.tap(find.text('選択してください'));
       await tester.pumpAndSettle();
 
-      // then: 住所入力フィールドが表示されている
-      expect(find.byType(TextField), findsOneWidget);
-
-      // when: 「現在地で検索」ラジオボタンをタップして現在地検索モードに戻る
-      final currentLocationRadio = find.byWidgetPredicate((Widget widget) =>
-          widget is RadioListTile<bool> &&
-          widget.title is Text &&
-          (widget.title as Text).data == '現在地で検索');
-      await tester.tap(currentLocationRadio);
+      // 関東はinitiallyExpanded: trueなので直接東京都をタップ
+      final tokyoFinder = find.text('東京都');
+      await tester.ensureVisible(tokyoFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(tokyoFinder);
       await tester.pumpAndSettle();
 
-      // then: 住所入力フィールドが隠される
-      expect(find.byType(TextField), findsNothing);
+      // then: 市区町村選択UIが表示される
+      expect(find.text('市区町村を選択（任意）'), findsOneWidget);
+      expect(find.text('全域'), findsOneWidget);
+    });
 
-      // then: 現在地検索ラジオボタンが選択状態になる
-      final selectedCurrentLocationRadio = find.byWidgetPredicate(
-          (Widget widget) =>
-              widget is RadioListTile<bool> &&
-              widget.value == true &&
-              widget.groupValue == true);
-      expect(selectedCurrentLocationRadio, findsOneWidget);
+    testWidgets('should display selected area chip', (tester) async {
+      // when: SearchPageを表示
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // when: 都道府県を選択
+      await tester.tap(find.text('選択してください'));
+      await tester.pumpAndSettle();
+
+      // 関東はinitiallyExpanded: trueなので直接東京都をタップ
+      // 東京都を見つけてスクロールしてからタップ
+      final tokyoFinder = find.text('東京都');
+      await tester.ensureVisible(tokyoFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(tokyoFinder);
+      await tester.pumpAndSettle();
+
+      // then: エリアチップが表示される
+      expect(find.text('東京都の中華料理店'), findsOneWidget);
     });
   });
 }

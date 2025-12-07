@@ -28,11 +28,22 @@ class SearchProvider extends ChangeNotifier {
 
   // 状態管理フィールド
   bool _isLoading = false;
+  bool _isLoadingMore = false;
   bool _isGettingLocation = false;
   String? _errorMessage;
   List<Store> _searchResults = [];
   bool _useCurrentLocation = true;
   bool _hasSearched = false;
+
+  // ページネーション
+  int _currentPage = 1;
+  bool _hasMoreResults = true;
+  static const int _pageSize = SearchConfig.defaultPageSize;
+
+  // 最後の検索パラメータ（ページネーション用）
+  double? _lastSearchLat;
+  double? _lastSearchLng;
+  String? _lastSearchAddress;
 
   // 検索フィルター設定
   int _searchRange = _defaultSearchRange;
@@ -40,11 +51,13 @@ class SearchProvider extends ChangeNotifier {
 
   // ゲッター
   bool get isLoading => _isLoading;
+  bool get isLoadingMore => _isLoadingMore;
   bool get isGettingLocation => _isGettingLocation;
   String? get errorMessage => _errorMessage;
   List<Store> get searchResults => _searchResults;
   bool get useCurrentLocation => _useCurrentLocation;
   bool get hasSearched => _hasSearched;
+  bool get hasMoreResults => _hasMoreResults;
   int get searchRange => _searchRange;
   int get resultCount => _resultCount;
 
@@ -52,6 +65,13 @@ class SearchProvider extends ChangeNotifier {
   void setUseCurrentLocation(bool value) {
     _useCurrentLocation = value;
     notifyListeners();
+  }
+
+  // ページネーションをリセット
+  void _resetPagination() {
+    _currentPage = 1;
+    _hasMoreResults = true;
+    _searchResults.clear();
   }
 
   // 検索フィルター設定メソッド
@@ -112,20 +132,27 @@ class SearchProvider extends ChangeNotifier {
   Future<void> performSearch({String? address}) async {
     _isLoading = true;
     _errorMessage = null;
-    _searchResults.clear();
+    _resetPagination();
     _hasSearched = true;
     notifyListeners();
 
     try {
       if (address != null && address.isNotEmpty) {
-        // 住所での検索（フィルター設定適用）
+        _lastSearchAddress = address;
+        _lastSearchLat = null;
+        _lastSearchLng = null;
+
+        // 住所での検索（ページサイズ使用）
         await storeProvider.loadNewStoresFromApi(
           address: address,
           keyword: StringConstants.defaultSearchKeyword,
           range: _searchRange,
-          count: _resultCount,
+          count: _pageSize,
+          start: 1,
         );
         _searchResults = List<Store>.from(storeProvider.searchResults);
+        _currentPage = 1;
+        _hasMoreResults = _searchResults.length >= _pageSize;
       }
 
       _isLoading = false;
@@ -142,7 +169,7 @@ class SearchProvider extends ChangeNotifier {
     _isLoading = true;
     _isGettingLocation = true;
     _errorMessage = null;
-    _searchResults.clear();
+    _resetPagination();
     _hasSearched = true;
     notifyListeners();
 
@@ -153,21 +180,81 @@ class SearchProvider extends ChangeNotifier {
       _isGettingLocation = false;
       notifyListeners();
 
-      // 位置情報を使ってAPI検索（フィルター設定適用）
+      _lastSearchLat = location.latitude;
+      _lastSearchLng = location.longitude;
+      _lastSearchAddress = null;
+
+      // 位置情報を使ってAPI検索（ページサイズ使用）
       await storeProvider.loadNewStoresFromApi(
         lat: location.latitude,
         lng: location.longitude,
         keyword: StringConstants.defaultSearchKeyword,
         range: _searchRange,
-        count: _resultCount,
+        count: _pageSize,
+        start: 1,
       );
       _searchResults = List<Store>.from(storeProvider.searchResults);
+      _currentPage = 1;
+      _hasMoreResults = _searchResults.length >= _pageSize;
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _isGettingLocation = false;
       _isLoading = false;
+      _errorMessage = _formatErrorMessage(e);
+      notifyListeners();
+    }
+  }
+
+  // 次のページを読み込む
+  Future<void> loadMoreResults() async {
+    // Race condition 防止：早期チェックとフラグ即時設定
+    if (_isLoadingMore || !_hasMoreResults) {
+      return;
+    }
+
+    _isLoadingMore = true;
+    notifyListeners();
+
+    try {
+      final nextPage = _currentPage + 1;
+      final start = (nextPage - 1) * _pageSize + 1;
+
+      if (_lastSearchAddress != null) {
+        // 住所検索の続き
+        await storeProvider.loadNewStoresFromApi(
+          address: _lastSearchAddress!,
+          keyword: StringConstants.defaultSearchKeyword,
+          range: _searchRange,
+          count: _pageSize,
+          start: start,
+        );
+      } else if (_lastSearchLat != null && _lastSearchLng != null) {
+        // 現在地検索の続き
+        await storeProvider.loadNewStoresFromApi(
+          lat: _lastSearchLat!,
+          lng: _lastSearchLng!,
+          keyword: StringConstants.defaultSearchKeyword,
+          range: _searchRange,
+          count: _pageSize,
+          start: start,
+        );
+      }
+
+      final newResults = storeProvider.searchResults;
+      if (newResults.isNotEmpty) {
+        _searchResults.addAll(newResults);
+        _currentPage = nextPage;
+        _hasMoreResults = newResults.length >= _pageSize;
+      } else {
+        _hasMoreResults = false;
+      }
+
+      _isLoadingMore = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoadingMore = false;
       _errorMessage = _formatErrorMessage(e);
       notifyListeners();
     }

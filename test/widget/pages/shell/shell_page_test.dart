@@ -60,7 +60,7 @@ void main() {
         final bottomNavBar = find.byType(BottomNavigationBar);
         expect(find.descendant(of: bottomNavBar, matching: find.text('見つける')),
             findsOneWidget);
-        expect(find.descendant(of: bottomNavBar, matching: find.text('検索')),
+        expect(find.descendant(of: bottomNavBar, matching: find.text('エリア')),
             findsOneWidget);
         expect(find.descendant(of: bottomNavBar, matching: find.text('マイメニュー')),
             findsOneWidget);
@@ -117,7 +117,7 @@ void main() {
         }
       });
 
-      testWidgets('検索タブをタップすると検索画面に遷移する', (tester) async {
+      testWidgets('エリアタブをタップするとエリア画面に遷移する', (tester) async {
         // レンダリングエラーを無視して基本的なナビゲーション機能をテスト
         final originalOnError = FlutterError.onError;
         FlutterError.onError = (FlutterErrorDetails details) {
@@ -138,12 +138,12 @@ void main() {
           expect(find.byType(ShellPage), findsOneWidget);
           expect(find.byType(BottomNavigationBar), findsOneWidget);
 
-          // BottomNavigationBar内の検索タブをタップ
+          // BottomNavigationBar内のエリアタブをタップ
           final bottomNavBar = find.byType(BottomNavigationBar);
-          final searchTab =
-              find.descendant(of: bottomNavBar, matching: find.text('検索'));
+          final areaTab =
+              find.descendant(of: bottomNavBar, matching: find.text('エリア'));
 
-          await tester.tap(searchTab);
+          await tester.tap(areaTab);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
@@ -209,11 +209,11 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          // まず検索画面に移動
+          // まずエリア画面に移動
           final bottomNavBar = find.byType(BottomNavigationBar);
-          final searchTab =
-              find.descendant(of: bottomNavBar, matching: find.text('検索'));
-          await tester.tap(searchTab);
+          final areaTab =
+              find.descendant(of: bottomNavBar, matching: find.text('エリア'));
+          await tester.tap(areaTab);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
@@ -334,7 +334,7 @@ void main() {
           // ナビゲーションアイテムのテキストが表示されることを確認
           expect(find.descendant(of: bottomNavBar, matching: find.text('見つける')),
               findsOneWidget);
-          expect(find.descendant(of: bottomNavBar, matching: find.text('検索')),
+          expect(find.descendant(of: bottomNavBar, matching: find.text('エリア')),
               findsOneWidget);
           expect(
               find.descendant(of: bottomNavBar, matching: find.text('マイメニュー')),
