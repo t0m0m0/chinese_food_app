@@ -73,19 +73,7 @@ jobs:
       run: dart run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
     
     - name: テスト用環境変数を設定
-      run: |
-        echo "=== テスト用.envファイル作成 ==="
-        # テスト用の.env.testファイルがCI環境で使えるように.envとしてコピー
-        if [ -f ".env.test" ]; then
-          cp .env.test .env
-          echo "TEST_ENV_SOURCE=ci" >> .env.test
-          echo "CI_ENVIRONMENT=github_actions" >> .env.test
-          echo "✅ .env.testファイルから.envを作成しました"
-        else
-          echo "FLUTTER_ENV=test" > .env
-          echo "HOTPEPPER_API_KEY=test_dummy_key_12345" >> .env
-          echo "✅ デフォルトのテスト用.envファイルを作成しました"
-        fi
+      run: ./.github/scripts/setup-env.sh
 
     - name: 全件テストを実行
       timeout-minutes: 25
