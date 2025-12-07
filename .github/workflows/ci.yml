@@ -73,11 +73,16 @@ jobs:
       run: dart run build_runner build --delete-conflicting-outputs || echo "No build_runner configured"
     
     - name: テスト用環境変数を設定
-      run: ./.github/scripts/setup-test-env.sh
-      
-    - name: 全件テストを実行（最適化版）
+      run: ./.github/scripts/setup-env.sh
+
+    - name: 全件テストを実行
       timeout-minutes: 25
-      run: ./.github/scripts/run-tests-with-debug.sh
+      run: |
+        flutter test \
+          --dart-define=PRODUCTION=false \
+          --dart-define=DEVELOPMENT=true \
+          --reporter=expanded \
+          --coverage
         
     - name: テストカバレッジをアップロード
       uses: codecov/codecov-action@v3
