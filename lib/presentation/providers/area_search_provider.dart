@@ -29,7 +29,6 @@ class AreaSearchProvider extends ChangeNotifier {
   int _currentPage = 1;
   bool _hasMoreResults = true;
   static const int _pageSize = 20;
-  static const int _maxResults = 100;
 
   // 検索フィルター
   int _searchRange = SearchConfig.defaultRange;
@@ -135,8 +134,7 @@ class AreaSearchProvider extends ChangeNotifier {
 
       _searchResults = List<Store>.from(storeProvider.searchResults);
       _currentPage = 1;
-      _hasMoreResults = _searchResults.length >= _pageSize &&
-          _searchResults.length < _maxResults;
+      _hasMoreResults = _searchResults.length >= _pageSize;
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -148,10 +146,7 @@ class AreaSearchProvider extends ChangeNotifier {
 
   /// 次のページを読み込む
   Future<void> loadMoreResults() async {
-    if (!canSearch ||
-        _isLoadingMore ||
-        !_hasMoreResults ||
-        _searchResults.length >= _maxResults) {
+    if (!canSearch || _isLoadingMore || !_hasMoreResults) {
       return;
     }
 
@@ -175,8 +170,7 @@ class AreaSearchProvider extends ChangeNotifier {
       if (newResults.isNotEmpty) {
         _searchResults.addAll(newResults);
         _currentPage = nextPage;
-        _hasMoreResults = newResults.length >= _pageSize &&
-            _searchResults.length < _maxResults;
+        _hasMoreResults = newResults.length >= _pageSize;
       } else {
         _hasMoreResults = false;
       }

@@ -8,38 +8,31 @@ void main() {
     testWidgets('should display filter options', (tester) async {
       // Arrange
       int selectedRange = 3;
-      int selectedCount = 10;
 
       // Act
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: SearchFilterWidget(
             searchRange: selectedRange,
-            resultCount: selectedCount,
             onRangeChanged: (value) {},
-            onCountChanged: (value) {},
           ),
         ),
       ));
 
       // Assert
       expect(find.text('検索範囲'), findsOneWidget);
-      expect(find.text('結果数'), findsOneWidget);
     });
 
     testWidgets('should display range options', (tester) async {
       // Arrange
       int selectedRange = 3;
-      int selectedCount = 10;
 
       // Act
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: SearchFilterWidget(
             searchRange: selectedRange,
-            resultCount: selectedCount,
             onRangeChanged: (value) {},
-            onCountChanged: (value) {},
           ),
         ),
       ));
@@ -55,7 +48,6 @@ void main() {
     testWidgets('should handle range selection', (tester) async {
       // Arrange
       int selectedRange = 3;
-      int selectedCount = 10;
       int? newRange;
 
       // Act
@@ -63,11 +55,9 @@ void main() {
         home: Scaffold(
           body: SearchFilterWidget(
             searchRange: selectedRange,
-            resultCount: selectedCount,
             onRangeChanged: (value) {
               newRange = value;
             },
-            onCountChanged: (value) {},
           ),
         ),
       ));
@@ -80,57 +70,6 @@ void main() {
       expect(newRange, 2);
     });
 
-    testWidgets('should display count slider', (tester) async {
-      // Arrange
-      int selectedRange = 3;
-      int selectedCount = 15;
-
-      // Act
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: SearchFilterWidget(
-            searchRange: selectedRange,
-            resultCount: selectedCount,
-            onRangeChanged: (value) {},
-            onCountChanged: (value) {},
-          ),
-        ),
-      ));
-
-      // Assert
-      expect(find.byType(Slider), findsOneWidget);
-      expect(find.text('15件'), findsOneWidget);
-    });
-
-    testWidgets('should handle count slider change', (tester) async {
-      // Arrange
-      int selectedRange = 3;
-      int selectedCount = 10;
-      int? newCount;
-
-      // Act
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: SearchFilterWidget(
-            searchRange: selectedRange,
-            resultCount: selectedCount,
-            onRangeChanged: (value) {},
-            onCountChanged: (value) {
-              newCount = value;
-            },
-          ),
-        ),
-      ));
-
-      // スライダーを動かす
-      await tester.drag(find.byType(Slider), const Offset(50, 0));
-      await tester.pump();
-
-      // Assert
-      expect(newCount, isNotNull);
-      expect(newCount, greaterThan(10));
-    });
-
     testWidgets('should show correct selected range', (tester) async {
       // Arrange & Act
       for (int range = 1; range <= 5; range++) {
@@ -138,9 +77,7 @@ void main() {
           home: Scaffold(
             body: SearchFilterWidget(
               searchRange: range,
-              resultCount: 10,
               onRangeChanged: (value) {},
-              onCountChanged: (value) {},
             ),
           ),
         ));

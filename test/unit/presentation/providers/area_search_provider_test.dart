@@ -211,22 +211,23 @@ void main() {
 
       test('should search with prefecture address', () async {
         const tokyo = Prefecture(code: '13', name: '東京都');
-        provider.selectPrefecture(tokyo);
 
         when(mockStoreProvider.loadNewStoresFromApi(
           address: anyNamed('address'),
           keyword: anyNamed('keyword'),
           range: anyNamed('range'),
           count: anyNamed('count'),
+          start: anyNamed('start'),
         )).thenAnswer((_) async {});
 
-        await provider.performSearch();
+        provider.selectPrefecture(tokyo); // 自動検索が実行される
 
         verify(mockStoreProvider.loadNewStoresFromApi(
           address: '東京都',
           keyword: '中華',
           range: anyNamed('range'),
           count: anyNamed('count'),
+          start: anyNamed('start'),
         )).called(1);
       });
 
@@ -238,23 +239,23 @@ void main() {
           name: '新宿区',
         );
 
-        provider.selectPrefecture(tokyo);
-        provider.selectCity(shinjuku);
-
         when(mockStoreProvider.loadNewStoresFromApi(
           address: anyNamed('address'),
           keyword: anyNamed('keyword'),
           range: anyNamed('range'),
           count: anyNamed('count'),
+          start: anyNamed('start'),
         )).thenAnswer((_) async {});
 
-        await provider.performSearch();
+        provider.selectPrefecture(tokyo); // 自動検索（東京都）
+        provider.selectCity(shinjuku); // 自動検索（東京都新宿区）
 
         verify(mockStoreProvider.loadNewStoresFromApi(
           address: '東京都新宿区',
           keyword: '中華',
           range: anyNamed('range'),
           count: anyNamed('count'),
+          start: anyNamed('start'),
         )).called(1);
       });
 

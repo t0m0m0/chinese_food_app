@@ -5,16 +5,12 @@ import '../../core/config/ui_config.dart';
 /// 検索フィルター設定ウィジェット
 class SearchFilterWidget extends StatelessWidget {
   final int searchRange;
-  final int resultCount;
   final void Function(int) onRangeChanged;
-  final void Function(int) onCountChanged;
 
   const SearchFilterWidget({
     super.key,
     required this.searchRange,
-    required this.resultCount,
     required this.onRangeChanged,
-    required this.onCountChanged,
   });
 
   @override
@@ -38,16 +34,6 @@ class SearchFilterWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _buildRangeSelector(colorScheme),
-            const SizedBox(height: 24),
-
-            // 結果数設定
-            Text(
-              UiConfig.getSearchFilterLabel('resultCount'),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
           ],
         ),
       ),
