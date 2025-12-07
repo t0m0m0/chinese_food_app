@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:chinese_food_app/core/network/app_http_client.dart';
 import 'package:chinese_food_app/core/network/api_response.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/unified_exceptions_export.dart';
 
 void main() {
   group('AppHttpClient', () {
@@ -94,7 +94,7 @@ void main() {
         // Act & Assert
         await expectLater(
           () => httpClient.get(url),
-          throwsA(isA<NetworkException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.message,
             'message',
             contains('timeout'),
@@ -110,7 +110,7 @@ void main() {
         // Act & Assert
         await expectLater(
           () => httpClient.get(url),
-          throwsA(isA<NetworkException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.statusCode,
             'statusCode',
             equals(404),
@@ -177,7 +177,7 @@ void main() {
         // Act & Assert
         await expectLater(
           () => httpClient.get(url),
-          throwsA(isA<NetworkException>()),
+          throwsA(isA<UnifiedNetworkException>()),
         );
         expect(mockHttpClient.getRequestCountForUrl(url),
             equals(4)); // maxRetries + 1
@@ -191,7 +191,7 @@ void main() {
         // Act & Assert
         await expectLater(
           () => httpClient.get(url),
-          throwsA(isA<NetworkException>()),
+          throwsA(isA<UnifiedNetworkException>()),
         );
         expect(mockHttpClient.requestCount,
             equals(1)); // No retry for client errors
@@ -232,7 +232,7 @@ void main() {
     });
 
     group('Error handling', () {
-      test('should throw NetworkException on network error', () async {
+      test('should throw UnifiedNetworkException on network error', () async {
         // Arrange
         const url = 'https://api.example.com/network-error';
         mockHttpClient.stubNetworkError(url);
@@ -240,11 +240,12 @@ void main() {
         // Act & Assert
         await expectLater(
           () => httpClient.get(url),
-          throwsA(isA<NetworkException>()),
+          throwsA(isA<UnifiedNetworkException>()),
         );
       });
 
-      test('should include original exception in NetworkException', () async {
+      test('should include original exception in UnifiedNetworkException',
+          () async {
         // Arrange
         const url = 'https://api.example.com/error';
         const originalError = 'Connection refused';
@@ -253,7 +254,7 @@ void main() {
         // Act & Assert
         await expectLater(
           () => httpClient.get(url),
-          throwsA(isA<NetworkException>().having(
+          throwsA(isA<UnifiedNetworkException>().having(
             (e) => e.message,
             'message',
             contains(originalError),

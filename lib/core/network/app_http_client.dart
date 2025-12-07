@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
-import '../exceptions/domain_exceptions.dart';
+import '../exceptions/unified_exceptions_export.dart';
 import 'api_response.dart';
 
 /// Unified HTTP client for the application
@@ -77,7 +77,7 @@ class AppHttpClient {
 
         return _handleResponse(response);
       } on TimeoutException catch (e) {
-        throw NetworkException('Request timeout: ${e.message}');
+        throw UnifiedNetworkException.timeout('Request timeout: ${e.message}');
       }
     });
   }
@@ -111,7 +111,7 @@ class AppHttpClient {
 
         return _handleResponse(response);
       } on TimeoutException catch (e) {
-        throw NetworkException('Request timeout: ${e.message}');
+        throw UnifiedNetworkException.timeout('Request timeout: ${e.message}');
       }
     });
   }
@@ -145,7 +145,7 @@ class AppHttpClient {
 
         return _handleResponse(response);
       } on TimeoutException catch (e) {
-        throw NetworkException('Request timeout: ${e.message}');
+        throw UnifiedNetworkException.timeout('Request timeout: ${e.message}');
       }
     });
   }
@@ -175,7 +175,7 @@ class AppHttpClient {
 
         return _handleResponse(response);
       } on TimeoutException catch (e) {
-        throw NetworkException('Request timeout: ${e.message}');
+        throw UnifiedNetworkException.timeout('Request timeout: ${e.message}');
       }
     });
   }
@@ -238,7 +238,7 @@ class AppHttpClient {
         attempts++;
 
         // Don't retry on client errors (4xx)
-        if (e is NetworkException && e.isClientError) {
+        if (e is UnifiedNetworkException && e.isClientError) {
           rethrow;
         }
 
@@ -256,17 +256,18 @@ class AppHttpClient {
       }
     }
 
-    // All retries exhausted - wrap in NetworkException if needed
+    // All retries exhausted - wrap in UnifiedNetworkException if needed
     if (lastException != null) {
-      if (lastException is NetworkException) {
+      if (lastException is UnifiedNetworkException) {
         throw lastException;
       } else {
-        throw NetworkException(
+        throw UnifiedNetworkException.connection(
           'Network request failed: ${lastException.toString()}',
         );
       }
     } else {
-      throw NetworkException('HTTP request failed after $maxRetries retries');
+      throw UnifiedNetworkException.connection(
+          'HTTP request failed after $maxRetries retries');
     }
   }
 
@@ -288,7 +289,7 @@ class AppHttpClient {
     } else {
       final errorMessage = _createErrorMessage(response);
 
-      throw NetworkException(
+      throw UnifiedNetworkException.http(
         errorMessage,
         statusCode: response.statusCode,
       );
@@ -329,8 +330,8 @@ class AppHttpClient {
   }
 }
 
-/// Extension to check if NetworkException is a client error
-extension NetworkExceptionExtension on NetworkException {
+/// Extension to check if UnifiedNetworkException is a client error
+extension UnifiedNetworkExceptionExtension on UnifiedNetworkException {
   /// Whether this is a client error (4xx status codes)
   bool get isClientError =>
       statusCode != null && statusCode! >= 400 && statusCode! < 500;
