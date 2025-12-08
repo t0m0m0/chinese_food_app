@@ -64,7 +64,7 @@ abstract class BaseEnvironmentContainer implements DIContainerInterface {
   void configureForEnvironment(Environment environment) {
     if (environment != _targetEnvironment) {
       throw DIContainerException(
-        '${runtimeType} can only be configured for ${_targetEnvironment.name} environment',
+        '$runtimeType can only be configured for ${_targetEnvironment.name} environment',
       );
     }
 

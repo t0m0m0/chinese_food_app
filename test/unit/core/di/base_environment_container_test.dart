@@ -1,10 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/di/containers/base_environment_container.dart';
 import 'package:chinese_food_app/core/di/di_container_interface.dart';
-import 'package:chinese_food_app/presentation/providers/store_provider.dart';
-import 'package:chinese_food_app/domain/services/location_service.dart';
-import 'package:chinese_food_app/domain/usecases/add_visit_record_usecase.dart';
-import 'package:chinese_food_app/domain/usecases/get_visit_records_by_store_id_usecase.dart';
 
 void main() {
   group('BaseEnvironmentContainer', () {
@@ -39,8 +35,8 @@ void main() {
         expect(() => container.getStoreProvider(), returnsNormally);
         expect(() => container.getLocationService(), returnsNormally);
         expect(() => container.getAddVisitRecordUsecase(), returnsNormally);
-        expect(
-            () => container.getGetVisitRecordsByStoreIdUsecase(), returnsNormally);
+        expect(() => container.getGetVisitRecordsByStoreIdUsecase(),
+            returnsNormally);
       });
 
       test('should throw when accessing services before configuration', () {
@@ -75,8 +71,8 @@ void main() {
         final mockProvider = container.getStoreProvider();
 
         // Act & Assert - should not throw
-        expect(
-            () => container.registerTestProvider(mockProvider), returnsNormally);
+        expect(() => container.registerTestProvider(mockProvider),
+            returnsNormally);
       });
 
       test('ProductionEnvironmentContainer should reject registerTestProvider',
