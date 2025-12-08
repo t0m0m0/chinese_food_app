@@ -63,28 +63,13 @@ class DIContainerFactory {
   }
 
   /// Determine current environment based on configuration
+  ///
+  /// Delegates to [Environment.detect()] for the actual detection logic.
   static Environment _determineEnvironment() {
-    // Check for test environment first (for Flutter test framework)
-    if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
-      return Environment.test;
-    }
-
-    // Check for explicit environment variable
     const envMode = String.fromEnvironment('APP_ENV', defaultValue: '');
 
-    // Valid environment values for APP_ENV
-    const validEnvironments = {
-      'production',
-      'prod',
-      'test',
-      'testing',
-      'development',
-      'dev'
-    };
-
     // Validate environment variable if provided
-    if (envMode.isNotEmpty &&
-        !validEnvironments.contains(envMode.toLowerCase())) {
+    if (envMode.isNotEmpty && !Environment.isValidEnvValue(envMode)) {
       developer.log(
         'Unknown APP_ENV value: "$envMode", falling back to development',
         name: 'DIFactory',
@@ -92,10 +77,6 @@ class DIContainerFactory {
       );
     }
 
-    return switch (envMode.toLowerCase()) {
-      'production' || 'prod' => Environment.production,
-      'test' || 'testing' => Environment.test,
-      'development' || 'dev' || _ => Environment.development,
-    };
+    return Environment.detect();
   }
 }
