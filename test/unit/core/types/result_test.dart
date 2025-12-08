@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/types/result.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/unified_exceptions_export.dart';
 
 void main() {
   group('Result<T> Type System', () {
@@ -70,8 +70,9 @@ void main() {
       test('should support different exception types', () {
         // Arrange
         final validationException = ValidationException('Invalid input');
-        final networkException = NetworkException('Network error');
-        final apiException = ApiException('API failed');
+        final networkException =
+            UnifiedNetworkException.connection('Network error');
+        final apiException = UnifiedNetworkException.api('API failed');
 
         // Act
         final validationResult = Failure<String>(validationException);
@@ -80,8 +81,8 @@ void main() {
 
         // Assert
         expect(validationResult.exception, isA<ValidationException>());
-        expect(networkResult.exception, isA<NetworkException>());
-        expect(apiResult.exception, isA<ApiException>());
+        expect(networkResult.exception, isA<UnifiedNetworkException>());
+        expect(apiResult.exception, isA<UnifiedNetworkException>());
       });
 
       test('should preserve exception hierarchy', () {

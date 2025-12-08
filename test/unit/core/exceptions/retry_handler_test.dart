@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/exceptions/handlers/retry_handler.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/unified_exceptions_export.dart';
 import 'package:chinese_food_app/core/exceptions/handlers/exception_handler.dart';
 
 void main() {
@@ -11,14 +11,15 @@ void main() {
       retryHandler = RetryHandler();
     });
 
-    test('should retry operation up to maxAttempts times on NetworkException',
+    test(
+        'should retry operation up to maxAttempts times on UnifiedNetworkException',
         () async {
       // Arrange
       int callCount = 0;
       Future<String> operation() async {
         callCount++;
         if (callCount < 3) {
-          throw NetworkException('Connection failed');
+          throw UnifiedNetworkException.connection('Connection failed');
         }
         return 'Success';
       }
@@ -41,7 +42,7 @@ void main() {
       int callCount = 0;
       Future<String> operation() async {
         callCount++;
-        throw NetworkException('Connection failed');
+        throw UnifiedNetworkException.connection('Connection failed');
       }
 
       // Act
@@ -53,7 +54,7 @@ void main() {
 
       // Assert
       expect(result.isFailure, true);
-      expect(result.exception, isA<NetworkException>());
+      expect(result.exception, isA<UnifiedNetworkException>());
       expect(callCount, 2);
     });
 
@@ -86,7 +87,7 @@ void main() {
       Future<String> operation() async {
         callCount++;
         if (callCount < 3) {
-          throw NetworkException('Connection failed');
+          throw UnifiedNetworkException.connection('Connection failed');
         }
         return 'Success';
       }
@@ -154,7 +155,7 @@ void main() {
       Future<String> operation() async {
         callCount++;
         if (callCount < 2) {
-          throw NetworkException('Connection failed');
+          throw UnifiedNetworkException.connection('Connection failed');
         }
         return 'Success';
       }
@@ -182,7 +183,7 @@ void main() {
         Future<String> operation() async {
           localCallCount++;
           if (localCallCount < 2) {
-            throw NetworkException('Connection failed $i');
+            throw UnifiedNetworkException.connection('Connection failed $i');
           }
           return 'Success $i';
         }

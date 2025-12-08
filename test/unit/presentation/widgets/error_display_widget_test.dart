@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/presentation/widgets/error_display_widget.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/unified_exceptions_export.dart';
 
 void main() {
   group('ErrorDisplayWidget', () {
@@ -9,7 +9,7 @@ void main() {
         (WidgetTester tester) async {
       // Arrange
       const errorMessage = 'ネットワークエラーが発生しました';
-      final exception = NetworkException('Connection failed');
+      final exception = UnifiedNetworkException.connection('Connection failed');
 
       await tester.pumpWidget(
         MaterialApp(
@@ -77,7 +77,7 @@ void main() {
         (WidgetTester tester) async {
       // Arrange
       const errorMessage = 'ネットワークエラーが発生しました';
-      final exception = NetworkException('Connection failed');
+      final exception = UnifiedNetworkException.connection('Connection failed');
       bool retryPressed = false;
 
       await tester.pumpWidget(
@@ -118,7 +118,7 @@ void main() {
         (WidgetTester tester) async {
       // Arrange
       const errorMessage = 'データの読み込みに失敗しました';
-      final exception = NetworkException('Connection failed');
+      final exception = UnifiedNetworkException.connection('Connection failed');
 
       await tester.pumpWidget(
         MaterialApp(

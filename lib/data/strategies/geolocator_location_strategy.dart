@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../domain/strategies/location_strategy.dart';
 import '../../domain/entities/location.dart';
 import '../../core/types/result.dart';
-import '../../core/exceptions/domain_exceptions.dart' as domain;
+import '../../core/exceptions/unified_exceptions_export.dart' as exceptions;
 
 /// Production implementation of LocationStrategy using the Geolocator package
 ///
@@ -55,9 +55,9 @@ class GeolocatorLocationStrategy extends LocationStrategy {
 
       final isServiceEnabled = (serviceEnabledResult as Success<bool>).data;
       if (!isServiceEnabled) {
-        return Failure(domain.LocationException(
+        return Failure(exceptions.LocationException(
           'Location services are disabled on this device',
-          reason: domain.LocationExceptionReason.serviceDisabled,
+          reason: exceptions.LocationExceptionReason.serviceDisabled,
         ));
       }
 
@@ -69,9 +69,9 @@ class GeolocatorLocationStrategy extends LocationStrategy {
 
       final hasPermission = (permissionResult as Success<bool>).data;
       if (!hasPermission) {
-        return Failure(domain.LocationException(
+        return Failure(exceptions.LocationException(
           'Location permission is required to get current location',
-          reason: domain.LocationExceptionReason.permissionDenied,
+          reason: exceptions.LocationExceptionReason.permissionDenied,
         ));
       }
 
@@ -94,29 +94,29 @@ class GeolocatorLocationStrategy extends LocationStrategy {
 
       return Success(location);
     } on TimeoutException {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Location request timed out after ${timeout.inSeconds} seconds',
-        reason: domain.LocationExceptionReason.timeout,
+        reason: exceptions.LocationExceptionReason.timeout,
       ));
     } on LocationServiceDisabledException {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Location services are disabled',
-        reason: domain.LocationExceptionReason.serviceDisabled,
+        reason: exceptions.LocationExceptionReason.serviceDisabled,
       ));
     } on PermissionDeniedException {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Location permission denied',
-        reason: domain.LocationExceptionReason.permissionDenied,
+        reason: exceptions.LocationExceptionReason.permissionDenied,
       ));
     } on PositionUpdateException catch (e) {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Failed to get location: ${e.message}',
-        reason: domain.LocationExceptionReason.unknown,
+        reason: exceptions.LocationExceptionReason.unknown,
       ));
     } catch (e) {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Unexpected error getting location: ${e.toString()}',
-        reason: domain.LocationExceptionReason.unknown,
+        reason: exceptions.LocationExceptionReason.unknown,
       ));
     }
   }
@@ -136,9 +136,9 @@ class GeolocatorLocationStrategy extends LocationStrategy {
           return const Success(false);
       }
     } catch (e) {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Failed to check location permission: ${e.toString()}',
-        reason: domain.LocationExceptionReason.unknown,
+        reason: exceptions.LocationExceptionReason.unknown,
       ));
     }
   }
@@ -157,9 +157,9 @@ class GeolocatorLocationStrategy extends LocationStrategy {
 
       // If permanently denied, we can't request again
       if (currentPermission == LocationPermission.deniedForever) {
-        return Failure(domain.LocationException(
+        return Failure(exceptions.LocationException(
           'Location permission permanently denied. Please enable in system settings.',
-          reason: domain.LocationExceptionReason.permissionDenied,
+          reason: exceptions.LocationExceptionReason.permissionDenied,
         ));
       }
 
@@ -173,20 +173,20 @@ class GeolocatorLocationStrategy extends LocationStrategy {
         case LocationPermission.denied:
           return const Success(false);
         case LocationPermission.deniedForever:
-          return Failure(domain.LocationException(
+          return Failure(exceptions.LocationException(
             'Location permission permanently denied',
-            reason: domain.LocationExceptionReason.permissionDenied,
+            reason: exceptions.LocationExceptionReason.permissionDenied,
           ));
         case LocationPermission.unableToDetermine:
-          return Failure(domain.LocationException(
+          return Failure(exceptions.LocationException(
             'Unable to determine location permission status',
-            reason: domain.LocationExceptionReason.unknown,
+            reason: exceptions.LocationExceptionReason.unknown,
           ));
       }
     } catch (e) {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Failed to request location permission: ${e.toString()}',
-        reason: domain.LocationExceptionReason.unknown,
+        reason: exceptions.LocationExceptionReason.unknown,
       ));
     }
   }
@@ -197,9 +197,9 @@ class GeolocatorLocationStrategy extends LocationStrategy {
       final isEnabled = await Geolocator.isLocationServiceEnabled();
       return Success(isEnabled);
     } catch (e) {
-      return Failure(domain.LocationException(
+      return Failure(exceptions.LocationException(
         'Failed to check if location service is enabled: ${e.toString()}',
-        reason: domain.LocationExceptionReason.unknown,
+        reason: exceptions.LocationExceptionReason.unknown,
       ));
     }
   }

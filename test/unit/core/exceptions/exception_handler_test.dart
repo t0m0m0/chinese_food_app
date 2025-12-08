@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/exceptions/app_exception.dart';
-import 'package:chinese_food_app/core/exceptions/domain_exceptions.dart';
+import 'package:chinese_food_app/core/exceptions/unified_exceptions_export.dart';
 import 'package:chinese_food_app/core/exceptions/handlers/exception_handler.dart';
 
 void main() {
@@ -45,7 +44,8 @@ void main() {
 
     test('should log exception details when handling', () {
       // Arrange
-      final exception = NetworkException('Connection failed', statusCode: 500);
+      final exception =
+          UnifiedNetworkException.http('Connection failed', statusCode: 500);
 
       // Act
       handler.handle(exception);
@@ -71,7 +71,7 @@ void main() {
 
     test('should provide different user messages based on exception type', () {
       // Arrange
-      final networkException = NetworkException('API failed');
+      final networkException = UnifiedNetworkException.connection('API failed');
       final validationException = ValidationException('Invalid input');
 
       // Act
@@ -116,12 +116,13 @@ void main() {
         // Act
         final result = await handler.executeAsync<String>(() async {
           await Future.delayed(const Duration(milliseconds: 10));
-          throw NetworkException('Async network error', statusCode: 500);
+          throw UnifiedNetworkException.http('Async network error',
+              statusCode: 500);
         });
 
         // Assert
         expect(result.isFailure, isTrue);
-        expect(result.exception, isA<NetworkException>());
+        expect(result.exception, isA<UnifiedNetworkException>());
         expect(result.userMessage, contains('ネットワーク'));
       });
 
@@ -212,13 +213,14 @@ void main() {
         expect(exception.toString(), equals('ValidationException: Test'));
       });
 
-      test('should handle null safety correctly for NetworkException', () {
+      test('should handle null safety correctly for UnifiedNetworkException',
+          () {
         // Arrange
-        final exception = NetworkException('Network error', statusCode: null);
+        final exception = UnifiedNetworkException.connection('Network error');
 
         // Act & Assert
         expect(exception.statusCode, isNull);
-        expect(exception.toString(), equals('NetworkException: Network error'));
+        expect(exception.message, equals('Network error'));
       });
 
       test('should handle null safety correctly for DatabaseException', () {
