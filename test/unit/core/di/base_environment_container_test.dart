@@ -94,7 +94,7 @@ void main() {
 
 /// Test concrete implementation of BaseEnvironmentContainer
 class _TestConcreteContainer extends BaseEnvironmentContainer {
-  _TestConcreteContainer(super.environment);
+  _TestConcreteContainer(Environment environment) : super(environment);
 
   @override
   void registerEnvironmentSpecificServices() {
