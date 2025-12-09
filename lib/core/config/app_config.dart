@@ -8,7 +8,7 @@ import 'ui_config.dart';
 import 'database_config.dart';
 import 'location_config.dart';
 import 'search_config.dart';
-import 'validation/config_validator_facade.dart';
+import 'config_validator.dart';
 
 /// アプリケーション設定管理クラス
 ///
@@ -78,8 +78,8 @@ class AppConfig {
 
   /// すべての設定を検証
   static Map<String, List<String>> validateAll() {
-    // 新しい統合検証システムを使用
-    return ConfigValidatorFacade.validateAll();
+    // 統合検証システムを使用
+    return ConfigValidator.validateAllDomainConfigs();
   }
 
   /// ホットペッパーAPIキー

@@ -276,3 +276,15 @@ class ConfigValidator {
     };
   }
 }
+
+/// 後方互換性のためのエイリアス
+///
+/// @deprecated 代わりに [ConfigValidator.validateAllDomainConfigs] を直接使用してください。
+/// このクラスは将来のバージョンで削除される予定です。
+@Deprecated('Use ConfigValidator.validateAllDomainConfigs instead')
+class ConfigValidatorFacade {
+  /// すべての設定を検証
+  static Map<String, List<String>> validateAll() {
+    return ConfigValidator.validateAllDomainConfigs();
+  }
+}
