@@ -94,6 +94,7 @@ void main() {
 
 /// Test concrete implementation of BaseEnvironmentContainer
 class _TestConcreteContainer extends BaseEnvironmentContainer {
+  // ignore: use_super_parameters - Explicit form preferred for test code clarity
   _TestConcreteContainer(Environment environment) : super(environment);
 
   @override
