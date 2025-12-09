@@ -7,14 +7,11 @@ import '../../../helpers/mocks.mocks.dart';
 void main() {
   late StoreBusinessLogic businessLogic;
   late MockStoreRepository mockRepository;
-  late MockLocationService mockLocationService;
 
   setUp(() {
     mockRepository = MockStoreRepository();
-    mockLocationService = MockLocationService();
     businessLogic = StoreBusinessLogic(
       repository: mockRepository,
-      locationService: mockLocationService,
     );
   });
 

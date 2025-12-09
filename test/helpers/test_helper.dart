@@ -122,7 +122,6 @@ class TestsHelper {
   static StoreProvider createStoreProvider() {
     return StoreProvider(
       repository: MockStoreRepository(),
-      locationService: MockLocationService(),
     );
   }
 

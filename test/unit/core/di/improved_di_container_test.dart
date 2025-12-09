@@ -130,7 +130,6 @@ class MockStoreProvider extends StoreProvider {
   MockStoreProvider()
       : super(
           repository: MockStoreRepository(),
-          locationService: MockLocationService(),
         );
 }
 

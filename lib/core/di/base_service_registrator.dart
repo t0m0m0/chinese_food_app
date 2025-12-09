@@ -69,7 +69,6 @@ abstract class BaseServiceRegistrator {
     serviceContainer.register<StoreProvider>(() {
       return StoreProvider(
         repository: serviceContainer.resolve<StoreRepositoryImpl>(),
-        locationService: serviceContainer.resolve<LocationService>(),
       );
     });
 
