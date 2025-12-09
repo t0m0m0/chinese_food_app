@@ -126,7 +126,6 @@ void main() {
     mockLocationService = MockLocationService();
     storeProvider = StoreProvider(
       repository: mockRepository,
-      locationService: mockLocationService,
     );
   });
 
@@ -254,7 +253,6 @@ void main() {
       final mockLocationService = MockLocationService();
       final raceConditionProvider = StoreProvider(
         repository: mockRepository,
-        locationService: mockLocationService,
       );
 
       // when: SwipePageを表示
@@ -297,7 +295,6 @@ void main() {
       final mockLocationService = MockLocationService();
       final oneStoreProvider = StoreProvider(
         repository: mockRepositoryWithOneStore,
-        locationService: mockLocationService,
       );
 
       // when: SwipePageを表示

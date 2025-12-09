@@ -2,22 +2,16 @@ import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
-import '../../domain/services/location_service.dart';
 import '../../core/constants/string_constants.dart';
 import '../../core/constants/debug_constants.dart';
 
 class StoreBusinessLogic {
   final StoreRepository _repository;
-  // TODO: Issue #155 - 位置情報機能の完全実装で使用予定（loadStoresWithCurrentLocation等）
-  // ignore: unused_field
-  final LocationService _locationService;
   List<Store> _stores = [];
 
   StoreBusinessLogic({
     required StoreRepository repository,
-    required LocationService locationService,
-  })  : _repository = repository,
-        _locationService = locationService;
+  }) : _repository = repository;
 
   List<Store> get allStores => List.unmodifiable(_stores);
 

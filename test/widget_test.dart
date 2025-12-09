@@ -24,7 +24,6 @@ void main() {
     final fakeRepository = FakeStoreRepository();
     final storeProvider = StoreProvider(
       repository: fakeRepository,
-      locationService: mockLocationService,
     );
     final mockContainer = MockDIContainer(
       storeProvider: storeProvider,
@@ -58,7 +57,6 @@ void main() {
     final fakeRepository = FakeStoreRepository();
     final storeProvider = StoreProvider(
       repository: fakeRepository,
-      locationService: mockLocationService,
     );
 
     // 事前初期化をシミュレート
@@ -93,7 +91,6 @@ void main() {
     final mockLocationService = MockLocationService();
     final storeProvider = StoreProvider(
       repository: errorRepository,
-      locationService: mockLocationService,
     );
 
     // 初期化エラーをシミュレート

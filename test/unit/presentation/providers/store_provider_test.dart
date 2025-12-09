@@ -123,14 +123,11 @@ class FakeStoreRepository implements StoreRepository {
 void main() {
   late StoreProvider storeProvider;
   late FakeStoreRepository fakeRepository;
-  late MockLocationService mockLocationService;
 
   setUp(() {
     fakeRepository = FakeStoreRepository();
-    mockLocationService = MockLocationService();
     storeProvider = StoreProvider(
       repository: fakeRepository,
-      locationService: mockLocationService,
     );
   });
 

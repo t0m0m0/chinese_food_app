@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
-import '../../domain/services/location_service.dart';
 import '../../core/constants/error_messages.dart';
 import '../../core/constants/info_messages.dart';
 import '../../core/constants/string_constants.dart';
@@ -17,12 +16,10 @@ class StoreProvider extends ChangeNotifier {
 
   StoreProvider({
     required StoreRepository repository,
-    required LocationService locationService,
   })  : _stateManager = StoreStateManager(),
         _cacheManager = StoreCacheManager(),
         _businessLogic = StoreBusinessLogic(
           repository: repository,
-          locationService: locationService,
         ) {
     _stateManager.addListener(_onStateChanged);
   }

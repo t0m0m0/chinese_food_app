@@ -74,7 +74,6 @@ void main() {
     mockLocationService = MockLocationService();
     storeProvider = StoreProvider(
       repository: mockRepository,
-      locationService: mockLocationService,
     );
   });
 
