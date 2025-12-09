@@ -12,7 +12,47 @@ enum Environment {
   development,
 
   /// Test environment with mock services
-  test,
+  test;
+
+  /// Determine current environment based on configuration
+  ///
+  /// Checks environment variables and compile-time constants
+  /// to determine the appropriate environment.
+  ///
+  /// Priority:
+  /// 1. Flutter test framework detection (`flutter.test`)
+  /// 2. Explicit APP_ENV environment variable
+  /// 3. Default to development
+  static Environment detect() {
+    // Check for test environment first (for Flutter test framework)
+    if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
+      return Environment.test;
+    }
+
+    // Check for explicit environment variable
+    const envMode = String.fromEnvironment('APP_ENV', defaultValue: '');
+
+    return switch (envMode.toLowerCase()) {
+      'production' || 'prod' => Environment.production,
+      'test' || 'testing' => Environment.test,
+      'development' || 'dev' || _ => Environment.development,
+    };
+  }
+
+  /// Valid APP_ENV values for validation
+  static const validEnvValues = {
+    'production',
+    'prod',
+    'test',
+    'testing',
+    'development',
+    'dev',
+  };
+
+  /// Check if a given APP_ENV value is valid
+  static bool isValidEnvValue(String value) {
+    return validEnvValues.contains(value.toLowerCase());
+  }
 }
 
 /// Exception thrown when DIContainer operations fail

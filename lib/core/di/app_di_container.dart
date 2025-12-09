@@ -84,40 +84,19 @@ class AppDIContainer implements DIContainerInterface {
   }
 
   /// Determine current environment based on configuration
+  ///
+  /// Delegates to [Environment.detect()] for the actual detection logic.
   Environment _determineEnvironment() {
-    // Check for test environment first (for Flutter test framework)
-    if (const bool.fromEnvironment('flutter.test', defaultValue: false)) {
-      developer.log('Environment: test (Flutter test framework)', name: 'DI');
-      return Environment.test;
-    }
+    final environment = Environment.detect();
 
-    // Check for explicit environment variable
+    // Log environment detection for debugging
     const envMode = String.fromEnvironment('APP_ENV', defaultValue: '');
-
-    // Valid environment values for APP_ENV
-    const validEnvironments = {
-      'production',
-      'prod',
-      'test',
-      'testing',
-      'development',
-      'dev'
-    };
-
-    // Validate environment variable if provided
-    if (envMode.isNotEmpty &&
-        !validEnvironments.contains(envMode.toLowerCase())) {
+    if (envMode.isNotEmpty && !Environment.isValidEnvValue(envMode)) {
       developer.log(
           'Unknown APP_ENV value: "$envMode", falling back to development',
           name: 'DI',
           level: 900); // WARNING level
     }
-
-    final environment = switch (envMode.toLowerCase()) {
-      'production' || 'prod' => Environment.production,
-      'test' || 'testing' => Environment.test,
-      'development' || 'dev' || _ => Environment.development,
-    };
 
     developer.log(
         'Environment: ${environment.name}${envMode.isNotEmpty ? ' (APP_ENV=$envMode)' : ' (default)'}',
