@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/config/api_connection_tester.dart';
+// ignore: deprecated_member_use
+import 'package:chinese_food_app/core/config/api_diagnostics.dart';
 import '../../../helpers/test_env_setup.dart';
 
 void main() {
