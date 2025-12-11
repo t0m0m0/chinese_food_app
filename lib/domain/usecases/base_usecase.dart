@@ -8,7 +8,7 @@ import '../../core/types/result.dart';
 ///
 /// The base class provides a consistent interface for all Use Cases:
 /// - Input parameters of type [Params]
-/// - Output wrapped in a [Result<Type>] for unified error handling
+/// - Output wrapped in a [Result<T>] for unified error handling
 /// - Async execution with [Future] support
 ///
 /// Example usage:
@@ -34,20 +34,20 @@ import '../../core/types/result.dart';
 ///     handleError(result.exception);
 /// }
 /// ```
-abstract class BaseUseCase<Params, Type> {
+abstract class BaseUseCase<Params, T> {
   /// Executes the use case with the given parameters
   ///
   /// [params] - Input parameters for the use case
-  /// Returns a [Future<Result<Type>>] containing either:
-  /// - [Success<Type>] with the operation result
-  /// - [Failure<Type>] with an exception describing the error
+  /// Returns a [Future<Result<T>>] containing either:
+  /// - [Success<T>] with the operation result
+  /// - [Failure<T>] with an exception describing the error
   ///
   /// Implementation requirements:
   /// - Should handle all exceptions and wrap them in [Failure]
   /// - Should validate input parameters if necessary
   /// - Should be stateless and side-effect free when possible
   /// - Should delegate complex logic to repositories and services
-  Future<Result<Type>> call(Params params);
+  Future<Result<T>> call(Params params);
 }
 
 /// Parameter class for Use Cases that don't require input parameters
