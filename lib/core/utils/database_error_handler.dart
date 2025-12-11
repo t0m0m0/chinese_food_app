@@ -41,6 +41,8 @@ class DatabaseErrorHandler {
   static bool isDatabaseFileAccessError(Exception error) {
     // SqliteException型の場合は型安全な判定を行う
     if (error is SqliteException) {
+      // extendedResultCodeは上位ビットに追加情報を含む場合があるため、
+      // 基本のresultCodeも併せてチェックする
       return _databaseAccessErrorCodes.contains(error.extendedResultCode) ||
           _databaseAccessErrorCodes.contains(error.resultCode);
     }

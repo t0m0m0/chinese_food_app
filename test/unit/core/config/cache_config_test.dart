@@ -4,6 +4,11 @@ import 'package:chinese_food_app/core/config/environment_config.dart';
 
 void main() {
   group('CacheConfig', () {
+    tearDown(() {
+      // テスト後にEnvironmentConfigのテストコンテキストをクリア
+      EnvironmentConfig.clearTestContext();
+    });
+
     test('should provide default cache durations', () {
       expect(CacheConfig.storeCacheMaxAge, equals(const Duration(seconds: 30)));
       expect(CacheConfig.searchCacheMaxAge, equals(const Duration(minutes: 5)));
