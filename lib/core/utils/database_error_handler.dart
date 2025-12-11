@@ -1,4 +1,4 @@
-// Note: SqliteExceptionのインポート は将来の段階的改善で追加予定
+import 'package:sqlite3/sqlite3.dart';
 
 /// Issue #113 Phase 2: 型安全なデータベースエラーハンドリング
 ///
@@ -12,18 +12,41 @@ class DatabaseErrorHandler {
   static const int severityError = 2;
   static const int severityCritical = 3;
 
-  /// SQLiteファイルアクセスエラー（SqliteException code 14）の判定
+  /// SQLite関連エラーコード
+  /// https://www.sqlite.org/rescode.html
+  static const int sqliteIoErr = 10; // SQLITE_IOERR
+  static const int sqliteCorrupt = 11; // SQLITE_CORRUPT
+  static const int sqliteCantOpen = 14; // SQLITE_CANTOPEN
+  static const int sqliteBusy = 5; // SQLITE_BUSY
+
+  /// データベースアクセスエラーに該当するSQLiteエラーコード一覧
+  static const List<int> _databaseAccessErrorCodes = [
+    sqliteIoErr, // 10: disk I/O error
+    sqliteCorrupt, // 11: database disk image is malformed
+    sqliteCantOpen, // 14: unable to open database file
+    sqliteBusy, // 5: database is locked
+  ];
+
+  /// SQLiteファイルアクセスエラーの判定
   ///
   /// **対象エラー**:
   /// - SqliteException(14): unable to open database file (SQLITE_CANTOPEN)
-  /// - ファイルアクセス権限問題
-  /// - 無効なファイルパス
+  /// - SqliteException(5): database is locked (SQLITE_BUSY)
+  /// - SqliteException(10): disk I/O error (SQLITE_IOERR)
+  /// - SqliteException(11): database disk image is malformed (SQLITE_CORRUPT)
+  /// - その他のファイルアクセス関連例外
+  ///
+  /// SqliteException型の場合は型チェックとエラーコードで判定し、
+  /// それ以外の例外は文字列マッチングにフォールバックします。
   static bool isDatabaseFileAccessError(Exception error) {
-    // 改善された文字列マッチング（現在の実装）
-    // TODO(Issue #113 Phase 2 by 2025-09-01): sqlite3パッケージのSqliteException型チェックに移行
-    final errorString = error.toString();
+    // SqliteException型の場合は型安全な判定を行う
+    if (error is SqliteException) {
+      return _databaseAccessErrorCodes.contains(error.extendedResultCode) ||
+          _databaseAccessErrorCodes.contains(error.resultCode);
+    }
 
-    // より精密なエラーパターンマッチング
+    // その他の例外は文字列マッチングにフォールバック
+    final errorString = error.toString();
     return _matchesDatabaseFileError(errorString);
   }
 

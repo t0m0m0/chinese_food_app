@@ -1,26 +1,51 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/utils/database_error_handler.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 void main() {
   group('DatabaseErrorHandler (Issue #113 Phase 2)', () {
     group('sqlite3 Package Integration Tests', () {
       test('should detect SqliteException types when available', () async {
-        // 🔴 Red: sqlite3パッケージのSqliteExceptionを使用した型チェック
-        // 現在は文字列マッチングを使用しているが、将来的には型チェックに移行する
-
-        // SqliteExceptionが利用可能かどうかをテスト
+        // sqlite3パッケージのSqliteExceptionを使用した型チェック
         expect(DatabaseErrorHandler.supportsSqliteExceptionTypeCheck(), isTrue,
-            reason: 'sqlite3パッケージのSqliteException型チェックがサポートされていません');
+            reason: 'sqlite3パッケージのSqliteException型チェックがサポートされています');
       });
 
-      test('should provide type-safe error detection', () async {
-        // 🔴 Red: 型安全なエラー検出の実装テスト
+      test('should detect SqliteException with SQLITE_CANTOPEN error code', () {
+        // SqliteException(14)はSQLITE_CANTOPENエラーを表す
+        final sqliteError = SqliteException(14, 'unable to open database file');
 
-        // 期待: TypedDatabaseErrorHandler クラスが実装される
-        expect(() {
-          final typedHandler = DatabaseErrorHandler.createTypedHandler();
-          return typedHandler.isDatabaseFileAccessError;
-        }, throwsA(isA<UnimplementedError>()));
+        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
+            isTrue,
+            reason: 'SqliteException型のエラーを検出できる必要があります');
+      });
+
+      test('should detect SqliteException with SQLITE_BUSY error code', () {
+        // SqliteException(5)はSQLITE_BUSYエラー（database is locked）
+        final sqliteError = SqliteException(5, 'database is locked');
+
+        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
+            isTrue,
+            reason: 'SQLITE_BUSYエラーを検出できる必要があります');
+      });
+
+      test('should detect SqliteException with SQLITE_CORRUPT error code', () {
+        // SqliteException(11)はSQLITE_CORRUPTエラー（database disk image is malformed）
+        final sqliteError =
+            SqliteException(11, 'database disk image is malformed');
+
+        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
+            isTrue,
+            reason: 'SQLITE_CORRUPTエラーを検出できる必要があります');
+      });
+
+      test('should detect SqliteException with SQLITE_IOERR error code', () {
+        // SqliteException(10)はSQLITE_IOERRエラー（disk I/O error）
+        final sqliteError = SqliteException(10, 'disk I/O error');
+
+        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
+            isTrue,
+            reason: 'SQLITE_IOERRエラーを検出できる必要があります');
       });
     });
 
