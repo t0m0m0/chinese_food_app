@@ -1166,7 +1166,7 @@ packages:
     source: hosted
     version: "2.4.0"
   sqlite3:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sqlite3
       sha256: dd806fff004a0aeb01e208b858dbc649bc72104670d425a81a6dd17698535f6e
