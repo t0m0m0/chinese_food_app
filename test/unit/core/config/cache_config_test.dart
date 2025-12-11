@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/cache_config.dart';
+import 'package:chinese_food_app/core/config/environment_config.dart';
 
 void main() {
   group('CacheConfig', () {
@@ -62,6 +63,17 @@ void main() {
       // 画像キャッシュは最も長い
       expect(CacheConfig.imageCacheMaxAge.inMilliseconds,
           greaterThan(CacheConfig.locationCacheMaxAge.inMilliseconds));
+    });
+
+    test('isDevelopment should use EnvironmentConfig', () {
+      // テスト環境ではEnvironmentConfigの状態をリセット
+      EnvironmentConfig.resetForTesting();
+
+      // CacheConfig.isDevelopmentはEnvironmentConfig.isDevelopmentまたは
+      // EnvironmentConfig.isTestに基づいて判定される
+      final envIsDevelopmentOrTest =
+          EnvironmentConfig.isDevelopment || EnvironmentConfig.isTest;
+      expect(CacheConfig.isDevelopment, equals(envIsDevelopmentOrTest));
     });
   });
 }

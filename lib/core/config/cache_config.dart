@@ -1,3 +1,5 @@
+import 'environment_config.dart';
+
 /// キャッシュ設定管理
 ///
 /// アプリケーション全体のキャッシュ動作を管理する設定クラス
@@ -32,8 +34,11 @@ class CacheConfig {
   /// メモリ圧迫時の自動キャッシュクリア閾値（MB）
   static const int memoryCriticalThresholdMB = 100;
 
-  /// 開発環境判定用フラグ（将来的に環境設定と連携）
-  static const bool isDevelopment = true; // TODO: 環境設定から取得
+  /// 開発環境判定用フラグ（EnvironmentConfigから取得）
+  ///
+  /// 開発環境またはテスト環境の場合にtrueを返す
+  static bool get isDevelopment =>
+      EnvironmentConfig.isDevelopment || EnvironmentConfig.isTest;
 
   /// 実際に使用するストアキャッシュ期間（環境に応じて動的切り替え）
   static Duration get activeStoreCacheMaxAge {
