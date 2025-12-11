@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chinese_food_app/core/config/api_connection_tester.dart';
+import 'package:chinese_food_app/core/config/api_diagnostics.dart';
 import '../../../helpers/test_env_setup.dart';
 
 void main() {
-  group('ApiConnectionTester', () {
+  group('ApiDiagnostics', () {
     setUp(() async {
       await TestEnvSetup.initializeTestEnvironment();
     });
@@ -17,7 +17,7 @@ void main() {
       TestEnvSetup.setTestApiKey('HOTPEPPER_API_KEY', 'valid_test_key');
 
       // Act
-      final result = await ApiConnectionTester.testBasicConnectivity();
+      final result = await ApiDiagnostics.testBasicConnectivity();
 
       // Assert
       expect(result.isSuccessful, isTrue);
@@ -30,7 +30,7 @@ void main() {
       TestEnvSetup.clearTestApiKey('HOTPEPPER_API_KEY');
 
       // Act
-      final result = await ApiConnectionTester.testApiKeyValidation();
+      final result = await ApiDiagnostics.testApiKeyValidation();
 
       // Assert
       expect(result.isSuccessful, isFalse);
@@ -42,7 +42,7 @@ void main() {
       TestEnvSetup.setTestApiKey('HOTPEPPER_API_KEY', 'test_key_123');
 
       // Act
-      final results = await ApiConnectionTester.runComprehensiveTest();
+      final results = await ApiDiagnostics.runComprehensiveTest();
 
       // Assert
       expect(results, isNotEmpty);
@@ -57,7 +57,7 @@ void main() {
       final customTimeout = const Duration(seconds: 5);
 
       // Act
-      final result = await ApiConnectionTester.testBasicConnectivity(
+      final result = await ApiDiagnostics.testBasicConnectivity(
         timeout: customTimeout,
       );
 
@@ -74,7 +74,7 @@ void main() {
           'HOTPEPPER_API_KEY', 'test_comprehensive_timeout');
 
       // Act
-      final results = await ApiConnectionTester.runComprehensiveTest(
+      final results = await ApiDiagnostics.runComprehensiveTest(
         connectivityTimeout: const Duration(seconds: 8),
         apiCallTimeout: const Duration(seconds: 12),
       );
