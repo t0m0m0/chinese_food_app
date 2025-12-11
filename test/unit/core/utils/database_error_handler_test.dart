@@ -15,8 +15,8 @@ void main() {
         // SqliteException(14)はSQLITE_CANTOPENエラーを表す
         final sqliteError = SqliteException(14, 'unable to open database file');
 
-        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
-            isTrue,
+        expect(
+            DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError), isTrue,
             reason: 'SqliteException型のエラーを検出できる必要があります');
       });
 
@@ -24,8 +24,8 @@ void main() {
         // SqliteException(5)はSQLITE_BUSYエラー（database is locked）
         final sqliteError = SqliteException(5, 'database is locked');
 
-        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
-            isTrue,
+        expect(
+            DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError), isTrue,
             reason: 'SQLITE_BUSYエラーを検出できる必要があります');
       });
 
@@ -34,8 +34,8 @@ void main() {
         final sqliteError =
             SqliteException(11, 'database disk image is malformed');
 
-        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
-            isTrue,
+        expect(
+            DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError), isTrue,
             reason: 'SQLITE_CORRUPTエラーを検出できる必要があります');
       });
 
@@ -43,8 +43,8 @@ void main() {
         // SqliteException(10)はSQLITE_IOERRエラー（disk I/O error）
         final sqliteError = SqliteException(10, 'disk I/O error');
 
-        expect(DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError),
-            isTrue,
+        expect(
+            DatabaseErrorHandler.isDatabaseFileAccessError(sqliteError), isTrue,
             reason: 'SQLITE_IOERRエラーを検出できる必要があります');
       });
     });
