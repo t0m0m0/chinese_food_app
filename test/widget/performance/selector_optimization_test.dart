@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
-import '../../helpers/test_helper.dart';
+import '../../helpers/test_helpers.dart';
 
 /// Selectorを使った最適化の動作確認テスト
 ///

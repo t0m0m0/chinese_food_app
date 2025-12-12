@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 // Local imports
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
 // Test imports
 import 'fakes.dart';
@@ -235,5 +236,39 @@ class TestEnvironment {
   /// 非同期テストの共通クリーンアップ
   static Future<void> tearDownAsync() async {
     // 非同期処理が必要な場合のクリーンアップ
+  }
+}
+
+/// パフォーマンステスト用ヘルパー（旧test_helper.dartから移行）
+///
+/// StoreProviderのインスタンス作成やテストStore作成を提供
+class TestsHelper {
+  /// StoreProviderのインスタンスを作成（テスト用）
+  static StoreProvider createStoreProvider() {
+    return StoreProvider(
+      repository: FakeStoreRepository(),
+    );
+  }
+
+  /// テスト用のStoreを作成
+  static Store createTestStore({
+    String? id,
+    String? name,
+    String? address,
+    double lat = 35.6812,
+    double lng = 139.7671,
+    StoreStatus? status,
+    String? memo,
+  }) {
+    return Store(
+      id: id ?? 'test-store-${DateTime.now().millisecondsSinceEpoch}',
+      name: name ?? 'Test Store',
+      address: address ?? 'Test Address',
+      lat: lat,
+      lng: lng,
+      status: status,
+      memo: memo,
+      createdAt: DateTime.now(),
+    );
   }
 }

@@ -4,9 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 import 'package:chinese_food_app/presentation/providers/search_provider.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
-import 'package:chinese_food_app/domain/services/location_service.dart';
-import 'package:chinese_food_app/domain/entities/location.dart';
-import '../../helpers/test_helper.dart';
+import '../../helpers/test_helpers.dart';
+import '../../helpers/fakes.dart';
 
 /// SearchPageとMyMenuPageのSelector最適化テスト
 ///
@@ -21,7 +20,7 @@ void main() {
       storeProvider = TestsHelper.createStoreProvider();
       searchProvider = SearchProvider(
         storeProvider: storeProvider,
-        locationService: MockLocationService(),
+        locationService: FakeLocationService(),
       );
     });
 
@@ -217,25 +216,4 @@ void main() {
           findsOneWidget); // SearchProviderは変更なし
     });
   });
-}
-
-// Mock LocationService for testing
-class MockLocationService implements LocationService {
-  @override
-  Future<Location> getCurrentLocation() async {
-    return Location(
-      latitude: 35.6812,
-      longitude: 139.7671,
-      timestamp: DateTime.now(),
-    );
-  }
-
-  @override
-  Future<bool> hasLocationPermission() async => true;
-
-  @override
-  Future<bool> isLocationServiceEnabled() async => true;
-
-  @override
-  Future<bool> requestLocationPermission() async => true;
 }
