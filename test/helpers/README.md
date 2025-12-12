@@ -1,6 +1,7 @@
 # 統一テストダブル - 使用ガイド
 
 > Issue #52「テストダブル（Mock/Fake）の統一化」の成果物
+> Issue #231「テストヘルパーファイルの整理」で未使用ファイルを削除
 
 ## 概要
 
@@ -12,10 +13,12 @@
 test/helpers/
 ├── README.md                    # 本ドキュメント
 ├── mocks.dart                   # Mockito用アノテーション定義
-├── mocks.mocks.dart            # Mockito自動生成ファイル
+├── mocks.mocks.dart             # Mockito自動生成ファイル
 ├── fakes.dart                   # カスタムFakeクラス実装
-├── test_helpers.dart           # 共通テストヘルパー
-└── unified_test_example.dart   # 使用例・デモンストレーション
+├── test_helpers.dart            # 共通テストヘルパー・データビルダー
+├── test_constants.dart          # テスト環境用定数
+├── test_env_setup.dart          # テスト環境セットアップ
+└── test_database_factory.dart   # Driftデータベーステスト用ファクトリ
 ```
 
 ## 使用方法

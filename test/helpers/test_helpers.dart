@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 // Local imports
 import 'package:chinese_food_app/domain/entities/location.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
+import 'package:chinese_food_app/presentation/providers/store_provider.dart';
 
 // Test imports
 import 'fakes.dart';
@@ -16,6 +17,13 @@ import 'fakes.dart';
 ///
 /// テスト間での重複コードを削減し、一貫したテストセットアップを提供する。
 class TestHelpers {
+  /// StoreProviderのインスタンスを作成（テスト用）
+  static StoreProvider createStoreProvider() {
+    return StoreProvider(
+      repository: FakeStoreRepository(),
+    );
+  }
+
   /// ウィジェットテスト用のMaterialApp + Provider構成を作成
   ///
   /// 使用例：
@@ -235,5 +243,39 @@ class TestEnvironment {
   /// 非同期テストの共通クリーンアップ
   static Future<void> tearDownAsync() async {
     // 非同期処理が必要な場合のクリーンアップ
+  }
+}
+
+/// TestsHelper は TestHelpers と TestDataBuilders に統合されました。
+/// 後方互換性のためのエイリアス（将来削除予定）
+@Deprecated(
+    'Use TestHelpers.createStoreProvider() and TestDataBuilders.createTestStore() instead')
+class TestsHelper {
+  /// StoreProviderのインスタンスを作成（テスト用）
+  /// 代わりに TestHelpers.createStoreProvider() を使用してください
+  static StoreProvider createStoreProvider() {
+    return TestHelpers.createStoreProvider();
+  }
+
+  /// テスト用のStoreを作成
+  /// 代わりに TestDataBuilders.createTestStore() を使用してください
+  static Store createTestStore({
+    String? id,
+    String? name,
+    String? address,
+    double lat = 35.6812,
+    double lng = 139.7671,
+    StoreStatus? status,
+    String? memo,
+  }) {
+    return TestDataBuilders.createTestStore(
+      id: id,
+      name: name ?? 'Test Store',
+      address: address ?? 'Test Address',
+      lat: lat,
+      lng: lng,
+      status: status ?? StoreStatus.wantToGo,
+      memo: memo ?? '',
+    );
   }
 }
