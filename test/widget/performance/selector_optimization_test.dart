@@ -58,7 +58,7 @@ void main() {
     late StoreProvider storeProvider;
 
     setUp(() {
-      storeProvider = TestsHelper.createStoreProvider();
+      storeProvider = TestHelpers.createStoreProvider();
     });
 
     testWidgets('Selectorの基本動作を確認', (tester) async {
@@ -87,7 +87,7 @@ void main() {
       expect(find.text('Stores: 0'), findsOneWidget);
 
       // 新しい店舗を追加（storesが変更される）
-      final newStore = TestsHelper.createTestStore(
+      final newStore = TestDataBuilders.createTestStore(
         id: 'new-store-1',
         name: 'New Test Store',
       );
@@ -108,7 +108,7 @@ void main() {
 
       // 複数の店舗を追加
       for (int i = 1; i <= 3; i++) {
-        final store = TestsHelper.createTestStore(
+        final store = TestDataBuilders.createTestStore(
           id: 'store-$i',
           name: 'Test Store $i',
         );
@@ -152,7 +152,7 @@ void main() {
       expect(find.text('Stores: 0'), findsOneWidget);
 
       // 店舗を追加
-      final store = TestsHelper.createTestStore();
+      final store = TestDataBuilders.createTestStore();
       await storeProvider.addStore(store);
       await tester.pump();
 

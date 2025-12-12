@@ -17,6 +17,13 @@ import 'fakes.dart';
 ///
 /// テスト間での重複コードを削減し、一貫したテストセットアップを提供する。
 class TestHelpers {
+  /// StoreProviderのインスタンスを作成（テスト用）
+  static StoreProvider createStoreProvider() {
+    return StoreProvider(
+      repository: FakeStoreRepository(),
+    );
+  }
+
   /// ウィジェットテスト用のMaterialApp + Provider構成を作成
   ///
   /// 使用例：
@@ -239,18 +246,19 @@ class TestEnvironment {
   }
 }
 
-/// パフォーマンステスト用ヘルパー（旧test_helper.dartから移行）
-///
-/// StoreProviderのインスタンス作成やテストStore作成を提供
+/// TestsHelper は TestHelpers と TestDataBuilders に統合されました。
+/// 後方互換性のためのエイリアス（将来削除予定）
+@Deprecated(
+    'Use TestHelpers.createStoreProvider() and TestDataBuilders.createTestStore() instead')
 class TestsHelper {
   /// StoreProviderのインスタンスを作成（テスト用）
+  /// 代わりに TestHelpers.createStoreProvider() を使用してください
   static StoreProvider createStoreProvider() {
-    return StoreProvider(
-      repository: FakeStoreRepository(),
-    );
+    return TestHelpers.createStoreProvider();
   }
 
   /// テスト用のStoreを作成
+  /// 代わりに TestDataBuilders.createTestStore() を使用してください
   static Store createTestStore({
     String? id,
     String? name,
@@ -260,15 +268,14 @@ class TestsHelper {
     StoreStatus? status,
     String? memo,
   }) {
-    return Store(
-      id: id ?? 'test-store-${DateTime.now().millisecondsSinceEpoch}',
+    return TestDataBuilders.createTestStore(
+      id: id,
       name: name ?? 'Test Store',
       address: address ?? 'Test Address',
       lat: lat,
       lng: lng,
-      status: status,
-      memo: memo,
-      createdAt: DateTime.now(),
+      status: status ?? StoreStatus.wantToGo,
+      memo: memo ?? '',
     );
   }
 }

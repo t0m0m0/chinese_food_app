@@ -17,7 +17,7 @@ void main() {
     late SearchProvider searchProvider;
 
     setUp(() {
-      storeProvider = TestsHelper.createStoreProvider();
+      storeProvider = TestHelpers.createStoreProvider();
       searchProvider = SearchProvider(
         storeProvider: storeProvider,
         locationService: FakeLocationService(),
@@ -128,7 +128,7 @@ void main() {
       expect(find.text('Bad: 0'), findsOneWidget);
 
       // 店舗追加テスト
-      final newStore = TestsHelper.createTestStore(
+      final newStore = TestDataBuilders.createTestStore(
         id: 'test-store-1',
         name: 'Test Store',
         status: StoreStatus.wantToGo,
@@ -203,7 +203,7 @@ void main() {
       expect(find.text('SearchStyle - Results: 0'), findsOneWidget);
 
       // StoreProviderに変更を加える
-      final newStore = TestsHelper.createTestStore(
+      final newStore = TestDataBuilders.createTestStore(
         status: StoreStatus.wantToGo,
       );
       await storeProvider.addStore(newStore);
