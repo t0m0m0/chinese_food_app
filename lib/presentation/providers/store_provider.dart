@@ -317,10 +317,6 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
-  // Temporary getter for backward compatibility
-  StoreRepository get repository => throw UnimplementedError(
-      'repository getter is deprecated. Direct repository access violates separation of concerns.');
-
   @override
   void dispose() {
     _stateManager.removeListener(_onStateChanged);
