@@ -3,14 +3,12 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i8;
-import 'dart:ui' as _i11;
+import 'dart:async' as _i7;
+import 'dart:ui' as _i10;
 
-import 'package:chinese_food_app/core/di/di_container_interface.dart' as _i7;
-import 'package:chinese_food_app/domain/entities/store.dart' as _i10;
-import 'package:chinese_food_app/domain/entities/visit_record.dart' as _i9;
-import 'package:chinese_food_app/domain/repositories/store_repository.dart'
-    as _i6;
+import 'package:chinese_food_app/core/di/di_container_interface.dart' as _i6;
+import 'package:chinese_food_app/domain/entities/store.dart' as _i9;
+import 'package:chinese_food_app/domain/entities/visit_record.dart' as _i8;
 import 'package:chinese_food_app/domain/services/location_service.dart' as _i3;
 import 'package:chinese_food_app/domain/usecases/add_visit_record_usecase.dart'
     as _i4;
@@ -77,22 +75,11 @@ class _FakeGetVisitRecordsByStoreIdUsecase_3 extends _i1.SmartFake
         );
 }
 
-class _FakeStoreRepository_4 extends _i1.SmartFake
-    implements _i6.StoreRepository {
-  _FakeStoreRepository_4(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
-}
-
 /// A class which mocks [DIContainerInterface].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDIContainerInterface extends _i1.Mock
-    implements _i7.DIContainerInterface {
+    implements _i6.DIContainerInterface {
   MockDIContainerInterface() {
     _i1.throwOnMissingStub(this);
   }
@@ -113,7 +100,7 @@ class MockDIContainerInterface extends _i1.Mock
       );
 
   @override
-  void configureForEnvironment(_i7.Environment? environment) =>
+  void configureForEnvironment(_i6.Environment? environment) =>
       super.noSuchMethod(
         Invocation.method(
           #configureForEnvironment,
@@ -212,15 +199,15 @@ class MockGetVisitRecordsByStoreIdUsecase extends _i1.Mock
   }
 
   @override
-  _i8.Future<List<_i9.VisitRecord>> call(String? storeId) =>
+  _i7.Future<List<_i8.VisitRecord>> call(String? storeId) =>
       (super.noSuchMethod(
         Invocation.method(
           #call,
           [storeId],
         ),
         returnValue:
-            _i8.Future<List<_i9.VisitRecord>>.value(<_i9.VisitRecord>[]),
-      ) as _i8.Future<List<_i9.VisitRecord>>);
+            _i7.Future<List<_i8.VisitRecord>>.value(<_i8.VisitRecord>[]),
+      ) as _i7.Future<List<_i8.VisitRecord>>);
 }
 
 /// A class which mocks [StoreProvider].
@@ -238,55 +225,46 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
       ) as bool);
 
   @override
-  List<_i10.Store> get searchResults => (super.noSuchMethod(
+  List<_i9.Store> get searchResults => (super.noSuchMethod(
         Invocation.getter(#searchResults),
-        returnValue: <_i10.Store>[],
-      ) as List<_i10.Store>);
+        returnValue: <_i9.Store>[],
+      ) as List<_i9.Store>);
 
   @override
-  List<_i10.Store> get swipeStores => (super.noSuchMethod(
+  List<_i9.Store> get swipeStores => (super.noSuchMethod(
         Invocation.getter(#swipeStores),
-        returnValue: <_i10.Store>[],
-      ) as List<_i10.Store>);
+        returnValue: <_i9.Store>[],
+      ) as List<_i9.Store>);
 
   @override
-  List<_i10.Store> get stores => (super.noSuchMethod(
+  List<_i9.Store> get stores => (super.noSuchMethod(
         Invocation.getter(#stores),
-        returnValue: <_i10.Store>[],
-      ) as List<_i10.Store>);
+        returnValue: <_i9.Store>[],
+      ) as List<_i9.Store>);
 
   @override
-  List<_i10.Store> get wantToGoStores => (super.noSuchMethod(
+  List<_i9.Store> get wantToGoStores => (super.noSuchMethod(
         Invocation.getter(#wantToGoStores),
-        returnValue: <_i10.Store>[],
-      ) as List<_i10.Store>);
+        returnValue: <_i9.Store>[],
+      ) as List<_i9.Store>);
 
   @override
-  List<_i10.Store> get visitedStores => (super.noSuchMethod(
+  List<_i9.Store> get visitedStores => (super.noSuchMethod(
         Invocation.getter(#visitedStores),
-        returnValue: <_i10.Store>[],
-      ) as List<_i10.Store>);
+        returnValue: <_i9.Store>[],
+      ) as List<_i9.Store>);
 
   @override
-  List<_i10.Store> get badStores => (super.noSuchMethod(
+  List<_i9.Store> get badStores => (super.noSuchMethod(
         Invocation.getter(#badStores),
-        returnValue: <_i10.Store>[],
-      ) as List<_i10.Store>);
+        returnValue: <_i9.Store>[],
+      ) as List<_i9.Store>);
 
   @override
-  List<_i10.Store> get newStores => (super.noSuchMethod(
+  List<_i9.Store> get newStores => (super.noSuchMethod(
         Invocation.getter(#newStores),
-        returnValue: <_i10.Store>[],
-      ) as List<_i10.Store>);
-
-  @override
-  _i6.StoreRepository get repository => (super.noSuchMethod(
-        Invocation.getter(#repository),
-        returnValue: _FakeStoreRepository_4(
-          this,
-          Invocation.getter(#repository),
-        ),
-      ) as _i6.StoreRepository);
+        returnValue: <_i9.Store>[],
+      ) as List<_i9.Store>);
 
   @override
   bool get hasListeners => (super.noSuchMethod(
@@ -295,19 +273,19 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
       ) as bool);
 
   @override
-  _i8.Future<void> loadStores() => (super.noSuchMethod(
+  _i7.Future<void> loadStores() => (super.noSuchMethod(
         Invocation.method(
           #loadStores,
           [],
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i8.Future<void> updateStoreStatus(
+  _i7.Future<void> updateStoreStatus(
     String? storeId,
-    _i10.StoreStatus? newStatus,
+    _i9.StoreStatus? newStatus,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -317,14 +295,14 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
             newStatus,
           ],
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i8.Future<void> saveSwipedStore(
-    _i10.Store? store,
-    _i10.StoreStatus? status,
+  _i7.Future<void> saveSwipedStore(
+    _i9.Store? store,
+    _i9.StoreStatus? status,
   ) =>
       (super.noSuchMethod(
         Invocation.method(
@@ -334,29 +312,29 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
             status,
           ],
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i8.Future<void> addStore(_i10.Store? store) => (super.noSuchMethod(
+  _i7.Future<void> addStore(_i9.Store? store) => (super.noSuchMethod(
         Invocation.method(
           #addStore,
           [store],
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i8.Future<void> deleteAllStores() => (super.noSuchMethod(
+  _i7.Future<void> deleteAllStores() => (super.noSuchMethod(
         Invocation.method(
           #deleteAllStores,
           [],
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
   void clearError() => super.noSuchMethod(
@@ -377,7 +355,7 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
       );
 
   @override
-  _i8.Future<void> loadNewStoresFromApi({
+  _i7.Future<void> loadNewStoresFromApi({
     double? lat,
     double? lng,
     String? address,
@@ -400,12 +378,12 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
             #start: start,
           },
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i8.Future<void> loadSwipeStores({
+  _i7.Future<void> loadSwipeStores({
     required double? lat,
     required double? lng,
     int? range = 3,
@@ -422,12 +400,12 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
             #count: count,
           },
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i8.Future<void> loadMoreSwipeStores({
+  _i7.Future<void> loadMoreSwipeStores({
     required double? lat,
     required double? lng,
     int? range = 3,
@@ -446,18 +424,18 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
             #start: start,
           },
         ),
-        returnValue: _i8.Future<void>.value(),
-        returnValueForMissingStub: _i8.Future<void>.value(),
-      ) as _i8.Future<void>);
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 
   @override
-  _i8.Future<bool> tryRecoverFromDatabaseError() => (super.noSuchMethod(
+  _i7.Future<bool> tryRecoverFromDatabaseError() => (super.noSuchMethod(
         Invocation.method(
           #tryRecoverFromDatabaseError,
           [],
         ),
-        returnValue: _i8.Future<bool>.value(false),
-      ) as _i8.Future<bool>);
+        returnValue: _i7.Future<bool>.value(false),
+      ) as _i7.Future<bool>);
 
   @override
   void dispose() => super.noSuchMethod(
@@ -469,7 +447,7 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
       );
 
   @override
-  void addListener(_i11.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i10.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #addListener,
           [listener],
@@ -478,7 +456,7 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
       );
 
   @override
-  void removeListener(_i11.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i10.VoidCallback? listener) => super.noSuchMethod(
         Invocation.method(
           #removeListener,
           [listener],

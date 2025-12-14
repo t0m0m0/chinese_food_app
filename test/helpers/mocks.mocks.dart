@@ -719,15 +719,6 @@ class MockStoreProvider extends _i1.Mock implements _i22.StoreProvider {
       ) as List<_i15.Store>);
 
   @override
-  _i4.StoreRepository get repository => (super.noSuchMethod(
-        Invocation.getter(#repository),
-        returnValue: _FakeStoreRepository_2(
-          this,
-          Invocation.getter(#repository),
-        ),
-      ) as _i4.StoreRepository);
-
-  @override
   bool get hasListeners => (super.noSuchMethod(
         Invocation.getter(#hasListeners),
         returnValue: false,
