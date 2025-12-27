@@ -773,4 +773,215 @@ void main() {
       expect(result, isEmpty);
     });
   });
+
+  group('StoreBusinessLogic - auto pagination on filtering (issue #245)', () {
+    // Issue #245: フィルタリング後に店舗数が少ない場合、自動で次ページを取得すべき
+    //
+    // 問題:
+    // - APIから100件取得
+    // - DBに既にスワイプ済みの店舗が90件ある
+    // - フィルタリング後、10件しか残らない
+    // - 次ページ（101-200件目）を自動取得しないため、ユーザーは10件しかスワイプできない
+
+    test(
+        'should auto-fetch next page when filtered stores count is below threshold',
+        () async {
+      // Arrange
+      // ページ1: 100件（うち95件がスワイプ済み → 5件しか残らない）
+      final page1Stores = List.generate(
+        100,
+        (i) => Store(
+          id: 'page1-store-$i',
+          name: 'ページ1店舗$i',
+          address: '東京都港区$i-$i-$i',
+          lat: 35.6590 + (i * 0.0001),
+          lng: 139.7460 + (i * 0.0001),
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      // ページ2: 50件（全て新規 → 50件）
+      final page2Stores = List.generate(
+        50,
+        (i) => Store(
+          id: 'page2-store-$i',
+          name: 'ページ2店舗$i',
+          address: '東京都渋谷区$i-$i-$i',
+          lat: 35.6700 + (i * 0.0001),
+          lng: 139.7000 + (i * 0.0001),
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      // DBにはページ1の95件がスワイプ済みとして保存されている
+      final swipedStores = List.generate(
+        95,
+        (i) => page1Stores[i].copyWith(status: StoreStatus.wantToGo),
+      );
+
+      when(mockRepository.getAllStores()).thenAnswer((_) async => swipedStores);
+
+      // ページ1のAPI呼び出し（start=1）
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 1,
+      )).thenAnswer((_) async => page1Stores);
+
+      // ページ2のAPI呼び出し（start=101）
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 101,
+      )).thenAnswer((_) async => page2Stores);
+
+      // まず既存店舗をロード
+      await businessLogic.loadStores();
+
+      // Act: loadSwipeStoresを呼び出す
+      // 期待: フィルタリング後5件しか残らないため、自動で次ページを取得し合計55件になる
+      final result = await businessLogic.loadSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 5,
+        count: 100,
+      );
+
+      // Assert: ページ1の未スワイプ5件 + ページ2の50件 = 55件
+      expect(result.length, greaterThanOrEqualTo(50));
+
+      // 次ページのAPI呼び出しが行われたことを確認
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 101,
+      )).called(1);
+    });
+
+    test(
+        'should not auto-fetch next page when filtered stores count is sufficient',
+        () async {
+      // Arrange
+      // ページ1: 100件（うち10件がスワイプ済み → 90件残る）
+      final page1Stores = List.generate(
+        100,
+        (i) => Store(
+          id: 'page1-store-$i',
+          name: 'ページ1店舗$i',
+          address: '東京都港区$i-$i-$i',
+          lat: 35.6590 + (i * 0.0001),
+          lng: 139.7460 + (i * 0.0001),
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      // DBには10件のみスワイプ済み
+      final swipedStores = List.generate(
+        10,
+        (i) => page1Stores[i].copyWith(status: StoreStatus.wantToGo),
+      );
+
+      when(mockRepository.getAllStores()).thenAnswer((_) async => swipedStores);
+
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 1,
+      )).thenAnswer((_) async => page1Stores);
+
+      // まず既存店舗をロード
+      await businessLogic.loadStores();
+
+      // Act
+      final result = await businessLogic.loadSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 5,
+        count: 100,
+      );
+
+      // Assert: 90件残るので次ページは不要
+      expect(result.length, equals(90));
+
+      // 次ページのAPI呼び出しが行われないことを確認
+      verifyNever(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: 101,
+      ));
+    });
+
+    test('should stop auto-fetch when API returns empty page', () async {
+      // Arrange
+      // ページ1: 100件（うち100件がスワイプ済み → 0件残る）
+      final page1Stores = List.generate(
+        100,
+        (i) => Store(
+          id: 'page1-store-$i',
+          name: 'ページ1店舗$i',
+          address: '東京都港区$i-$i-$i',
+          lat: 35.6590 + (i * 0.0001),
+          lng: 139.7460 + (i * 0.0001),
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      // 全てスワイプ済み
+      final swipedStores =
+          page1Stores.map((s) => s.copyWith(status: StoreStatus.bad)).toList();
+
+      when(mockRepository.getAllStores()).thenAnswer((_) async => swipedStores);
+
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 1,
+      )).thenAnswer((_) async => page1Stores);
+
+      // ページ2は空
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 101,
+      )).thenAnswer((_) async => []);
+
+      await businessLogic.loadStores();
+
+      // Act
+      final result = await businessLogic.loadSwipeStores(
+        lat: 35.6590,
+        lng: 139.7460,
+        range: 5,
+        count: 100,
+      );
+
+      // Assert: ページ2��空なので0件
+      expect(result, isEmpty);
+    });
+  });
 }
