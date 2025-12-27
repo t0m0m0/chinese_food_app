@@ -4,7 +4,6 @@ import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../../core/constants/string_constants.dart';
 import '../../core/constants/debug_constants.dart';
-import '../../core/constants/api_constants.dart';
 
 class StoreBusinessLogic {
   final StoreRepository _repository;
@@ -142,9 +141,9 @@ class StoreBusinessLogic {
           '[SwipeStores]   - 位置別マップサイズ: ${existingStoreMaps.byLocation.length}');
     }
 
-    // Issue #245: フィルタリング後の店舗数が閾値以下の場合、次ページを自動取得
-    while (hasMorePages &&
-        allFilteredStores.length < ApiConstants.autoPaginationThreshold) {
+    // Issue #245: APIから取得可能な全店舗を取得し続ける
+    // フィルタリング後の件数に関わらず、次ページがあれば取得を継続
+    while (hasMorePages) {
       final apiStores = await _fetchStoresFromApi(lat, lng, range, count,
           start: currentStart);
 

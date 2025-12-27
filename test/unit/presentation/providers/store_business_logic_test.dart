@@ -661,6 +661,16 @@ void main() {
         start: 1,
       )).thenAnswer((_) async => page1Stores);
 
+      // 次ページは空を返す（これ以上ページがない）
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 3,
+        count: 100,
+        start: 101,
+      )).thenAnswer((_) async => []);
+
       // Act
       final result = await businessLogic.loadSwipeStores(
         lat: 35.6590,
@@ -869,8 +879,7 @@ void main() {
       )).called(1);
     });
 
-    test(
-        'should not auto-fetch next page when filtered stores count is sufficient',
+    test('should fetch all available pages regardless of filtered count',
         () async {
       // Arrange
       // ページ1: 100件（うち10件がスワイプ済み → 90件残る）
@@ -882,6 +891,20 @@ void main() {
           address: '東京都港区$i-$i-$i',
           lat: 35.6590 + (i * 0.0001),
           lng: 139.7460 + (i * 0.0001),
+          status: null,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      // ページ2: 50件（全て新規）
+      final page2Stores = List.generate(
+        50,
+        (i) => Store(
+          id: 'page2-store-$i',
+          name: 'ページ2店舗$i',
+          address: '東京都渋谷区$i-$i-$i',
+          lat: 35.6700 + (i * 0.0001),
+          lng: 139.7000 + (i * 0.0001),
           status: null,
           createdAt: DateTime.now(),
         ),
@@ -904,6 +927,16 @@ void main() {
         start: 1,
       )).thenAnswer((_) async => page1Stores);
 
+      // ページ2のスタブ（50件未満なので最終ページ）
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 101,
+      )).thenAnswer((_) async => page2Stores);
+
       // まず既存店舗をロード
       await businessLogic.loadStores();
 
@@ -915,18 +948,26 @@ void main() {
         count: 100,
       );
 
-      // Assert: 90件残るので次ページは不要
-      expect(result.length, equals(90));
+      // Assert: ページ1の90件 + ページ2の50件 = 140件
+      expect(result.length, equals(140));
 
-      // 次ページのAPI呼び出しが行われないことを確認
-      verifyNever(mockRepository.searchStoresFromApi(
-        lat: anyNamed('lat'),
-        lng: anyNamed('lng'),
-        keyword: anyNamed('keyword'),
-        range: anyNamed('range'),
-        count: anyNamed('count'),
+      // 両ページのAPI呼び出しが行われたことを確認
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 1,
+      )).called(1);
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6590,
+        lng: 139.7460,
+        keyword: '中華',
+        range: 5,
+        count: 100,
         start: 101,
-      ));
+      )).called(1);
     });
 
     test('should stop auto-fetch when API returns empty page', () async {
