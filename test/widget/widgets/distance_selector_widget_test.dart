@@ -5,11 +5,12 @@ import 'package:chinese_food_app/presentation/widgets/distance_selector_widget.d
 /// 距離選択ウィジェットの単体テスト（TDD）
 ///
 /// Issue #124: 距離設定UIをFilterChipからSliderに変更
+/// Issue #246: 検索範囲を50kmまで拡張
 /// Material Design 3準拠のSlider距離選択UIをテスト
 
 void main() {
   group('DistanceSelectorWidget - Slider UI', () {
-    testWidgets('滑らかなSliderが正しく表示される', (WidgetTester tester) async {
+    testWidgets('Sliderが正しく表示される', (WidgetTester tester) async {
       // Arrange
       const selectedRange = 3; // 1000m
 
@@ -35,22 +36,21 @@ void main() {
       expect(
           find.descendant(
             of: find.byType(Container),
-            matching: find.text('1000m'),
+            matching: find.text('1km'),
           ),
-          findsOneWidget); // バッジ表示確認
+          findsOneWidget); // バッジ表示確認（1000m → 1km）
       expect(find.text('300m'), findsOneWidget); // 範囲最小値確認
-      expect(find.text('3000m'), findsOneWidget); // 範囲最大値確認
+      expect(find.text('50km'), findsOneWidget); // 範囲最大値確認
 
-      // Sliderの設定値確認
+      // Sliderの設定値確認（インデックスベース: 0-8）
       final slider = tester.widget<Slider>(find.byType(Slider));
-      expect(slider.value, equals(1000.0));
-      expect(slider.min, equals(300.0));
-      expect(slider.max, equals(3000.0));
-      expect(slider.divisions, equals(27)); // 細かい分割確認
+      expect(slider.value, equals(2.0)); // 1000m = index 2
+      expect(slider.min, equals(0.0));
+      expect(slider.max, equals(8.0)); // 9段階: 0-8
+      expect(slider.divisions, equals(8)); // 9段階
     });
 
-    testWidgets('滑らかなSliderドラッグ時にonChangedが正しく呼ばれる',
-        (WidgetTester tester) async {
+    testWidgets('Sliderドラッグ時にonChangedが正しく呼ばれる', (WidgetTester tester) async {
       // Arrange
       int? changedRange;
 
@@ -73,21 +73,21 @@ void main() {
       final slider = find.byType(Slider);
       final sliderWidget = tester.widget<Slider>(slider);
 
-      // 500m近くの値でonChangeEndを呼び出し
-      sliderWidget.onChangeEnd?.call(500.0);
+      // index 1 (500m) でonChangeEndを呼び出し
+      sliderWidget.onChangeEnd?.call(1.0);
 
-      // Assert - _snapToValidValue()により500mに丸められ、range=2になる
-      expect(changedRange, equals(2)); // 500m = range 2
+      // Assert
+      expect(changedRange, equals(2)); // 500m = API range 2
     });
 
-    testWidgets('異なる距離選択で滑らかなSlider値が正しく表示される', (WidgetTester tester) async {
+    testWidgets('異なる距離選択でSlider値が正しく表示される', (WidgetTester tester) async {
       // Arrange & Act - 各範囲をテスト
       final testCases = [
-        {'range': 1, 'expectedMeter': 300.0, 'expectedText': '300m'},
-        {'range': 2, 'expectedMeter': 500.0, 'expectedText': '500m'},
-        {'range': 3, 'expectedMeter': 1000.0, 'expectedText': '1000m'},
-        {'range': 4, 'expectedMeter': 2000.0, 'expectedText': '2000m'},
-        {'range': 5, 'expectedMeter': 3000.0, 'expectedText': '3000m'},
+        {'range': 1, 'expectedIndex': 0.0, 'expectedText': '300m'},
+        {'range': 2, 'expectedIndex': 1.0, 'expectedText': '500m'},
+        {'range': 3, 'expectedIndex': 2.0, 'expectedText': '1km'},
+        {'range': 4, 'expectedIndex': 3.0, 'expectedText': '2km'},
+        {'range': 5, 'expectedIndex': 4.0, 'expectedText': '3km'},
       ];
 
       for (final testCase in testCases) {
@@ -106,7 +106,7 @@ void main() {
 
         // Assert
         final slider = tester.widget<Slider>(find.byType(Slider));
-        expect(slider.value, equals(testCase['expectedMeter']));
+        expect(slider.value, equals(testCase['expectedIndex']));
         // バッジ内の特定テキストを確認（Container内のテキスト）
         expect(
             find.descendant(
@@ -117,7 +117,7 @@ void main() {
       }
     });
 
-    testWidgets('Material Design 3のテーマが滑らかなSliderに適用される',
+    testWidgets('Material Design 3のテーマがSliderに適用される',
         (WidgetTester tester) async {
       // Arrange
       const selectedRange = 4; // 2000m
@@ -146,16 +146,16 @@ void main() {
       expect(
           find.descendant(
             of: find.byType(Container),
-            matching: find.text('2000m'),
+            matching: find.text('2km'),
           ),
           findsOneWidget); // バッジ表示確認
 
       final slider = tester.widget<Slider>(find.byType(Slider));
-      expect(slider.value, equals(2000.0));
-      expect(slider.divisions, equals(27));
+      expect(slider.value, equals(3.0)); // 2000m = index 3
+      expect(slider.divisions, equals(8));
     });
 
-    testWidgets('滑らかなSliderのラベルとバッジが正しく表示される', (WidgetTester tester) async {
+    testWidgets('Sliderのラベルとバッジが正しく表示される', (WidgetTester tester) async {
       // Arrange
       await tester.pumpWidget(
         MaterialApp(
@@ -172,17 +172,16 @@ void main() {
 
       // Assert
       final slider = tester.widget<Slider>(find.byType(Slider));
-      expect(slider.label, equals('1000m')); // Sliderラベル確認
+      expect(slider.label, equals('1km')); // Sliderラベル確認
       expect(
           find.descendant(
             of: find.byType(Container),
-            matching: find.text('1000m'),
+            matching: find.text('1km'),
           ),
           findsOneWidget); // バッジテキスト確認
     });
 
-    testWidgets('100m単位Sliderの値変換とAPIマッピングが正しく動作する',
-        (WidgetTester tester) async {
+    testWidgets('Slider値がAPIマッピングに正しく変換される', (WidgetTester tester) async {
       // Arrange
       final changedValues = <int>[];
 
@@ -201,33 +200,41 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Act & Assert - 100m単位の値がAPIレンジに正しくマッピングされることをテスト
+      // Act & Assert - インデックス値がAPIレンジに正しくマッピングされることをテスト
       final slider = find.byType(Slider);
       final sliderWidget = tester.widget<Slider>(slider);
 
-      final testValues = [
-        300.0, // 100m単位で300m → range=1
-        500.0, // 100m単位で500m → range=2
-        1200.0, // 100m単位で1200m → range=3
-        1800.0, // 100m単位で1800m → range=4
-        2700.0, // 100m単位で2700m → range=5
+      // 各インデックスでテスト
+      final testCases = [
+        {'index': 0.0, 'expectedRange': 1}, // 300m
+        {'index': 1.0, 'expectedRange': 2}, // 500m
+        {'index': 2.0, 'expectedRange': 3}, // 1000m
+        {'index': 3.0, 'expectedRange': 4}, // 2000m
+        {'index': 4.0, 'expectedRange': 5}, // 3000m
+        {'index': 5.0, 'expectedRange': 5}, // 5000m → API max 5
+        {'index': 8.0, 'expectedRange': 5}, // 50000m → API max 5
       ];
-      final expectedRanges = [1, 2, 3, 4, 5];
 
-      for (int i = 0; i < testValues.length; i++) {
-        sliderWidget.onChangeEnd?.call(testValues[i]);
-        expect(changedValues[i], equals(expectedRanges[i]));
+      for (final testCase in testCases) {
+        changedValues.clear();
+        sliderWidget.onChangeEnd?.call(testCase['index'] as double);
+        expect(changedValues.last, equals(testCase['expectedRange']));
       }
     });
 
-    testWidgets('100m刻みの滑らかな値表示が正しく動作する', (WidgetTester tester) async {
+    testWidgets('広域検索時にonMetersChangedが呼ばれる', (WidgetTester tester) async {
       // Arrange
+      int? changedMeters;
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: DistanceSelectorWidget(
-              selectedRange: 3, // 1000m
+              selectedRange: 3,
               onChanged: (_) {},
+              onMetersChanged: (meters) {
+                changedMeters = meters;
+              },
             ),
           ),
         ),
@@ -235,22 +242,13 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Act - 1350m位置での操作をシミュレート
+      // Act - 広域検索範囲（5km = index 5）を選択
       final slider = find.byType(Slider);
       final sliderWidget = tester.widget<Slider>(slider);
+      sliderWidget.onChangeEnd?.call(5.0);
 
-      // 1300mをSliderで選択（100m単位）
-      sliderWidget.onChanged?.call(1300.0);
-
-      await tester.pump();
-
-      // Assert - 1300mで表示されることを確認
-      expect(
-          find.descendant(
-            of: find.byType(Container),
-            matching: find.text('1300m'),
-          ),
-          findsOneWidget);
+      // Assert
+      expect(changedMeters, equals(5000)); // 5km = 5000m
     });
 
     testWidgets('初期状態でSliderが折りたたまれている', (WidgetTester tester) async {
@@ -295,7 +293,7 @@ void main() {
       // Assert - Sliderが表示されていることを確認
       expect(find.byType(Slider), findsOneWidget);
       expect(find.text('300m'), findsOneWidget); // 範囲ラベル
-      expect(find.text('3000m'), findsOneWidget); // 範囲ラベル
+      expect(find.text('50km'), findsOneWidget); // 範囲ラベル（3000m → 50km）
     });
 
     testWidgets('展開後、再度タップで折りたたまれる', (WidgetTester tester) async {
@@ -326,6 +324,30 @@ void main() {
 
       // Assert - SizeTransitionは存在するが、Sliderは見えない状態
       expect(find.byType(SizeTransition), findsOneWidget);
+    });
+
+    testWidgets('広域検索選択時に注意書きが表示される', (WidgetTester tester) async {
+      // Arrange
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DistanceSelectorWidget(
+              selectedRange: 6, // 5km（広域検索）
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Act - ヘッダーをタップして展開
+      await tester.tap(find.byType(InkWell));
+      await tester.pumpAndSettle();
+
+      // Assert - 広域検索の注意書きが表示される
+      expect(find.text('広域検索: 複数回のAPI検索を行います'), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline), findsOneWidget);
     });
   });
 }

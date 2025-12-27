@@ -164,5 +164,52 @@ void main() {
       expect(sortOptions, contains('budget'));
       expect(sortOptions, contains('name'));
     });
+
+    group('Wide Area Search Settings', () {
+      test('should have correct wide area search constants', () {
+        expect(SearchConfig.maxApiRadiusMeters, 3000);
+        expect(SearchConfig.maxSearchRadiusMeters, 50000);
+        expect(SearchConfig.defaultGridSpacingMeters, 5000);
+      });
+
+      test('should detect wide area search correctly', () {
+        expect(SearchConfig.isWideAreaSearch(3000), isFalse);
+        expect(SearchConfig.isWideAreaSearch(3001), isTrue);
+        expect(SearchConfig.isWideAreaSearch(50000), isTrue);
+      });
+
+      test('should validate wide area search radius', () {
+        expect(SearchConfig.isValidWideAreaRadius(3001), isTrue);
+        expect(SearchConfig.isValidWideAreaRadius(50000), isTrue);
+        expect(SearchConfig.isValidWideAreaRadius(50001), isFalse);
+        expect(SearchConfig.isValidWideAreaRadius(3000), isFalse);
+      });
+
+      test('should have extended range to meters mapping for wide area', () {
+        // 従来のAPI範囲
+        expect(SearchConfig.extendedRangeToMeters[1], 300);
+        expect(SearchConfig.extendedRangeToMeters[5], 3000);
+        // 拡張範囲
+        expect(SearchConfig.extendedRangeToMeters[6], 5000);
+        expect(SearchConfig.extendedRangeToMeters[7], 10000);
+        expect(SearchConfig.extendedRangeToMeters[8], 20000);
+        expect(SearchConfig.extendedRangeToMeters[9], 50000);
+      });
+
+      test('should have extended range labels', () {
+        expect(SearchConfig.extendedRangeLabels[6], '5km');
+        expect(SearchConfig.extendedRangeLabels[7], '10km');
+        expect(SearchConfig.extendedRangeLabels[8], '20km');
+        expect(SearchConfig.extendedRangeLabels[9], '50km');
+      });
+
+      test('should convert extended meters to range correctly', () {
+        expect(SearchConfig.extendedMeterToRange(5000), 6);
+        expect(SearchConfig.extendedMeterToRange(10000), 7);
+        expect(SearchConfig.extendedMeterToRange(20000), 8);
+        expect(SearchConfig.extendedMeterToRange(50000), 9);
+        expect(SearchConfig.extendedMeterToRange(99999), isNull);
+      });
+    });
   });
 }

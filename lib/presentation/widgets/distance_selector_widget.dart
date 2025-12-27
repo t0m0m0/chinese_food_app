@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import '../../core/config/search_config.dart';
 
 /// 距離選択ウィジェット
 ///
 /// Issue #117: スワイプ画面に距離設定UI追加機能
+/// Issue #246: 検索範囲を50kmまで拡張
 /// Material Design 3準拠の距離選択UI
 class DistanceSelectorWidget extends StatefulWidget {
   final int selectedRange;
   final ValueChanged<int> onChanged;
 
+  /// メートル単位で距離が変更された時のコールバック（広域検索対応）
+  final ValueChanged<int>? onMetersChanged;
+
   const DistanceSelectorWidget({
     super.key,
     required this.selectedRange,
     required this.onChanged,
+    this.onMetersChanged,
   });
 
   @override
@@ -27,9 +33,23 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
   late AnimationController _confirmController;
   late Animation<double> _confirmAnimation;
 
-  double _currentSliderValue = 1000.0;
+  /// スライダーの値（対数スケールのインデックス: 0-8）
+  double _currentSliderValue = 2.0; // デフォルト1000m
   int _displayMeters = 1000;
   bool _isExpanded = false;
+
+  /// 選択可能な距離値（対数スケール的に配置）
+  static const List<int> _distanceSteps = [
+    300, // index 0
+    500, // index 1
+    1000, // index 2
+    2000, // index 3
+    3000, // index 4
+    5000, // index 5
+    10000, // index 6
+    20000, // index 7
+    50000, // index 8
+  ];
 
   @override
   void initState() {
@@ -69,7 +89,7 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
 
     // API rangeから表示用メートルを逆算
     _displayMeters = _rangeToDisplayMeters(widget.selectedRange);
-    _currentSliderValue = _displayMeters.toDouble();
+    _currentSliderValue = _metersToSliderValue(_displayMeters);
     _animationController.forward();
   }
 
@@ -81,7 +101,7 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
       if (newMeters != _displayMeters) {
         setState(() {
           _displayMeters = newMeters;
-          _currentSliderValue = newMeters.toDouble();
+          _currentSliderValue = _metersToSliderValue(newMeters);
         });
       }
     }
@@ -149,7 +169,7 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
-                                '${_displayMeters}m',
+                                _formatDistance(_displayMeters),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onPrimaryContainer,
                                   fontWeight: FontWeight.w600,
@@ -198,26 +218,29 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                           ),
                           child: Slider(
                             value: _currentSliderValue,
-                            min: 300.0,
-                            max: 3000.0,
-                            divisions: 27, // 100m刻みで滑らかな操作 (3000-300)/100 = 27
-                            label: '${_displayMeters}m',
+                            min: 0.0,
+                            max: (_distanceSteps.length - 1).toDouble(),
+                            divisions: _distanceSteps.length - 1,
+                            label: _formatDistance(_displayMeters),
                             onChanged: (value) {
-                              final roundedValue =
-                                  (value / 100).round() * 100; // 100m単位に丸める
+                              final index = value.round();
+                              final meters = _distanceSteps[index];
                               setState(() {
-                                _currentSliderValue = roundedValue.toDouble();
-                                _displayMeters = roundedValue;
+                                _currentSliderValue = value;
+                                _displayMeters = meters;
                               });
                             },
                             onChangeEnd: (value) {
-                              final finalMeters = (value / 100).round() * 100;
-                              final range = _metersToApiRange(finalMeters);
+                              final index = value.round();
+                              final meters = _distanceSteps[index];
+                              final range = _metersToApiRange(meters);
                               setState(() {
-                                _currentSliderValue = finalMeters.toDouble();
-                                _displayMeters = finalMeters;
+                                _currentSliderValue = index.toDouble();
+                                _displayMeters = meters;
                               });
                               widget.onChanged(range);
+                              // 広域検索用にメートル値も通知
+                              widget.onMetersChanged?.call(meters);
                               // 距離変更確認のアニメーション再生
                               _confirmController.forward().then((_) {
                                 _confirmController.reverse();
@@ -236,13 +259,37 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
                               ),
                             ),
                             Text(
-                              '3000m',
+                              '50km',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
                         ),
+                        // 広域検索の注意書き
+                        if (_displayMeters > SearchConfig.maxApiRadiusMeters)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 14,
+                                  color: colorScheme.tertiary,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    '広域検索: 複数回のAPI検索を行います',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.tertiary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -256,13 +303,47 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
     );
   }
 
+  /// メートル値をスライダー値（インデックス）に変換
+  double _metersToSliderValue(int meters) {
+    for (int i = 0; i < _distanceSteps.length; i++) {
+      if (_distanceSteps[i] == meters) {
+        return i.toDouble();
+      }
+    }
+    // 見つからない場合は最も近い値を探す
+    int closestIndex = 0;
+    int closestDiff = (meters - _distanceSteps[0]).abs();
+    for (int i = 1; i < _distanceSteps.length; i++) {
+      final diff = (meters - _distanceSteps[i]).abs();
+      if (diff < closestDiff) {
+        closestDiff = diff;
+        closestIndex = i;
+      }
+    }
+    return closestIndex.toDouble();
+  }
+
+  /// 距離をフォーマットして表示
+  String _formatDistance(int meters) {
+    if (meters >= 1000) {
+      final km = meters / 1000;
+      // 整数の場合は小数点なし
+      if (km == km.roundToDouble()) {
+        return '${km.round()}km';
+      }
+      return '${km.toStringAsFixed(1)}km';
+    }
+    return '${meters}m';
+  }
+
   /// ユーザー選択メートルをHotPepper API範囲にマッピング
+  /// 3km超の場合は最大値5を返す（広域検索はUsecaseで処理）
   int _metersToApiRange(int meters) {
-    if (meters <= 399) return 1; // 300-399m → 300m API
-    if (meters <= 749) return 2; // 400-749m → 500m API
-    if (meters <= 1499) return 3; // 750-1499m → 1000m API
-    if (meters <= 2499) return 4; // 1500-2499m → 2000m API
-    return 5; // 2500-3000m → 3000m API
+    if (meters <= 300) return 1;
+    if (meters <= 500) return 2;
+    if (meters <= 1000) return 3;
+    if (meters <= 2000) return 4;
+    return 5; // 3000m以上は全て5（広域検索はUsecaseで対応）
   }
 
   /// API範囲から表示用メートルを逆算（初期化・外部更新時用）
@@ -278,6 +359,14 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
         return 2000;
       case 5:
         return 3000;
+      case 6:
+        return 5000;
+      case 7:
+        return 10000;
+      case 8:
+        return 20000;
+      case 9:
+        return 50000;
       default:
         return 1000;
     }
