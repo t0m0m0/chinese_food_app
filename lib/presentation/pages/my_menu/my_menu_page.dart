@@ -86,145 +86,152 @@ class _MyMenuPageState extends State<MyMenuPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
+    return Consumer<StoreProvider>(
+      builder: (context, provider, child) {
+        return Scaffold(
+          backgroundColor: AppTheme.backgroundLight,
+          appBar: AppBar(
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DecorativeElements.ramenBowl(size: 30),
+                const SizedBox(width: 12),
+                Text(
+                  'マイメニュー',
+                  style: AppTheme.headlineMedium.copyWith(
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                DecorativeElements.gyozaIcon(size: 30),
+              ],
+            ),
+            centerTitle: true,
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                gradient: AppTheme.backgroundGradient,
+              ),
+            ),
+            elevation: 0,
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorColor: _getTabIndicatorColor(),
+              indicatorWeight: 3,
+              labelColor: _getTabIndicatorColor(),
+              unselectedLabelColor: AppTheme.textTertiary,
+              labelStyle: AppTheme.labelLarge.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+              unselectedLabelStyle: AppTheme.labelMedium,
+              tabs: [
+                Tab(
+                  icon: const Icon(Icons.favorite_rounded),
+                  text: '行きたい (${provider.wantToGoStores.length})',
+                ),
+                Tab(
+                  icon: const Icon(Icons.check_circle_rounded),
+                  text: '行った (${provider.visitedStores.length})',
+                ),
+                Tab(
+                  icon: const Icon(Icons.block_rounded),
+                  text: '興味なし (${provider.badStores.length})',
+                ),
+              ],
+            ),
+          ),
+          body: _buildBody(context, provider, theme, colorScheme),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    StoreProvider provider,
+    ThemeData theme,
+    ColorScheme colorScheme,
+  ) {
+    if (provider.isLoading) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            DecorativeElements.ramenBowl(size: 30),
-            const SizedBox(width: 12),
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('店舗データを読み込み中...'),
+          ],
+        ),
+      );
+    }
+
+    if (provider.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: colorScheme.error,
+            ),
+            const SizedBox(height: 16),
             Text(
-              'マイメニュー',
-              style: AppTheme.headlineMedium.copyWith(
-                color: AppTheme.textPrimary,
+              'エラーが発生しました',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: colorScheme.error,
               ),
             ),
-            const SizedBox(width: 12),
-            DecorativeElements.gyozaIcon(size: 30),
-          ],
-        ),
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppTheme.backgroundGradient,
-          ),
-        ),
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: _getTabIndicatorColor(),
-          indicatorWeight: 3,
-          labelColor: _getTabIndicatorColor(),
-          unselectedLabelColor: AppTheme.textTertiary,
-          labelStyle: AppTheme.labelLarge.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelStyle: AppTheme.labelMedium,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.favorite_rounded),
-              text: '行きたい',
+            const SizedBox(height: 8),
+            Text(
+              provider.error!,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
             ),
-            Tab(
-              icon: Icon(Icons.check_circle_rounded),
-              text: '行った',
-            ),
-            Tab(
-              icon: Icon(Icons.block_rounded),
-              text: '興味なし',
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Provider.of<StoreProvider>(context, listen: false).clearError();
+                Provider.of<StoreProvider>(context, listen: false)
+                    .refreshCache();
+              },
+              child: const Text('再試行'),
             ),
           ],
         ),
-      ),
-      body: Consumer<StoreProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('店舗データを読み込み中...'),
-                ],
-              ),
-            );
-          }
+      );
+    }
 
-          if (provider.error != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: colorScheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'エラーが発生しました',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: colorScheme.error,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    provider.error!,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Provider.of<StoreProvider>(context, listen: false)
-                          .clearError();
-                      // エラークリア後にキャッシュをリフレッシュ
-                      Provider.of<StoreProvider>(context, listen: false)
-                          .refreshCache();
-                    },
-                    child: const Text('再試行'),
-                  ),
-                ],
-              ),
-            );
-          }
+    // マイメニュー画面では情報メッセージを表示しない
+    // （infoMessageはスワイプ画面専用のAPI検索結果メッセージ）
 
-          // マイメニュー画面では情報メッセージを表示しない
-          // （infoMessageはスワイプ画面専用のAPI検索結果メッセージ）
-
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _buildStoreList(
-                stores: provider.wantToGoStores,
-                emptyMessage: 'まだ「行きたい」店舗がありません',
-                emptySubMessage: '「見つける」画面で気になる店舗を右スワイプしてみましょう',
-                emptyIcon: Icons.favorite_border,
-                theme: theme,
-                colorScheme: colorScheme,
-              ),
-              _buildStoreList(
-                stores: provider.visitedStores,
-                emptyMessage: 'まだ訪問した店舗がありません',
-                emptySubMessage: '店舗を訪問したらステータスを更新しましょう',
-                emptyIcon: Icons.check_circle_outline,
-                theme: theme,
-                colorScheme: colorScheme,
-              ),
-              _buildStoreList(
-                stores: provider.badStores,
-                emptyMessage: '「興味なし」の店舗はありません',
-                emptySubMessage: '興味のない店舗はここに表示されます',
-                emptyIcon: Icons.block_outlined,
-                theme: theme,
-                colorScheme: colorScheme,
-              ),
-            ],
-          );
-        },
-      ),
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        _buildStoreList(
+          stores: provider.wantToGoStores,
+          emptyMessage: 'まだ「行きたい」店舗がありません',
+          emptySubMessage: '「見つける」画面で気になる店舗を右スワイプしてみましょう',
+          emptyIcon: Icons.favorite_border,
+          theme: theme,
+          colorScheme: colorScheme,
+        ),
+        _buildStoreList(
+          stores: provider.visitedStores,
+          emptyMessage: 'まだ訪問した店舗がありません',
+          emptySubMessage: '店舗を訪問したらステータスを更新しましょう',
+          emptyIcon: Icons.check_circle_outline,
+          theme: theme,
+          colorScheme: colorScheme,
+        ),
+        _buildStoreList(
+          stores: provider.badStores,
+          emptyMessage: '「興味なし」の店舗はありません',
+          emptySubMessage: '興味のない店舗はここに表示されます',
+          emptyIcon: Icons.block_outlined,
+          theme: theme,
+          colorScheme: colorScheme,
+        ),
+      ],
     );
   }
 
