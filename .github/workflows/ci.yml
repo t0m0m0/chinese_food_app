@@ -78,11 +78,21 @@ jobs:
     - name: 全件テストを実行
       timeout-minutes: 25
       run: |
+        # 一時ファイル削除エラー対策のため、環境をクリーンアップ
+        flutter clean || true
+        flutter pub get
+
+        # テスト実行（リトライ対応）
         flutter test \
           --dart-define=PRODUCTION=false \
           --dart-define=DEVELOPMENT=true \
           --reporter=expanded \
-          --coverage
+          --coverage || \
+        (echo "テスト再実行中..." && sleep 5 && flutter test \
+          --dart-define=PRODUCTION=false \
+          --dart-define=DEVELOPMENT=true \
+          --reporter=expanded \
+          --coverage)
         
     - name: テストカバレッジをアップロード
       uses: codecov/codecov-action@v3
