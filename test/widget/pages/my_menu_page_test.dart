@@ -146,9 +146,10 @@ void main() {
 
       // Assert
       expect(find.text('マイメニュー'), findsOneWidget);
-      expect(find.text('行きたい'), findsOneWidget);
-      expect(find.text('行った'), findsOneWidget);
-      expect(find.text('興味なし'), findsOneWidget);
+      // タブには件数が表示される
+      expect(find.text('行きたい (0)'), findsOneWidget);
+      expect(find.text('行った (0)'), findsOneWidget);
+      expect(find.text('興味なし (0)'), findsOneWidget);
     });
 
     testWidgets('should display loading state when isLoading is true',
@@ -298,8 +299,8 @@ void main() {
       // Act
       await tester.pumpWidget(createWidgetUnderTest());
 
-      // 「行った」タブをタップ
-      await tester.tap(find.text('行った'));
+      // 「行った (1)」タブをタップ（件数が表示されるため）
+      await tester.tap(find.text('行った (1)'));
       await tester.pumpAndSettle();
 
       // Assert
@@ -359,6 +360,166 @@ void main() {
 
       // Assert
       // clearError and refreshCache are handled by the fake implementation
+    });
+
+    group('Tab count display', () {
+      testWidgets('should display store count in tabs when stores exist',
+          (tester) async {
+        // Arrange
+        final wantToGoStores = [
+          Store(
+            id: '1',
+            name: '行きたい店舗1',
+            address: 'テスト住所1',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.wantToGo,
+            createdAt: DateTime(2023, 1, 1),
+          ),
+          Store(
+            id: '2',
+            name: '行きたい店舗2',
+            address: 'テスト住所2',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.wantToGo,
+            createdAt: DateTime(2023, 1, 2),
+          ),
+        ];
+        final visitedStores = [
+          Store(
+            id: '3',
+            name: '行った店舗',
+            address: 'テスト住所',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.visited,
+            createdAt: DateTime(2023, 1, 3),
+          ),
+        ];
+        final badStores = [
+          Store(
+            id: '4',
+            name: '興味なし店舗1',
+            address: 'テスト住所',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.bad,
+            createdAt: DateTime(2023, 1, 4),
+          ),
+          Store(
+            id: '5',
+            name: '興味なし店舗2',
+            address: 'テスト住所',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.bad,
+            createdAt: DateTime(2023, 1, 5),
+          ),
+          Store(
+            id: '6',
+            name: '興味なし店舗3',
+            address: 'テスト住所',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.bad,
+            createdAt: DateTime(2023, 1, 6),
+          ),
+        ];
+
+        fakeStoreProvider.setLoading(false);
+        fakeStoreProvider.setError(null);
+        fakeStoreProvider.setInfoMessage(null);
+        fakeStoreProvider.setWantToGoStores(wantToGoStores);
+        fakeStoreProvider.setVisitedStores(visitedStores);
+        fakeStoreProvider.setBadStores(badStores);
+
+        // Act
+        await tester.pumpWidget(createWidgetUnderTest());
+
+        // Assert
+        expect(find.text('行きたい (2)'), findsOneWidget);
+        expect(find.text('行った (1)'), findsOneWidget);
+        expect(find.text('興味なし (3)'), findsOneWidget);
+      });
+
+      testWidgets('should display (0) in tabs when no stores exist',
+          (tester) async {
+        // Arrange
+        fakeStoreProvider.setLoading(false);
+        fakeStoreProvider.setError(null);
+        fakeStoreProvider.setInfoMessage(null);
+        fakeStoreProvider.setWantToGoStores([]);
+        fakeStoreProvider.setVisitedStores([]);
+        fakeStoreProvider.setBadStores([]);
+
+        // Act
+        await tester.pumpWidget(createWidgetUnderTest());
+
+        // Assert
+        expect(find.text('行きたい (0)'), findsOneWidget);
+        expect(find.text('行った (0)'), findsOneWidget);
+        expect(find.text('興味なし (0)'), findsOneWidget);
+      });
+
+      testWidgets('should update tab count when store status changes',
+          (tester) async {
+        // Arrange - 初期状態: 行きたい2件、行った0件
+        final wantToGoStores = [
+          Store(
+            id: '1',
+            name: '行きたい店舗1',
+            address: 'テスト住所1',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.wantToGo,
+            createdAt: DateTime(2023, 1, 1),
+          ),
+          Store(
+            id: '2',
+            name: '行きたい店舗2',
+            address: 'テスト住所2',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.wantToGo,
+            createdAt: DateTime(2023, 1, 2),
+          ),
+        ];
+
+        fakeStoreProvider.setLoading(false);
+        fakeStoreProvider.setError(null);
+        fakeStoreProvider.setInfoMessage(null);
+        fakeStoreProvider.setWantToGoStores(wantToGoStores);
+        fakeStoreProvider.setVisitedStores([]);
+        fakeStoreProvider.setBadStores([]);
+
+        // Act
+        await tester.pumpWidget(createWidgetUnderTest());
+
+        // Assert - 初期状態の確認
+        expect(find.text('行きたい (2)'), findsOneWidget);
+        expect(find.text('行った (0)'), findsOneWidget);
+
+        // 店舗を移動（行きたい1件 → 行った1件）
+        fakeStoreProvider.setWantToGoStores([wantToGoStores[0]]);
+        fakeStoreProvider.setVisitedStores([
+          Store(
+            id: '2',
+            name: '行きたい店舗2',
+            address: 'テスト住所2',
+            lat: 35.6895,
+            lng: 139.6917,
+            status: StoreStatus.visited,
+            createdAt: DateTime(2023, 1, 2),
+          ),
+        ]);
+
+        await tester.pump();
+
+        // Assert - 更新後の状態確認
+        expect(find.text('行きたい (1)'), findsOneWidget);
+        expect(find.text('行った (1)'), findsOneWidget);
+      });
     });
   });
 }
