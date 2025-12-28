@@ -165,8 +165,8 @@ void main() {
       });
     });
 
-    group('Map Tap to Open External App Tests', () {
-      testWidgets('should have GestureDetector wrapping the map',
+    group('Map Open Button Tests', () {
+      testWidgets('should have InkWell for map open button',
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
@@ -174,8 +174,8 @@ void main() {
           ),
         ));
 
-        // GestureDetectorが地図をラップしていることを確認
-        expect(find.byType(GestureDetector), findsAtLeastNWidgets(1));
+        // InkWellがマップ開くボタンとして存在することを確認
+        expect(find.byType(InkWell), findsAtLeastNWidgets(1));
       });
 
       testWidgets('should show visual hint for tappable map',
@@ -190,7 +190,7 @@ void main() {
         expect(find.byIcon(Icons.open_in_new), findsOneWidget);
       });
 
-      testWidgets('should handle map tap without errors',
+      testWidgets('should handle map open button tap without errors',
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
@@ -198,16 +198,16 @@ void main() {
           ),
         ));
 
-        // GestureDetectorを見つけてタップ
-        final gestureDetector = find.byType(GestureDetector).first;
-        await tester.tap(gestureDetector);
+        // open_in_newアイコンを見つけてタップ
+        final openInNewIcon = find.byIcon(Icons.open_in_new);
+        await tester.tap(openInNewIcon);
         await tester.pump();
 
         // エラーが発生せずに処理されることを確認
         expect(find.byType(StoreMapWidget), findsOneWidget);
       });
 
-      testWidgets('should have proper tooltip for map tap hint',
+      testWidgets('should have proper tooltip for map open button',
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
@@ -215,8 +215,33 @@ void main() {
           ),
         ));
 
-        // 地図タップのヒントにツールチップが設定されていることを確認
+        // マップ開くボタンにツールチップが設定されていることを確認
         expect(find.byTooltip('マップアプリで開く'), findsOneWidget);
+      });
+
+      testWidgets('should have proper semantics for accessibility',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // Semanticsラベルが設定されていることを確認
+        final semanticsList = find.byType(Semantics);
+        expect(semanticsList, findsAtLeastNWidgets(2));
+
+        // マップアプリで開くラベルが存在することを確認
+        bool hasMapOpenSemantics = false;
+        for (int i = 0; i < semanticsList.evaluate().length; i++) {
+          final semantics = tester.widget<Semantics>(semanticsList.at(i));
+          if (semantics.properties.label != null &&
+              semantics.properties.label!.contains('マップアプリで店舗位置を開く')) {
+            hasMapOpenSemantics = true;
+            break;
+          }
+        }
+        expect(hasMapOpenSemantics, isTrue);
       });
     });
 

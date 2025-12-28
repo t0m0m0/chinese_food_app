@@ -18,37 +18,44 @@ class StoreMapWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // OpenStreetMap WebView地図（タップで外部マップアプリを開く）
-        GestureDetector(
-          onTap: () => _openInMapApp(),
-          child: WebViewMapWidget(
-            store: store,
-            useOpenStreetMap: true,
-          ),
+        // OpenStreetMap WebView地図
+        WebViewMapWidget(
+          store: store,
+          useOpenStreetMap: true,
         ),
-        // 地図タップのヒント（左上）
+        // マップアプリで開くボタン（左上）
         Positioned(
           top: 16.0,
           left: 16.0,
-          child: Tooltip(
-            message: 'マップアプリで開く',
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(8.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 4.0,
-                    offset: const Offset(0, 2),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _openInMapApp(),
+              borderRadius: BorderRadius.circular(8.0),
+              child: Tooltip(
+                message: 'マップアプリで開く',
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(8.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 4.0,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.open_in_new,
-                size: 20.0,
-                color: Colors.blue,
+                  child: Semantics(
+                    label: 'マップアプリで店舗位置を開く',
+                    child: const Icon(
+                      Icons.open_in_new,
+                      size: 20.0,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
