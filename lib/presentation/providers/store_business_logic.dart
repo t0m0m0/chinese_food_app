@@ -118,18 +118,18 @@ class StoreBusinessLogic {
   ///
   /// DB保存は行わず、スワイプ可能な店舗リストのみを返す
   /// 実際のDB保存はスワイプ時に行われる
+  ///
+  /// Issue #245対応: フィルタリング後の店舗数が閾値以下の場合、
+  /// 自動的に次ページを取得して十分な店舗数を確保する
   Future<List<Store>> loadSwipeStores({
     required double lat,
     required double lng,
     int range = 3,
     int count = 20,
   }) async {
-    final apiStores =
-        await _fetchStoresFromApi(lat, lng, range, count, start: 1);
-
-    if (DebugConstants.enableApiLog) {
-      debugPrint('[SwipeStores] 🔍 APIから取得した店舗数: ${apiStores.length}');
-    }
+    final allFilteredStores = <Store>[];
+    var currentStart = 1;
+    var hasMorePages = true;
 
     final existingStoreMaps = _buildExistingStoreMaps();
 
@@ -141,13 +141,45 @@ class StoreBusinessLogic {
           '[SwipeStores]   - 位置別マップサイズ: ${existingStoreMaps.byLocation.length}');
     }
 
-    final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
+    // Issue #245: APIから取得可能な全店舗を取得し続ける
+    // フィルタリング後の件数に関わらず、次ページがあれば取得を継続
+    while (hasMorePages) {
+      final apiStores = await _fetchStoresFromApi(lat, lng, range, count,
+          start: currentStart);
 
-    if (DebugConstants.enableApiLog) {
-      debugPrint('[SwipeStores] 🔍 フィルタリング後の店舗数: ${filteredStores.length}');
+      if (DebugConstants.enableApiLog) {
+        debugPrint(
+            '[SwipeStores] 🔍 APIから取得した店舗数: ${apiStores.length} (start=$currentStart)');
+      }
+
+      // APIから店舗が返されなかった場合、これ以上ページがない
+      if (apiStores.isEmpty) {
+        hasMorePages = false;
+        break;
+      }
+
+      final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
+
+      if (DebugConstants.enableApiLog) {
+        debugPrint('[SwipeStores] 🔍 フィルタリング後の店舗数: ${filteredStores.length}');
+      }
+
+      allFilteredStores.addAll(filteredStores);
+
+      // 次ページの開始位置を計算
+      currentStart += count;
+
+      // APIから取得した店舗数がcount未満なら、これ以上ページがない
+      if (apiStores.length < count) {
+        hasMorePages = false;
+      }
     }
 
-    return filteredStores;
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 最終的な店舗数: ${allFilteredStores.length}');
+    }
+
+    return allFilteredStores;
   }
 
   /// スワイプ画面用の追加店舗取得（ページネーション）

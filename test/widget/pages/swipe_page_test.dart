@@ -82,7 +82,10 @@ class MockStoreRepositoryWithOneStore extends Mock implements StoreRepository {
     int count = 20,
     int start = 1,
   }) async {
-    // 1件の店舗を返す（numberOfCardsDisplayed assertion テスト用）
+    // 最初のページのみ1件の店舗を返す（次ページは空で無限ループ防止）
+    if (start > 1) {
+      return [];
+    }
     return [
       Store(
         id: 'test_store_1',
