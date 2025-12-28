@@ -99,7 +99,8 @@ void main() {
         // 基本的なウィジェット構造の確認
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
         expect(find.byType(FloatingActionButton), findsOneWidget);
-        expect(find.byType(Positioned), findsOneWidget);
+        // 2つのPositioned: ヒントアイコン（左上）とナビボタン（右上）
+        expect(find.byType(Positioned), findsNWidgets(2));
         expect(find.byType(Semantics), findsAtLeastNWidgets(1));
       });
 
@@ -111,13 +112,19 @@ void main() {
           ),
         ));
 
-        // Positionedウィジェットで適切な位置に配置されていることを確認
+        // 2つのPositionedウィジェットで適切な位置に配置されていることを確認
         final positioned = find.byType(Positioned);
-        expect(positioned, findsOneWidget);
+        expect(positioned, findsNWidgets(2));
 
-        final positionedWidget = tester.widget<Positioned>(positioned);
-        expect(positionedWidget.top, equals(16.0));
-        expect(positionedWidget.right, equals(16.0));
+        // 左上のヒントアイコン
+        final leftPositioned = tester.widget<Positioned>(positioned.first);
+        expect(leftPositioned.top, equals(16.0));
+        expect(leftPositioned.left, equals(16.0));
+
+        // 右上のナビボタン
+        final rightPositioned = tester.widget<Positioned>(positioned.last);
+        expect(rightPositioned.top, equals(16.0));
+        expect(rightPositioned.right, equals(16.0));
       });
     });
 
@@ -155,6 +162,61 @@ void main() {
 
         // エラーなく処理されることを確認
         expect(navigationButton, findsOneWidget);
+      });
+    });
+
+    group('Map Tap to Open External App Tests', () {
+      testWidgets('should have GestureDetector wrapping the map',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // GestureDetectorが地図をラップしていることを確認
+        expect(find.byType(GestureDetector), findsAtLeastNWidgets(1));
+      });
+
+      testWidgets('should show visual hint for tappable map',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // タップ可能であることを示す視覚的ヒント（アイコン）が存在することを確認
+        expect(find.byIcon(Icons.open_in_new), findsOneWidget);
+      });
+
+      testWidgets('should handle map tap without errors',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // GestureDetectorを見つけてタップ
+        final gestureDetector = find.byType(GestureDetector).first;
+        await tester.tap(gestureDetector);
+        await tester.pump();
+
+        // エラーが発生せずに処理されることを確認
+        expect(find.byType(StoreMapWidget), findsOneWidget);
+      });
+
+      testWidgets('should have proper tooltip for map tap hint',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // 地図タップのヒントにツールチップが設定されていることを確認
+        expect(find.byTooltip('マップアプリで開く'), findsOneWidget);
       });
     });
 
