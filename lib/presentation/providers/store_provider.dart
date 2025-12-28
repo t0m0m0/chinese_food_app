@@ -233,6 +233,52 @@ class StoreProvider extends ChangeNotifier {
     }
   }
 
+  /// スワイプ画面用の店舗取得（メートル単位の半径指定、広域検索対応）
+  ///
+  /// [radiusMeters] 検索半径（メートル）
+  /// - 3000m以下: 通常の単一API検索
+  /// - 3000m超: 広域検索（複数ポイントで並列検索）
+  Future<void> loadSwipeStoresWithRadius({
+    required double lat,
+    required double lng,
+    required int radiusMeters,
+    int count = 100,
+  }) async {
+    try {
+      _stateManager.setLoading(true);
+      _stateManager.clearError();
+
+      // スワイプ前にDBから最新の店舗リストを読み込む
+      await _businessLogic.loadStores();
+
+      final swipeStores = await _businessLogic.loadSwipeStoresWithRadius(
+        lat: lat,
+        lng: lng,
+        radiusMeters: radiusMeters,
+        count: count,
+      );
+
+      _stateManager.updateSwipeStores(swipeStores);
+
+      // スワイプ用店舗が0件の場合、適切な情報メッセージを設定
+      if (swipeStores.isEmpty) {
+        _stateManager.setInfoMessage(
+            InfoMessages.getStoreMessage('no_stores_found_nearby'));
+      } else {
+        _stateManager.clearInfoMessage();
+      }
+
+      _cacheManager.clearCache();
+      notifyListeners();
+
+      _stateManager.setLoading(false);
+    } catch (e) {
+      _stateManager
+          .setError(ErrorMessages.getStoreMessage('location_stores_failed'));
+      _stateManager.setLoading(false);
+    }
+  }
+
   /// スワイプ画面用の追加店舗取得（ページネーション）
   ///
   /// 次ページの店舗を取得し、既存のスワイプリストに追加する
