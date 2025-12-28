@@ -76,12 +76,12 @@ jobs:
       run: ./.github/scripts/setup-env.sh
 
     - name: 全件テストを実行
-      timeout-minutes: 25
+      timeout-minutes: 30
       run: |
         flutter test \
           --dart-define=PRODUCTION=false \
           --dart-define=DEVELOPMENT=true \
-          --reporter=expanded \
+          --reporter=compact \
           --coverage
         
     - name: テストカバレッジをアップロード

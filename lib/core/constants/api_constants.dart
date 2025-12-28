@@ -13,6 +13,7 @@ class ApiConstants {
 
   /// ページネーション設定
   static const int paginationThreshold = 10; // 次ページ取得のトリガー閾値（残り枚数）
+  static const int autoPaginationThreshold = 20; // 自動ページ取得の閾値（フィルタリング後）
 
   /// 重複チェック用の閾値
   static const double duplicateThreshold = 0.001; // 約110m

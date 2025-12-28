@@ -88,3 +88,4 @@ coverage/
 ios/Podfile.lock
 macos/Podfile
 ios/Flutter/Generated.xcconfig
+.vscode/
