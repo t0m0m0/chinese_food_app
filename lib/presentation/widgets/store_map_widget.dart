@@ -16,61 +16,43 @@ class StoreMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Column(
       children: [
         // OpenStreetMap WebView地図
-        WebViewMapWidget(
-          store: store,
-          useOpenStreetMap: true,
-        ),
-        // マップアプリで開くボタン（左上）
-        Positioned(
-          top: 16.0,
-          left: 16.0,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => _openInMapApp(),
-              borderRadius: BorderRadius.circular(8.0),
-              child: Tooltip(
-                message: 'マップアプリで開く',
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 4.0,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+        Expanded(
+          child: Stack(
+            children: [
+              WebViewMapWidget(
+                store: store,
+                useOpenStreetMap: true,
+              ),
+              // 外部地図アプリでナビゲーション開始ボタン（右上）
+              Positioned(
+                top: 16.0,
+                right: 16.0,
+                child: FloatingActionButton(
+                  mini: true,
+                  tooltip: 'ナビを開始',
+                  onPressed: () => _openExternalNavigation(),
                   child: Semantics(
-                    label: 'マップアプリで店舗位置を開く',
-                    child: const Icon(
-                      Icons.open_in_new,
-                      size: 20.0,
-                      color: Colors.blue,
-                    ),
+                    label: '外部地図アプリでナビゲーションを開始',
+                    child: const Icon(Icons.navigation),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
-        // 外部地図アプリでナビゲーション開始ボタン（右上）
-        Positioned(
-          top: 16.0,
-          right: 16.0,
-          child: FloatingActionButton(
-            mini: true,
-            tooltip: '外部地図アプリで開く',
-            onPressed: () => _openExternalNavigation(),
-            child: Semantics(
-              label: '外部地図アプリでナビゲーションを開始',
-              child: const Icon(Icons.navigation),
+        // マップアプリで開くボタン（地図の下）
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12.0),
+          child: OutlinedButton.icon(
+            onPressed: () => _openInMapApp(),
+            icon: const Icon(Icons.map),
+            label: const Text('マップアプリで開く'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
             ),
           ),
         ),
