@@ -7,13 +7,36 @@ class SearchConfig {
   static const int defaultCount = 20;
   static const int defaultStart = 1;
 
-  /// 検索範囲設定
+  /// 広域検索設定
+  /// HotPepper APIの最大検索半径（メートル）
+  static const int maxApiRadiusMeters = 3000;
+
+  /// アプリでサポートする最大検索半径（メートル）
+  static const int maxSearchRadiusMeters = 50000;
+
+  /// 広域検索時のデフォルトグリッド間隔（メートル）
+  static const int defaultGridSpacingMeters = 5000;
+
+  /// 検索範囲設定（API用: 1-5）
   static const Map<int, int> rangeToMeters = {
     1: 300,
     2: 500,
     3: 1000,
     4: 2000,
     5: 3000,
+  };
+
+  /// 拡張検索範囲設定（広域検索用: 1-9）
+  static const Map<int, int> extendedRangeToMeters = {
+    1: 300,
+    2: 500,
+    3: 1000,
+    4: 2000,
+    5: 3000,
+    6: 5000,
+    7: 10000,
+    8: 20000,
+    9: 50000,
   };
 
   /// 検索範囲のラベル表示（UI用）
@@ -25,6 +48,19 @@ class SearchConfig {
     5: '3000m',
   };
 
+  /// 拡張検索範囲のラベル表示（UI用: 広域検索対応）
+  static const Map<int, String> extendedRangeLabels = {
+    1: '300m',
+    2: '500m',
+    3: '1km',
+    4: '2km',
+    5: '3km',
+    6: '5km',
+    7: '10km',
+    8: '20km',
+    9: '50km',
+  };
+
   /// 検索範囲の説明文（ツールチップ用）
   static const Map<int, String> rangeDescriptions = {
     1: '最寄り（300m圏内）',
@@ -32,6 +68,19 @@ class SearchConfig {
     3: '徒歩圏内（1000m圏内）',
     4: '少し遠め（2000m圏内）',
     5: '広範囲（3000m圏内）',
+  };
+
+  /// 拡張検索範囲の説明文（ツールチップ用: 広域検索対応）
+  static const Map<int, String> extendedRangeDescriptions = {
+    1: '最寄り（300m圏内）',
+    2: '近場（500m圏内）',
+    3: '徒歩圏内（1km圏内）',
+    4: '少し遠め（2km圏内）',
+    5: '広範囲（3km圏内）',
+    6: '電車1駅分（5km圏内）',
+    7: '電車数駅分（10km圏内）',
+    8: '隣接エリア（20km圏内）',
+    9: '広域エリア（50km圏内）',
   };
 
   /// 検索結果の取得件数設定
@@ -124,6 +173,33 @@ class SearchConfig {
       }
     }
     return null;
+  }
+
+  /// 拡張メートルを検索範囲に変換（広域検索対応）
+  static int? extendedMeterToRange(int meter) {
+    for (final entry in extendedRangeToMeters.entries) {
+      if (entry.value == meter) {
+        return entry.key;
+      }
+    }
+    return null;
+  }
+
+  /// 広域検索かどうかを判定
+  ///
+  /// [radiusMeters] 検索半径（メートル）
+  /// 返り値: 3km超の場合true
+  static bool isWideAreaSearch(int radiusMeters) {
+    return radiusMeters > maxApiRadiusMeters;
+  }
+
+  /// 広域検索の半径が有効かどうかを判定
+  ///
+  /// [radiusMeters] 検索半径（メートル）
+  /// 返り値: 3km超〜50km以下の場合true
+  static bool isValidWideAreaRadius(int radiusMeters) {
+    return radiusMeters > maxApiRadiusMeters &&
+        radiusMeters <= maxSearchRadiusMeters;
   }
 
   /// 予算範囲が有効かどうかを判定
