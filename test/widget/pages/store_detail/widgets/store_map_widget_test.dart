@@ -46,9 +46,9 @@ void main() {
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
         expect(find.byType(FloatingActionButton), findsOneWidget);
 
-        // 外部地図アプリ起動ボタンが表示されることを確認
+        // ナビゲーションボタンが表示されることを確認
         expect(find.byIcon(Icons.navigation), findsOneWidget);
-        expect(find.byTooltip('外部地図アプリで開く'), findsOneWidget);
+        expect(find.byTooltip('ナビを開始'), findsOneWidget);
       });
 
       testWidgets('should have navigation button with proper semantics',
@@ -64,7 +64,7 @@ void main() {
 
         // NavigationアイコンとTooltipが存在することを確認
         expect(find.byIcon(Icons.navigation), findsOneWidget);
-        expect(find.byTooltip('外部地図アプリで開く'), findsOneWidget);
+        expect(find.byTooltip('ナビを開始'), findsOneWidget);
       });
 
       testWidgets('should handle navigation button tap without errors',
@@ -97,9 +97,10 @@ void main() {
         ));
 
         // 基本的なウィジェット構造の確認
+        expect(find.byType(Column), findsAtLeastNWidgets(1));
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
         expect(find.byType(FloatingActionButton), findsOneWidget);
-        expect(find.byType(Positioned), findsOneWidget);
+        expect(find.byType(OutlinedButton), findsOneWidget);
         expect(find.byType(Semantics), findsAtLeastNWidgets(1));
       });
 
@@ -111,7 +112,7 @@ void main() {
           ),
         ));
 
-        // Positionedウィジェットで適切な位置に配置されていることを確認
+        // ナビボタンが右上に配置されていることを確認
         final positioned = find.byType(Positioned);
         expect(positioned, findsOneWidget);
 
@@ -158,6 +159,60 @@ void main() {
       });
     });
 
+    group('Map Open Button Tests', () {
+      testWidgets('should have OutlinedButton for map open',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // OutlinedButtonが地図下に存在することを確認
+        expect(find.byType(OutlinedButton), findsOneWidget);
+      });
+
+      testWidgets('should show map icon in button',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // マップアイコンが存在することを確認
+        expect(find.byIcon(Icons.map), findsOneWidget);
+      });
+
+      testWidgets('should show button text', (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // ボタンテキストが表示されていることを確認
+        expect(find.text('マップアプリで開く'), findsOneWidget);
+      });
+
+      testWidgets('should handle map open button tap without errors',
+          (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: StoreMapWidget(store: testStore),
+          ),
+        ));
+
+        // ボタンをタップ
+        final button = find.byType(OutlinedButton);
+        await tester.tap(button);
+        await tester.pump();
+
+        // エラーが発生せずに処理されることを確認
+        expect(find.byType(StoreMapWidget), findsOneWidget);
+      });
+    });
+
     group('Accessibility Tests', () {
       testWidgets('should provide proper accessibility support',
           (WidgetTester tester) async {
@@ -167,8 +222,8 @@ void main() {
           ),
         ));
 
-        // アクセシビリティ要素の確認
-        expect(find.byTooltip('外部地図アプリで開く'), findsOneWidget);
+        // ナビボタンのツールチップ確認
+        expect(find.byTooltip('ナビを開始'), findsOneWidget);
 
         // Semanticsラベルが適切に設定されていることを確認
         final semanticsList = find.byType(Semantics);

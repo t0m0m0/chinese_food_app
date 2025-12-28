@@ -16,29 +16,85 @@ class StoreMapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Column(
       children: [
         // OpenStreetMap WebView地図
-        WebViewMapWidget(
-          store: store,
-          useOpenStreetMap: true,
+        Expanded(
+          child: Stack(
+            children: [
+              WebViewMapWidget(
+                store: store,
+                useOpenStreetMap: true,
+              ),
+              // 外部地図アプリでナビゲーション開始ボタン（右上）
+              Positioned(
+                top: 16.0,
+                right: 16.0,
+                child: FloatingActionButton(
+                  mini: true,
+                  tooltip: 'ナビを開始',
+                  onPressed: () => _openExternalNavigation(),
+                  child: Semantics(
+                    label: '外部地図アプリでナビゲーションを開始',
+                    child: const Icon(Icons.navigation),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        // 外部地図アプリ起動ボタン
-        Positioned(
-          top: 16.0,
-          right: 16.0,
-          child: FloatingActionButton(
-            mini: true,
-            tooltip: '外部地図アプリで開く',
-            onPressed: () => _openExternalNavigation(),
-            child: Semantics(
-              label: '外部地図アプリでナビゲーションを開始',
-              child: const Icon(Icons.navigation),
+        // マップアプリで開くボタン（地図の下）
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12.0),
+          child: OutlinedButton.icon(
+            onPressed: () => _openInMapApp(),
+            icon: const Icon(Icons.map),
+            label: const Text('マップアプリで開く'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
             ),
           ),
         ),
       ],
     );
+  }
+
+  /// 外部マップアプリで店舗位置を表示（ナビゲーションではなく位置表示）
+  Future<void> _openInMapApp() async {
+    try {
+      // 店舗名をURLエンコード
+      final encodedName = Uri.encodeComponent(store.name);
+
+      // プラットフォーム別URL優先順位（位置表示用）
+      final mapUrls = [
+        // iOS: Apple Maps（位置表示）
+        'maps://maps.apple.com/?ll=${store.lat},${store.lng}&q=$encodedName',
+        // Google Maps app（iOS/Android）
+        'comgooglemaps://?q=${store.lat},${store.lng}',
+        // Universal fallback: Web URL
+        'https://www.google.com/maps/search/?api=1&query=${store.lat},${store.lng}',
+      ];
+
+      for (final urlString in mapUrls) {
+        final url = Uri.parse(urlString);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+          return; // 成功時は処理終了
+        }
+      }
+
+      // 全てのURLが失敗した場合
+      if (kDebugMode) {
+        debugPrint(
+            '[StoreMapWidget] All map URLs failed for store: ${store.name}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[StoreMapWidget] Open map app error: $e');
+      }
+      // 本番環境ではサイレントフェール
+    }
   }
 
   /// 外部地図アプリでナビゲーションを開始
