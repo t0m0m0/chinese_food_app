@@ -32,6 +32,9 @@ class _SwipePageState extends State<SwipePage> {
   String? _locationError;
   int _selectedRange = SearchConfig.defaultRange;
 
+  // 広域検索対応: メートル単位での距離管理
+  int _selectedRadiusMeters = 1000; // デフォルト1km
+
   // スワイプフィードバック用状態
   bool _showLikeFeedback = false;
   bool _showDislikeFeedback = false;
@@ -55,10 +58,13 @@ class _SwipePageState extends State<SwipePage> {
     final savedRange = await AppConfig.search.getDistance();
     setState(() {
       _selectedRange = savedRange;
+      // rangeからメートルに変換
+      _selectedRadiusMeters =
+          SearchConfig.extendedRangeToMeters[savedRange] ?? 1000;
     });
   }
 
-  /// 距離設定を変更し、店舗を再読み込み
+  /// 距離設定を変更し、店舗を再読み込み（API range用）
   Future<void> _onDistanceChanged(int newRange) async {
     if (newRange == _selectedRange) return;
 
@@ -73,6 +79,18 @@ class _SwipePageState extends State<SwipePage> {
     await _loadStoresWithLocation();
   }
 
+  /// 距離設定を変更（メートル単位、広域検索対応）
+  Future<void> _onMetersChanged(int meters) async {
+    if (meters == _selectedRadiusMeters) return;
+
+    setState(() {
+      _selectedRadiusMeters = meters;
+    });
+
+    // 店舗を再読み込み
+    await _loadStoresWithLocation();
+  }
+
   /// Providerから店舗データを読み込み、未選択の店舗のみを表示対象とする
   void _loadStoresFromProvider() async {
     // 既存の店舗データは事前初期化済みのため、APIから新しい店舗データのみ取得
@@ -80,6 +98,7 @@ class _SwipePageState extends State<SwipePage> {
   }
 
   /// 位置情報を取得してAPIから店舗データを読み込む
+  /// 広域検索対応: _selectedRadiusMeters を使って検索
   Future<void> _loadStoresWithLocation() async {
     final storeProvider = Provider.of<StoreProvider>(context, listen: false);
 
@@ -101,11 +120,11 @@ class _SwipePageState extends State<SwipePage> {
       _lastLng = location.longitude;
       _currentPage = 1; // 新規読み込み時はページをリセット
 
-      // 位置情報を使ってスワイプ画面専用API検索
-      await storeProvider.loadSwipeStores(
+      // 広域検索対応: メートル単位で検索
+      await storeProvider.loadSwipeStoresWithRadius(
         lat: location.latitude,
         lng: location.longitude,
-        range: _selectedRange,
+        radiusMeters: _selectedRadiusMeters,
         count: ApiConstants.defaultStoreCount,
       );
     } on LocationException {
@@ -119,10 +138,10 @@ class _SwipePageState extends State<SwipePage> {
       _lastLng = ApiConstants.defaultLongitude;
       _currentPage = 1;
 
-      await storeProvider.loadSwipeStores(
+      await storeProvider.loadSwipeStoresWithRadius(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
-        range: _selectedRange,
+        radiusMeters: _selectedRadiusMeters,
         count: ApiConstants.defaultStoreCount,
       );
 
@@ -138,10 +157,10 @@ class _SwipePageState extends State<SwipePage> {
       _lastLng = ApiConstants.defaultLongitude;
       _currentPage = 1;
 
-      await storeProvider.loadSwipeStores(
+      await storeProvider.loadSwipeStoresWithRadius(
         lat: ApiConstants.defaultLatitude,
         lng: ApiConstants.defaultLongitude,
-        range: _selectedRange,
+        radiusMeters: _selectedRadiusMeters,
         count: ApiConstants.defaultStoreCount,
       );
     } finally {
@@ -366,10 +385,11 @@ class _SwipePageState extends State<SwipePage> {
         opacity: 0.03,
         child: Column(
           children: [
-            // 距離設定UI
+            // 距離設定UI（広域検索対応）
             DistanceSelectorWidget(
               selectedRange: _selectedRange,
               onChanged: _onDistanceChanged,
+              onMetersChanged: _onMetersChanged,
             ),
             // スワイプ操作説明
             RepaintBoundary(

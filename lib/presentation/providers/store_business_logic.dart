@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../domain/entities/store.dart';
 import '../../domain/repositories/store_repository.dart';
 import '../../core/constants/string_constants.dart';
 import '../../core/constants/debug_constants.dart';
+import '../../core/utils/grid_search_generator.dart';
 
 class StoreBusinessLogic {
   final StoreRepository _repository;
@@ -180,6 +182,123 @@ class StoreBusinessLogic {
     }
 
     return allFilteredStores;
+  }
+
+  /// スワイプ画面用の店舗取得（メートル単位の半径指定、広域検索対応）
+  ///
+  /// [radiusMeters] 検索半径（メートル）
+  /// - 3000m以下: 通常の単一API検索
+  /// - 3000m超: 広域検索（複数ポイントで並列検索）
+  ///
+  /// DB保存は行わず、スワイプ可能な店舗リストのみを返す
+  Future<List<Store>> loadSwipeStoresWithRadius({
+    required double lat,
+    required double lng,
+    required int radiusMeters,
+    int count = 100,
+  }) async {
+    final center = LatLng(lat, lng);
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint(
+          '[SwipeStores] 🔍 検索開始 - radiusMeters: $radiusMeters, 広域: ${GridSearchGenerator.isWideAreaSearch(radiusMeters.toDouble())}');
+    }
+
+    List<Store> apiStores;
+
+    if (GridSearchGenerator.isWideAreaSearch(radiusMeters.toDouble())) {
+      // 広域検索: 複数ポイントで並列検索
+      apiStores = await _executeWideAreaSearch(center, radiusMeters, count);
+    } else {
+      // 通常検索: 単一ポイント
+      final range =
+          GridSearchGenerator.metersToApiRange(radiusMeters.toDouble());
+      apiStores = await _fetchStoresFromApi(lat, lng, range, count, start: 1);
+    }
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 APIから取得した店舗数: ${apiStores.length}');
+    }
+
+    final existingStoreMaps = _buildExistingStoreMaps();
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 DB内の既存店舗数: ${_stores.length}');
+    }
+
+    final filteredStores = _filterSwipeStores(apiStores, existingStoreMaps);
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 フィルタリング後の店舗数: ${filteredStores.length}');
+    }
+
+    return filteredStores;
+  }
+
+  /// 広域検索を実行（複数ポイントで並列検索）
+  Future<List<Store>> _executeWideAreaSearch(
+    LatLng center,
+    int radiusMeters,
+    int count,
+  ) async {
+    // グリッドポイントを生成
+    final searchPoints = GridSearchGenerator.generateSearchPoints(
+      center: center,
+      radiusMeters: radiusMeters.toDouble(),
+    );
+
+    if (DebugConstants.enableApiLog) {
+      debugPrint('[SwipeStores] 🔍 広域検索ポイント数: ${searchPoints.length}');
+    }
+
+    // 各ポイントで検索を実行（並列）
+    final futures = searchPoints.map((point) async {
+      try {
+        return await _repository.searchStoresFromApi(
+          lat: point.latitude,
+          lng: point.longitude,
+          keyword: StringConstants.apiKeywordParameter,
+          range: 5, // 最大範囲（3km）で検索
+          count: count,
+          start: 1,
+        );
+      } catch (e) {
+        if (DebugConstants.enableApiLog) {
+          debugPrint('[SwipeStores] ⚠️ 広域検索エラー（スキップ）: $e');
+        }
+        return <Store>[];
+      }
+    });
+
+    final results = await Future.wait(futures);
+
+    // 結果をマージして重複を除去
+    final allStores = <Store>[];
+    final seenIds = <String>{};
+
+    for (final stores in results) {
+      for (final store in stores) {
+        if (!seenIds.contains(store.id)) {
+          seenIds.add(store.id);
+          allStores.add(store);
+        }
+      }
+    }
+
+    // 中心からの距離でソート
+    allStores.sort((a, b) {
+      final distA = GridSearchGenerator.calculateDistance(
+        center,
+        LatLng(a.lat, a.lng),
+      );
+      final distB = GridSearchGenerator.calculateDistance(
+        center,
+        LatLng(b.lat, b.lng),
+      );
+      return distA.compareTo(distB);
+    });
+
+    return allStores;
   }
 
   /// スワイプ画面用の追加店舗取得（ページネーション）

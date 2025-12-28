@@ -1021,8 +1021,198 @@ void main() {
         count: 100,
       );
 
-      // Assert: ページ2��空なので0件
+      // Assert: ページ2が空なので0件
       expect(result, isEmpty);
+    });
+  });
+
+  group('StoreBusinessLogic - wide area search (radiusMeters)', () {
+    final testApiStores = [
+      Store(
+        id: 'wide-store-1',
+        name: '広域店舗1',
+        address: '東京都港区1-1-1',
+        lat: 35.6584,
+        lng: 139.7454,
+        status: null,
+        createdAt: DateTime.now(),
+      ),
+      Store(
+        id: 'wide-store-2',
+        name: '広域店舗2',
+        address: '東京都渋谷区2-2-2',
+        lat: 35.6600,
+        lng: 139.7500,
+        status: null,
+        createdAt: DateTime.now(),
+      ),
+    ];
+
+    test('should use normal search for radius <= 3000m', () async {
+      // Arrange
+      when(mockRepository.searchStoresFromApi(
+        lat: 35.6584,
+        lng: 139.7454,
+        keyword: '中華',
+        range: 5, // 3000m -> range=5
+        count: 100,
+        start: 1,
+      )).thenAnswer((_) async => testApiStores);
+
+      // Act
+      final result = await businessLogic.loadSwipeStoresWithRadius(
+        lat: 35.6584,
+        lng: 139.7454,
+        radiusMeters: 3000,
+        count: 100,
+      );
+
+      // Assert
+      expect(result, hasLength(2));
+      verify(mockRepository.searchStoresFromApi(
+        lat: 35.6584,
+        lng: 139.7454,
+        keyword: '中華',
+        range: 5,
+        count: 100,
+        start: 1,
+      )).called(1);
+    });
+
+    test('should use wide area search for radius > 3000m', () async {
+      // Arrange - 広域検索では複数のポイントでAPIが呼ばれる
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: anyNamed('start'),
+      )).thenAnswer((_) async => testApiStores);
+
+      // Act
+      final result = await businessLogic.loadSwipeStoresWithRadius(
+        lat: 35.6584,
+        lng: 139.7454,
+        radiusMeters: 10000, // 10km -> 広域検索
+        count: 100,
+      );
+
+      // Assert - 複数回のAPI呼び出しがあるはず
+      expect(result, isNotEmpty);
+      // 広域検索では複数回のAPI呼び出しが行われる
+      verify(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: anyNamed('start'),
+      )).called(greaterThan(1));
+    });
+
+    test('should filter out already-swiped stores from wide area search',
+        () async {
+      // Arrange
+      final swipedStore = Store(
+        id: 'wide-store-1',
+        name: '広域店舗1',
+        address: '東京都港区1-1-1',
+        lat: 35.6584,
+        lng: 139.7454,
+        status: StoreStatus.wantToGo, // 既にスワイプ済み
+        createdAt: DateTime.now(),
+      );
+
+      when(mockRepository.getAllStores())
+          .thenAnswer((_) async => [swipedStore]);
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: anyNamed('start'),
+      )).thenAnswer((_) async => testApiStores);
+
+      await businessLogic.loadStores();
+
+      // Act
+      final result = await businessLogic.loadSwipeStoresWithRadius(
+        lat: 35.6584,
+        lng: 139.7454,
+        radiusMeters: 10000,
+        count: 100,
+      );
+
+      // Assert - スワイプ済みの店舗は除外される
+      expect(result.any((s) => s.id == 'wide-store-1'), false);
+      expect(result.any((s) => s.id == 'wide-store-2'), true);
+    });
+
+    test('should remove duplicate stores from wide area search results',
+        () async {
+      // Arrange - 複数のポイントから同じ店舗が返される場合
+      when(mockRepository.searchStoresFromApi(
+        lat: anyNamed('lat'),
+        lng: anyNamed('lng'),
+        keyword: anyNamed('keyword'),
+        range: anyNamed('range'),
+        count: anyNamed('count'),
+        start: anyNamed('start'),
+      )).thenAnswer((_) async => testApiStores); // 全ポイントで同じ店舗
+
+      // Act
+      final result = await businessLogic.loadSwipeStoresWithRadius(
+        lat: 35.6584,
+        lng: 139.7454,
+        radiusMeters: 10000,
+        count: 100,
+      );
+
+      // Assert - 重複が除去されて2件のみ
+      expect(result.length, 2);
+      final ids = result.map((s) => s.id).toSet();
+      expect(ids.length, 2); // ユニークなIDが2件
+    });
+
+    test('should convert radiusMeters to correct API range for normal search',
+        () async {
+      // Arrange & Act & Assert for various radius values
+      final testCases = [
+        (300, 1),
+        (500, 2),
+        (1000, 3),
+        (2000, 4),
+        (3000, 5),
+      ];
+
+      for (final (meters, expectedRange) in testCases) {
+        when(mockRepository.searchStoresFromApi(
+          lat: 35.6584,
+          lng: 139.7454,
+          keyword: '中華',
+          range: expectedRange,
+          count: 100,
+          start: 1,
+        )).thenAnswer((_) async => testApiStores);
+
+        await businessLogic.loadSwipeStoresWithRadius(
+          lat: 35.6584,
+          lng: 139.7454,
+          radiusMeters: meters,
+          count: 100,
+        );
+
+        verify(mockRepository.searchStoresFromApi(
+          lat: 35.6584,
+          lng: 139.7454,
+          keyword: '中華',
+          range: expectedRange,
+          count: 100,
+          start: 1,
+        )).called(1);
+      }
     });
   });
 }
