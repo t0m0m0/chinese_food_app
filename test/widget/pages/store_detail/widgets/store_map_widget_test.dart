@@ -51,18 +51,27 @@ void main() {
       );
     });
 
+    // テスト用のヘルパー関数：SizedBoxで囲まれたStoreMapWidgetを作成
+    Widget buildTestWidget(Store store) {
+      return MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 400,
+            height: 600,
+            child: StoreMapWidget(
+              store: store,
+              testMapWidget: mockMapWidget,
+            ),
+          ),
+        ),
+      );
+    }
+
     group('WebView Map Display Tests', () {
       testWidgets(
           'should display Stack with WebViewMapWidget and FloatingActionButton',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: testStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // StoreMapWidgetのStackとFloatingActionButtonが表示されることを確認
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
@@ -75,14 +84,7 @@ void main() {
 
       testWidgets('should have navigation button with proper semantics',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: testStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // Semanticsラベルが正しく設定されていることを確認
         expect(find.byType(Semantics), findsAtLeastNWidgets(1));
@@ -94,14 +96,7 @@ void main() {
 
       testWidgets('should handle navigation button tap without errors',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: testStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // ナビゲーションボタンをタップ（実際の外部アプリ起動はしない）
         final navigationButton = find.byType(FloatingActionButton);
@@ -118,18 +113,7 @@ void main() {
     group('Widget Structure Tests', () {
       testWidgets('should have proper widget hierarchy',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 400,
-              height: 600,
-              child: StoreMapWidget(
-                store: testStore,
-                testMapWidget: mockMapWidget,
-              ),
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // 基本的なウィジェット構造の確認
         expect(find.byType(StoreMapWidget), findsOneWidget);
@@ -142,14 +126,7 @@ void main() {
 
       testWidgets('should maintain proper positioning',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: testStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // ナビボタンが右上に配置されていることを確認
         final positioned = find.byType(Positioned);
@@ -164,14 +141,7 @@ void main() {
     group('Store Data Integration Tests', () {
       testWidgets('should work with different store data',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: edgeCaseStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(edgeCaseStore));
 
         // エッジケースストアでもウィジェットが正常に動作することを確認
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
@@ -181,14 +151,7 @@ void main() {
 
       testWidgets('should handle store with boundary coordinate values',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: edgeCaseStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(edgeCaseStore));
 
         // 境界値座標でもエラーが発生しないことを確認
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
@@ -207,18 +170,7 @@ void main() {
     group('Map Open Button Tests', () {
       testWidgets('should have OutlinedButton for map open',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 400,
-              height: 600,
-              child: StoreMapWidget(
-                store: testStore,
-                testMapWidget: mockMapWidget,
-              ),
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // OutlinedButtonが地図下に存在することを確認
         expect(find.byType(OutlinedButton), findsOneWidget);
@@ -226,36 +178,14 @@ void main() {
 
       testWidgets('should show map icon in button',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 400,
-              height: 600,
-              child: StoreMapWidget(
-                store: testStore,
-                testMapWidget: mockMapWidget,
-              ),
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // マップアイコンが存在することを確認
         expect(find.byIcon(Icons.map), findsOneWidget);
       });
 
       testWidgets('should show button text', (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 400,
-              height: 600,
-              child: StoreMapWidget(
-                store: testStore,
-                testMapWidget: mockMapWidget,
-              ),
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // ボタンテキストが表示されていることを確認
         expect(find.text('マップアプリで開く'), findsOneWidget);
@@ -263,18 +193,7 @@ void main() {
 
       testWidgets('should handle map open button tap without errors',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 400,
-              height: 600,
-              child: StoreMapWidget(
-                store: testStore,
-                testMapWidget: mockMapWidget,
-              ),
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // ボタンをタップ
         final button = find.byType(OutlinedButton);
@@ -289,14 +208,7 @@ void main() {
     group('Accessibility Tests', () {
       testWidgets('should provide proper accessibility support',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: testStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // ナビボタンのツールチップ確認
         expect(find.byTooltip('ナビを開始'), findsOneWidget);
@@ -320,14 +232,7 @@ void main() {
 
       testWidgets('should be interactive and focusable',
           (WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: Scaffold(
-            body: StoreMapWidget(
-              store: testStore,
-              testMapWidget: mockMapWidget,
-            ),
-          ),
-        ));
+        await tester.pumpWidget(buildTestWidget(testStore));
 
         // FloatingActionButtonがインタラクティブであることを確認
         final fab = find.byType(FloatingActionButton);
