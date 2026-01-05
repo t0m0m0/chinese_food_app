@@ -3,10 +3,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 import 'package:chinese_food_app/presentation/widgets/store_map_widget.dart';
 
+/// テスト用のモックマップウィジェット
+/// WebViewを使用しないのでCI環境でも動作する
+class MockMapWidget extends StatelessWidget {
+  const MockMapWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.grey[300],
+      child: const Center(
+        child: Text('Mock Map'),
+      ),
+    );
+  }
+}
+
 void main() {
   group('StoreMapWidget (WebView Implementation)', () {
     late Store testStore;
     late Store edgeCaseStore;
+
+    // CI環境でWebViewが動作しないため、モックマップウィジェットを使用
+    const mockMapWidget = MockMapWidget();
 
     setUp(() {
       testStore = Store(
@@ -38,7 +57,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: StoreMapWidget(
+              store: testStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 
@@ -55,7 +77,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: StoreMapWidget(
+              store: testStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 
@@ -71,7 +96,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: StoreMapWidget(
+              store: testStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 
@@ -95,15 +123,16 @@ void main() {
             body: SizedBox(
               width: 400,
               height: 600,
-              child: StoreMapWidget(store: testStore),
+              child: StoreMapWidget(
+                store: testStore,
+                testMapWidget: mockMapWidget,
+              ),
             ),
           ),
         ));
 
-        // 非同期処理を待つ
-        await tester.pump(const Duration(milliseconds: 100));
-
         // 基本的なウィジェット構造の確認
+        expect(find.byType(StoreMapWidget), findsOneWidget);
         expect(find.byType(Column), findsAtLeastNWidgets(1));
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
         expect(find.byType(FloatingActionButton), findsOneWidget);
@@ -115,7 +144,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: StoreMapWidget(
+              store: testStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 
@@ -134,7 +166,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: edgeCaseStore),
+            body: StoreMapWidget(
+              store: edgeCaseStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 
@@ -148,7 +183,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: edgeCaseStore),
+            body: StoreMapWidget(
+              store: edgeCaseStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 
@@ -174,13 +212,13 @@ void main() {
             body: SizedBox(
               width: 400,
               height: 600,
-              child: StoreMapWidget(store: testStore),
+              child: StoreMapWidget(
+                store: testStore,
+                testMapWidget: mockMapWidget,
+              ),
             ),
           ),
         ));
-
-        // 非同期処理を待つ
-        await tester.pump(const Duration(milliseconds: 100));
 
         // OutlinedButtonが地図下に存在することを確認
         expect(find.byType(OutlinedButton), findsOneWidget);
@@ -193,13 +231,13 @@ void main() {
             body: SizedBox(
               width: 400,
               height: 600,
-              child: StoreMapWidget(store: testStore),
+              child: StoreMapWidget(
+                store: testStore,
+                testMapWidget: mockMapWidget,
+              ),
             ),
           ),
         ));
-
-        // 非同期処理を待つ
-        await tester.pump(const Duration(milliseconds: 100));
 
         // マップアイコンが存在することを確認
         expect(find.byIcon(Icons.map), findsOneWidget);
@@ -211,13 +249,13 @@ void main() {
             body: SizedBox(
               width: 400,
               height: 600,
-              child: StoreMapWidget(store: testStore),
+              child: StoreMapWidget(
+                store: testStore,
+                testMapWidget: mockMapWidget,
+              ),
             ),
           ),
         ));
-
-        // 非同期処理を待つ
-        await tester.pump(const Duration(milliseconds: 100));
 
         // ボタンテキストが表示されていることを確認
         expect(find.text('マップアプリで開く'), findsOneWidget);
@@ -230,13 +268,13 @@ void main() {
             body: SizedBox(
               width: 400,
               height: 600,
-              child: StoreMapWidget(store: testStore),
+              child: StoreMapWidget(
+                store: testStore,
+                testMapWidget: mockMapWidget,
+              ),
             ),
           ),
         ));
-
-        // 非同期処理を待つ
-        await tester.pump(const Duration(milliseconds: 100));
 
         // ボタンをタップ
         final button = find.byType(OutlinedButton);
@@ -253,7 +291,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: StoreMapWidget(
+              store: testStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 
@@ -281,7 +322,10 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: StoreMapWidget(
+              store: testStore,
+              testMapWidget: mockMapWidget,
+            ),
           ),
         ));
 

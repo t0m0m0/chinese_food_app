@@ -9,9 +9,14 @@ import 'webview_map_widget.dart';
 class StoreMapWidget extends StatelessWidget {
   final Store store;
 
+  /// テスト用にマップウィジェットを注入できるようにするオプショナルパラメータ
+  @visibleForTesting
+  final Widget? testMapWidget;
+
   const StoreMapWidget({
     super.key,
     required this.store,
+    this.testMapWidget,
   });
 
   @override
@@ -22,10 +27,11 @@ class StoreMapWidget extends StatelessWidget {
         Expanded(
           child: Stack(
             children: [
-              WebViewMapWidget(
-                store: store,
-                useOpenStreetMap: true,
-              ),
+              testMapWidget ??
+                  WebViewMapWidget(
+                    store: store,
+                    useOpenStreetMap: true,
+                  ),
               // 外部地図アプリでナビゲーション開始ボタン（右上）
               Positioned(
                 top: 16.0,
