@@ -220,6 +220,28 @@ class MockStoreProvider extends _i1.Mock implements _i2.StoreProvider {
       ) as _i4.Future<void>);
 
   @override
+  _i4.Future<void> loadSwipeStoresWithRadius({
+    required double? lat,
+    required double? lng,
+    required int? radiusMeters,
+    int? count = 100,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #loadSwipeStoresWithRadius,
+          [],
+          {
+            #lat: lat,
+            #lng: lng,
+            #radiusMeters: radiusMeters,
+            #count: count,
+          },
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
   _i4.Future<void> loadMoreSwipeStores({
     required double? lat,
     required double? lng,

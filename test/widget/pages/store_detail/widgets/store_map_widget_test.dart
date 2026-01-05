@@ -96,6 +96,9 @@ void main() {
           ),
         ));
 
+        // 非同期処理を待つ
+        await tester.pump(const Duration(milliseconds: 100));
+
         // 基本的なウィジェット構造の確認
         expect(find.byType(Column), findsAtLeastNWidgets(1));
         expect(find.byType(Stack), findsAtLeastNWidgets(1));
@@ -168,6 +171,9 @@ void main() {
           ),
         ));
 
+        // 非同期処理を待つ
+        await tester.pump(const Duration(milliseconds: 100));
+
         // OutlinedButtonが地図下に存在することを確認
         expect(find.byType(OutlinedButton), findsOneWidget);
       });
@@ -180,6 +186,9 @@ void main() {
           ),
         ));
 
+        // 非同期処理を待つ
+        await tester.pump(const Duration(milliseconds: 100));
+
         // マップアイコンが存在することを確認
         expect(find.byIcon(Icons.map), findsOneWidget);
       });
@@ -190,6 +199,9 @@ void main() {
             body: StoreMapWidget(store: testStore),
           ),
         ));
+
+        // 非同期処理を待つ
+        await tester.pump(const Duration(milliseconds: 100));
 
         // ボタンテキストが表示されていることを確認
         expect(find.text('マップアプリで開く'), findsOneWidget);
@@ -202,6 +214,9 @@ void main() {
             body: StoreMapWidget(store: testStore),
           ),
         ));
+
+        // 非同期処理を待つ
+        await tester.pump(const Duration(milliseconds: 100));
 
         // ボタンをタップ
         final button = find.byType(OutlinedButton);
