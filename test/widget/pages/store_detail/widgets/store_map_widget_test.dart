@@ -92,7 +92,11 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: SizedBox(
+              width: 400,
+              height: 600,
+              child: StoreMapWidget(store: testStore),
+            ),
           ),
         ));
 
@@ -167,7 +171,11 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: SizedBox(
+              width: 400,
+              height: 600,
+              child: StoreMapWidget(store: testStore),
+            ),
           ),
         ));
 
@@ -182,7 +190,11 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: SizedBox(
+              width: 400,
+              height: 600,
+              child: StoreMapWidget(store: testStore),
+            ),
           ),
         ));
 
@@ -196,7 +208,11 @@ void main() {
       testWidgets('should show button text', (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: SizedBox(
+              width: 400,
+              height: 600,
+              child: StoreMapWidget(store: testStore),
+            ),
           ),
         ));
 
@@ -211,7 +227,11 @@ void main() {
           (WidgetTester tester) async {
         await tester.pumpWidget(MaterialApp(
           home: Scaffold(
-            body: StoreMapWidget(store: testStore),
+            body: SizedBox(
+              width: 400,
+              height: 600,
+              child: StoreMapWidget(store: testStore),
+            ),
           ),
         ));
 
