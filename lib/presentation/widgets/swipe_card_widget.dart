@@ -67,25 +67,25 @@ class SwipeCardWidget extends StatelessWidget {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: AppTheme.softShadow,
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(20),
               onTap: onTap,
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(20),
                   gradient: AppTheme.cardGradient,
                   border: Border.all(
                     color: AppTheme.accentBeige,
-                    width: 1,
+                    width: 1.5,
                   ),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(20),
                   child: Stack(
                     children: [
                       // メインコンテンツ
@@ -104,7 +104,7 @@ class SwipeCardWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // 左上のコーナー装飾
+                      // 左上のコーナー装飾（赤）
                       Positioned(
                         top: 0,
                         left: 0,
@@ -113,13 +113,22 @@ class SwipeCardWidget extends StatelessWidget {
                           color: AppTheme.primaryRed,
                         ),
                       ),
+                      // 右上のコーナー装飾（金）
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: DecorativeElements.cornerDecorationTopRight(
+                          size: 24,
+                          color: AppTheme.goldenAccent,
+                        ),
+                      ),
                       // 右下に小さな餃子装飾
                       Positioned(
                         bottom: 10,
                         right: 10,
                         child: Opacity(
-                          opacity: 0.15,
-                          child: DecorativeElements.gyozaIcon(size: 24),
+                          opacity: 0.12,
+                          child: DecorativeElements.gyozaIcon(size: 22),
                         ),
                       ),
                     ],
@@ -162,25 +171,15 @@ class SwipeCardWidget extends StatelessWidget {
               ),
             ),
           ),
-        // 右上に装飾的なアクセント
+        // 右上にレトロ看板風バッジ
         if (enableGradientOverlay)
           Positioned(
-            top: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                gradient: AppTheme.primaryGradient,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: AppTheme.glowEffect(AppTheme.primaryRed),
-              ),
-              child: Text(
-                '町中華',
-                style: AppTheme.labelSmall.copyWith(
-                  color: AppTheme.surfaceWhite,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+            top: 14,
+            right: 14,
+            child: DecorativeElements.retroBadge(
+              text: '町中華',
+              backgroundColor: AppTheme.primaryRed,
+              textColor: AppTheme.surfaceWhite,
             ),
           ),
       ],
@@ -196,8 +195,9 @@ class SwipeCardWidget extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             AppTheme.surfaceWhite,
-            AppTheme.surfaceWhite,
+            AppTheme.accentCream,
           ],
+          stops: [0.0, 1.0],
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),

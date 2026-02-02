@@ -326,23 +326,19 @@ class _SwipePageState extends State<SwipePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.sentiment_satisfied,
-            size: 64,
-            color: colorScheme.primary,
-          ),
-          const SizedBox(height: 16),
+          DecorativeElements.ramenBowl(size: 64),
+          const SizedBox(height: 12),
           Text(
             'すべての店舗を確認済みです！',
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: colorScheme.primary,
+            style: AppTheme.titleLarge.copyWith(
+              color: AppTheme.primaryRed,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             '検索画面で新しい店舗を探してみましょう',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+            style: AppTheme.bodyMedium.copyWith(
+              color: AppTheme.textSecondary,
             ),
           ),
         ],
@@ -361,16 +357,16 @@ class _SwipePageState extends State<SwipePage> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DecorativeElements.beerIcon(size: 30),
-            const SizedBox(width: 12),
+            DecorativeElements.beerIcon(size: 28),
+            const SizedBox(width: 10),
             Text(
               '見つける',
               style: AppTheme.headlineMedium.copyWith(
                 color: AppTheme.textPrimary,
               ),
             ),
-            const SizedBox(width: 12),
-            DecorativeElements.gyozaIcon(size: 30),
+            const SizedBox(width: 10),
+            DecorativeElements.gyozaIcon(size: 28),
           ],
         ),
         centerTitle: true,
@@ -380,6 +376,13 @@ class _SwipePageState extends State<SwipePage> {
           ),
         ),
         elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3),
+          child: DecorativeElements.norenDecoration(
+            height: 3,
+            color: AppTheme.primaryRed,
+          ),
+        ),
       ),
       body: DecorativeElements.foodPatternBackground(
         opacity: 0.03,
@@ -391,49 +394,63 @@ class _SwipePageState extends State<SwipePage> {
               onChanged: _onDistanceChanged,
               onMetersChanged: _onMetersChanged,
             ),
-            // スワイプ操作説明
+            // スワイプ操作説明（レトロモダン）
             RepaintBoundary(
               child: Container(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 12.0),
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.accentCream, AppTheme.surfaceWhite],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppTheme.accentBeige,
+                    width: 1,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.block,
-                          color: Colors.orange,
-                          size: 20,
+                        Icon(
+                          Icons.block_rounded,
+                          color: Colors.orange.shade700,
+                          size: 18,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Text(
                           '← 興味なし',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w500,
+                          style: AppTheme.labelMedium.copyWith(
+                            color: Colors.orange.shade700,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
+                    Container(
+                      width: 1,
+                      height: 20,
+                      color: AppTheme.accentBeige,
+                    ),
                     Row(
                       children: [
                         Text(
-                          '→ 行きたい',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.red,
-                            fontWeight: FontWeight.w500,
+                          '行きたい →',
+                          style: AppTheme.labelMedium.copyWith(
+                            color: AppTheme.primaryRed,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         const Icon(
-                          Icons.favorite,
-                          color: Colors.red,
-                          size: 20,
+                          Icons.favorite_rounded,
+                          color: AppTheme.primaryRed,
+                          size: 18,
                         ),
                       ],
                     ),
@@ -443,13 +460,21 @@ class _SwipePageState extends State<SwipePage> {
             ),
             Expanded(
               child: _isGettingLocation
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text('現在地を取得中...'),
+                          const CircularProgressIndicator(
+                            color: AppTheme.primaryRed,
+                            strokeWidth: 3,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            '現在地を取得中...',
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
                         ],
                       ),
                     )
@@ -470,13 +495,21 @@ class _SwipePageState extends State<SwipePage> {
                       builder: (context, state, child) {
                         // API読み込み中の表示
                         if (state.isLoading) {
-                          return const Center(
+                          return Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CircularProgressIndicator(),
-                                SizedBox(height: 16),
-                                Text('新しい店舗を読み込み中...'),
+                                const CircularProgressIndicator(
+                                  color: AppTheme.primaryRed,
+                                  strokeWidth: 3,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  '新しい店舗を読み込み中...',
+                                  style: AppTheme.bodyMedium.copyWith(
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
                               ],
                             ),
                           );

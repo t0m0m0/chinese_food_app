@@ -54,15 +54,15 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
 
         expect(find.byType(ShellPage), findsOneWidget);
-        expect(find.byType(BottomNavigationBar), findsOneWidget);
+        expect(find.byType(NavigationBar), findsOneWidget);
 
-        // BottomNavigationBar内のテキストのみを検索
-        final bottomNavBar = find.byType(BottomNavigationBar);
-        expect(find.descendant(of: bottomNavBar, matching: find.text('見つける')),
+        // NavigationBar内のテキストのみを検索
+        final navBar = find.byType(NavigationBar);
+        expect(find.descendant(of: navBar, matching: find.text('見つける')),
             findsOneWidget);
-        expect(find.descendant(of: bottomNavBar, matching: find.text('エリア')),
+        expect(find.descendant(of: navBar, matching: find.text('エリア')),
             findsOneWidget);
-        expect(find.descendant(of: bottomNavBar, matching: find.text('マイメニュー')),
+        expect(find.descendant(of: navBar, matching: find.text('マイメニュー')),
             findsOneWidget);
       } finally {
         FlutterError.onError = originalOnError;
@@ -107,11 +107,11 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          final bottomNavBar = tester.widget<BottomNavigationBar>(
-            find.byType(BottomNavigationBar),
+          final navBar = tester.widget<NavigationBar>(
+            find.byType(NavigationBar),
           );
 
-          expect(bottomNavBar.currentIndex, 0);
+          expect(navBar.selectedIndex, 0);
         } finally {
           FlutterError.onError = originalOnError;
         }
@@ -136,22 +136,22 @@ void main() {
 
           // ShellPageが表示されているか確認
           expect(find.byType(ShellPage), findsOneWidget);
-          expect(find.byType(BottomNavigationBar), findsOneWidget);
+          expect(find.byType(NavigationBar), findsOneWidget);
 
-          // BottomNavigationBar内のエリアタブをタップ
-          final bottomNavBar = find.byType(BottomNavigationBar);
+          // NavigationBar内のエリアタブをタップ
+          final navBar = find.byType(NavigationBar);
           final areaTab =
-              find.descendant(of: bottomNavBar, matching: find.text('エリア'));
+              find.descendant(of: navBar, matching: find.text('エリア'));
 
           await tester.tap(areaTab);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
           // 現在のナビゲーションインデックスが正しく更新されているか確認
-          final bottomNavBarWidget = tester.widget<BottomNavigationBar>(
-            find.byType(BottomNavigationBar),
+          final navBarWidget = tester.widget<NavigationBar>(
+            find.byType(NavigationBar),
           );
-          expect(bottomNavBarWidget.currentIndex, 1);
+          expect(navBarWidget.selectedIndex, 1);
 
           // 将来的な機能実装確認（現在はSearchPageの完全な実装待ち）
           // expect(find.byType(SearchPage), findsOneWidget);
@@ -175,20 +175,20 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          // BottomNavigationBar内のマイメニュータブをタップ
-          final bottomNavBar = find.byType(BottomNavigationBar);
+          // NavigationBar内のマイメニュータブをタップ
+          final navBar = find.byType(NavigationBar);
           final myMenuTab =
-              find.descendant(of: bottomNavBar, matching: find.text('マイメニュー'));
+              find.descendant(of: navBar, matching: find.text('マイメニュー'));
           await tester.tap(myMenuTab);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
           expect(find.byType(MyMenuPage), findsOneWidget);
 
-          final bottomNavBarWidget = tester.widget<BottomNavigationBar>(
-            find.byType(BottomNavigationBar),
+          final navBarWidget = tester.widget<NavigationBar>(
+            find.byType(NavigationBar),
           );
-          expect(bottomNavBarWidget.currentIndex, 2);
+          expect(navBarWidget.selectedIndex, 2);
         } finally {
           FlutterError.onError = originalOnError;
         }
@@ -210,26 +210,26 @@ void main() {
           await tester.pump(const Duration(milliseconds: 100));
 
           // まずエリア画面に移動
-          final bottomNavBar = find.byType(BottomNavigationBar);
+          final navBar = find.byType(NavigationBar);
           final areaTab =
-              find.descendant(of: bottomNavBar, matching: find.text('エリア'));
+              find.descendant(of: navBar, matching: find.text('エリア'));
           await tester.tap(areaTab);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
           // 見つけるタブをタップ
           final swipeTab =
-              find.descendant(of: bottomNavBar, matching: find.text('見つける'));
+              find.descendant(of: navBar, matching: find.text('見つける'));
           await tester.tap(swipeTab);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
           expect(find.byType(SwipePage), findsOneWidget);
 
-          final bottomNavBarWidget = tester.widget<BottomNavigationBar>(
-            find.byType(BottomNavigationBar),
+          final navBarWidget = tester.widget<NavigationBar>(
+            find.byType(NavigationBar),
           );
-          expect(bottomNavBarWidget.currentIndex, 0);
+          expect(navBarWidget.selectedIndex, 0);
         } finally {
           FlutterError.onError = originalOnError;
         }
@@ -253,30 +253,30 @@ void main() {
           await tester.pump(const Duration(milliseconds: 100));
 
           // 初期パス (/swipe) - インデックス 0
-          var bottomNavBar = tester.widget<BottomNavigationBar>(
-            find.byType(BottomNavigationBar),
+          var navBar = tester.widget<NavigationBar>(
+            find.byType(NavigationBar),
           );
-          expect(bottomNavBar.currentIndex, 0);
+          expect(navBar.selectedIndex, 0);
 
           // 検索パス (/search) - インデックス 1
           router.go('/search');
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          bottomNavBar = tester.widget<BottomNavigationBar>(
-            find.byType(BottomNavigationBar),
+          navBar = tester.widget<NavigationBar>(
+            find.byType(NavigationBar),
           );
-          expect(bottomNavBar.currentIndex, 1);
+          expect(navBar.selectedIndex, 1);
 
           // マイメニューパス (/my-menu) - インデックス 2
           router.go('/my-menu');
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          bottomNavBar = tester.widget<BottomNavigationBar>(
-            find.byType(BottomNavigationBar),
+          navBar = tester.widget<NavigationBar>(
+            find.byType(NavigationBar),
           );
-          expect(bottomNavBar.currentIndex, 2);
+          expect(navBar.selectedIndex, 2);
         } finally {
           FlutterError.onError = originalOnError;
         }
@@ -327,17 +327,16 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 100));
 
-          // BottomNavigationBarアイテムはFlutterによって自動的にアクセシブルになる
-          final bottomNavBar = find.byType(BottomNavigationBar);
-          expect(bottomNavBar, findsOneWidget);
+          // NavigationBarアイテムはFlutterによって自動的にアクセシブルになる
+          final navBar = find.byType(NavigationBar);
+          expect(navBar, findsOneWidget);
 
           // ナビゲーションアイテムのテキストが表示されることを確認
-          expect(find.descendant(of: bottomNavBar, matching: find.text('見つける')),
+          expect(find.descendant(of: navBar, matching: find.text('見つける')),
               findsOneWidget);
-          expect(find.descendant(of: bottomNavBar, matching: find.text('エリア')),
+          expect(find.descendant(of: navBar, matching: find.text('エリア')),
               findsOneWidget);
-          expect(
-              find.descendant(of: bottomNavBar, matching: find.text('マイメニュー')),
+          expect(find.descendant(of: navBar, matching: find.text('マイメニュー')),
               findsOneWidget);
         } finally {
           FlutterError.onError = originalOnError;

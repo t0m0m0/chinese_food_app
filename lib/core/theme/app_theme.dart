@@ -385,6 +385,112 @@ class AppTheme {
         thickness: 1,
         space: 24,
       ),
+
+      // NavigationBarテーマ（昭和レトロモダン）
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surfaceWhite,
+        indicatorColor: primaryRed.withValues(alpha: 0.12),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        height: 72,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return labelMedium.copyWith(
+              color: primaryRed,
+              fontWeight: FontWeight.w700,
+            );
+          }
+          return labelMedium.copyWith(
+            color: textTertiary,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(
+              color: primaryRed,
+              size: 26,
+            );
+          }
+          return const IconThemeData(
+            color: textTertiary,
+            size: 24,
+          );
+        }),
+      ),
+
+      // TabBarテーマ（レトロ看板風）
+      tabBarTheme: TabBarThemeData(
+        indicatorSize: TabBarIndicatorSize.label,
+        indicator: UnderlineTabIndicator(
+          borderSide: const BorderSide(
+            color: primaryRed,
+            width: 3.0,
+          ),
+          borderRadius: BorderRadius.circular(2),
+        ),
+        labelColor: primaryRed,
+        unselectedLabelColor: textTertiary,
+        labelStyle: labelLarge.copyWith(fontWeight: FontWeight.w700),
+        unselectedLabelStyle: labelMedium,
+        dividerColor: Colors.transparent,
+      ),
+
+      // FloatingActionButtonテーマ
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primaryRed,
+        foregroundColor: surfaceWhite,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+
+      // SnackBarテーマ（温かみのあるスタイル）
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: textPrimary,
+        contentTextStyle: bodyMedium.copyWith(color: surfaceWhite),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        behavior: SnackBarBehavior.floating,
+        elevation: 4,
+      ),
+
+      // Dialogテーマ
+      dialogTheme: DialogThemeData(
+        backgroundColor: surfaceWhite,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        elevation: 8,
+        titleTextStyle: headlineSmall,
+      ),
+
+      // BottomSheetテーマ
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: surfaceWhite,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        elevation: 8,
+        showDragHandle: true,
+        dragHandleColor: accentBeige,
+      ),
     );
   }
+
+  // ============================
+  // 昭和レトロモダン追加カラー
+  // ============================
+
+  /// 暖簾の深い藍色
+  static const Color norenIndigo = Color(0xFF2D3A4A);
+
+  /// 古い木のような深いブラウン
+  static const Color woodBrown = Color(0xFF5C4033);
+
+  /// 黄金色（看板のアクセント）
+  static const Color goldenAccent = Color(0xFFD4A24E);
 }

@@ -13,7 +13,7 @@ import '../../widgets/cached_store_image.dart';
 import '../../widgets/api_attribution_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
-/// エリア探索ページ
+/// エリア探索ページ（昭和レトロモダン）
 ///
 /// 都道府県・市区町村の階層選択によるエリア指定検索を提供
 class SearchPage extends StatefulWidget {
@@ -62,17 +62,17 @@ class _SearchPageState extends State<SearchPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DecorativeElements.lanternDecoration(
-                  size: 50, color: AppTheme.primaryRed),
-              const SizedBox(width: 12),
+                  size: 40, color: AppTheme.primaryRed),
+              const SizedBox(width: 10),
               Text(
                 'エリア',
                 style: AppTheme.headlineMedium.copyWith(
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               DecorativeElements.lanternDecoration(
-                  size: 50, color: AppTheme.secondaryYellow),
+                  size: 40, color: AppTheme.secondaryYellow),
             ],
           ),
           flexibleSpace: Container(
@@ -82,11 +82,21 @@ class _SearchPageState extends State<SearchPage> {
           ),
           elevation: 0,
           iconTheme: const IconThemeData(color: AppTheme.primaryRed),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(3),
+            child: DecorativeElements.norenDecoration(
+              height: 3,
+              color: AppTheme.primaryRed,
+            ),
+          ),
         ),
         body: Column(
           children: [
             _buildAreaSelector(),
-            Divider(color: AppTheme.accentBeige.withValues(alpha: 0.5)),
+            DecorativeElements.retroDivider(
+              color: AppTheme.accentBeige,
+              indent: 16,
+            ),
             Expanded(child: _buildSearchResults()),
           ],
         ),
@@ -131,37 +141,41 @@ class _SearchPageState extends State<SearchPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '都道府県を選択',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+          style: AppTheme.labelMedium.copyWith(
             color: AppTheme.textSecondary,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 8),
         InkWell(
-          onTap: () => _showPrefectureDialog(),
+          onTap: () => _showPrefectureBottomSheet(),
+          borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              border: Border.all(color: AppTheme.accentBeige),
-              borderRadius: BorderRadius.circular(8),
+              color: AppTheme.accentCream,
+              border: Border.all(color: AppTheme.accentBeige, width: 1.5),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   selectedPrefecture?.name ?? '選択してください',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: AppTheme.bodyLarge.copyWith(
                     color: selectedPrefecture != null
                         ? AppTheme.textPrimary
-                        : AppTheme.textSecondary,
+                        : AppTheme.textTertiary,
                   ),
                 ),
-                const Icon(Icons.arrow_drop_down,
-                    color: AppTheme.textSecondary),
+                Icon(
+                  Icons.expand_more_rounded,
+                  color: selectedPrefecture != null
+                      ? AppTheme.primaryRed
+                      : AppTheme.textTertiary,
+                ),
               ],
             ),
           ),
@@ -180,47 +194,57 @@ class _SearchPageState extends State<SearchPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           '市区町村を選択（任意）',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+          style: AppTheme.labelMedium.copyWith(
             color: AppTheme.textSecondary,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 8),
         InkWell(
-          onTap: () => _showCityDialog(prefecture),
+          onTap: () => _showCityBottomSheet(prefecture),
+          borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              border: Border.all(color: AppTheme.accentBeige),
-              borderRadius: BorderRadius.circular(8),
+              color: AppTheme.accentCream,
+              border: Border.all(color: AppTheme.accentBeige, width: 1.5),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   selectedCity?.name ?? '全域',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: AppTheme.bodyLarge.copyWith(
                     color: selectedCity != null
                         ? AppTheme.textPrimary
-                        : AppTheme.textSecondary,
+                        : AppTheme.textTertiary,
                   ),
                 ),
                 Row(
                   children: [
                     if (selectedCity != null)
-                      IconButton(
-                        icon: const Icon(Icons.clear, size: 20),
-                        onPressed: () => _areaSearchProvider.clearCity(),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                      GestureDetector(
+                        onTap: () => _areaSearchProvider.clearCity(),
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.textTertiary.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close,
+                              size: 16, color: AppTheme.textSecondary),
+                        ),
                       ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.arrow_drop_down,
-                        color: AppTheme.textSecondary),
+                    Icon(
+                      Icons.expand_more_rounded,
+                      color: selectedCity != null
+                          ? AppTheme.primaryRed
+                          : AppTheme.textTertiary,
+                    ),
                   ],
                 ),
               ],
@@ -236,113 +260,140 @@ class _SearchPageState extends State<SearchPage> {
     final selection = _areaSearchProvider.currentSelection;
     if (selection == null) return const SizedBox.shrink();
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryRed.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.primaryRed.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.location_on, size: 18, color: AppTheme.primaryRed),
-          const SizedBox(width: 4),
-          Text(
-            '${selection.displayName}の中華料理店',
-            style: const TextStyle(
-              color: AppTheme.primaryRed,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+    return DecorativeElements.retroBadge(
+      text: '${selection.displayName}の中華料理店',
+      backgroundColor: AppTheme.primaryRed.withValues(alpha: 0.1),
+      textColor: AppTheme.primaryRed,
+      fontSize: 12,
     );
   }
 
-  void _showPrefectureDialog() {
-    showDialog(
+  void _showPrefectureBottomSheet() {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('都道府県を選択'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 400,
-          child: ListView.builder(
-            itemCount: AreaData.prefecturesByRegion.length,
-            itemBuilder: (context, index) {
-              final region = AreaData.prefecturesByRegion.keys.elementAt(index);
-              final prefectures = AreaData.prefecturesByRegion[region]!;
-
-              return ExpansionTile(
-                title: Text(
-                  region,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.65,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: Text(
+                '都道府県を選択',
+                style: AppTheme.headlineSmall.copyWith(
+                  color: AppTheme.textPrimary,
                 ),
-                initiallyExpanded: region == '関東', // 関東をデフォルトで開く
-                children: prefectures.map((prefecture) {
-                  return ListTile(
-                    title: Text(prefecture.name),
-                    dense: true,
-                    onTap: () {
-                      _areaSearchProvider.selectPrefecture(prefecture);
-                      Navigator.pop(context);
-                    },
+              ),
+            ),
+            DecorativeElements.retroDivider(
+              color: AppTheme.accentBeige,
+              indent: 20,
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: AreaData.prefecturesByRegion.length,
+                itemBuilder: (context, index) {
+                  final region =
+                      AreaData.prefecturesByRegion.keys.elementAt(index);
+                  final prefectures = AreaData.prefecturesByRegion[region]!;
+
+                  return ExpansionTile(
+                    title: Text(
+                      region,
+                      style: AppTheme.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    initiallyExpanded: region == '関東',
+                    iconColor: AppTheme.primaryRed,
+                    collapsedIconColor: AppTheme.textTertiary,
+                    children: prefectures.map((prefecture) {
+                      return ListTile(
+                        title: Text(
+                          prefecture.name,
+                          style: AppTheme.bodyLarge,
+                        ),
+                        dense: true,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 32),
+                        onTap: () {
+                          _areaSearchProvider.selectPrefecture(prefecture);
+                          Navigator.pop(context);
+                        },
+                      );
+                    }).toList(),
                   );
-                }).toList(),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showCityDialog(Prefecture prefecture) {
-    final cities = AreaData.getCitiesForPrefecture(prefecture.code);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('${prefecture.name}の市区町村'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 300,
-          child: ListView(
-            children: [
-              ListTile(
-                title: const Text('全域'),
-                leading: const Icon(Icons.public),
-                dense: true,
-                onTap: () {
-                  _areaSearchProvider.clearCity();
-                  Navigator.pop(context);
                 },
               ),
-              const Divider(),
-              ...cities.map((city) => ListTile(
-                    title: Text(city.name),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCityBottomSheet(Prefecture prefecture) {
+    final cities = AreaData.getCitiesForPrefecture(prefecture.code);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        maxChildSize: 0.8,
+        minChildSize: 0.3,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+              child: Text(
+                '${prefecture.name}の市区町村',
+                style: AppTheme.headlineSmall.copyWith(
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ),
+            DecorativeElements.retroDivider(
+              color: AppTheme.accentBeige,
+              indent: 20,
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  ListTile(
+                    title: Text('全域', style: AppTheme.bodyLarge),
+                    leading:
+                        const Icon(Icons.public, color: AppTheme.primaryRed),
                     dense: true,
                     onTap: () {
-                      _areaSearchProvider.selectCity(city);
+                      _areaSearchProvider.clearCity();
                       Navigator.pop(context);
                     },
-                  )),
-            ],
-          ),
+                  ),
+                  const Divider(color: AppTheme.accentBeige),
+                  ...cities.map((city) => ListTile(
+                        title: Text(city.name, style: AppTheme.bodyLarge),
+                        dense: true,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 24),
+                        onTap: () {
+                          _areaSearchProvider.selectCity(city);
+                          Navigator.pop(context);
+                        },
+                      )),
+                ],
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-        ],
       ),
     );
   }
@@ -366,13 +417,21 @@ class _SearchPageState extends State<SearchPage> {
       ),
       builder: (context, state, child) {
         if (state.isLoading) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('検索中...'),
+                const CircularProgressIndicator(
+                  color: AppTheme.primaryRed,
+                  strokeWidth: 3,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '検索中...',
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
               ],
             ),
           );
@@ -383,14 +442,22 @@ class _SearchPageState extends State<SearchPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const Icon(Icons.error_outline,
+                    size: 64, color: AppTheme.errorRed),
                 const SizedBox(height: 16),
                 Text(
                   'エラーが発生しました',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: AppTheme.headlineSmall.copyWith(
+                    color: AppTheme.errorRed,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Text(state.errorMessage!),
+                Text(
+                  state.errorMessage!,
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
               ],
             ),
           );
@@ -401,32 +468,33 @@ class _SearchPageState extends State<SearchPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  state.hasSearched ? Icons.search_off : Icons.map,
-                  size: 64,
-                  color: Colors.grey,
-                ),
+                state.hasSearched
+                    ? DecorativeElements.gyozaIcon(size: 64)
+                    : DecorativeElements.ramenBowl(size: 64),
                 const SizedBox(height: 16),
                 Text(
                   state.hasSearched ? '検索結果が見つかりません' : 'エリアを選択して検索してください',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  style: AppTheme.titleLarge.copyWith(
+                    color: AppTheme.textPrimary,
                   ),
                 ),
                 if (state.hasSearched) ...[
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     '別のエリアで検索するか、\n検索範囲を広げてみてください',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ] else ...[
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     '出張先や旅行先のエリアを\n選んで中華料理店を探そう',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                 ],
               ],
@@ -443,13 +511,13 @@ class _SearchPageState extends State<SearchPage> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.restaurant, size: 20, color: Colors.grey),
+                    const Icon(Icons.restaurant,
+                        size: 18, color: AppTheme.textTertiary),
                     const SizedBox(width: 8),
                     Text(
                       '${state.selection!.displayName}の中華料理店',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
+                      style: AppTheme.labelMedium.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
                     ),
                     const Spacer(),
@@ -466,19 +534,38 @@ class _SearchPageState extends State<SearchPage> {
                 builder: (context, paginationState, child) {
                   return ListView.builder(
                     controller: _scrollController,
+                    padding: const EdgeInsets.only(bottom: 8),
                     itemCount: state.searchResults.length +
                         (paginationState.hasMoreResults ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index < state.searchResults.length) {
                         final store = state.searchResults[index];
-                        return _buildStoreCard(store);
+                        return TweenAnimationBuilder<double>(
+                          key: ValueKey('search_${store.id}_$index'),
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: Duration(
+                              milliseconds: 300 + (index.clamp(0, 10) * 50)),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: Transform.translate(
+                                offset: Offset(0, 20 * (1 - value)),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: _buildStoreCard(store),
+                        );
                       } else {
-                        // ローディングインジケーター
                         return Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Center(
                             child: paginationState.isLoadingMore
-                                ? const CircularProgressIndicator()
+                                ? const CircularProgressIndicator(
+                                    color: AppTheme.primaryRed,
+                                    strokeWidth: 3,
+                                  )
                                 : const SizedBox.shrink(),
                           ),
                         );
@@ -499,60 +586,15 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _buildStoreCard(Store store) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: SizedBox(
-          width: 56,
-          height: 56,
-          child: CachedStoreImage(
-            imageUrl: store.imageUrl,
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            fit: BoxFit.cover,
-          ),
-        ),
-        title: Text(
-          store.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(store.address),
-            if (store.memo?.isNotEmpty == true) ...[
-              const SizedBox(height: 4),
-              Text(
-                store.memo!,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ],
-        ),
-        trailing: Selector<StoreProvider, List<Store>>(
-          selector: (context, provider) => provider.stores,
-          builder: (context, stores, child) {
-            final existingStore = stores
-                .where(
-                    (s) => s.name == store.name && s.address == store.address)
-                .firstOrNull;
-
-            if (existingStore != null) {
-              return Icon(
-                _getStatusIcon(existingStore.status),
-                color: _getStatusColor(existingStore.status),
-              );
-            }
-
-            return IconButton(
-              icon: const Icon(Icons.favorite_border),
-              onPressed: () => _addToWantToGo(store),
-            );
-          },
-        ),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: AppTheme.accentBeige, width: 1),
+      ),
+      color: AppTheme.surfaceWhite,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
         onTap: () {
           Navigator.push(
             context,
@@ -561,6 +603,113 @@ class _SearchPageState extends State<SearchPage> {
             ),
           );
         },
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              // 店舗画像（大きめ、角丸）
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: CachedStoreImage(
+                    imageUrl: store.imageUrl,
+                    width: 72,
+                    height: 72,
+                    borderRadius: 10,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // 店舗情報
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      store.name,
+                      style: AppTheme.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 14,
+                          color: AppTheme.textTertiary,
+                        ),
+                        const SizedBox(width: 2),
+                        Expanded(
+                          child: Text(
+                            store.address,
+                            style: AppTheme.bodySmall.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (store.memo?.isNotEmpty == true) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        store.memo!,
+                        style: AppTheme.bodySmall.copyWith(
+                          color: AppTheme.primaryRed,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // ステータスアイコン
+              Selector<StoreProvider, List<Store>>(
+                selector: (context, provider) => provider.stores,
+                builder: (context, stores, child) {
+                  final existingStore = stores
+                      .where((s) =>
+                          s.name == store.name && s.address == store.address)
+                      .firstOrNull;
+
+                  if (existingStore != null) {
+                    return Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(existingStore.status)
+                            .withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getStatusIcon(existingStore.status),
+                        color: _getStatusColor(existingStore.status),
+                        size: 20,
+                      ),
+                    );
+                  }
+
+                  return IconButton(
+                    icon: const Icon(
+                      Icons.favorite_border_rounded,
+                      color: AppTheme.textTertiary,
+                    ),
+                    onPressed: () => _addToWantToGo(store),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -604,16 +753,15 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Color _getStatusColor(StoreStatus? status) {
-    final colorScheme = Theme.of(context).colorScheme;
     switch (status) {
       case StoreStatus.wantToGo:
-        return Colors.red;
+        return AppTheme.primaryRed;
       case StoreStatus.visited:
-        return Colors.green;
+        return AppTheme.successGreen;
       case StoreStatus.bad:
-        return Colors.orange;
+        return AppTheme.warningOrange;
       default:
-        return colorScheme.onSurfaceVariant;
+        return AppTheme.textTertiary;
     }
   }
 

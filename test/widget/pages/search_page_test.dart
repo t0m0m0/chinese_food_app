@@ -138,12 +138,12 @@ void main() {
       await tester.tap(find.text('選択してください'));
       await tester.pumpAndSettle();
 
-      // then: 都道府県選択ダイアログが表示される
-      expect(find.text('都道府県を選択'), findsNWidgets(2)); // 1つはUIラベル、1つはダイアログタイトル
+      // then: 都道府県選択ボトムシートが表示される
+      expect(find.text('都道府県を選択'), findsNWidgets(2)); // 1つはUIラベル、1つはシートタイトル
       // 関東はinitiallyExpanded: trueなので直接見える
       expect(find.text('関東'), findsOneWidget);
-      // ダイアログが開いていることを確認（AlertDialogの存在）
-      expect(find.byType(AlertDialog), findsOneWidget);
+      // ボトムシートが開いていることを確認
+      expect(find.byType(BottomSheet), findsOneWidget);
     });
 
     testWidgets('should select prefecture from dialog', (tester) async {
