@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../core/services/photo_service.dart';
+import '../../core/theme/app_theme.dart';
 
 /// 写真選択方法を選択するダイアログ
 class PhotoSelectionDialog extends StatelessWidget {
@@ -81,7 +82,7 @@ class PhotoSelectionDialog extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('カメラでの撮影に失敗しました: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorRed,
           ),
         );
         Navigator.of(context).pop();
@@ -101,7 +102,7 @@ class PhotoSelectionDialog extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('ギャラリーからの選択に失敗しました: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorRed,
           ),
         );
         Navigator.of(context).pop();

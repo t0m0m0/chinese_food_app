@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/config/search_config.dart';
+import '../../core/theme/app_theme.dart';
 
 /// 距離選択ウィジェット
 ///
@@ -136,7 +137,12 @@ class _DistanceSelectorWidgetState extends State<DistanceSelectorWidget>
       builder: (context, child) {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          elevation: 2.0 * _sliderAnimation.value,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: AppTheme.accentBeige, width: 1),
+          ),
+          color: AppTheme.surfaceWhite,
           child: InkWell(
             onTap: _toggleExpansion,
             borderRadius: BorderRadius.circular(12),

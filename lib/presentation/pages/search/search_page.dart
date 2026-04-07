@@ -4,12 +4,14 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/utils/duplicate_store_checker.dart';
+import '../../../core/utils/store_utils.dart';
 import '../../../core/constants/area_data.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/entities/area.dart';
 import '../../providers/store_provider.dart';
 import '../../providers/area_search_provider.dart';
 import '../../widgets/cached_store_image.dart';
+import '../../widgets/common_states.dart';
 import '../../widgets/api_attribution_widget.dart';
 import '../store_detail/store_detail_page.dart';
 
@@ -61,8 +63,7 @@ class _SearchPageState extends State<SearchPage> {
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              DecorativeElements.lanternDecoration(
-                  size: 40, color: AppTheme.primaryRed),
+              DecorativeElements.lanternIcon(size: 28),
               const SizedBox(width: 10),
               Text(
                 'エリア',
@@ -71,8 +72,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
               const SizedBox(width: 10),
-              DecorativeElements.lanternDecoration(
-                  size: 40, color: AppTheme.secondaryYellow),
+              DecorativeElements.ramenBowl(size: 28),
             ],
           ),
           flexibleSpace: Container(
@@ -417,88 +417,22 @@ class _SearchPageState extends State<SearchPage> {
       ),
       builder: (context, state, child) {
         if (state.isLoading) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(
-                  color: AppTheme.primaryRed,
-                  strokeWidth: 3,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '検索中...',
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          );
+          return const AppLoadingState(message: '検索中...');
         }
 
         if (state.errorMessage != null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline,
-                    size: 64, color: AppTheme.errorRed),
-                const SizedBox(height: 16),
-                Text(
-                  'エラーが発生しました',
-                  style: AppTheme.headlineSmall.copyWith(
-                    color: AppTheme.errorRed,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  state.errorMessage!,
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          );
+          return AppErrorState(message: state.errorMessage);
         }
 
         if (state.searchResults.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                state.hasSearched
-                    ? DecorativeElements.gyozaIcon(size: 64)
-                    : DecorativeElements.ramenBowl(size: 64),
-                const SizedBox(height: 16),
-                Text(
-                  state.hasSearched ? '検索結果が見つかりません' : 'エリアを選択して検索してください',
-                  style: AppTheme.titleLarge.copyWith(
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                if (state.hasSearched) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    '別のエリアで検索するか、\n検索範囲を広げてみてください',
-                    textAlign: TextAlign.center,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                ] else ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    '出張先や旅行先のエリアを\n選んで中華料理店を探そう',
-                    textAlign: TextAlign.center,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                ],
-              ],
-            ),
+          return AppEmptyState(
+            message: state.hasSearched ? '検索結果が見つかりません' : 'エリアを選択して検索してください',
+            subMessage: state.hasSearched
+                ? '別のエリアで検索するか、\n検索範囲を広げてみてください'
+                : '出張先や旅行先のエリアを\n選んで中華料理店を探そう',
+            icon: state.hasSearched
+                ? DecorativeElements.gyozaIcon(size: 64)
+                : DecorativeElements.ramenBowl(size: 64),
           );
         }
 
@@ -686,13 +620,13 @@ class _SearchPageState extends State<SearchPage> {
                     return Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(existingStore.status)
+                        color: StoreUtils.getStatusColor(existingStore.status)
                             .withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        _getStatusIcon(existingStore.status),
-                        color: _getStatusColor(existingStore.status),
+                        StoreUtils.getStatusIcon(existingStore.status),
+                        color: StoreUtils.getStatusColor(existingStore.status),
                         size: 20,
                       ),
                     );
@@ -727,7 +661,7 @@ class _SearchPageState extends State<SearchPage> {
           SnackBar(
             content: Text(
                 ErrorMessageHelper.getStoreRelatedMessage('duplicate_store')),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppTheme.warningOrange,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -744,37 +678,11 @@ class _SearchPageState extends State<SearchPage> {
           SnackBar(
             content:
                 Text(ErrorMessageHelper.getStoreRelatedMessage('add_store')),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorRed,
             duration: const Duration(seconds: 3),
           ),
         );
       }
-    }
-  }
-
-  Color _getStatusColor(StoreStatus? status) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return AppTheme.primaryRed;
-      case StoreStatus.visited:
-        return AppTheme.successGreen;
-      case StoreStatus.bad:
-        return AppTheme.warningOrange;
-      default:
-        return AppTheme.textTertiary;
-    }
-  }
-
-  IconData _getStatusIcon(StoreStatus? status) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return Icons.favorite;
-      case StoreStatus.visited:
-        return Icons.check_circle;
-      case StoreStatus.bad:
-        return Icons.block;
-      default:
-        return Icons.restaurant;
     }
   }
 }

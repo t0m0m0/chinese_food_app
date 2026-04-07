@@ -41,8 +41,8 @@ class SwipeActionButtons extends StatelessWidget {
               child: _RetroActionButton(
                 onPressed: enabled ? _handleDislike : null,
                 icon: Icons.block,
-                color: Colors.orange.shade700,
-                lightColor: Colors.orange.shade100,
+                color: AppTheme.warningOrange,
+                lightColor: AppTheme.warningOrange.withValues(alpha: 0.3),
                 enabled: enabled,
                 heroTag: 'dislike_button',
               ),

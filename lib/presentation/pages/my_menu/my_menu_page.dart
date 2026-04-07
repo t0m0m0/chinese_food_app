@@ -4,10 +4,12 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
+import '../../../core/utils/store_utils.dart';
 import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/usecases/get_visit_records_by_store_id_usecase.dart';
 import '../../providers/store_provider.dart';
+import '../../widgets/common_states.dart';
 import '../store_detail/store_detail_page.dart';
 
 class MyMenuPage extends StatefulWidget {
@@ -164,52 +166,16 @@ class _MyMenuPageState extends State<MyMenuPage>
     ColorScheme colorScheme,
   ) {
     if (provider.isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('店舗データを読み込み中...'),
-          ],
-        ),
-      );
+      return const AppLoadingState(message: '店舗データを読み込み中...');
     }
 
     if (provider.error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'エラーが発生しました',
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              provider.error!,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Provider.of<StoreProvider>(context, listen: false).clearError();
-                Provider.of<StoreProvider>(context, listen: false)
-                    .refreshCache();
-              },
-              child: const Text('再試行'),
-            ),
-          ],
-        ),
+      return AppErrorState(
+        message: provider.error,
+        onRetry: () {
+          Provider.of<StoreProvider>(context, listen: false).clearError();
+          Provider.of<StoreProvider>(context, listen: false).refreshCache();
+        },
       );
     }
 
@@ -256,32 +222,10 @@ class _MyMenuPageState extends State<MyMenuPage>
     required ColorScheme colorScheme,
   }) {
     if (stores.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              emptyIcon,
-              size: 64,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              emptyMessage,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              emptySubMessage,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+      return AppEmptyState(
+        message: emptyMessage,
+        subMessage: emptySubMessage,
+        icon: DecorativeElements.gyozaIcon(size: 64),
       );
     }
 
@@ -312,7 +256,7 @@ class _MyMenuPageState extends State<MyMenuPage>
 
   Widget _buildStoreCard(
       Store store, ThemeData theme, ColorScheme colorScheme) {
-    final statusColor = _getStatusColor(store.status, colorScheme);
+    final statusColor = StoreUtils.getStatusColor(store.status, colorScheme);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -362,7 +306,7 @@ class _MyMenuPageState extends State<MyMenuPage>
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              _getStatusIcon(store.status),
+                              StoreUtils.getStatusIcon(store.status),
                               color: statusColor,
                               size: 22,
                             ),
@@ -517,47 +461,21 @@ class _MyMenuPageState extends State<MyMenuPage>
     );
   }
 
-  Color _getStatusColor(StoreStatus? status, ColorScheme colorScheme) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return Colors.red;
-      case StoreStatus.visited:
-        return Colors.green;
-      case StoreStatus.bad:
-        return Colors.orange;
-      default:
-        return colorScheme.onSurfaceVariant;
-    }
-  }
-
-  IconData _getStatusIcon(StoreStatus? status) {
-    switch (status) {
-      case StoreStatus.wantToGo:
-        return Icons.favorite;
-      case StoreStatus.visited:
-        return Icons.check_circle;
-      case StoreStatus.bad:
-        return Icons.block;
-      default:
-        return Icons.restaurant;
-    }
-  }
-
   String _formatDate(DateTime date) {
-    return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+    return StoreUtils.formatDate(date);
   }
 
   /// 現在選択されているタブに応じたインジケーター色を返す
   Color _getTabIndicatorColor() {
     switch (_tabController.index) {
-      case 0: // 行きたい
-        return Colors.red;
-      case 1: // 行った
-        return Colors.green;
-      case 2: // 興味なし
-        return Colors.orange;
+      case 0:
+        return AppTheme.statusWantToGo;
+      case 1:
+        return AppTheme.statusVisited;
+      case 2:
+        return AppTheme.statusBad;
       default:
-        return Colors.red;
+        return AppTheme.statusWantToGo;
     }
   }
 
@@ -589,7 +507,7 @@ class _MyMenuPageState extends State<MyMenuPage>
           SnackBar(
             content: Text(
                 ErrorMessageHelper.getStoreRelatedMessage('update_status')),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorRed,
             duration: const Duration(seconds: 3),
           ),
         );

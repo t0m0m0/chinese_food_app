@@ -109,7 +109,7 @@ class SwipeCardWidget extends StatelessWidget {
                         top: 0,
                         left: 0,
                         child: DecorativeElements.cornerDecorationTopLeft(
-                          size: 30,
+                          size: 36,
                           color: AppTheme.primaryRed,
                         ),
                       ),
@@ -118,7 +118,7 @@ class SwipeCardWidget extends StatelessWidget {
                         top: 0,
                         right: 0,
                         child: DecorativeElements.cornerDecorationTopRight(
-                          size: 24,
+                          size: 28,
                           color: AppTheme.goldenAccent,
                         ),
                       ),

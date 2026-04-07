@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// UI関連の設定を管理するクラス
 class UiConfig {
   /// アプリ情報 - ASO最適化対応
@@ -30,11 +28,10 @@ class UiConfig {
   static const double buttonBorderRadius = 8.0;
   static const double iconButtonSize = 24.0;
 
-  /// フォント設定
-  static const double titleFontSize = 24.0;
-  static const double subtitleFontSize = 18.0;
-  static const double bodyFontSize = 16.0;
-  static const double captionFontSize = 14.0;
+  /// カード角丸設定（用途別）
+  static const double listCardBorderRadius = 16.0;
+  static const double swipeCardBorderRadius = 20.0;
+  static const double detailCardBorderRadius = 16.0;
 
   /// アイコン設定
   static const double defaultIconSize = 24.0;
@@ -65,18 +62,6 @@ class UiConfig {
     'filterShow': 'フィルターを表示',
     'filterHide': 'フィルターを隠す',
   };
-
-  /// 色設定
-  static const Color primaryColor = Color(0xFF2196F3);
-  static const Color secondaryColor = Color(0xFFFF9800);
-  static const Color errorColor = Color(0xFFFF5722);
-  static const Color successColor = Color(0xFF4CAF50);
-  static const Color warningColor = Color(0xFFFF9800);
-  static const Color backgroundColor = Color(0xFFF5F5F5);
-  static const Color cardBackgroundColor = Colors.white;
-  static const Color textColor = Color(0xFF333333);
-  static const Color subtitleColor = Color(0xFF666666);
-  static const Color dividerColor = Color(0xFFE0E0E0);
 
   /// 設定値の妥当性チェック
   static bool isValidPadding(double padding) {
@@ -144,10 +129,9 @@ class UiConfig {
       'buttonHeight': buttonHeight,
       'buttonBorderRadius': buttonBorderRadius,
       'iconButtonSize': iconButtonSize,
-      'titleFontSize': titleFontSize,
-      'subtitleFontSize': subtitleFontSize,
-      'bodyFontSize': bodyFontSize,
-      'captionFontSize': captionFontSize,
+      'listCardBorderRadius': listCardBorderRadius,
+      'swipeCardBorderRadius': swipeCardBorderRadius,
+      'detailCardBorderRadius': detailCardBorderRadius,
       'defaultIconSize': defaultIconSize,
       'smallIconSize': smallIconSize,
       'largeIconSize': largeIconSize,
@@ -160,16 +144,6 @@ class UiConfig {
       'swipeThreshold': swipeThreshold,
       'swipeVelocityThreshold': swipeVelocityThreshold,
       'mapZoom': mapZoom,
-      'primaryColor': primaryColor.toString(),
-      'secondaryColor': secondaryColor.toString(),
-      'errorColor': errorColor.toString(),
-      'successColor': successColor.toString(),
-      'warningColor': warningColor.toString(),
-      'backgroundColor': backgroundColor.toString(),
-      'cardBackgroundColor': cardBackgroundColor.toString(),
-      'textColor': textColor.toString(),
-      'subtitleColor': subtitleColor.toString(),
-      'dividerColor': dividerColor.toString(),
       'searchFilterLabels': searchFilterLabels,
     };
   }

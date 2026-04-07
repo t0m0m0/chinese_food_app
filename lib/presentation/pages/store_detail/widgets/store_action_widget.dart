@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../domain/entities/store.dart';
 
 class StoreActionWidget extends StatelessWidget {
@@ -32,9 +33,12 @@ class StoreActionWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Card(
-          elevation: 2,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: AppTheme.accentBeige, width: 1),
+          ),
+          color: AppTheme.surfaceWhite,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -55,7 +59,7 @@ class StoreActionWidget extends StatelessWidget {
                         '行きたい',
                         Icons.favorite,
                         StoreStatus.wantToGo,
-                        Colors.red,
+                        AppTheme.statusWantToGo,
                         theme,
                         colorScheme,
                       ),
@@ -67,7 +71,7 @@ class StoreActionWidget extends StatelessWidget {
                         '行った',
                         Icons.check_circle,
                         StoreStatus.visited,
-                        Colors.green,
+                        AppTheme.statusVisited,
                         theme,
                         colorScheme,
                       ),
@@ -79,7 +83,7 @@ class StoreActionWidget extends StatelessWidget {
                         '興味なし',
                         Icons.block,
                         StoreStatus.bad,
-                        Colors.orange,
+                        AppTheme.statusBad,
                         theme,
                         colorScheme,
                       ),

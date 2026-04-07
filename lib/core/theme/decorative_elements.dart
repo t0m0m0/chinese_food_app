@@ -156,11 +156,24 @@ class DecorativeElements {
       height: size,
       child: Center(
         child: Text(
-          '🀄️',
-          style: AppTheme.headlineSmall.copyWith(
-            fontWeight: FontWeight.w900,
-            fontSize: size * 0.4,
-          ),
+          '🏮',
+          style: TextStyle(fontSize: size * 0.4),
+        ),
+      ),
+    );
+  }
+
+  /// 提灯アイコン（赤提灯）
+  static Widget lanternIcon({
+    double size = 40,
+  }) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Center(
+        child: Text(
+          '🏮',
+          style: TextStyle(fontSize: size * 0.8),
         ),
       ),
     );
@@ -592,6 +605,16 @@ class _ChineseCornerPainter extends CustomPainter {
         break;
 
       case Corner.bottomLeft:
+        path.moveTo(0, size.height * 0.7);
+        path.lineTo(0, size.height);
+        path.lineTo(size.width * 0.3, size.height);
+
+        path.moveTo(size.width * 0.1, size.height * 0.9);
+        path.lineTo(size.width * 0.1, size.height * 0.8);
+        path.moveTo(size.width * 0.1, size.height * 0.9);
+        path.lineTo(size.width * 0.2, size.height * 0.9);
+        break;
+
       case Corner.bottomRight:
         break;
     }

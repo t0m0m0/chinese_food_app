@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:chinese_food_app/core/theme/app_theme.dart';
 import 'package:chinese_food_app/core/utils/store_utils.dart';
 import 'package:chinese_food_app/domain/entities/store.dart';
 
@@ -21,7 +22,7 @@ void main() {
             StoreUtils.getStatusColor(StoreStatus.wantToGo, colorScheme);
 
         // Assert
-        expect(result, Colors.red);
+        expect(result, AppTheme.statusWantToGo);
       });
 
       test('should return green color for visited status', () {
@@ -30,7 +31,7 @@ void main() {
             StoreUtils.getStatusColor(StoreStatus.visited, colorScheme);
 
         // Assert
-        expect(result, Colors.green);
+        expect(result, AppTheme.statusVisited);
       });
 
       test('should return orange color for bad status', () {
@@ -38,7 +39,7 @@ void main() {
         final result = StoreUtils.getStatusColor(StoreStatus.bad, colorScheme);
 
         // Assert
-        expect(result, Colors.orange);
+        expect(result, AppTheme.statusBad);
       });
 
       test('should return onSurfaceVariant color for null status', () {
