@@ -42,8 +42,8 @@ void main() {
     // 1フレーム進めてUIを描画
     await tester.pump();
 
-    // BottomNavigationBarが表示されることを確認
-    expect(find.byType(BottomNavigationBar), findsOneWidget);
+    // NavigationBarが表示されることを確認
+    expect(find.byType(NavigationBar), findsOneWidget);
 
     // 基本的なUI要素の存在を確認（重複があっても可）
     expect(find.text('見つける'), findsWidgets);
@@ -121,7 +121,7 @@ void main() {
     await tester.pump();
 
     // 基本的なUIが表示されることを確認
-    expect(find.byType(BottomNavigationBar), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 }
 

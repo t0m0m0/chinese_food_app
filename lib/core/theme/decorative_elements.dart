@@ -179,6 +179,163 @@ class DecorativeElements {
   }
 
   // ============================
+  // 昭和レトロモダン装飾
+  // ============================
+
+  /// 暖簾（のれん）モチーフのヘッダー装飾
+  static Widget norenDecoration({
+    double height = 6,
+    Color color = AppTheme.primaryRed,
+  }) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.0),
+            color.withValues(alpha: 0.7),
+            color,
+            color.withValues(alpha: 0.7),
+            color.withValues(alpha: 0.0),
+          ],
+          stops: const [0.0, 0.15, 0.5, 0.85, 1.0],
+        ),
+      ),
+    );
+  }
+
+  /// レトロ風の区切り線（中央に小さな菱形装飾付き）
+  static Widget retroDivider({
+    Color color = AppTheme.accentBeige,
+    double thickness = 1,
+    double indent = 24,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: indent),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(height: thickness, color: color),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Transform.rotate(
+              angle: 0.785, // 45 degrees
+              child: Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(height: thickness, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 提灯の光のようなRadialGradientウィジェット
+  static Widget lanternGlow({
+    double size = 200,
+    Color color = AppTheme.primaryRed,
+    double opacity = 0.08,
+  }) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            color.withValues(alpha: opacity),
+            color.withValues(alpha: opacity * 0.5),
+            color.withValues(alpha: 0),
+          ],
+          stops: const [0.0, 0.5, 1.0],
+        ),
+      ),
+    );
+  }
+
+  /// 微細なノイズテクスチャオーバーレイ
+  static Widget grainOverlay({
+    required Widget child,
+    double opacity = 0.03,
+  }) {
+    return Stack(
+      children: [
+        child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _GrainPainter(opacity: opacity),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// レトロ風バッジ（ステータス表示用）
+  static Widget retroBadge({
+    required String text,
+    Color backgroundColor = AppTheme.primaryRed,
+    Color textColor = AppTheme.surfaceWhite,
+    double fontSize = 11,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: backgroundColor == AppTheme.surfaceWhite
+              ? AppTheme.accentBeige
+              : backgroundColor.withValues(alpha: 0.8),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: backgroundColor.withValues(alpha: 0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        text,
+        style: AppTheme.labelSmall.copyWith(
+          color: textColor,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  /// ステータスカラー付きの左アクセントバー
+  static Widget statusAccentBar({
+    required Color color,
+    double width = 4,
+    double height = double.infinity,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  // ============================
   // コーナー装飾
   // ============================
 
@@ -351,6 +508,37 @@ class _SteamPainter extends CustomPainter {
     }
 
     canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// 微細なノイズテクスチャ（グレイン効果）
+class _GrainPainter extends CustomPainter {
+  final double opacity;
+
+  _GrainPainter({required this.opacity});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppTheme.textPrimary.withValues(alpha: opacity)
+      ..style = PaintingStyle.fill;
+
+    // 疑似ランダムなドットパターンで紙のようなテクスチャを表現
+    const step = 6.0;
+    // Golden ratio based pseudo-random for deterministic grain
+    const phi = 1.618033988749895;
+    var seed = 0.5;
+    for (double x = 0; x < size.width; x += step) {
+      for (double y = 0; y < size.height; y += step) {
+        seed = (seed * phi) % 1.0;
+        if (seed > 0.65) {
+          canvas.drawCircle(Offset(x, y), 0.5, paint);
+        }
+      }
+    }
   }
 
   @override

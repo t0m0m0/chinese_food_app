@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../core/theme/app_theme.dart';
 
-/// スワイプ操作を補完する手動操作ボタン
+/// スワイプ操作を補完する手動操作ボタン（昭和レトロモダン）
 ///
-/// 「行きたい」「興味なし」の2つのFloatingActionButtonを提供し、
+/// 「行きたい」「興味なし」の2つのアクションボタンを提供し、
 /// スワイプが難しい場合やより確実な操作が必要な場合に使用します。
 ///
 /// ## パフォーマンス最適化
@@ -26,12 +27,9 @@ class SwipeActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return RepaintBoundary(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // 「興味なし」ボタン（左スワイプと同等の機能）
           RepaintBoundary(
@@ -40,27 +38,35 @@ class SwipeActionButtons extends StatelessWidget {
               hint: '左スワイプと同じ効果。興味がない店舗として記録されます',
               button: true,
               excludeSemantics: !enabled,
-              child: FloatingActionButton(
+              child: _RetroActionButton(
                 onPressed: enabled ? _handleDislike : null,
-                // Material Design 3準拠のカラーテーマ - オレンジ色を使用
-                backgroundColor: enabled
-                    ? Colors.orange.shade100
-                    : colorScheme.surfaceContainerHighest,
-                foregroundColor: enabled
-                    ? Colors.orange.shade700
-                    : colorScheme.onSurfaceVariant,
-                // Hero animation競合回避のための一意タグ
+                icon: Icons.block,
+                color: Colors.orange.shade700,
+                lightColor: Colors.orange.shade100,
+                enabled: enabled,
                 heroTag: 'dislike_button',
-                // 有効/無効状態による視覚的フィードバック
-                elevation: enabled ? 6 : 2,
-                child: const Icon(
-                  Icons.block,
-                  size: 28,
-                ),
               ),
             ),
           ),
-
+          const SizedBox(width: 24),
+          // 中央のレストランアイコン装飾
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.accentCream,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppTheme.accentBeige,
+                width: 1.5,
+              ),
+            ),
+            child: Icon(
+              Icons.restaurant,
+              size: 18,
+              color: enabled ? AppTheme.textSecondary : AppTheme.textTertiary,
+            ),
+          ),
+          const SizedBox(width: 24),
           // 「行きたい」ボタン（右スワイプと同等の機能）
           RepaintBoundary(
             child: Semantics(
@@ -68,23 +74,14 @@ class SwipeActionButtons extends StatelessWidget {
               hint: '右スワイプと同じ効果。行きたい店舗として記録されます',
               button: true,
               excludeSemantics: !enabled,
-              child: FloatingActionButton(
+              child: _RetroActionButton(
                 onPressed: enabled ? _handleLike : null,
-                // Material Design 3準拠のカラーテーマ - 赤色を使用
-                backgroundColor: enabled
-                    ? Colors.red.shade100
-                    : colorScheme.surfaceContainerHighest,
-                foregroundColor: enabled
-                    ? Colors.red.shade700
-                    : colorScheme.onSurfaceVariant,
-                // Hero animation競合回避のための一意タグ
+                icon: Icons.favorite,
+                color: AppTheme.primaryRed,
+                lightColor: AppTheme.primaryRedLight,
+                enabled: enabled,
                 heroTag: 'like_button',
-                // 有効/無効状態による視覚的フィードバック
-                elevation: enabled ? 6 : 2,
-                child: const Icon(
-                  Icons.favorite,
-                  size: 28,
-                ),
+                showGlow: true,
               ),
             ),
           ),
@@ -93,7 +90,6 @@ class SwipeActionButtons extends StatelessWidget {
     );
   }
 
-  /// 「興味なし」ボタンのハンドラー（ハプティックフィードバック付き）
   void _handleDislike() {
     if (enableHapticFeedback) {
       HapticFeedback.lightImpact();
@@ -101,11 +97,73 @@ class SwipeActionButtons extends StatelessWidget {
     onDislike();
   }
 
-  /// 「行きたい」ボタンのハンドラー（ハプティックフィードバック付き）
   void _handleLike() {
     if (enableHapticFeedback) {
       HapticFeedback.lightImpact();
     }
     onLike();
+  }
+}
+
+/// レトロ風アクションボタン（提灯グロー効果付き）
+class _RetroActionButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final Color color;
+  final Color lightColor;
+  final bool enabled;
+  final String heroTag;
+  final bool showGlow;
+
+  const _RetroActionButton({
+    required this.onPressed,
+    required this.icon,
+    required this.color,
+    required this.lightColor,
+    required this.enabled,
+    required this.heroTag,
+    this.showGlow = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: enabled && showGlow
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.3),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                ),
+              ]
+            : null,
+      ),
+      child: SizedBox(
+        width: 68,
+        height: 68,
+        child: FloatingActionButton(
+          onPressed: onPressed,
+          heroTag: heroTag,
+          elevation: enabled ? 4 : 1,
+          backgroundColor: enabled
+              ? lightColor.withValues(alpha: 0.2)
+              : colorScheme.surfaceContainerHighest,
+          foregroundColor: enabled ? color : colorScheme.onSurfaceVariant,
+          shape: CircleBorder(
+            side: BorderSide(
+              color: enabled
+                  ? color.withValues(alpha: 0.4)
+                  : colorScheme.outlineVariant,
+              width: 2,
+            ),
+          ),
+          child: Icon(icon, size: 30),
+        ),
+      ),
+    );
   }
 }

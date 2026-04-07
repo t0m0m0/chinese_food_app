@@ -332,7 +332,7 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest());
 
       // ポップアップメニューを開く
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byIcon(Icons.more_horiz_rounded));
       await tester.pumpAndSettle();
 
       // ポップアップメニュー内の「行った」を選択

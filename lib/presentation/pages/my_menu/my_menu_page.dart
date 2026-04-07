@@ -94,16 +94,16 @@ class _MyMenuPageState extends State<MyMenuPage>
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                DecorativeElements.ramenBowl(size: 30),
-                const SizedBox(width: 12),
+                DecorativeElements.ramenBowl(size: 28),
+                const SizedBox(width: 10),
                 Text(
                   'マイメニュー',
                   style: AppTheme.headlineMedium.copyWith(
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 12),
-                DecorativeElements.gyozaIcon(size: 30),
+                const SizedBox(width: 10),
+                DecorativeElements.gyozaIcon(size: 28),
               ],
             ),
             centerTitle: true,
@@ -113,30 +113,42 @@ class _MyMenuPageState extends State<MyMenuPage>
               ),
             ),
             elevation: 0,
-            bottom: TabBar(
-              controller: _tabController,
-              indicatorColor: _getTabIndicatorColor(),
-              indicatorWeight: 3,
-              labelColor: _getTabIndicatorColor(),
-              unselectedLabelColor: AppTheme.textTertiary,
-              labelStyle: AppTheme.labelLarge.copyWith(
-                fontWeight: FontWeight.w700,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(55),
+              child: Column(
+                children: [
+                  DecorativeElements.norenDecoration(
+                    height: 3,
+                    color: AppTheme.primaryRed,
+                  ),
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: _getTabIndicatorColor(),
+                    indicatorWeight: 3,
+                    labelColor: _getTabIndicatorColor(),
+                    unselectedLabelColor: AppTheme.textTertiary,
+                    labelStyle: AppTheme.labelLarge.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                    unselectedLabelStyle: AppTheme.labelMedium,
+                    dividerColor: Colors.transparent,
+                    tabs: [
+                      Tab(
+                        icon: const Icon(Icons.favorite_rounded, size: 20),
+                        text: '行きたい (${provider.wantToGoStores.length})',
+                      ),
+                      Tab(
+                        icon: const Icon(Icons.check_circle_rounded, size: 20),
+                        text: '行った (${provider.visitedStores.length})',
+                      ),
+                      Tab(
+                        icon: const Icon(Icons.block_rounded, size: 20),
+                        text: '興味なし (${provider.badStores.length})',
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              unselectedLabelStyle: AppTheme.labelMedium,
-              tabs: [
-                Tab(
-                  icon: const Icon(Icons.favorite_rounded),
-                  text: '行きたい (${provider.wantToGoStores.length})',
-                ),
-                Tab(
-                  icon: const Icon(Icons.check_circle_rounded),
-                  text: '行った (${provider.visitedStores.length})',
-                ),
-                Tab(
-                  icon: const Icon(Icons.block_rounded),
-                  text: '興味なし (${provider.badStores.length})',
-                ),
-              ],
             ),
           ),
           body: _buildBody(context, provider, theme, colorScheme),
@@ -278,21 +290,40 @@ class _MyMenuPageState extends State<MyMenuPage>
       itemCount: stores.length,
       itemBuilder: (context, index) {
         final store = stores[index];
-        return _buildStoreCard(store, theme, colorScheme);
+        return TweenAnimationBuilder<double>(
+          key: ValueKey('menu_${store.id}_$index'),
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: Duration(milliseconds: 300 + (index.clamp(0, 10) * 50)),
+          curve: Curves.easeOutCubic,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Transform.translate(
+                offset: Offset(0, 20 * (1 - value)),
+                child: child,
+              ),
+            );
+          },
+          child: _buildStoreCard(store, theme, colorScheme),
+        );
       },
     );
   }
 
   Widget _buildStoreCard(
       Store store, ThemeData theme, ColorScheme colorScheme) {
+    final statusColor = _getStatusColor(store.status, colorScheme);
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: AppTheme.accentBeige, width: 1),
       ),
+      color: AppTheme.surfaceWhite,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         onTap: () {
           Navigator.push(
             context,
@@ -301,163 +332,183 @@ class _MyMenuPageState extends State<MyMenuPage>
             ),
           );
         },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: IntrinsicHeight(
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(store.status, colorScheme)
-                          .withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _getStatusIcon(store.status),
-                      color: _getStatusColor(store.status, colorScheme),
-                      size: 24,
-                    ),
+              // 左端のステータスカラーアクセントバー
+              Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(14),
+                    bottomLeft: Radius.circular(14),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          store.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                ),
+              ),
+              // メインコンテンツ
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: statusColor.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _getStatusIcon(store.status),
+                              color: statusColor,
+                              size: 22,
+                            ),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 16,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                store.address,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  store.name,
+                                  style: AppTheme.titleMedium.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        // 訪問済み店舗の場合、訪問回数を表示
-                        if (store.status == StoreStatus.visited) ...[
-                          const SizedBox(height: 4),
-                          FutureBuilder<int>(
-                            future: _getVisitCount(store.id),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData && snapshot.data! > 0) {
-                                return Row(
+                                const SizedBox(height: 4),
+                                Row(
                                   children: [
-                                    Icon(
-                                      Icons.event,
-                                      size: 16,
-                                      color: colorScheme.primary,
+                                    const Icon(
+                                      Icons.location_on_outlined,
+                                      size: 14,
+                                      color: AppTheme.textTertiary,
                                     ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${snapshot.data}回訪問',
-                                      style:
-                                          theme.textTheme.bodySmall?.copyWith(
-                                        color: colorScheme.primary,
-                                        fontWeight: FontWeight.bold,
+                                    const SizedBox(width: 3),
+                                    Expanded(
+                                      child: Text(
+                                        store.address,
+                                        style: AppTheme.bodySmall.copyWith(
+                                          color: AppTheme.textSecondary,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
                                   ],
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
+                                ),
+                                // 訪問済み店舗の場合、訪問回数を表示
+                                if (store.status == StoreStatus.visited) ...[
+                                  const SizedBox(height: 4),
+                                  FutureBuilder<int>(
+                                    future: _getVisitCount(store.id),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData &&
+                                          snapshot.data! > 0) {
+                                        return DecorativeElements.retroBadge(
+                                          text: '${snapshot.data}回訪問',
+                                          backgroundColor: AppTheme.successGreen
+                                              .withValues(alpha: 0.1),
+                                          textColor: AppTheme.successGreen,
+                                          fontSize: 10,
+                                        );
+                                      }
+                                      return const SizedBox.shrink();
+                                    },
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ],
+                      ),
+                      if (store.memo?.isNotEmpty == true) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentCream,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppTheme.accentBeige,
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            store.memo!,
+                            style: AppTheme.bodySmall.copyWith(
+                              fontStyle: FontStyle.italic,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-              if (store.memo?.isNotEmpty == true) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    store.memo!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _formatDate(store.createdAt),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  PopupMenuButton<StoreStatus>(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    onSelected: (newStatus) {
-                      _updateStoreStatus(store.id, newStatus);
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: StoreStatus.wantToGo,
-                        child: Row(
-                          children: [
-                            Icon(Icons.favorite),
-                            SizedBox(width: 8),
-                            Text('行きたい'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: StoreStatus.visited,
-                        child: Row(
-                          children: [
-                            Icon(Icons.check_circle),
-                            SizedBox(width: 8),
-                            Text('行った'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: StoreStatus.bad,
-                        child: Row(
-                          children: [
-                            Icon(Icons.block),
-                            SizedBox(width: 8),
-                            Text('興味なし'),
-                          ],
-                        ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatDate(store.createdAt),
+                            style: AppTheme.labelSmall.copyWith(
+                              color: AppTheme.textTertiary,
+                            ),
+                          ),
+                          PopupMenuButton<StoreStatus>(
+                            icon: const Icon(
+                              Icons.more_horiz_rounded,
+                              color: AppTheme.textTertiary,
+                              size: 20,
+                            ),
+                            onSelected: (newStatus) {
+                              _updateStoreStatus(store.id, newStatus);
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: StoreStatus.wantToGo,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.favorite,
+                                        color: AppTheme.primaryRed, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('行きたい'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: StoreStatus.visited,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.check_circle,
+                                        color: AppTheme.successGreen, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('行った'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: StoreStatus.bad,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.block,
+                                        color: AppTheme.warningOrange,
+                                        size: 20),
+                                    SizedBox(width: 8),
+                                    Text('興味なし'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ],
           ),
