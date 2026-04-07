@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../core/theme/app_theme.dart';
 
 /// スワイプ操作のフィードバックを表示するオーバーレイウィジェット
 /// Overlay widget that displays swipe operation feedback
@@ -220,7 +221,9 @@ class _SwipeFeedbackOverlayState extends State<SwipeFeedbackOverlay>
                         child: Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
-                            color: widget.showLike ? Colors.red : Colors.orange,
+                            color: widget.showLike
+                                ? AppTheme.statusWantToGo
+                                : AppTheme.statusBad,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -292,7 +295,7 @@ class _SwipeFeedbackOverlayState extends State<SwipeFeedbackOverlay>
                   scale: 0.5 + (_particleAnimation.value * 0.5),
                   child: Icon(
                     Icons.favorite,
-                    color: Colors.red.withValues(alpha: 0.8),
+                    color: AppTheme.primaryRed.withValues(alpha: 0.8),
                     size: 24,
                   ),
                 ),

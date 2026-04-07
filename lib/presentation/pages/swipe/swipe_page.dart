@@ -12,6 +12,7 @@ import '../../../domain/entities/store.dart';
 import '../../../domain/entities/location.dart';
 import '../../../domain/services/location_service.dart';
 import '../../providers/store_provider.dart';
+import '../../widgets/common_states.dart';
 import '../../widgets/swipe_card_widget.dart';
 import '../../widgets/swipe_action_buttons.dart';
 import '../../widgets/swipe_feedback_overlay.dart';
@@ -293,7 +294,7 @@ class _SwipePageState extends State<SwipePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(ErrorMessageHelper.getUserFriendlyMessage(e)),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorRed,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: '再試行',
@@ -322,27 +323,9 @@ class _SwipePageState extends State<SwipePage> {
   /// [colorScheme] カラースキーム
   /// 戻り値: 空状態を示すCenterウィジェット
   Widget _buildEmptyStoreMessage(ThemeData theme, ColorScheme colorScheme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          DecorativeElements.ramenBowl(size: 64),
-          const SizedBox(height: 12),
-          Text(
-            'すべての店舗を確認済みです！',
-            style: AppTheme.titleLarge.copyWith(
-              color: AppTheme.primaryRed,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '検索画面で新しい店舗を探してみましょう',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textSecondary,
-            ),
-          ),
-        ],
-      ),
+    return const AppEmptyState(
+      message: 'すべての店舗を確認済みです！',
+      subMessage: '検索画面で新しい店舗を探してみましょう',
     );
   }
 
@@ -357,7 +340,7 @@ class _SwipePageState extends State<SwipePage> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DecorativeElements.beerIcon(size: 28),
+            DecorativeElements.lanternIcon(size: 28),
             const SizedBox(width: 10),
             Text(
               '見つける',
@@ -417,16 +400,16 @@ class _SwipePageState extends State<SwipePage> {
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.block_rounded,
-                          color: Colors.orange.shade700,
+                          color: AppTheme.warningOrange,
                           size: 18,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           '← 興味なし',
                           style: AppTheme.labelMedium.copyWith(
-                            color: Colors.orange.shade700,
+                            color: AppTheme.warningOrange,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -460,24 +443,7 @@ class _SwipePageState extends State<SwipePage> {
             ),
             Expanded(
               child: _isGettingLocation
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircularProgressIndicator(
-                            color: AppTheme.primaryRed,
-                            strokeWidth: 3,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            '現在地を取得中...',
-                            style: AppTheme.bodyMedium.copyWith(
-                              color: AppTheme.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
+                  ? const AppLoadingState(message: '現在地を取得中...')
                   : Selector<
                       StoreProvider,
                       ({
@@ -495,96 +461,32 @@ class _SwipePageState extends State<SwipePage> {
                       builder: (context, state, child) {
                         // API読み込み中の表示
                         if (state.isLoading) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const CircularProgressIndicator(
-                                  color: AppTheme.primaryRed,
-                                  strokeWidth: 3,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  '新しい店舗を読み込み中...',
-                                  style: AppTheme.bodyMedium.copyWith(
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
+                          return const AppLoadingState(
+                              message: '新しい店舗を読み込み中...');
                         }
 
                         // エラー表示
                         final errorMessage = state.error ?? _locationError;
                         if (errorMessage != null) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 64,
-                                  color: colorScheme.error,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'エラーが発生しました',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    color: colorScheme.error,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  errorMessage,
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Provider.of<StoreProvider>(context,
-                                            listen: false)
-                                        .clearError();
-                                    setState(() {
-                                      _locationError = null;
-                                    });
-                                    _loadStoresFromProvider();
-                                  },
-                                  child: const Text('再試行'),
-                                ),
-                              ],
-                            ),
+                          return AppErrorState(
+                            message: errorMessage,
+                            onRetry: () {
+                              Provider.of<StoreProvider>(context, listen: false)
+                                  .clearError();
+                              setState(() {
+                                _locationError = null;
+                              });
+                              _loadStoresFromProvider();
+                            },
                           );
                         }
 
                         // 情報メッセージ表示（検索結果0件など）
                         if (state.infoMessage != null) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  size: 64,
-                                  color: colorScheme.primary,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  '検索結果',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    color: colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  state.infoMessage!,
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
+                          return AppEmptyState(
+                            message: '検索結果',
+                            subMessage: state.infoMessage,
+                            icon: DecorativeElements.gyozaIcon(size: 64),
                           );
                         }
 

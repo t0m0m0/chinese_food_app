@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chinese_food_app/core/config/ui_config.dart';
 
@@ -91,25 +90,17 @@ void main() {
       expect(debugInfo['appDescription'], isA<String>());
       expect(debugInfo['cardBorderRadius'], isA<double>());
       expect(debugInfo['defaultPadding'], isA<double>());
-      expect(debugInfo['titleFontSize'], isA<double>());
+      expect(debugInfo['listCardBorderRadius'], isA<double>());
       expect(debugInfo['defaultIconSize'], isA<double>());
       expect(debugInfo['defaultImageSize'], isA<double>());
       expect(debugInfo['defaultAnimationDuration'], isA<int>());
       expect(debugInfo['swipeThreshold'], isA<double>());
-      expect(debugInfo['primaryColor'], isA<String>());
     });
 
-    test('should have correct color types', () {
-      expect(UiConfig.primaryColor, isA<Color>());
-      expect(UiConfig.secondaryColor, isA<Color>());
-      expect(UiConfig.errorColor, isA<Color>());
-      expect(UiConfig.successColor, isA<Color>());
-      expect(UiConfig.warningColor, isA<Color>());
-      expect(UiConfig.backgroundColor, isA<Color>());
-      expect(UiConfig.cardBackgroundColor, isA<Color>());
-      expect(UiConfig.textColor, isA<Color>());
-      expect(UiConfig.subtitleColor, isA<Color>());
-      expect(UiConfig.dividerColor, isA<Color>());
+    test('should have correct card border radius values', () {
+      expect(UiConfig.listCardBorderRadius, 16.0);
+      expect(UiConfig.swipeCardBorderRadius, 20.0);
+      expect(UiConfig.detailCardBorderRadius, 16.0);
     });
 
     test('should have correct animation durations', () {
@@ -121,10 +112,6 @@ void main() {
     });
 
     test('should have correct size values', () {
-      expect(UiConfig.titleFontSize, 24.0);
-      expect(UiConfig.subtitleFontSize, 18.0);
-      expect(UiConfig.bodyFontSize, 16.0);
-      expect(UiConfig.captionFontSize, 14.0);
       expect(UiConfig.defaultIconSize, 24.0);
       expect(UiConfig.smallIconSize, 16.0);
       expect(UiConfig.largeIconSize, 32.0);

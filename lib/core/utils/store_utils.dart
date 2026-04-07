@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/store.dart';
+import '../theme/app_theme.dart';
 
 /// Store関連のユーティリティ機能を提供するクラス
 class StoreUtils {
   StoreUtils._(); // private constructor to prevent instantiation
 
   /// ステータスに応じた色を返す
-  static Color getStatusColor(StoreStatus? status, ColorScheme colorScheme) {
+  static Color getStatusColor(StoreStatus? status, [ColorScheme? colorScheme]) {
     switch (status) {
       case StoreStatus.wantToGo:
-        return Colors.red;
+        return AppTheme.statusWantToGo;
       case StoreStatus.visited:
-        return Colors.green;
+        return AppTheme.statusVisited;
       case StoreStatus.bad:
-        return Colors.orange;
+        return AppTheme.statusBad;
       default:
-        return colorScheme.onSurfaceVariant;
+        return colorScheme?.onSurfaceVariant ?? AppTheme.textTertiary;
     }
   }
 

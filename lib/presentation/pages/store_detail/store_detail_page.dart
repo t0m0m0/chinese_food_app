@@ -2,7 +2,10 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/decorative_elements.dart';
 import '../../../core/utils/error_message_helper.dart';
+import '../../widgets/common_states.dart';
 import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/entities/visit_record.dart';
@@ -70,8 +73,6 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final storeProvider = Provider.of<StoreProvider>(context);
 
     // StoreProviderから最新の店舗情報を取得
@@ -80,10 +81,37 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
         .firstWhere((s) => s.id == widget.store.id, orElse: () => widget.store);
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundLight,
       appBar: AppBar(
-        title: const Text('店舗詳細'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DecorativeElements.ramenBowl(size: 28),
+            const SizedBox(width: 10),
+            Text(
+              '店舗詳細',
+              style: AppTheme.headlineMedium.copyWith(
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            DecorativeElements.gyozaIcon(size: 28),
+          ],
+        ),
         centerTitle: true,
-        backgroundColor: colorScheme.surfaceContainerHighest,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: AppTheme.backgroundGradient,
+          ),
+        ),
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3),
+          child: DecorativeElements.norenDecoration(
+            height: 3,
+            color: AppTheme.primaryRed,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -111,7 +139,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
             if (_isLoadingVisitRecords)
               const Padding(
                 padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
+                child: AppLoadingState(),
               )
             else
               VisitRecordsSectionWidget(
@@ -140,7 +168,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
           SnackBar(
             content: Text(
                 ErrorMessageHelper.getStoreRelatedMessage('update_status')),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorRed,
             duration: const Duration(seconds: 3),
           ),
         );

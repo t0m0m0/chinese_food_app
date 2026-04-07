@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/error_message_helper.dart';
 import '../../../core/di/di_container_interface.dart';
 import '../../../domain/entities/store.dart';
@@ -216,7 +217,7 @@ class _VisitRecordFormPageState extends State<VisitRecordFormPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.errorRed,
             duration: const Duration(seconds: 4), // 少し長めに表示
           ),
         );

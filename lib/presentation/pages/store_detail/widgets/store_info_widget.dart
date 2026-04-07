@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/store_utils.dart';
 import '../../../../domain/entities/store.dart';
 
@@ -12,14 +13,15 @@ class StoreInfoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: AppTheme.accentBeige, width: 1),
+        ),
+        color: AppTheme.surfaceWhite,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -27,35 +29,29 @@ class StoreInfoWidget extends StatelessWidget {
             children: [
               Text(
                 '基本情報',
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: AppTheme.titleLarge.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
               _buildInfoRow(
-                context,
                 Icons.location_on,
                 '住所',
                 store.address,
-                theme,
-                colorScheme,
               ),
               const SizedBox(height: 12),
               _buildInfoRow(
-                context,
                 Icons.calendar_today,
                 '登録日',
                 StoreUtils.formatDate(store.createdAt),
-                theme,
-                colorScheme,
               ),
               if (store.memo?.isNotEmpty == true) ...[
                 const SizedBox(height: 16),
-                const Divider(),
+                const Divider(color: AppTheme.accentBeige),
                 const SizedBox(height: 16),
                 Text(
                   'メモ',
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: AppTheme.titleMedium.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -64,13 +60,18 @@ class StoreInfoWidget extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
+                    color: AppTheme.accentCream,
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppTheme.accentBeige,
+                      width: 1,
+                    ),
                   ),
                   child: Text(
                     store.memo!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: AppTheme.bodyMedium.copyWith(
                       fontStyle: FontStyle.italic,
+                      color: AppTheme.textSecondary,
                     ),
                   ),
                 ),
@@ -83,20 +84,24 @@ class StoreInfoWidget extends StatelessWidget {
   }
 
   Widget _buildInfoRow(
-    BuildContext context,
     IconData icon,
     String label,
     String value,
-    ThemeData theme,
-    ColorScheme colorScheme,
   ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: colorScheme.onSurfaceVariant,
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryRed.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: AppTheme.primaryRed,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -105,15 +110,15 @@ class StoreInfoWidget extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                style: AppTheme.bodySmall.copyWith(
+                  color: AppTheme.textTertiary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: theme.textTheme.bodyMedium,
+                style: AppTheme.bodyMedium,
               ),
             ],
           ),

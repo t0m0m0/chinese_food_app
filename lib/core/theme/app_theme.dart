@@ -44,6 +44,11 @@ class AppTheme {
   static const Color errorRed = Color(0xFFEF476F);
   static const Color warningOrange = Color(0xFFFF9F1C);
 
+  /// セマンティックステータスカラー（店舗ステータス用）
+  static const Color statusWantToGo = primaryRed;
+  static const Color statusVisited = successGreen;
+  static const Color statusBad = warningOrange;
+
   // ============================
   // グラデーション
   // ============================
